@@ -2,6 +2,6 @@
 
 namespace Kibo\Phast\Filters;
 
-class ScriptsRearrangement extends HTMLFilter {
+class ScriptsRearrangement extends CompositeHTMLFilter {
 
 }

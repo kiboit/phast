@@ -4,16 +4,16 @@ namespace Kibo\Phast\Filters;
 
 use PHPUnit\Framework\TestCase;
 
-class HTMLFilterTestCase extends TestCase {
+class CompositeHTMLFilterTest extends TestCase {
 
     /**
-     * @var HTMLFilter
+     * @var CompositeHTMLFilter
      */
     private $filter;
 
     public function setUp() {
         parent::setUp();
-        $this->filter = $this->getMockForAbstractClass(HTMLFilter::class);
+        $this->filter = new CompositeHTMLFilter();
     }
 
     public function testShouldApplyOnHTML() {
@@ -81,8 +81,17 @@ class HTMLFilterTestCase extends TestCase {
         $this->assertEquals($buffer, $this->filter->apply($buffer));
     }
 
+    public function testShouldApplyAllFilters() {
+        $this->shouldTransform();
+        $this->shouldTransform();
+        $buffer = '<html><body></body></html>';
+        $this->filter->apply($buffer);
+    }
+
     private function setExpectation($expectation) {
-        return $this->filter->expects($expectation)->method('transformHTML');
+        $filterMock = $this->createMock(HTMLFilter::class);
+        $filterMock->expects($expectation)->method('transformHTMLDOM');
+        $this->filter->addHTMLFilter($filterMock);
     }
 
     private function shouldTransform() {

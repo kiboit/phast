@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters;
 
-class ScriptsRearrangementTest extends HTMLFilterTestCase {
+class ScriptsRearrangementTestComposite extends CompositeHTMLFilterTest {
 
     protected function getFilter() {
         return new ScriptsRearrangement();
