@@ -2,11 +2,7 @@
 
 namespace Kibo\Phast\Filters;
 
-use PHPUnit\Framework\TestCase;
-
-class CSSInliningHTMLFilterTest extends TestCase {
-
-    const BASE_URL = 'kibo-test.org';
+class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
     private $files;
 
@@ -15,36 +11,8 @@ class CSSInliningHTMLFilterTest extends TestCase {
      */
     private $filter;
 
-    /**
-     * @var \DOMDocument
-     */
-    private $dom;
-
-    /**
-     * @var \DOMElement
-     */
-    private $html;
-
-    /**
-     * @var \DOMElement
-     */
-    private $head;
-
-    /**
-     * @var \DOMElement
-     */
-    private $body;
-
     public function setUp() {
         parent::setUp();
-
-        $this->dom = new \DOMDocument();
-        $this->html = $this->dom->createElement('html');
-        $this->dom->appendChild($this->html);
-        $this->head = $this->dom->createElement('head');
-        $this->html->appendChild($this->head);
-        $this->body = $this->dom->createElement('body');
-        $this->html->appendChild($this->body);
 
         $this->files = [];
         $retrieveFile = function ($filename) {
