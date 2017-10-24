@@ -42,13 +42,13 @@ class URLTest extends TestCase {
         $protocol = URL::fromString('//example.com')->withBase($base);
         $this->assertEquals('http://example.com', (string)$protocol);
 
-        $baseInDir = URL::fromString('http://test.com/path?query#hash');
+        $baseInDir = URL::fromString('http://test.com/path/?query#hash');
         $relativeToDir = URL::fromString('relative/path')->withBase($baseInDir);
         $this->assertEquals('http://test.com/path/relative/path', (string)$relativeToDir);
 
-        $baseFileAsDir = URL::fromString('http://test.com/path/index.php/');
+        $baseFileAsDir = URL::fromString('http://test.com/path/sub-path');
         $relativeToFile = URL::fromString('relative/path')->withBase($baseFileAsDir);
-        $this->assertEquals('http://test.com/path/index.php/relative/path', (string)$relativeToFile);
+        $this->assertEquals('http://test.com/path/relative/path', (string)$relativeToFile);
     }
 
 }

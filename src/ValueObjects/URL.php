@@ -96,7 +96,7 @@ class URL {
         if ($requested[0] == '/') {
             return $requested;
         }
-        if (substr($base, -1, 1) == '/' || strpos(basename($base), '.') === false) {
+        if (substr($base, -1, 1) == '/') {
             $usedBase = $base;
         } else {
             $usedBase = dirname($base);
