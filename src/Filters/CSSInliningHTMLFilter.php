@@ -37,7 +37,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
 
     private function inline(\DOMElement $link, \DOMDocument $document) {
         $location = $link->getAttribute('href');
-        $content = @call_user_func($this->retrieveFile, $location);
+        $content = call_user_func($this->retrieveFile, $location);
         if ($content === false) {
             return;
         }

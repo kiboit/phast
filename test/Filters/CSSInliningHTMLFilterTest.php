@@ -108,7 +108,7 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
     public function testNotInliningOnReadError() {
         $theLink = $this->makeLink($this->head);
         $retrieve = function () {
-            trigger_error('An error', E_USER_WARNING);
+            @trigger_error('An error', E_USER_WARNING);
             return false;
         };
         $filter = new CSSInliningHTMLFilter(self::BASE_URL, $retrieve);
