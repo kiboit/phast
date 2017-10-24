@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters;
 
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
@@ -17,10 +18,12 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         parent::setUp();
 
         $this->files = [];
-        $retrieveFile = function (URL $url) {
-            return isset ($this->files[$url->getPath()]) ? $this->files[$url->getPath()] : false;
-        };
-        $this->filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retrieveFile);
+        $retriever = $this->createMock(Retriever::class);
+        $retriever->method('retrieve')
+            ->willReturnCallback(function (URL $url) {
+                return isset ($this->files[$url->getPath()]) ? $this->files[$url->getPath()] : false;
+            });
+        $this->filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retriever);
     }
 
     public function testInliningCSS() {
@@ -109,11 +112,13 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
     public function testNotInliningOnReadError() {
         $theLink = $this->makeLink($this->head);
-        $retrieve = function () {
-            @trigger_error('An error', E_USER_WARNING);
-            return false;
-        };
-        $filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retrieve);
+        $retriever = $this->createMock(Retriever::class);
+        $retriever->method('retrieve')
+              ->willReturnCallback(function () {
+                  @trigger_error('An error', E_USER_WARNING);
+                  return false;
+              });
+        $filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retriever);
         $filter->transformHTMLDOM($this->dom);
 
         $this->assertEmpty($this->getTheStyles());

@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters;
 
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilter implements HTMLFilter {
@@ -12,13 +13,13 @@ class CSSInliningHTMLFilter implements HTMLFilter {
     private $baseURL;
 
     /**
-     * @var callable
+     * @var Retriever
      */
-    private $retrieveFile;
+    private $retriever;
 
-    public function __construct(URL $baseURL, callable $fileRetrieverCallback) {
+    public function __construct(URL $baseURL, Retriever $retriever) {
         $this->baseURL = $baseURL;
-        $this->retrieveFile = $fileRetrieverCallback;
+        $this->retriever = $retriever;
     }
 
     public function transformHTMLDOM(\DOMDocument $document) {
@@ -39,7 +40,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
 
     private function inline(\DOMElement $link, \DOMDocument $document) {
         $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
-        $content = call_user_func($this->retrieveFile, $location);
+        $content = $this->retriever->retrieve($location);
         if ($content === false) {
             return;
         }
