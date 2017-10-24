@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters;
 
 use Kibo\Phast\Security\ImagesOptimizationSignature;
+use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
 
@@ -17,26 +18,26 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         parent::setUp();
         $this->filter = new ImagesOptimizationServiceHTMLFilter(
             new ImagesOptimizationSignature('the-token'),
-            self::BASE_URL,
-            self::SERVICE_URL
+            URL::fromString(self::BASE_URL),
+            URL::fromString(self::SERVICE_URL)
         );
     }
 
     public function testImagesSrcRewriting() {
-        $this->makeImage('img?1');
-        $this->makeImage('img?2', 20);
-        $this->makeImage('img?3', null, 30);
-        $this->makeImage('img?4', 40, 50);
+        $this->makeImage('/img?1');
+        $this->makeImage('/img?2', 20);
+        $this->makeImage('/img?3', null, 30);
+        $this->makeImage('/img?4', 40, 50);
 
         $this->filter->transformHTMLDOM($this->dom);
 
         /** @var \DOMElement[] $images */
         $images = iterator_to_array($this->dom->getElementsByTagName('img'));
 
-        $this->checkSrc($images[0]->getAttribute('src'), ['src' => 'img?1']);
-        $this->checkSrc($images[1]->getAttribute('src'), ['src' => 'img?2', 'width' => 20]);
-        $this->checkSrc($images[2]->getAttribute('src'), ['src' => 'img?3', 'height' => 30]);
-        $this->checkSrc($images[3]->getAttribute('src'), ['src' => 'img?4', 'width' => 40, 'height' => 50]);
+        $this->checkSrc($images[0]->getAttribute('src'), ['src' => '/img?1']);
+        $this->checkSrc($images[1]->getAttribute('src'), ['src' => '/img?2', 'width' => 20]);
+        $this->checkSrc($images[2]->getAttribute('src'), ['src' => '/img?3', 'height' => 30]);
+        $this->checkSrc($images[3]->getAttribute('src'), ['src' => '/img?4', 'width' => 40, 'height' => 50]);
     }
 
     public function testNoRewriteForImagesWithInlineSource() {
@@ -82,12 +83,9 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
 
         $query = [];
         parse_str($components['query'], $query);
-        $this->assertArrayHasKey('referrer', $query);
-        $this->assertEquals(self::BASE_URL, $query['referrer']);
         $this->assertArrayHasKey('token', $query);
         $this->assertNotEmpty($query['token']);
 
-        unset ($query['referrer']);
         unset ($query['token']);
 
         $this->assertEquals($expectedParams, $query);

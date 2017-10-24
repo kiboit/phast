@@ -2,6 +2,8 @@
 
 namespace Kibo\Phast\Filters;
 
+use Kibo\Phast\ValueObjects\URL;
+
 class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
     private $files;
@@ -15,10 +17,10 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         parent::setUp();
 
         $this->files = [];
-        $retrieveFile = function ($filename) {
-            return isset ($this->files[$filename]) ? $this->files[$filename] : false;
+        $retrieveFile = function (URL $url) {
+            return isset ($this->files[$url->getPath()]) ? $this->files[$url->getPath()] : false;
         };
-        $this->filter = new CSSInliningHTMLFilter(self::BASE_URL, $retrieveFile);
+        $this->filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retrieveFile);
     }
 
     public function testInliningCSS() {
@@ -97,8 +99,8 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals("@import '$absoluteUrl'", $styles[0]->textContent);
         $this->assertEquals("url('$absoluteUrl')", $styles[1]->textContent);
-        $this->assertEquals("@import \"/$rootUrl\"", $styles[2]->textContent);
-        $this->assertEquals("url(\"/$rootUrl\")", $styles[3]->textContent);
+        $this->assertEquals("@import \"$rootUrl\"", $styles[2]->textContent);
+        $this->assertEquals("url(\"$rootUrl\")", $styles[3]->textContent);
         $this->assertEquals("@import '/css/$relativeUrl''", $styles[4]->textContent);
         $this->assertEquals("url('/css/$relativeUrl')", $styles[5]->textContent);
         $this->assertEquals("@import '$crossSiteUrl'", $styles[6]->textContent);
@@ -111,7 +113,7 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
             @trigger_error('An error', E_USER_WARNING);
             return false;
         };
-        $filter = new CSSInliningHTMLFilter(self::BASE_URL, $retrieve);
+        $filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retrieve);
         $filter->transformHTMLDOM($this->dom);
 
         $this->assertEmpty($this->getTheStyles());

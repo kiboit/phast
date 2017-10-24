@@ -6,12 +6,12 @@ return [
         \Kibo\Phast\Filters\ScriptsRearrangementHTMLFilter::class => [],
 
         \Kibo\Phast\Filters\CSSInliningHTMLFilter::class => [
-            'baseURL' => $_SERVER['HTTP_HOST']
+            'baseURL' => 'http://phast.dev'
         ],
 
         \Kibo\Phast\Filters\ImagesOptimizationServiceHTMLFilter::class => [
             'securityToken' => 'a-very-secure-token-that-no-one-knows',
-            'referrerUrl' => $_SERVER['HTTP_HOST'],
+            'referrerUrl' => 'http://phast.dev/',
             'serviceUrl' => 'that\'s-where-the-service-is-located'
         ]
     ]

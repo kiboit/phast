@@ -2,10 +2,12 @@
 
 namespace Kibo\Phast\Filters;
 
+use Kibo\Phast\ValueObjects\URL;
+
 class CSSInliningHTMLFilter implements HTMLFilter {
 
     /**
-     * @var string
+     * @var URL
      */
     private $baseURL;
 
@@ -14,7 +16,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
      */
     private $retrieveFile;
 
-    public function __construct($baseURL, callable $fileRetrieverCallback) {
+    public function __construct(URL $baseURL, callable $fileRetrieverCallback) {
         $this->baseURL = $baseURL;
         $this->retrieveFile = $fileRetrieverCallback;
     }
@@ -32,11 +34,11 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         return  $link->hasAttribute('rel')
                 && $link->getAttribute('rel') == 'stylesheet'
                 && $link->hasAttribute('href')
-                && !$this->isCrossSiteUrl($link->getAttribute('href'));
+                && !$this->isCrossSiteUrl(URL::fromString($link->getAttribute('href')));
     }
 
     private function inline(\DOMElement $link, \DOMDocument $document) {
-        $location = $link->getAttribute('href');
+        $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
         $content = call_user_func($this->retrieveFile, $location);
         if ($content === false) {
             return;
@@ -51,28 +53,14 @@ class CSSInliningHTMLFilter implements HTMLFilter {
     }
 
     /**
-     * @param string $url
+     * @param URL $url
      * @return bool
      */
-    private function isCrossSiteUrl($url) {
-        $urlComponents = parse_url($url);
-        return !empty ($urlComponents['host']) && $urlComponents['host'] != $this->baseURL;
+    private function isCrossSiteUrl(URL $url) {
+        return !empty ($url->getHost()) && $url->getHost() != $this->baseURL->getHost();
     }
 
-    private function rewriteRelativeURLs($cssContent, $cssUrl) {
-        $cssUrlComponents = parse_url($cssUrl);
-        $absBase = $this->compileUrl(array_merge($cssUrlComponents, [
-            'path' => '/',
-            'query' => null,
-            'fragment' => null,
-        ]));
-
-        $relBase = $this->compileUrl(array_merge($cssUrlComponents, [
-            'path' => preg_replace('~[^/]*$~', '', $cssUrlComponents['path']),
-            'query' => null,
-            'fragment' => null,
-        ]));
-
+    private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
         return preg_replace_callback(
             '~
                 (
@@ -82,27 +70,10 @@ class CSSInliningHTMLFilter implements HTMLFilter {
                 (?! (?:[a-z]+:)? // )
                 ([A-Za-z0-9_/.-])
             ~xi',
-            function ($match) use ($absBase, $relBase) {
-                $base = $match[2] == '/' ? $absBase : $relBase;
-                return $match[1] . $base . $match[2];
+            function ($match) use ($cssUrl) {
+                return $match[1] . URL::fromString($match[2])->withBase($cssUrl);
             },
             $cssContent
         );
     }
-
-    private function compileUrl(array $urlComponents) {
-        $scheme   = isset($urlComponents['scheme']) ? $urlComponents['scheme'] . '://' : '';
-        $host     = isset($urlComponents['host']) ? $urlComponents['host'] : '';
-        $port     = isset($urlComponents['port']) ? ':' . $urlComponents['port'] : '';
-        $user     = isset($urlComponents['user']) ? $urlComponents['user'] : '';
-        $pass     = isset($urlComponents['pass']) ? ':' . $urlComponents['pass']  : '';
-        $pass     = ($user || $pass) ? "$pass@" : '';
-        $path     = isset($urlComponents['path']) ? $urlComponents['path'] : '';
-        $query    = isset($urlComponents['query']) ? '?' . $urlComponents['query'] : '';
-        $fragment = isset($urlComponents['fragment']) ? '#' . $urlComponents['fragment'] : '';
-        return "$scheme$user$pass$host$port$path$query$fragment";
-    }
-
-
-
 }

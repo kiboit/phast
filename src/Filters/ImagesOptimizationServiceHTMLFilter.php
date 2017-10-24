@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters;
 
 use Kibo\Phast\Security\ImagesOptimizationSignature;
+use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
 
@@ -12,12 +13,12 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     private $signature;
 
     /**
-     * @var string
+     * @var URL
      */
-    private $referrerUrl;
+    private $baseUrl;
 
     /**
-     * @var string
+     * @var URL
      */
     private $serviceUrl;
 
@@ -25,12 +26,12 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
      * ImagesOptimizationServiceHTMLFilter constructor.
      *
      * @param ImagesOptimizationSignature $signature
-     * @param string $referrerUrl
-     * @param string $serviceUrl
+     * @param URL $baseUrl
+     * @param URL $serviceUrl
      */
-    public function __construct(ImagesOptimizationSignature $signature, $referrerUrl, $serviceUrl) {
+    public function __construct(ImagesOptimizationSignature $signature, URL $baseUrl, URL $serviceUrl) {
         $this->signature = $signature;
-        $this->referrerUrl = $referrerUrl;
+        $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
     }
 
@@ -51,13 +52,12 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     }
 
     private function rewriteSrc(\DOMElement $img) {
-        $parts = [];
-        foreach (['src', 'width', 'height'] as $attr) {
+        $parts = [['src', URL::fromString($img->getAttribute('src'))->withBase($this->baseUrl)]];
+        foreach (['width', 'height'] as $attr) {
             if ($img->hasAttribute($attr)) {
                 $parts[] = [$attr, $img->getAttribute($attr)];
             }
         }
-        $parts[] = ['referrer', $this->referrerUrl];
         $query = join('&', array_map(function ($item) {
             return $item[0] . '=' . urlencode($item[1]);
         }, $parts));

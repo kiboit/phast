@@ -14,5 +14,6 @@ $config = require_once __DIR__ . '/../../src/config-example.php';
             console.log('Loaded another one!');
         </script>
         <div>This is where we are!</div>
+        <img src="wow.jpg" width="100" height="100">
     </body>
 </html>

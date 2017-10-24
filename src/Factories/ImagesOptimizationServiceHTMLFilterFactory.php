@@ -4,6 +4,7 @@ namespace Kibo\Phast\Factories;
 
 use Kibo\Phast\Filters\ImagesOptimizationServiceHTMLFilter;
 use Kibo\Phast\Security\ImagesOptimizationSignature;
+use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilterFactory implements HTMLFilterFactory {
 
@@ -11,8 +12,8 @@ class ImagesOptimizationServiceHTMLFilterFactory implements HTMLFilterFactory {
         $signature = new ImagesOptimizationSignature($config['securityToken']);
         return new ImagesOptimizationServiceHTMLFilter(
             $signature,
-            $config['referrerUrl'],
-            $config['serviceUrl']
+            URL::fromString($config['referrerUrl']),
+            URL::fromString($config['serviceUrl'])
         );
     }
 
