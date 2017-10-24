@@ -12,7 +12,7 @@ class ImagesOptimizationServiceHTMLFilterFactory implements HTMLFilterFactory {
         $signature = new ImagesOptimizationSignature($config['securityToken']);
         return new ImagesOptimizationServiceHTMLFilter(
             $signature,
-            URL::fromString($config['referrerUrl']),
+            URL::fromString($config['baseUrl']),
             URL::fromString($config['serviceUrl'])
         );
     }
