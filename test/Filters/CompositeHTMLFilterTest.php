@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class CompositeHTMLFilterTest extends TestCase {
 
+    const MAX_BUFFER_SIZE_TO_APPLY = 1024;
+
     /**
      * @var CompositeHTMLFilter
      */
@@ -13,7 +15,7 @@ class CompositeHTMLFilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new CompositeHTMLFilter();
+        $this->filter = new CompositeHTMLFilter(self::MAX_BUFFER_SIZE_TO_APPLY);
     }
 
     public function testShouldApplyOnHTML() {
@@ -86,6 +88,13 @@ class CompositeHTMLFilterTest extends TestCase {
         $this->shouldTransform();
         $buffer = '<html><body></body></html>';
         $this->filter->apply($buffer);
+    }
+
+    public function testShouldNotApplyIfBufferIsTooBig() {
+        $this->shouldNotTransform();
+        $buffer = sprintf('<html><body>%s</body></html>', str_pad('', self::MAX_BUFFER_SIZE_TO_APPLY, 's'));
+        $filtered = $this->filter->apply($buffer);
+        $this->assertEquals($buffer, $filtered);
     }
 
     private function setExpectation($expectation) {
