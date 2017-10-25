@@ -4,6 +4,10 @@ namespace Kibo\Phast\Filters\Image;
 
 interface Image {
 
+    const TYPE_JPEG = 'jpg';
+
+    const TYPE_PNG  = 'png';
+
     /**
      * @return integer
      */
@@ -25,5 +29,16 @@ interface Image {
      * @return void
      */
     public function setHeight($height);
+
+    /**
+     * @return string
+     */
+    public function getType();
+
+    /**
+     * @param integer $compression
+     * @return null
+     */
+    public function setCompression($compression);
 
 }

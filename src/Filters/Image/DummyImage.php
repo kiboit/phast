@@ -15,12 +15,22 @@ class DummyImage implements Image {
     private $height;
 
     /**
+     * @var string
+     */
+    private $type;
+
+    /**
+     * @var integer
+     */
+    private $compression;
+
+    /**
      * DummyImage constructor.
      *
      * @param int $width
      * @param int $height
      */
-    public function __construct($width, $height) {
+    public function __construct($width = null, $height = null) {
         $this->width = $width;
         $this->height = $height;
     }
@@ -53,6 +63,33 @@ class DummyImage implements Image {
         $this->height = $height;
     }
 
+    /**
+     * @return string
+     */
+    public function getType() {
+        return $this->type;
+    }
 
+    /**
+     * @param string $type
+     */
+    public function setType($type) {
+        $this->type = $type;
+    }
+
+    /**
+     * @param int $compression
+     * @return void
+     */
+    public function setCompression($compression) {
+        $this->compression = $compression;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCompression() {
+        return $this->compression;
+    }
 
 }
