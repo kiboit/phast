@@ -1,6 +1,8 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\ImageImplementations;
+
+use Kibo\Phast\Filters\Image\Image;
 
 class DummyImage implements Image {
 
@@ -90,6 +92,10 @@ class DummyImage implements Image {
      */
     public function getCompression() {
         return $this->compression;
+    }
+
+    public function getAsString() {
+        return '';
     }
 
 }

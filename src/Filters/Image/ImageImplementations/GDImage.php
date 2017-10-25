@@ -1,0 +1,119 @@
+<?php
+
+namespace Kibo\Phast\Filters\Image\ImageImplementations;
+
+use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageException;
+
+class GDImage implements Image {
+
+    /**
+     * @var string
+     */
+    private $imageString;
+
+    /**
+     * @var array
+     */
+    private $imageInfo;
+
+    /**
+     * @var integer
+     */
+    private $width;
+
+    /**
+     * @var integer
+     */
+    private $height;
+
+    /**
+     * @var integer
+     */
+    private $compression;
+
+    public function __construct($imageString) {
+        $this->imageString = $imageString;
+    }
+
+    public function getWidth() {
+        return isset ($this->width) ? $this->width : $this->getImageInfo()[0];
+    }
+
+    public function getHeight() {
+        return isset ($this->height) ? $this->height : $this->getImageInfo()[1];
+    }
+
+    public function setWidth($width) {
+        $this->width = $width;
+    }
+
+    public function setHeight($height) {
+        $this->height = $height;
+    }
+
+    public function getType() {
+        $type = image_type_to_mime_type($this->getImageInfo()[2]);
+        if ($type == 'image/jpeg') {
+            return Image::TYPE_JPEG;
+        }
+        if ($type == 'image/png') {
+            return Image::TYPE_PNG;
+        }
+        return Image::TYPE_OTHER;
+    }
+
+    public function setCompression($compression) {
+        $this->compression = $compression;
+    }
+
+    public function getAsString() {
+        $image = @imagecreatefromstring($this->imageString);
+        if ($image === false) {
+            throw new ImageException('Could not load GD image');
+        }
+        if (isset ($this->width) && isset ($this->height)) {
+            $image = @imagescale($image, $this->width, $this->height);
+            if ($image === false) {
+                throw new ImageException('Could not resize GD image');
+            }
+        }
+        if ($this->getType() == Image::TYPE_PNG) {
+            $callback = 'imagepng';
+        } else if ($this->getType() == Image::TYPE_JPEG) {
+            $callback = 'imagejpeg';
+        } else {
+            $callback = 'imagepng';
+        }
+        $tmp = tmpfile();
+        if (!$tmp) {
+            throw new ImageException('Could not open temporary file');
+        }
+        if (isset ($this->compression)) {
+            $ok = $callback($image, $tmp, $this->compression);
+        } else {
+            $ok = $callback($image, $tmp);
+        }
+        if (!$ok) {
+            throw new ImageException('Could not write image to temporary file');
+        }
+        if (fseek($tmp, 0) !== 0) {
+            throw new ImageException('Could not seek to beginning of temporary image file');
+        }
+        $string = stream_get_contents($tmp);
+        if ($string === false) {
+            throw new ImageException('Could not read image from temporary file');
+        }
+        return $string;
+    }
+
+    private function getImageInfo() {
+        if (!isset ($this->imageInfo)) {
+            $this->imageInfo = @getimagesizefromstring($this->imageString);
+            if ($this->imageInfo === false) {
+                throw new ImageException('Could not read GD image info');
+            }
+        }
+        return $this->imageInfo;
+    }
+}
