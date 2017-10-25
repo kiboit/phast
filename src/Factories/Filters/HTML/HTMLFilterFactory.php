@@ -1,8 +1,8 @@
 <?php
 
-namespace Kibo\Phast\Factories;
+namespace Kibo\Phast\Factories\Filters\HTML;
 
-use Kibo\Phast\Filters\HTMLFilter;
+use Kibo\Phast\Filters\HTML\HTMLFilter;
 
 interface HTMLFilterFactory {
 

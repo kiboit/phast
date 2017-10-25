@@ -1,8 +1,8 @@
 <?php
 
-namespace Kibo\Phast\Factories;
+namespace Kibo\Phast\Factories\Filters\HTML;
 
-use Kibo\Phast\Filters\ScriptsRearrangementHTMLFilter;
+use Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter;
 
 class ScriptsRearrangementHTMLFilterFactory implements HTMLFilterFactory {
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Kibo\Phast\Factories;
+namespace Kibo\Phast\Factories\Filters\HTML;
 
-use Kibo\Phast\Filters\CompositeHTMLFilter;
+use Kibo\Phast\Filters\HTML\CompositeHTMLFilter;
 
 class CompositeHTMLFilterFactory {
 
@@ -21,7 +21,7 @@ class CompositeHTMLFilterFactory {
      * @return HTMLFilterFactory
      */
     private function makeFactory($filter) {
-        $factory = str_replace('\Filters\\', '\Factories\\', $filter) . 'Factory';
+        $factory = str_replace('\Filters\\', '\Factories\Filters\\', $filter) . 'Factory';
         return new $factory();
     }
 

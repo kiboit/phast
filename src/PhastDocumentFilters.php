@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast;
 
-use Kibo\Phast\Factories\CompositeHTMLFilterFactory;
+use Kibo\Phast\Factories\Filters\HTML\CompositeHTMLFilterFactory;
 
 class PhastDocumentFilters {
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Filters;
+namespace Kibo\Phast\Filters\HTML;
 
 class ScriptsRearrangementHTMLFilter implements HTMLFilter {
 

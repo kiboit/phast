@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Filters;
+namespace Kibo\Phast\Filters\HTML;
 
 interface HTMLFilter {
 

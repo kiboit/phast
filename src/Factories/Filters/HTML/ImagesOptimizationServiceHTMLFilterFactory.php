@@ -1,8 +1,8 @@
 <?php
 
-namespace Kibo\Phast\Factories;
+namespace Kibo\Phast\Factories\Filters\HTML;
 
-use Kibo\Phast\Filters\ImagesOptimizationServiceHTMLFilter;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter;
 use Kibo\Phast\Security\ImagesOptimizationSignature;
 use Kibo\Phast\ValueObjects\URL;
 

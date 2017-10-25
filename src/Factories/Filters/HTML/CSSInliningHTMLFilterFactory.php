@@ -1,8 +1,8 @@
 <?php
 
-namespace Kibo\Phast\Factories;
+namespace Kibo\Phast\Factories\Filters\HTML;
 
-use Kibo\Phast\Filters\CSSInliningHTMLFilter;
+use Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\ValueObjects\URL;
 
