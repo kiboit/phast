@@ -1,0 +1,134 @@
+<?php
+
+namespace Kibo\Phast\Filters\Image;
+
+class ResizerImageFilter implements ImageFilter {
+
+    /**
+     * @var integer
+     */
+    private $maxWidth;
+
+    /**
+     * @var integer
+     */
+    private $maxHeight;
+
+    /**
+     * ResizerImageFilter constructor.
+     *
+     * @param int $maxWidth Set to zero for no limit on width
+     * @param int $maxHeight Set to zero for no limit on height
+     */
+    public function __construct($maxWidth, $maxHeight) {
+        $this->maxWidth = (int)$maxWidth;
+        $this->maxHeight = (int)$maxHeight;
+    }
+
+    /**
+     * Resizes image, keeping its original proportions,
+     * to a maximum width ot height, set at construction time.
+     * If both width and height of the image exceed the maximums set,
+     * the image will be resized to the bigger possible size.
+     *
+     * @param Image $image
+     * @return void
+     */
+    public function transformImage(Image $image) {
+        $hasBiggerWidth  = $this->maxWidth  && $image->getWidth()  > $this->maxWidth;
+        $hasBiggerHeight = $this->maxHeight && $image->getHeight() > $this->maxHeight;
+
+        if ($hasBiggerWidth && $hasBiggerHeight) {
+            $sizeW = $this->getNewSizeByWidth($image);
+            $sizeH = $this->getNewSizeByHeight($image);
+            if ($this->isBiggerSize($sizeW, $sizeH)) {
+                $this->setSize($image, $sizeW);
+            } else {
+                $this->setSize($image, $sizeH);
+            }
+        } else if ($hasBiggerWidth) {
+            $this->setSize($image, $this->getNewSizeByWidth($image));
+        } else if ($hasBiggerHeight) {
+            $this->setSize($image, $this->getNewSizeByHeight($image));
+        }
+    }
+
+    /**
+     * Calculate a new size for an image,
+     * keeping its original proportions,
+     * with a certain maximum width.
+     *
+     * @param Image $image
+     * @return array
+     */
+    private function getNewSizeByWidth(Image $image) {
+        return [
+            $this->maxWidth,
+            $this->calculateNewSide(
+                $image->getWidth(),
+                $image->getHeight(),
+                $this->maxWidth
+            )
+        ];
+    }
+
+    /**
+     * Calculate a new size for an image,
+     * keeping its original proportions,
+     * with a certain maximum height.
+     *
+     * @param Image $image
+     * @return array
+     */
+    private function getNewSizeByHeight(Image $image) {
+        return [
+            $this->calculateNewSide(
+                $image->getHeight(),
+                $image->getWidth(),
+                $this->maxHeight
+            ),
+            $this->maxHeight
+        ];
+    }
+
+    /**
+     * Calculates a side of an image to a new size
+     * that would follow the images proportions,
+     * based on the old and new sizes of the other side.
+     *
+     * @param integer $oldSideA The old size of the other side
+     * @param integer $sideB The current size of the side being calculated
+     * @param integer $newSideA The new size of the other side
+     * @return integer
+     */
+    private function calculateNewSide($oldSideA, $sideB, $newSideA) {
+        $proportion = $oldSideA / $sideB;
+        return (int)round($newSideA / $proportion);
+    }
+
+    /**
+     * Sets a size to an image
+     *
+     * @param Image $image
+     * @param array $size
+     */
+    private function setSize(Image $image, array $size) {
+        $image->setWidth($size[0]);
+        $image->setHeight($size[1]);
+    }
+
+    /**
+     * Tells an image size is bigger than another.
+     * An image size is bigger than another when the
+     * product of it width and height is bigger than
+     * the one of the other image.
+     *
+     * @param array $sizeA
+     * @param array $sizeB
+     * @return bool - true is $sizeA is bigger that $sizeB, false otherwise
+     */
+    private function isBiggerSize(array $sizeA, array $sizeB) {
+        return $sizeA[0] * $sizeA[1] > $sizeB[0] * $sizeB[1];
+    }
+
+}
