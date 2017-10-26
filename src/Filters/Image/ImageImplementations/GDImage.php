@@ -83,44 +83,51 @@ class GDImage implements Image {
     }
 
     public function getAsString() {
-        $this->gdImage = @imagecreatefromstring($this->imageString);
-        if ($this->gdImage === false) {
-            $this->throwImageException('Could not load GD image');
-        }
-        if (isset ($this->width) && isset ($this->height)) {
-            $this->gdImage = @imagescale($this->gdImage, $this->width, $this->height, IMG_BICUBIC);
-            if ($this->gdImage === false) {
-                $this->throwImageException('Could not resize GD image');
+        try {
+            $gdImage = @imagecreatefromstring($this->imageString);
+            if ($gdImage === false) {
+                throw new ImageException('Could not load GD image');
+            }
+            if (isset ($this->width) && isset ($this->height)) {
+                $gdImage = @imagescale($gdImage, $this->width, $this->height, IMG_BICUBIC);
+                if ($gdImage === false) {
+                    throw new ImageException('Could not resize GD image');
+                }
+            }
+            @imagesavealpha($gdImage, true);
+            if ($this->getType() == Image::TYPE_JPEG) {
+                $callback = 'imagejpeg';
+            } else {
+                $callback = 'imagepng';
+            }
+            $tmpFh = @fopen('php://memory', 'w+');
+            if (!$tmpFh) {
+                throw new ImageException('Could not open temporary file');
+            }
+            if (isset ($this->compression)) {
+                $ok = $callback($gdImage, $tmpFh, $this->compression);
+            } else {
+                $ok = $callback($gdImage, $tmpFh);
+            }
+            if (!$ok) {
+                throw new ImageException('Could not write image to temporary file');
+            }
+            if (fseek($tmpFh, 0) !== 0) {
+                throw new ImageException('Could not seek to beginning of temporary image file');
+            }
+            $string = stream_get_contents($tmpFh);
+            if ($string === false) {
+                throw new ImageException('Could not read image from temporary file');
+            }
+            return $string;
+        } finally {
+            if (isset($gdImage)) {
+                @imagedestroy($gdImage);
+            }
+            if (isset($tmpFh)) {
+                @fclose($tmpFh);
             }
         }
-        @imagesavealpha($this->gdImage, true);
-        if ($this->getType() == Image::TYPE_JPEG) {
-            $callback = 'imagejpeg';
-        } else {
-            $callback = 'imagepng';
-        }
-        $this->tmpFh = @fopen('php://memory', 'w+');
-        if (!$this->tmpFh) {
-            $this->throwImageException('Could not open temporary file');
-        }
-        if (isset ($this->compression)) {
-            $ok = $callback($this->gdImage, $this->tmpFh, $this->compression);
-        } else {
-            $ok = $callback($this->gdImage, $this->tmpFh);
-        }
-        if (!$ok) {
-            $this->throwImageException('Could not write image to temporary file');
-        }
-        $this->destroyGDImage();
-        if (fseek($this->tmpFh, 0) !== 0) {
-            $this->throwImageException('Could not seek to beginning of temporary image file');
-        }
-        $string = stream_get_contents($this->tmpFh);
-        if ($string === false) {
-            $this->throwImageException('Could not read image from temporary file');
-        }
-        $this->closeTmpFile();
-        return $string;
     }
 
     private function getImageInfo() {
@@ -131,25 +138,5 @@ class GDImage implements Image {
             }
         }
         return $this->imageInfo;
-    }
-
-    private function throwImageException($message) {
-        $this->destroyGDImage();
-        $this->closeTmpFile();
-        throw new ImageException($message);
-    }
-
-    private function destroyGDImage() {
-        if ($this->gdImage) {
-            @imagedestroy($this->gdImage);
-            $this->gdImage = null;
-        }
-    }
-
-    private function closeTmpFile() {
-        if ($this->tmpFh) {
-            @fclose($this->tmpFh);
-            $this->tmpFh = null;
-        }
     }
 }
