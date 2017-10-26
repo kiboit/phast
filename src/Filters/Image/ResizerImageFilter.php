@@ -17,12 +17,24 @@ class ResizerImageFilter implements ImageFilter {
     /**
      * ResizerImageFilter constructor.
      *
-     * @param int $maxWidth Set to zero for no limit on width
-     * @param int $maxHeight Set to zero for no limit on height
+     * @param int $defaultMaxWidth Set to zero for no limit on width
+     * @param int $defaultMaxHeight Set to zero for no limit on height
+     * @param int $priorityMaxWidth If set will override $defaultMaxWidth
+     *                              and will set $defaultMaxHeight to 0
+     *                              unless $priorityMaxHeight is specified
+     * @param int $priorityMaxHeight If set will override $defaultMaxHeight
+     *                              and will set $defaultMaxWidth to 0
+     *                              unless $priorityMaxWidth is specified
      */
-    public function __construct($maxWidth, $maxHeight) {
-        $this->maxWidth = (int)$maxWidth;
-        $this->maxHeight = (int)$maxHeight;
+    public function __construct($defaultMaxWidth, $defaultMaxHeight, $priorityMaxWidth, $priorityMaxHeight) {
+        $usePriority = (bool)$priorityMaxWidth || (bool)$priorityMaxHeight;
+        if ($usePriority) {
+            $this->maxWidth = (int)$priorityMaxWidth;
+            $this->maxHeight = (int)$priorityMaxHeight;
+        } else {
+            $this->maxWidth = (int)$defaultMaxWidth;
+            $this->maxHeight = (int)$defaultMaxHeight;
+        }
     }
 
     /**

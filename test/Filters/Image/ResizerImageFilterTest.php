@@ -43,12 +43,25 @@ class ResizerImageFilterTest extends TestCase {
         $this->checkResizing('300x150', '200x100', 'x100');
     }
 
+    public function testMaxSizesPriorityWidthOnly() {
+        $this->checkResizing('75x150', '50x100', '100x300', '50');
+    }
 
-    private function checkResizing($imageSize, $expectedSize, $maxSize) {
+    public function testMaxSizesPriorityHeightOnly() {
+        $this->checkResizing('75x150', '50x100', '100x300', 'x100');
+    }
+
+    public function testMaxSizesPriorityWidthAndHeight() {
+        $this->checkResizing('75x150', '50x100', '100x300', '50x300');
+    }
+
+
+    private function checkResizing($imageSize, $expectedSize, $defaultMaxSize, $priorityMaxSize = null) {
         list ($imageWidth, $imageHeight) = explode('x', $imageSize);
         list ($expectedWidth, $expectedHeight) = explode('x', $expectedSize);
-        list ($maxWidth, $maxHeight) = explode('x', $maxSize);
-        $resizer = new ResizerImageFilter($maxWidth, $maxHeight);
+        list ($defaultMaxWidth, $defaultMaxHeight) = explode('x', $defaultMaxSize);
+        list ($priorityMaxWidth, $priorityMaxHeight) = explode('x', $priorityMaxSize);
+        $resizer = new ResizerImageFilter($defaultMaxWidth, $defaultMaxHeight, $priorityMaxWidth, $priorityMaxHeight);
         $image = new DummyImage($imageWidth, $imageHeight);
         $resizer->transformImage($image);
         $this->assertEquals($expectedWidth, $image->getWidth());
