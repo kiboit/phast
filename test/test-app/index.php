@@ -1,8 +1,4 @@
-<?php
-require_once __DIR__ . '/../../vendor/autoload.php';
-$config = require_once __DIR__ . '/../../src/config-example.php';
-\Kibo\Phast\PhastDocumentFilters::deploy($config);
-?>
+<?php require_once __DIR__ . '/../../src/html-filters.php';?>
 <!DOCTYPE html>
 <html>
     <head>
