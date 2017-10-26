@@ -26,8 +26,8 @@ class CompositeImageFilterTest extends TestCase {
     public function testApplicationOnAllFilters() {
         $mock1 = $this->getMockFilter();
         $mock2 = $this->getMockFilter();
-        $this->filter->addFilter($mock1);
-        $this->filter->addFilter($mock2);
+        $this->filter->addImageFilter($mock1);
+        $this->filter->addImageFilter($mock2);
         $this->filter->apply($this->image);
     }
 
@@ -49,7 +49,7 @@ class CompositeImageFilterTest extends TestCase {
         $filter = $this->createMock(ImageFilter::class);
         $filter->method('transformImage')
             ->willThrowException(new \Exception());
-        $this->filter->addFilter($filter);
+        $this->filter->addImageFilter($filter);
         $this->image->setOriginalString('original-string');
         $actual = $this->filter->apply($this->image);
         $this->assertEquals('original-string', $actual);

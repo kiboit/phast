@@ -9,7 +9,7 @@ class CompositeImageFilter {
      */
     private $filters = [];
 
-    public function addFilter(ImageFilter $filter) {
+    public function addImageFilter(ImageFilter $filter) {
         $this->filters[] = $filter;
     }
 
