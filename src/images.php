@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
-$config = require_once __DIR__ . '/config-example.php';
+$config = require_once PHAST_CONFIG_FILE;
 try {
     list ($type, $image) = \Kibo\Phast\Factories\ImageFilteringServiceFactory::make($config)->serve($_GET);
     if ($type == \Kibo\Phast\Filters\Image\Image::TYPE_JPEG) {
