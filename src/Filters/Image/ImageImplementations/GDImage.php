@@ -32,16 +32,6 @@ class GDImage implements Image {
      */
     private $compression;
 
-    /**
-     * @var resource
-     */
-    private $tmpFh;
-
-    /**
-     * @var resource
-     */
-    private $gdImage;
-
     public function __construct($imageString) {
         $this->imageString = $imageString;
     }
