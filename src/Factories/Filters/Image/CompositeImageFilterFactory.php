@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Factories\Filters\Images;
+namespace Kibo\Phast\Factories\Filters\Image;
 
 use Kibo\Phast\Filters\Image\CompositeImageFilter;
 

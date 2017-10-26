@@ -15,5 +15,9 @@ $config = require_once __DIR__ . '/../../src/config-example.php';
         </script>
         <div>This is where we are!</div>
         <img src="wow.jpg" width="100" height="100">
+        <img src="images/basset.png">
+        <img src="images/basset.png" width="130" height="155">
+        <img src="images/batman.jpg">
+        <img src="images/batman.jpg" width="84" height="50">
     </body>
 </html>

@@ -18,13 +18,16 @@ return [
                 'securityToken' => 'a-very-secure-token-that-no-one-knows',
                 'baseUrl' => (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://'
                     . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
-                'serviceUrl' => 'that\'s-where-the-service-is-located'
+                'serviceUrl' => 'images.php'
             ]
 
         ]
     ],
 
     'images' => [
+        'retrieverMap' => [
+            $_SERVER['HTTP_HOST'] => $_SERVER['DOCUMENT_ROOT']
+        ],
         'filters' => [
             \Kibo\Phast\Filters\Image\ResizerImageFilter::class => [
                 'defaultMaxWidth' => 320,
