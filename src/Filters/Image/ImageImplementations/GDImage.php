@@ -99,7 +99,7 @@ class GDImage implements Image {
         } else {
             $callback = 'imagepng';
         }
-        $this->tmpFh = tmpfile();
+        $this->tmpFh = @fopen('php://memory', 'w+');
         if (!$this->tmpFh) {
             $this->throwImageException('Could not open temporary file');
         }
