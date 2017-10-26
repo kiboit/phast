@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 $config = require_once __DIR__ . '/config-example.php';
 try {
     list ($type, $image) = \Kibo\Phast\Factories\ImageFilteringServiceFactory::make($config['images'])->serve($_GET);
