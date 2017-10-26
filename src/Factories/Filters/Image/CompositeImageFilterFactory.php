@@ -22,8 +22,8 @@ class CompositeImageFilterFactory {
 
     public function make(array $request) {
         $composite = new CompositeImageFilter();
-        foreach ($this->config['filters'] as $class => $filterConfig) {
-            $filter = $this->makeFactory($class)->make($filterConfig, $request);
+        foreach (array_keys($this->config['images']['filters']) as $class) {
+            $filter = $this->makeFactory($class)->make($this->config, $request);
             $composite->addImageFilter($filter);
         }
         return $composite;

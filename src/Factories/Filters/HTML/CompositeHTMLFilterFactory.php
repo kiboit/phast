@@ -8,9 +8,9 @@ class CompositeHTMLFilterFactory {
 
 
     public function make(array $config) {
-        $composite = new CompositeHTMLFilter($config['maxBufferSizeToApply']);
-        foreach ($config['filters'] as $class => $filterConfig) {
-            $filter = $this->makeFactory($class)->make($filterConfig);
+        $composite = new CompositeHTMLFilter($config['documents']['maxBufferSizeToApply']);
+        foreach (array_keys($config['documents']['filters']) as $class) {
+            $filter = $this->makeFactory($class)->make($config);
             $composite->addHTMLFilter($filter);
         }
         return $composite;

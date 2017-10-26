@@ -10,7 +10,7 @@ class CSSInliningHTMLFilterFactory implements HTMLFilterFactory {
 
     public function make(array $config) {
         return new CSSInliningHTMLFilter(
-            URL::fromString($config['baseUrl']),
+            URL::fromString($config['documents']['baseUrl']),
             new LocalRetriever($config['retrieverMap'])
         );
     }

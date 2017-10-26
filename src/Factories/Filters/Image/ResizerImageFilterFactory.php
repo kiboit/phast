@@ -7,6 +7,7 @@ use Kibo\Phast\Filters\Image\ResizerImageFilter;
 class ResizerImageFilterFactory {
 
     public function make(array $config, array $request) {
+        $config = $config['images']['filters'][ResizerImageFilter::class];
         $defaultMaxWidth = $this->getFromConfig($config, 'defaultMaxWidth');
         $defaultMaxHeight = $this->getFromConfig($config, 'defaultMaxHeight');
         $priorityMaxWidth = $this->getFromConfig($request, 'width');

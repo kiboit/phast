@@ -7,7 +7,7 @@ use Kibo\Phast\Filters\Image\CompressionImageFilter;
 class CompressionImageFilterFactory {
 
     public function make(array $config) {
-        return new CompressionImageFilter($config);
+        return new CompressionImageFilter($config['images']['filters'][CompressionImageFilter::class]);
     }
 
 }
