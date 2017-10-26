@@ -11,6 +11,8 @@ try {
     echo $image;
 } catch (\Kibo\Phast\Exceptions\ItemNotFoundException $exception) {
     http_response_code(404);
+} catch (\Kibo\Phast\Exceptions\UnauthorizedException $e) {
+    http_response_code(403);
 } catch (Exception $e) {
     http_response_code(500);
 }

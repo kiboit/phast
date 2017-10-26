@@ -25,6 +25,7 @@ return [
     ],
 
     'images' => [
+        'securityToken' => 'a-very-secure-token-that-no-one-knows',
         'retrieverMap' => [
             $_SERVER['HTTP_HOST'] => $_SERVER['DOCUMENT_ROOT']
         ],
