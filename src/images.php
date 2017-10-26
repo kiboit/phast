@@ -4,9 +4,9 @@ $config = require_once PHAST_CONFIG_FILE;
 try {
     list ($type, $image) = \Kibo\Phast\Factories\ImageFilteringServiceFactory::make($config)->serve($_GET);
     if ($type == \Kibo\Phast\Filters\Image\Image::TYPE_JPEG) {
-        header('Content-type: image/jpeg');
+        header('Content-Type: image/jpeg');
     } else {
-        header('Content-type: image/png');
+        header('Content-Type: image/png');
     }
     echo $image;
 } catch (\Kibo\Phast\Exceptions\ItemNotFoundException $exception) {
