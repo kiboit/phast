@@ -61,18 +61,18 @@ class GDImage implements Image {
     }
 
     public function getType() {
-        $type = image_type_to_mime_type($this->getImageInfo()[2]);
-        if ($type == 'image/jpeg') {
-            return Image::TYPE_JPEG;
+        $type = @image_type_to_mime_type($this->getImageInfo()[2]);
+        if (!$type) {
+            throw new ImageException('Could not determine image type');
         }
-        return Image::TYPE_PNG;
+        return $type;
     }
 
     public function setCompression($compression) {
         $this->compression = $compression;
     }
 
-    public function getAsString() {
+    public function transform() {
         try {
             $gdImage = @imagecreatefromstring($this->imageString);
             if ($gdImage === false) {
@@ -109,15 +109,19 @@ class GDImage implements Image {
             if ($string === false) {
                 throw new ImageException('Could not read image from temporary file');
             }
-            return $string;
+            return new self($string);
         } finally {
-            if (isset($gdImage)) {
+            if (isset ($gdImage)) {
                 @imagedestroy($gdImage);
             }
-            if (isset($tmpFh)) {
+            if (isset ($tmpFh)) {
                 @fclose($tmpFh);
             }
         }
+    }
+
+    public function getAsString() {
+        return $this->imageString;
     }
 
     private function getImageInfo() {

@@ -47,7 +47,7 @@ class ImageFilteringService {
         $this->validateRequest($request);
         $image = $this->imageFactory->getForURL(URL::fromString($request['src']));
         $filter = $this->filterFactory->make($request);
-        return [$image->getType(), $filter->apply($image)];
+        return $filter->apply($image);
     }
 
     private function validateRequest(array $request) {

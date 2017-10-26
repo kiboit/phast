@@ -11,16 +11,6 @@ interface Image {
     /**
      * @return integer
      */
-    public function getOriginalFileSize();
-
-    /**
-     * @return string
-     */
-    public function getOriginalAsString();
-
-    /**
-     * @return integer
-     */
     public function getWidth();
 
     /**
@@ -55,5 +45,10 @@ interface Image {
      * @return string
      */
     public function getAsString();
+
+    /**
+     * @return Image
+     */
+    public function transform();
 
 }

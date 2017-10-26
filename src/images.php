@@ -2,10 +2,10 @@
 require_once __DIR__ . '/bootstrap.php';
 $config = require_once PHAST_CONFIG_FILE;
 try {
-    list ($type, $image) = \Kibo\Phast\Factories\ImageFilteringServiceFactory::make($config)->serve($_GET);
-    header('Content-Type: ' . $type);
+    $image = \Kibo\Phast\Factories\ImageFilteringServiceFactory::make($config)->serve($_GET);
+    header('Content-Type: ' . $image->getType());
     header('Cache-Control: max-age=' . (86400 * 365));
-    echo $image;
+    echo $image->getAsString();
 } catch (\Kibo\Phast\Exceptions\ItemNotFoundException $e) {
     $url = $e->getUrl();
     if ($url) {

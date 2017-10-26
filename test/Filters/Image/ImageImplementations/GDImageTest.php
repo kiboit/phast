@@ -29,7 +29,7 @@ class GDImageTest extends TestCase {
         $this->assertEquals(75, $image->getWidth());
         $this->assertEquals(100, $image->getHeight());
 
-        $resized = $image->getAsString();
+        $resized = $image->transform()->getAsString();
         $info = getimagesizefromstring($resized);
         $this->assertEquals(75, $info[0]);
         $this->assertEquals(100, $info[1]);
@@ -47,7 +47,7 @@ class GDImageTest extends TestCase {
     public function testExceptionOnBadImageAsString() {
         $image = new GDImage('asdasd');
         $this->expectException(ImageException::class);
-        $image->getAsString();
+        $image->transform()->getAsString();
     }
 
     public function testExceptionOnBadImageInfo() {
@@ -69,13 +69,13 @@ class GDImageTest extends TestCase {
         $image = new GDImage($string);
 
         if ($checkDefault) {
-            $actual1 = $image->getAsString();
+            $actual1 = $image->transform()->getAsString();
             $this->assertNotEmpty($actual1);
             $this->assertGreaterThan(strlen($string), strlen($actual1));
         }
 
         $image->setCompression($outputCompression);
-        $actual = $image->getAsString();
+        $actual = $image->transform()->getAsString();
         $this->assertNotEmpty($actual);
         $this->assertLessThan(strlen($string), strlen($actual));
     }

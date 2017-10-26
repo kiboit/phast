@@ -18,10 +18,10 @@ class CompositeImageFilter {
             foreach ($this->filters as $filter) {
                 $filter->transformImage($image);
             }
-            $compressed = $image->getAsString();
-            return strlen($compressed) < $image->getOriginalFileSize() ? $compressed : $image->getOriginalAsString();
+            $compressedImage = $image->transform();
+            return strlen($compressedImage->getAsString()) < strlen($image->getAsString()) ? $compressedImage : $image;
         } catch (\Exception $e) {
-            return $image->getOriginalAsString();
+            return $image;
         }
     }
 
