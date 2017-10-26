@@ -1,5 +1,5 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Exceptions;
 
 class ImageException extends \RuntimeException {}

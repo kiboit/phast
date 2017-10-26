@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
 use Kibo\Phast\Filters\Image\Image;
-use Kibo\Phast\Filters\Image\ImageException;
+use Kibo\Phast\Exceptions\ImageException;
 
 class GDImage implements Image {
 

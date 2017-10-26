@@ -6,9 +6,23 @@ use Kibo\Phast\Filters\Image\CompositeImageFilter;
 
 class CompositeImageFilterFactory {
 
-    public function make(array $config, array $request) {
+    /**
+     * @var array
+     */
+    private $config;
+
+    /**
+     * CompositeImageFilterFactory constructor.
+     *
+     * @param array $config
+     */
+    public function __construct(array $config) {
+        $this->config = $config;
+    }
+
+    public function make(array $request) {
         $composite = new CompositeImageFilter();
-        foreach ($config['filters'] as $class => $filterConfig) {
+        foreach ($this->config['filters'] as $class => $filterConfig) {
             $filter = $this->makeFactory($class)->make($filterConfig, $request);
             $composite->addImageFilter($filter);
         }

@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image;
 
+use Kibo\Phast\Exceptions\ImageException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use PHPUnit\Framework\TestCase;
 
