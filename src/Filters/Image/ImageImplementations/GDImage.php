@@ -32,6 +32,16 @@ class GDImage implements Image {
      */
     private $compression;
 
+    /**
+     * @var resource
+     */
+    private $tmpFh;
+
+    /**
+     * @var resource
+     */
+    private $gdImage;
+
     public function __construct($imageString) {
         $this->imageString = $imageString;
     }
@@ -68,14 +78,14 @@ class GDImage implements Image {
     }
 
     public function getAsString() {
-        $image = @imagecreatefromstring($this->imageString);
-        if ($image === false) {
-            throw new ImageException('Could not load GD image');
+        $this->gdImage = @imagecreatefromstring($this->imageString);
+        if ($this->gdImage === false) {
+            $this->throwImageException('Could not load GD image');
         }
         if (isset ($this->width) && isset ($this->height)) {
-            $image = @imagescale($image, $this->width, $this->height);
-            if ($image === false) {
-                throw new ImageException('Could not resize GD image');
+            $this->gdImage = @imagescale($this->gdImage, $this->width, $this->height);
+            if ($this->gdImage === false) {
+                $this->throwImageException('Could not resize GD image');
             }
         }
         if ($this->getType() == Image::TYPE_PNG) {
@@ -85,25 +95,27 @@ class GDImage implements Image {
         } else {
             $callback = 'imagepng';
         }
-        $tmp = tmpfile();
-        if (!$tmp) {
-            throw new ImageException('Could not open temporary file');
+        $this->tmpFh = tmpfile();
+        if (!$this->tmpFh) {
+            $this->throwImageException('Could not open temporary file');
         }
         if (isset ($this->compression)) {
-            $ok = $callback($image, $tmp, $this->compression);
+            $ok = $callback($this->gdImage, $this->tmpFh, $this->compression);
         } else {
-            $ok = $callback($image, $tmp);
+            $ok = $callback($this->gdImage, $this->tmpFh);
         }
         if (!$ok) {
-            throw new ImageException('Could not write image to temporary file');
+            $this->throwImageException('Could not write image to temporary file');
         }
-        if (fseek($tmp, 0) !== 0) {
-            throw new ImageException('Could not seek to beginning of temporary image file');
+        $this->destroyGDImage();
+        if (fseek($this->tmpFh, 0) !== 0) {
+            $this->throwImageException('Could not seek to beginning of temporary image file');
         }
-        $string = stream_get_contents($tmp);
+        $string = stream_get_contents($this->tmpFh);
         if ($string === false) {
-            throw new ImageException('Could not read image from temporary file');
+            $this->throwImageException('Could not read image from temporary file');
         }
+        $this->closeTmpFile();
         return $string;
     }
 
@@ -115,5 +127,25 @@ class GDImage implements Image {
             }
         }
         return $this->imageInfo;
+    }
+
+    private function throwImageException($message) {
+        $this->destroyGDImage();
+        $this->closeTmpFile();
+        throw new ImageException($message);
+    }
+
+    private function destroyGDImage() {
+        if ($this->gdImage) {
+            @imagedestroy($this->gdImage);
+            $this->gdImage = null;
+        }
+    }
+
+    private function closeTmpFile() {
+        if ($this->tmpFh) {
+            @fclose($this->tmpFh);
+            $this->tmpFh = null;
+        }
     }
 }
