@@ -17,8 +17,8 @@ class LocalRetrieverTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->retrievedFile = null;
-        $this->retriever = new LocalRetriever(['kibo.test' => 'local-test'], function ($file) {
-            $this->retrievedFile = $file;
+        $this->retriever = new LocalRetriever(['kibo.test' => 'local-test'], function ($file, $base) {
+            $this->retrievedFile = $base . $file;
             return 'returned';
         });
     }

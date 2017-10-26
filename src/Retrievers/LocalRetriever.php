@@ -27,8 +27,19 @@ class LocalRetriever implements Retriever {
         if ($retrieveCb) {
             $this->retrieveCb = $retrieveCb;
         } else {
-            $this->retrieveCb = function ($file) {
-                return @file_get_contents($file);
+            $this->retrieveCb = function ($file, $base) {
+                $base = realpath($base) . '/';
+                if (!$base) {
+                    return false;
+                }
+                $path = realpath($base . $file);
+                if (!$path) {
+                    return false;
+                }
+                if (strpos($path, $base) !== 0) {
+                    return false;
+                }
+                return @file_get_contents($path);
             };
         }
     }
@@ -38,8 +49,7 @@ class LocalRetriever implements Retriever {
             return false;
         }
         $base = URL::fromString($this->map[$url->getHost()]);
-        $path = rtrim($base, '/') . '/' . ltrim($url->getPath(), '/');
-        return call_user_func($this->retrieveCb, $path);
+        return call_user_func($this->retrieveCb, $url->getPath(), $base);
     }
 
 }
