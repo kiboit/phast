@@ -8,6 +8,7 @@ try {
     } else {
         header('Content-Type: image/png');
     }
+    header('Cache-Control: max-age=' . (86400 * 365));
     echo $image;
 } catch (\Kibo\Phast\Exceptions\ItemNotFoundException $exception) {
     http_response_code(404);
