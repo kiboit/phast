@@ -75,10 +75,7 @@ class GDImage implements Image {
         if ($type == 'image/jpeg') {
             return Image::TYPE_JPEG;
         }
-        if ($type == 'image/png') {
-            return Image::TYPE_PNG;
-        }
-        return Image::TYPE_OTHER;
+        return Image::TYPE_PNG;
     }
 
     public function setCompression($compression) {

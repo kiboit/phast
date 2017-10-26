@@ -4,11 +4,9 @@ namespace Kibo\Phast\Filters\Image;
 
 interface Image {
 
-    const TYPE_JPEG  = 'jpg';
+    const TYPE_JPEG  = 'image/jpeg';
 
-    const TYPE_PNG   = 'png';
-
-    const TYPE_OTHER = 'other';
+    const TYPE_PNG   = 'image/png';
 
     /**
      * @return integer
