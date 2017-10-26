@@ -56,6 +56,13 @@ class GDImageTest extends TestCase {
         $image->getWidth();
     }
 
+    public function testOriginalSizeAndImage() {
+        $string = $this->getImageString('imagepng', 9, 'Hello, World!');
+        $image = new GDImage($string);
+        $this->assertEquals(strlen($string), $image->getOriginalFileSize());
+        $this->assertSame($string, $image->getOriginalAsString());
+    }
+
 
     private function checkCompressing($imagecb, $inputCompression, $outputCompression, $checkDefault = true) {
         $string = $this->getImageString($imagecb, $inputCompression, 'Hello, World!');

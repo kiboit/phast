@@ -27,6 +27,16 @@ class DummyImage implements Image {
     private $compression;
 
     /**
+     * @var string
+     */
+    private $imageString;
+
+    /**
+     * @var string
+     */
+    private $originalString;
+
+    /**
      * DummyImage constructor.
      *
      * @param int $width
@@ -94,8 +104,40 @@ class DummyImage implements Image {
         return $this->compression;
     }
 
+    /**
+     * @return string
+     */
     public function getAsString() {
-        return '';
+        return $this->imageString;
     }
+
+    /**
+     * @param string $imageString
+     */
+    public function setImageString($imageString) {
+        $this->imageString = $imageString;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOriginalFileSize() {
+        return strlen($this->originalString);
+    }
+
+    /**
+     * @return string
+     */
+    public function getOriginalAsString() {
+        return $this->originalString;
+    }
+
+    /**
+     * @param string $originalString
+     */
+    public function setOriginalString($originalString) {
+        $this->originalString = $originalString;
+    }
+
 
 }

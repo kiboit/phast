@@ -13,6 +13,16 @@ interface Image {
     /**
      * @return integer
      */
+    public function getOriginalFileSize();
+
+    /**
+     * @return string
+     */
+    public function getOriginalAsString();
+
+    /**
+     * @return integer
+     */
     public function getWidth();
 
     /**

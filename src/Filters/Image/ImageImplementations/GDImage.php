@@ -46,6 +46,14 @@ class GDImage implements Image {
         $this->imageString = $imageString;
     }
 
+    public function getOriginalFileSize() {
+        return strlen($this->imageString);
+    }
+
+    public function getOriginalAsString() {
+        return $this->imageString;
+    }
+
     public function getWidth() {
         return isset ($this->width) ? $this->width : $this->getImageInfo()[0];
     }
