@@ -88,14 +88,13 @@ class GDImage implements Image {
             $this->throwImageException('Could not load GD image');
         }
         if (isset ($this->width) && isset ($this->height)) {
-            $this->gdImage = @imagescale($this->gdImage, $this->width, $this->height);
+            $this->gdImage = @imagescale($this->gdImage, $this->width, $this->height, IMG_BICUBIC);
             if ($this->gdImage === false) {
                 $this->throwImageException('Could not resize GD image');
             }
         }
-        if ($this->getType() == Image::TYPE_PNG) {
-            $callback = 'imagepng';
-        } else if ($this->getType() == Image::TYPE_JPEG) {
+        @imagesavealpha($this->gdImage, true);
+        if ($this->getType() == Image::TYPE_JPEG) {
             $callback = 'imagejpeg';
         } else {
             $callback = 'imagepng';
