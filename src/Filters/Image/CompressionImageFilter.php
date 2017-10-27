@@ -20,10 +20,10 @@ class CompressionImageFilter implements ImageFilter {
 
     public function transformImage(Image $image) {
         if (isset ($this->compressions[$image->getType()])) {
-            $image->setCompression(
-                $this->compressions[$image->getType()]
-            );
+            return $image->compress($this->compressions[$image->getType()]);
         }
+
+        return $image;
     }
 
 }

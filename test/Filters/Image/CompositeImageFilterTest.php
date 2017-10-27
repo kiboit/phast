@@ -25,25 +25,30 @@ class CompositeImageFilterTest extends TestCase {
     }
 
     public function testApplicationOnAllFilters() {
-        $mock1 = $this->getMockFilter();
-        $mock2 = $this->getMockFilter();
-        $this->filter->addImageFilter($mock1);
-        $this->filter->addImageFilter($mock2);
+        $this->getMockFilter();
+        $this->getMockFilter();
         $this->filter->apply($this->image);
     }
 
-    public function testReturnsImageString() {
-        $this->image->setOriginalString('a-longer-test-string');
-        $this->image->setImageString('test-string');
+    public function testReturnOriginalWhenNoFilters() {
         $actual = $this->filter->apply($this->image);
-        $this->assertEquals('test-string', $actual);
+        $this->assertSame($this->image, $actual);
     }
 
-    public function testReturnsOriginalImageString() {
-        $this->image->setOriginalString('12345');
-        $this->image->setImageString('1234567890');
+    public function testReturnNewImageWhenChangesToSmaller() {
+        $this->image->setImageString('very-very-big');
+        $this->image->setTransformationString('small');
+        $this->getMockFilter();
         $actual = $this->filter->apply($this->image);
-        $this->assertEquals('12345', $actual);
+        $this->assertNotSame($this->image, $actual);
+    }
+
+    public function testReturnOriginalImageWhenChangesToBigger() {
+        $this->image->setImageString('small');
+        $this->image->setTransformationString('very-very-big');
+        $this->getMockFilter();
+        $actual = $this->filter->apply($this->image);
+        $this->assertSame($this->image, $actual);
     }
 
     public function testReturnOriginalOnFilterException() {
@@ -51,28 +56,28 @@ class CompositeImageFilterTest extends TestCase {
         $filter->method('transformImage')
             ->willThrowException(new \Exception());
         $this->filter->addImageFilter($filter);
-        $this->image->setOriginalString('original-string');
         $actual = $this->filter->apply($this->image);
-        $this->assertEquals('original-string', $actual);
+        $this->assertSame($this->image, $actual);
     }
 
     public function testReturnOriginalOnImageException() {
-        $image = $this->createMock(Image::class);
+        $image = $this->createMock(DummyImage::class);
         $image->expects($this->once())
             ->method('getAsString')
             ->willThrowException(new ImageException());
-        $image->expects($this->once())
-            ->method('getOriginalAsString')
-            ->willReturn('original');
+        $image->method('transform')
+            ->willReturn($image);
         $actual = $this->filter->apply($image);
-        $this->assertEquals('original', $actual);
+        $this->assertSame($image, $actual);
     }
 
     private function getMockFilter() {
         $mock = $this->createMock(ImageFilter::class);
         $mock->expects($this->once())
               ->method('transformImage')
-              ->with($this->image);
+              ->with($this->image)
+              ->willReturn($this->image);
+        $this->filter->addImageFilter($mock);
         return $mock;
     }
 }

@@ -31,10 +31,7 @@ class DummyImage implements Image {
      */
     private $imageString;
 
-    /**
-     * @var string
-     */
-    private $originalString;
+    private $transformationString;
 
     /**
      * DummyImage constructor.
@@ -55,24 +52,10 @@ class DummyImage implements Image {
     }
 
     /**
-     * @param int $width
-     */
-    public function setWidth($width) {
-        $this->width = $width;
-    }
-
-    /**
      * @return int
      */
     public function getHeight() {
         return $this->height;
-    }
-
-    /**
-     * @param int $height
-     */
-    public function setHeight($height) {
-        $this->height = $height;
     }
 
     /**
@@ -88,15 +71,6 @@ class DummyImage implements Image {
     public function setType($type) {
         $this->type = $type;
     }
-
-    /**
-     * @param int $compression
-     * @return void
-     */
-    public function setCompression($compression) {
-        $this->compression = $compression;
-    }
-
     /**
      * @return int
      */
@@ -119,25 +93,41 @@ class DummyImage implements Image {
     }
 
     /**
-     * @return int
+     * @param int $width
+     * @param int $height
+     * @return DummyImage
      */
-    public function getOriginalFileSize() {
-        return strlen($this->originalString);
+    public function resize($width, $height) {
+        $im = clone $this;
+        $im->width = $width;
+        $im->height = $height;
+        return $im;
     }
 
     /**
-     * @return string
+     * @param int $compression
+     * @return DummyImage
      */
-    public function getOriginalAsString() {
-        return $this->originalString;
+    public function compress($compression) {
+        $im = clone $this;
+        $im->compression = $compression;
+        return $im;
     }
 
     /**
-     * @param string $originalString
+     * @param mixed $transformationString
      */
-    public function setOriginalString($originalString) {
-        $this->originalString = $originalString;
+    public function setTransformationString($transformationString) {
+        $this->transformationString = $transformationString;
     }
 
+    /**
+     * @return DummyImage
+     */
+    public function transform() {
+        $im = clone $this;
+        $im->imageString = $this->transformationString;
+        return $im;
+    }
 
 }

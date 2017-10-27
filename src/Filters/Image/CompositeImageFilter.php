@@ -16,7 +16,7 @@ class CompositeImageFilter {
     public function apply(Image $image) {
         try {
             foreach ($this->filters as $filter) {
-                $filter->transformImage($image);
+                $image = $filter->transformImage($image);
             }
             $compressedImage = $image->transform();
             return strlen($compressedImage->getAsString()) < strlen($image->getAsString()) ? $compressedImage : $image;

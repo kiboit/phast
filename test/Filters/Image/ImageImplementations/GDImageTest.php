@@ -24,8 +24,7 @@ class GDImageTest extends TestCase {
         $this->assertEquals(200, $image->getHeight());
         $this->assertEquals($type, $image->getType());
 
-        $image->setWidth(75);
-        $image->setHeight(100);
+        $image = $image->resize(75, 100);
         $this->assertEquals(75, $image->getWidth());
         $this->assertEquals(100, $image->getHeight());
 
@@ -59,8 +58,8 @@ class GDImageTest extends TestCase {
     public function testOriginalSizeAndImage() {
         $string = $this->getImageString('imagepng', 9, 'Hello, World!');
         $image = new GDImage($string);
-        $this->assertEquals(strlen($string), $image->getOriginalFileSize());
-        $this->assertSame($string, $image->getOriginalAsString());
+        $this->assertEquals(strlen($string), strlen($image->getAsString()));
+        $this->assertSame($string, $image->getAsString());
     }
 
 
@@ -74,8 +73,7 @@ class GDImageTest extends TestCase {
             $this->assertGreaterThan(strlen($string), strlen($actual1));
         }
 
-        $image->setCompression($outputCompression);
-        $actual = $image->transform()->getAsString();
+        $actual = $image->compress($outputCompression)->transform()->getAsString();
         $this->assertNotEmpty($actual);
         $this->assertLessThan(strlen($string), strlen($actual));
     }

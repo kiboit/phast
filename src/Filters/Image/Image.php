@@ -20,26 +20,21 @@ interface Image {
 
     /**
      * @param integer $width
-     * @return void
+     * @param integer $height
+     * @return Image
      */
-    public function setWidth($width);
+    public function resize($width, $height);
 
     /**
-     * @param integer $height
-     * @return void
+     * @param integer $compression
+     * @return Image
      */
-    public function setHeight($height);
+    public function compress($compression);
 
     /**
      * @return string
      */
     public function getType();
-
-    /**
-     * @param integer $compression
-     * @return null
-     */
-    public function setCompression($compression);
 
     /**
      * @return string

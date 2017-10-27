@@ -36,14 +36,6 @@ class GDImage implements Image {
         $this->imageString = $imageString;
     }
 
-    public function getOriginalFileSize() {
-        return strlen($this->imageString);
-    }
-
-    public function getOriginalAsString() {
-        return $this->imageString;
-    }
-
     public function getWidth() {
         return isset ($this->width) ? $this->width : $this->getImageInfo()[0];
     }
@@ -52,12 +44,17 @@ class GDImage implements Image {
         return isset ($this->height) ? $this->height : $this->getImageInfo()[1];
     }
 
-    public function setWidth($width) {
-        $this->width = $width;
+    public function resize($width, $height) {
+        $im = clone $this;
+        $im->width = $width;
+        $im->height = $height;
+        return $im;
     }
 
-    public function setHeight($height) {
-        $this->height = $height;
+    public function compress($compression) {
+        $im = clone $this;
+        $im->compression = $compression;
+        return $im;
     }
 
     public function getType() {
@@ -66,10 +63,6 @@ class GDImage implements Image {
             throw new ImageException('Could not determine image type');
         }
         return $type;
-    }
-
-    public function setCompression($compression) {
-        $this->compression = $compression;
     }
 
     public function transform() {

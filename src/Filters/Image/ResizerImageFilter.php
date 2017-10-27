@@ -44,7 +44,7 @@ class ResizerImageFilter implements ImageFilter {
      * the image will be resized to the bigger possible size.
      *
      * @param Image $image
-     * @return void
+     * @return Image
      */
     public function transformImage(Image $image) {
         $hasBiggerWidth  = $this->maxWidth  && $image->getWidth()  > $this->maxWidth;
@@ -54,15 +54,15 @@ class ResizerImageFilter implements ImageFilter {
             $sizeW = $this->getNewSizeByWidth($image);
             $sizeH = $this->getNewSizeByHeight($image);
             if ($this->isBiggerSize($sizeW, $sizeH)) {
-                $this->setSize($image, $sizeW);
-            } else {
-                $this->setSize($image, $sizeH);
+                return $this->setSize($image, $sizeW);
             }
+            return $this->setSize($image, $sizeH);
         } else if ($hasBiggerWidth) {
-            $this->setSize($image, $this->getNewSizeByWidth($image));
+            return $this->setSize($image, $this->getNewSizeByWidth($image));
         } else if ($hasBiggerHeight) {
-            $this->setSize($image, $this->getNewSizeByHeight($image));
+            return $this->setSize($image, $this->getNewSizeByHeight($image));
         }
+        return $image;
     }
 
     /**
@@ -123,10 +123,10 @@ class ResizerImageFilter implements ImageFilter {
      *
      * @param Image $image
      * @param array $size
+     * @return Image
      */
     private function setSize(Image $image, array $size) {
-        $image->setWidth($size[0]);
-        $image->setHeight($size[1]);
+        return $image->resize($size[0], $size[1]);
     }
 
     /**

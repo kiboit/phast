@@ -16,17 +16,16 @@ class CompressionImageFilterTest extends TestCase {
         $image = new DummyImage();
 
         $image->setType(Image::TYPE_JPEG);
-        $filter->transformImage($image);
-        $this->assertEquals($compressions[Image::TYPE_JPEG], $image->getCompression());
+        $actual = $filter->transformImage($image);
+        $this->assertEquals($compressions[Image::TYPE_JPEG], $actual->getCompression());
 
         $image->setType(Image::TYPE_PNG);
-        $filter->transformImage($image);
-        $this->assertEquals($compressions[Image::TYPE_PNG], $image->getCompression());
+        $actual = $filter->transformImage($image);
+        $this->assertEquals($compressions[Image::TYPE_PNG], $actual->getCompression());
 
-        $image->setCompression('override-old');
         $image->setType('not-existing');
-        $filter->transformImage($image);
-        $this->assertEquals('override-old', $image->getCompression());
+        $actual = $filter->transformImage($image);
+        $this->assertSame($image, $actual);
 
     }
 
