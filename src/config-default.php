@@ -19,7 +19,7 @@ return [
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [
-                'serviceUrl' => 'images.php'
+                'serviceUrl' => '/Phast/images.php'
             ]
 
         ]
