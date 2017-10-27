@@ -16,5 +16,8 @@
         <img src="images/batman.jpg">
         <img src="images/batman.jpg" width="84" height="50">
         <img src="https://www.commitstrip.com/wp-content/uploads/2017/09/Strip-Lenfance-du-codeur-Le-piratage-650-finalenglish.jpg">
+        <script>
+            document.querySelectorAll('img').forEach(i => { i.removeAttribute('width'); i.removeAttribute('height'); });
+        </script>
     </body>
 </html>

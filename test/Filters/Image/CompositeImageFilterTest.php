@@ -37,16 +37,18 @@ class CompositeImageFilterTest extends TestCase {
 
     public function testReturnNewImageWhenChangesToSmaller() {
         $this->image->setImageString('very-very-big');
-        $this->image->setTransformationString('small');
-        $this->getMockFilter();
+        $small = new DummyImage();
+        $small->setImageString('small');
+        $this->getMockFilter($small);
         $actual = $this->filter->apply($this->image);
-        $this->assertNotSame($this->image, $actual);
+        $this->assertSame($small, $actual);
     }
 
     public function testReturnOriginalImageWhenChangesToBigger() {
         $this->image->setImageString('small');
-        $this->image->setTransformationString('very-very-big');
-        $this->getMockFilter();
+        $big = new DummyImage();
+        $big->setImageString('very-very-big');
+        $this->getMockFilter($big);
         $actual = $this->filter->apply($this->image);
         $this->assertSame($this->image, $actual);
     }
@@ -65,18 +67,17 @@ class CompositeImageFilterTest extends TestCase {
         $image->expects($this->once())
             ->method('getAsString')
             ->willThrowException(new ImageException());
-        $image->method('transform')
-            ->willReturn($image);
         $actual = $this->filter->apply($image);
         $this->assertSame($image, $actual);
     }
 
-    private function getMockFilter() {
+    private function getMockFilter(Image $image = null) {
+        $returnImage = is_null($image) ? $this->image : $image;
         $mock = $this->createMock(ImageFilter::class);
         $mock->expects($this->once())
               ->method('transformImage')
               ->with($this->image)
-              ->willReturn($this->image);
+              ->willReturn($returnImage);
         $this->filter->addImageFilter($mock);
         return $mock;
     }

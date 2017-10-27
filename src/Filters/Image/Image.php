@@ -19,6 +19,16 @@ interface Image {
     public function getHeight();
 
     /**
+     * @return string
+     */
+    public function getType();
+
+    /**
+     * @return string
+     */
+    public function getAsString();
+
+    /**
      * @param integer $width
      * @param integer $height
      * @return Image
@@ -30,20 +40,5 @@ interface Image {
      * @return Image
      */
     public function compress($compression);
-
-    /**
-     * @return string
-     */
-    public function getType();
-
-    /**
-     * @return string
-     */
-    public function getAsString();
-
-    /**
-     * @return Image
-     */
-    public function transform();
 
 }

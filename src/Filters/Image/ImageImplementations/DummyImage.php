@@ -4,27 +4,12 @@ namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
 use Kibo\Phast\Filters\Image\Image;
 
-class DummyImage implements Image {
-
-    /**
-     * @var integer
-     */
-    private $width;
-
-    /**
-     * @var integer
-     */
-    private $height;
+class DummyImage extends BaseImage implements Image {
 
     /**
      * @var string
      */
     private $type;
-
-    /**
-     * @var integer
-     */
-    private $compression;
 
     /**
      * @var string
@@ -93,41 +78,13 @@ class DummyImage implements Image {
     }
 
     /**
-     * @param int $width
-     * @param int $height
-     * @return DummyImage
-     */
-    public function resize($width, $height) {
-        $im = clone $this;
-        $im->width = $width;
-        $im->height = $height;
-        return $im;
-    }
-
-    /**
-     * @param int $compression
-     * @return DummyImage
-     */
-    public function compress($compression) {
-        $im = clone $this;
-        $im->compression = $compression;
-        return $im;
-    }
-
-    /**
      * @param mixed $transformationString
      */
     public function setTransformationString($transformationString) {
         $this->transformationString = $transformationString;
     }
 
-    /**
-     * @return DummyImage
-     */
-    public function transform() {
-        $im = clone $this;
-        $im->imageString = $this->transformationString;
-        return $im;
+    protected function __clone() {
+        $this->imageString = $this->transformationString;
     }
-
 }

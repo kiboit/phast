@@ -5,7 +5,12 @@ namespace Kibo\Phast\Filters\Image\ImageImplementations;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Exceptions\ImageException;
 
-class GDImage implements Image {
+class GDImage extends BaseImage implements Image {
+
+    /**
+     * @var bool
+     */
+    protected $processed = true;
 
     /**
      * @var string
@@ -16,21 +21,6 @@ class GDImage implements Image {
      * @var array
      */
     private $imageInfo;
-
-    /**
-     * @var integer
-     */
-    private $width;
-
-    /**
-     * @var integer
-     */
-    private $height;
-
-    /**
-     * @var integer
-     */
-    private $compression;
 
     public function __construct($imageString) {
         $this->imageString = $imageString;
@@ -44,19 +34,6 @@ class GDImage implements Image {
         return isset ($this->height) ? $this->height : $this->getImageInfo()[1];
     }
 
-    public function resize($width, $height) {
-        $im = clone $this;
-        $im->width = $width;
-        $im->height = $height;
-        return $im;
-    }
-
-    public function compress($compression) {
-        $im = clone $this;
-        $im->compression = $compression;
-        return $im;
-    }
-
     public function getType() {
         $type = @image_type_to_mime_type($this->getImageInfo()[2]);
         if (!$type) {
@@ -65,7 +42,7 @@ class GDImage implements Image {
         return $type;
     }
 
-    public function transform() {
+    private function process() {
         try {
             $gdImage = @imagecreatefromstring($this->imageString);
             if ($gdImage === false) {
@@ -102,7 +79,7 @@ class GDImage implements Image {
             if ($string === false) {
                 throw new ImageException('Could not read image from temporary file');
             }
-            return new self($string);
+            return $string;
         } finally {
             if (isset ($gdImage)) {
                 @imagedestroy($gdImage);
@@ -114,6 +91,10 @@ class GDImage implements Image {
     }
 
     public function getAsString() {
+        if (!$this->processed) {
+            $this->imageString = $this->process();
+            $this->processed = true;
+        }
         return $this->imageString;
     }
 
@@ -126,4 +107,9 @@ class GDImage implements Image {
         }
         return $this->imageInfo;
     }
+
+    protected function __clone() {
+        $this->processed = false;
+    }
+
 }

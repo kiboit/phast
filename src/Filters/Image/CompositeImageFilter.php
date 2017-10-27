@@ -14,12 +14,12 @@ class CompositeImageFilter {
     }
 
     public function apply(Image $image) {
+        $filteredImage = $image;
         try {
             foreach ($this->filters as $filter) {
-                $image = $filter->transformImage($image);
+                $filteredImage = $filter->transformImage($filteredImage);
             }
-            $compressedImage = $image->transform();
-            return strlen($compressedImage->getAsString()) < strlen($image->getAsString()) ? $compressedImage : $image;
+            return strlen($filteredImage->getAsString()) < strlen($image->getAsString()) ? $filteredImage : $image;
         } catch (\Exception $e) {
             return $image;
         }
