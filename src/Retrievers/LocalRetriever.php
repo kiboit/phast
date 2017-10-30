@@ -33,23 +33,31 @@ class LocalRetriever implements Retriever {
     }
 
     public function retrieve(URL $url) {
-        if (!isset ($this->map[$url->getHost()])) {
-            return false;
-        }
-        $base = URL::fromString($this->map[$url->getHost()]);
-        $file = $this->getPathInBase($base, $url->getPath());
+        $file = $this->getFileForURL($url);
         if ($file === false) {
             return false;
         }
         return $this->fsAccessor->file_get_contents($file);
     }
 
-    private function getPathInBase($base, $file) {
+    public function getLastModificationTime(URL $url) {
+        $file = $this->getFileForURL($url);
+        if ($file === false) {
+            return false;
+        }
+        return $this->fsAccessor->filemtime($file);
+    }
+
+    private function getFileForURL(URL $url) {
+        if (!isset ($this->map[$url->getHost()])) {
+            return false;
+        }
+        $base = URL::fromString($this->map[$url->getHost()]);
         $base = $this->fsAccessor->realpath($base);
         if (!$base) {
             return false;
         }
-        $path = $this->fsAccessor->realpath($base . '/' . $file);
+        $path = $this->fsAccessor->realpath($base . '/' . $url->getPath());
         if (!$path) {
             return false;
         }

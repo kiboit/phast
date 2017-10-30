@@ -22,4 +22,13 @@ class FileSystemAccessor {
         return @file_get_contents($filename);
     }
 
+    /**
+     * @param $filename
+     * @return bool|int
+     * @see filemtime()
+     */
+    public function filemtime($filename) {
+        return filemtime($filename);
+    }
+
 }

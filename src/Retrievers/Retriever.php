@@ -11,4 +11,10 @@ interface Retriever {
      * @return string|bool
      */
     public function retrieve(URL $url);
+
+    /**
+     * @param URL $url
+     * @return integer|bool
+     */
+    public function getLastModificationTime(URL $url);
 }
