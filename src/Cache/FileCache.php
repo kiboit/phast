@@ -56,6 +56,14 @@ class FileCache implements Cache {
             @mkdir($dir, 0700, true);
         }
         if (posix_geteuid() !== fileowner($this->cacheRoot)) {
+            error_log(
+                sprintf(
+                    'Phast cache error: Cache root %s owned by %s process user is %s!',
+                    $this->cacheRoot,
+                    fileowner($this->cacheRoot),
+                    posix_geteuid()
+                )
+            );
             return;
         }
         $file = $this->getCacheFilename($key);
@@ -63,6 +71,14 @@ class FileCache implements Cache {
         $serialized = serialize($contents);
         $result = @file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
+            error_log(
+                sprintf(
+                    'Phast cache error: Error writing to file %s. %s of %s bytes written!',
+                    $tmpFile,
+                    (int)$result,
+                    strlen($serialized)
+                )
+            );
             return;
         }
         @rename($tmpFile, $file);
@@ -73,7 +89,10 @@ class FileCache implements Cache {
         $file = $this->getCacheFilename($key);
         if (file_exists($file) && filemtime($file) + $this->expirationTime > time()) {
             $contents = @file_get_contents($file);
-            return unserialize($contents);
+            if ($contents !== false) {
+                return unserialize($contents);
+            }
+            error_log("Phast cache error: Could not read file $file");
         }
         return null;
     }
