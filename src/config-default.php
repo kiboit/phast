@@ -2,8 +2,14 @@
 return [
 
     'securityToken' => 'a-very-secure-token-that-no-one-knows',
+
     'retrieverMap' => [
         $_SERVER['HTTP_HOST'] => $_SERVER['DOCUMENT_ROOT']
+    ],
+
+    'cache' => [
+        'cacheRoot' => sys_get_temp_dir() . '/phast-cache-' . posix_geteuid(),
+        'cacheTTL' => 86400 * 365
     ],
 
     'documents' => [
@@ -26,6 +32,8 @@ return [
     ],
 
     'images' => [
+        'enable-cache' => true,
+
         'filters' => [
             \Kibo\Phast\Filters\Image\ResizerImageFilter::class => [
                 'defaultMaxWidth' => 320,
