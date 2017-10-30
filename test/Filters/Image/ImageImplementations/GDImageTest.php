@@ -2,8 +2,8 @@
 
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
-use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Exceptions\ImageException;
+use Kibo\Phast\Filters\Image\Image;
 use PHPUnit\Framework\TestCase;
 
 class GDImageTest extends TestCase {
@@ -63,15 +63,9 @@ class GDImageTest extends TestCase {
     }
 
 
-    private function checkCompressing($imagecb, $inputCompression, $outputCompression, $checkDefault = true) {
+    private function checkCompressing($imagecb, $inputCompression, $outputCompression) {
         $string = $this->getImageString($imagecb, $inputCompression, 'Hello, World!');
         $image = new GDImage($string);
-
-        if ($checkDefault) {
-            $actual1 = $image->getAsString();
-            $this->assertNotEmpty($actual1);
-            //$this->assertGreaterThan(strlen($string), strlen($actual1));
-        }
 
         $actual = $image->compress($outputCompression)->getAsString();
         $this->assertNotEmpty($actual);
