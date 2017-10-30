@@ -17,7 +17,7 @@ class FileCache implements Cache {
     /**
      * @var integer
      */
-    private $expirationTime;
+    private $maxAge;
 
     /**
      * FileCache constructor.
@@ -29,7 +29,7 @@ class FileCache implements Cache {
     public function __construct($cacheRoot, $cacheNamespace, $expirationTime) {
         $this->cacheRoot = $cacheRoot;
         $this->cacheNS = $cacheNamespace;
-        $this->expirationTime = $expirationTime;
+        $this->maxAge = $expirationTime;
     }
 
     public function get($key, callable $cached) {
@@ -87,7 +87,7 @@ class FileCache implements Cache {
 
     private function getFromCache($key) {
         $file = $this->getCacheFilename($key);
-        if (file_exists($file) && filemtime($file) + $this->expirationTime > time()) {
+        if (file_exists($file) && filemtime($file) + $this->maxAge > time()) {
             $contents = @file_get_contents($file);
             if ($contents !== false) {
                 return unserialize($contents);

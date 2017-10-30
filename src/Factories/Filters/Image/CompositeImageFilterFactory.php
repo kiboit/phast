@@ -27,7 +27,7 @@ class CompositeImageFilterFactory {
         if ($this->config['images']['enable-cache']) {
             $retriever = new LocalRetriever($this->config['retrieverMap']);
             $composite = new CachedCompositeImageFilter(
-                new FileCache($this->config['cache']['cacheRoot'], 'images', $this->config['cache']['cacheTTL']),
+                new FileCache($this->config['cache']['cacheRoot'], 'images', $this->config['cache']['cacheMaxAge']),
                 $retriever,
                 $request
             );
