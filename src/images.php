@@ -12,6 +12,7 @@ $image = \Kibo\Phast\Factories\ImageFilteringServiceFactory::make($config)->serv
 $output = $image->getAsString();
 
 header_remove('Location');
+http_response_code(200);
 header('Content-Type: ' . $image->getType());
 header('Cache-Control: max-age=' . (86400 * 365));
 
