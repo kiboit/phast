@@ -57,7 +57,10 @@ class FileCache implements Cache {
         }
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
-        @file_put_contents($tmpFile, $contents);
+        $result = @file_put_contents($tmpFile, $contents);
+        if ($result !== strlen($contents)) {
+            return;
+        }
         @rename($tmpFile, $file);
         @chmod($file, 0700);
     }
