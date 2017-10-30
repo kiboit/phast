@@ -9,7 +9,7 @@ class FileCacheTest extends TestCase {
     /**
      * @var string
      */
-    private $testDir = __DIR__ . '/test-cache-dir';
+    private $testDir;
 
     private $nameSpace = 'test';
 
@@ -23,6 +23,7 @@ class FileCacheTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->rmDir($this->testDir);
+        $this->testDir = __DIR__ . '/test-cache-dir';
         $this->expirationTime = 10;
         $this->rebuildCache();
     }
@@ -73,6 +74,18 @@ class FileCacheTest extends TestCase {
 
         $this->assertEquals(2, $calledTimes);
         $this->assertEquals(2, file_get_contents($this->getCacheFileName('test')));
+    }
+
+    public function testNotWritingToUnownedDir() {
+        $testDir = __DIR__ . '/un-owned-dir';
+        $this->rebuildCache();
+        (new FileCache($testDir, $this->nameSpace, $this->expirationTime))
+            ->get('test-key', function () { return 'test-content'; });
+        $dirContents = scandir($testDir . '/test/te');
+        $this->assertCount(3, $dirContents);
+        $this->assertContains('.', $dirContents);
+        $this->assertContains('..', $dirContents);
+        $this->assertContains('.gitkeep', $dirContents);
     }
 
     private function rmDir($dir) {

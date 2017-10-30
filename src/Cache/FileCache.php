@@ -54,6 +54,8 @@ class FileCache implements Cache {
         $dir = $this->getCacheDir($key);
         if (!file_exists($dir)) {
             @mkdir($dir, 0700, true);
+        } else if (posix_geteuid() !== fileowner($dir)) {
+            return;
         }
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
