@@ -3,6 +3,8 @@
 namespace Kibo\Phast\Filters\Image;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\ValueObjects\URL;
 
 class CachedCompositeImageFilter extends CompositeImageFilter {
 
@@ -12,20 +14,30 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
     private $cache;
 
     /**
+     * @var Retriever
+     */
+    private $retriever;
+
+    /**
      * @var array
      */
     private $request;
 
+    /**
+     * @var array
+     */
     private $filtersNames = [];
 
     /**
      * CachedCompositeImageFilter constructor.
      *
      * @param Cache $cache
+     * @param Retriever $retriever
      * @param array $request
      */
-    public function __construct(Cache $cache, array $request) {
+    public function __construct(Cache $cache, Retriever $retriever, array $request) {
         $this->cache = $cache;
+        $this->retriever = $retriever;
         $this->request = $request;
     }
 
@@ -42,8 +54,10 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
      * @return Image
      */
     public function apply(Image $image) {
+        $url = URL::fromString($this->request['src']);
+        $lastModTime = $this->retriever->getLastModificationTime($url);
         sort($this->filtersNames);
-        $toHash = join('', $this->filtersNames) . $this->request['src'];
+        $toHash = join('', $this->filtersNames) . $lastModTime . $this->request['src'];
         if (isset ($this->request['width'])) {
             $toHash .= $this->request['width'];
         }

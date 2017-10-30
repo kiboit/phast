@@ -5,6 +5,7 @@ namespace Kibo\Phast\Factories\Filters\Image;
 use Kibo\Phast\Cache\FileCache;
 use Kibo\Phast\Filters\Image\CachedCompositeImageFilter;
 use Kibo\Phast\Filters\Image\CompositeImageFilter;
+use Kibo\Phast\Retrievers\LocalRetriever;
 
 class CompositeImageFilterFactory {
 
@@ -24,8 +25,10 @@ class CompositeImageFilterFactory {
 
     public function make(array $request) {
         if ($this->config['images']['enable-cache']) {
+            $retriever = new LocalRetriever($this->config['retrieverMap']);
             $composite = new CachedCompositeImageFilter(
                 new FileCache($this->config['cache']['cacheRoot'], 'images', $this->config['cache']['cacheTTL']),
+                $retriever,
                 $request
             );
         } else {

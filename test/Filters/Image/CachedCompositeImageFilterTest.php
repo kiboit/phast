@@ -4,14 +4,23 @@ namespace Kibo\Phast\Filters\Image;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
+use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class CachedCompositeImageFilterTest extends TestCase {
+
+    const LAST_MODIFICATION_TIME = 123456789;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     private $cache;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $retriever;
 
     /**
      * @var CachedCompositeImageFilter
@@ -27,13 +36,19 @@ class CachedCompositeImageFilterTest extends TestCase {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
         $this->request = ['src' => 'the-src'];
-        $this->filter = new CachedCompositeImageFilter($this->cache, $this->request);
+        $this->retriever = $this->createMock(Retriever::class);
+        $this->retriever->method('getLastModificationTime')
+            ->willReturnCallback(function (URL $url) {
+                $this->assertEquals('the-src', $url->getPath());
+                return self::LAST_MODIFICATION_TIME;
+            });
+        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $this->request);
     }
 
     public function testCorrectHash() {
         $this->request['height'] = 'the-height';
         $this->request['width'] = 'the-width';
-        $this->filter = new CachedCompositeImageFilter($this->cache, $this->request);
+        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $this->request);
         $filters = [
             $this->createMock(ImageFilter::class),
             $this->createMock(ImageFilter::class)
@@ -44,6 +59,7 @@ class CachedCompositeImageFilterTest extends TestCase {
 
         $hash = md5(
             get_class($filters[0]) . get_class($filters[1])
+            . self::LAST_MODIFICATION_TIME
             . $this->request['src'] . $this->request['width'] . $this->request['height']
         );
         $this->cache->expects($this->once())
