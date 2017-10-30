@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-use Kibo\Phast\Exceptions\ImageException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use PHPUnit\Framework\TestCase;
 
@@ -51,24 +50,6 @@ class CompositeImageFilterTest extends TestCase {
         $this->getMockFilter($big);
         $actual = $this->filter->apply($this->image);
         $this->assertSame($this->image, $actual);
-    }
-
-    public function testReturnOriginalOnFilterException() {
-        $filter = $this->createMock(ImageFilter::class);
-        $filter->method('transformImage')
-            ->willThrowException(new \Exception());
-        $this->filter->addImageFilter($filter);
-        $actual = $this->filter->apply($this->image);
-        $this->assertSame($this->image, $actual);
-    }
-
-    public function testReturnOriginalOnImageException() {
-        $image = $this->createMock(DummyImage::class);
-        $image->expects($this->once())
-            ->method('getAsString')
-            ->willThrowException(new ImageException());
-        $actual = $this->filter->apply($image);
-        $this->assertSame($image, $actual);
     }
 
     private function getMockFilter(Image $image = null) {
