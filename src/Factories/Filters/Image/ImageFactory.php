@@ -22,11 +22,7 @@ class ImageFactory {
      */
     public function getForURL(URL $url) {
         $locator = new LocalRetriever($this->config['retrieverMap']);
-        $string = $locator->retrieve($url);
-        if ($string === false) {
-            throw new ItemNotFoundException('Could not find image: ' . $url, 0, null, $url);
-        }
-        return new GDImage($string);
+        return new GDImage($url, $locator);
     }
 
 }

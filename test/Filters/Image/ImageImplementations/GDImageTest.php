@@ -3,7 +3,10 @@
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
 use Kibo\Phast\Exceptions\ImageException;
+use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class GDImageTest extends TestCase {
@@ -18,7 +21,7 @@ class GDImageTest extends TestCase {
 
     private function checkImageSizeAndType($type, $gdtype, $imgcallback) {
         $string = $this->getImageString($imgcallback);
-        $image = new GDImage($string);
+        $image = $this->makeImage($string);
 
         $this->assertEquals(150, $image->getWidth());
         $this->assertEquals(200, $image->getHeight());
@@ -44,32 +47,51 @@ class GDImageTest extends TestCase {
     }
 
     public function testExceptionOnBadImageAsString() {
-        $image = new GDImage('asdasd');
+        $image = $this->makeImage('asdasd');
         $this->expectException(ImageException::class);
         $image->compress(9)->getAsString();
     }
 
     public function testExceptionOnBadImageInfo() {
-        $image = new GDImage('asdasd');
+        $image = $this->makeImage('asdasd');
         $this->expectException(ImageException::class);
         $image->getWidth();
     }
 
+    public function testExceptionOnUnretrievableImage() {
+        $image = $this->makeImage(false);
+        $this->expectException(ItemNotFoundException::class);
+        $image->getAsString();
+    }
+
     public function testOriginalSizeAndImage() {
         $string = $this->getImageString('imagepng', 9, 'Hello, World!');
-        $image = new GDImage($string);
+        $image = $this->makeImage($string);
         $this->assertEquals(strlen($string), strlen($image->getAsString()));
         $this->assertSame($string, $image->getAsString());
     }
 
-
     private function checkCompressing($imagecb, $inputCompression, $outputCompression) {
         $string = $this->getImageString($imagecb, $inputCompression, 'Hello, World!');
-        $image = new GDImage($string);
+        $image = $this->makeImage($string);
 
         $actual = $image->compress($outputCompression)->getAsString();
         $this->assertNotEmpty($actual);
         $this->assertLessThan(strlen($string), strlen($actual));
+    }
+
+    /**
+     * @param $imageString
+     * @return GDImage
+     */
+    private function makeImage($imageString) {
+        $url = URL::fromString('http://kibo.test/the-image');
+        $retriever = $this->createMock(Retriever::class);
+        $retriever->expects($this->atMost(1))
+                  ->method('retrieve')
+                  ->with($url)
+                  ->willReturn($imageString);
+        return new GDImage($url, $retriever);
     }
 
     private function getImageString($callback, $compression = 0, $text = null) {

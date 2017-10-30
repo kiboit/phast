@@ -2,10 +2,23 @@
 
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
-use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Exceptions\ImageException;
+use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\ValueObjects\URL;
 
 class GDImage extends BaseImage implements Image {
+
+    /**
+     * @var URL
+     */
+    private $imageURL;
+
+    /**
+     * @var Retriever
+     */
+    private $retriever;
 
     /**
      * @var bool
@@ -22,8 +35,15 @@ class GDImage extends BaseImage implements Image {
      */
     private $imageInfo;
 
-    public function __construct($imageString) {
-        $this->imageString = $imageString;
+    /**
+     * GDImage constructor.
+     *
+     * @param URL $imageURL
+     * @param Retriever $retriever
+     */
+    public function __construct(URL $imageURL, Retriever $retriever) {
+        $this->imageURL = $imageURL;
+        $this->retriever = $retriever;
     }
 
     public function getWidth() {
@@ -44,7 +64,7 @@ class GDImage extends BaseImage implements Image {
 
     private function process() {
         try {
-            $gdImage = @imagecreatefromstring($this->imageString);
+            $gdImage = @imagecreatefromstring($this->getImageString());
             if ($gdImage === false) {
                 throw new ImageException('Could not load GD image');
             }
@@ -95,17 +115,27 @@ class GDImage extends BaseImage implements Image {
             $this->imageString = $this->process();
             $this->processed = true;
         }
-        return $this->imageString;
+        return $this->getImageString();
     }
 
     private function getImageInfo() {
         if (!isset ($this->imageInfo)) {
-            $this->imageInfo = @getimagesizefromstring($this->imageString);
+            $this->imageInfo = @getimagesizefromstring($this->getImageString());
             if ($this->imageInfo === false) {
                 throw new ImageException('Could not read GD image info');
             }
         }
         return $this->imageInfo;
+    }
+
+    private function getImageString() {
+        if (!isset ($this->imageString)) {
+            $this->imageString = $this->retriever->retrieve($this->imageURL);
+            if ($this->imageString === false) {
+                throw new ItemNotFoundException('Could not find image: ' . $this->imageURL, 0, null, $this->imageURL);
+            }
+        }
+        return $this->imageString;
     }
 
     protected function __clone() {
