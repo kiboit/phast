@@ -21,15 +21,19 @@ class CachedCompositeImageFilterTest extends TestCase {
     /**
      * @var array
      */
-    private $request = ['height' => 'the-height', 'src' => 'the-src', 'width' => 'the-width'];
+    private $request;
 
     public function setUp() {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
+        $this->request = ['src' => 'the-src'];
         $this->filter = new CachedCompositeImageFilter($this->cache, $this->request);
     }
 
     public function testCorrectHash() {
+        $this->request['height'] = 'the-height';
+        $this->request['width'] = 'the-width';
+        $this->filter = new CachedCompositeImageFilter($this->cache, $this->request);
         $filters = [
             $this->createMock(ImageFilter::class),
             $this->createMock(ImageFilter::class)
@@ -37,6 +41,7 @@ class CachedCompositeImageFilterTest extends TestCase {
         $this->filter->addImageFilter($filters[1]);
         $this->filter->addImageFilter($filters[0]);
         sort($filters);
+
         $hash = md5(
             get_class($filters[0]) . get_class($filters[1])
             . $this->request['src'] . $this->request['width'] . $this->request['height']

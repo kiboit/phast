@@ -43,8 +43,14 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
      */
     public function apply(Image $image) {
         sort($this->filtersNames);
-        $filters = join('', $this->filtersNames);
-        $hash = md5($filters . $this->request['src'] . $this->request['width'] . $this->request['height']);
+        $toHash = join('', $this->filtersNames) . $this->request['src'];
+        if (isset ($this->request['width'])) {
+            $toHash .= $this->request['width'];
+        }
+        if (isset ($this->request['height'])) {
+            $toHash .= $this->request['height'];
+        }
+        $hash = md5($toHash);
         $filtered = $this->cache->get($hash, function () use ($image) {
             return parent::apply($image);
         });
