@@ -23,7 +23,7 @@ class FileCacheTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->rmDir($this->testDir);
-        $this->testDir = __DIR__ . '/test-cache-dir';
+        $this->testDir = sys_get_temp_dir() . '/test-cache-dir';
         $this->expirationTime = 10;
         $this->rebuildCache();
     }
