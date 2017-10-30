@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Retrievers;
 
+use Kibo\Phast\FileSystem\FileSystemAccessor;
 use Kibo\Phast\ValueObjects\URL;
 
 class LocalRetriever implements Retriever {
@@ -12,35 +13,22 @@ class LocalRetriever implements Retriever {
     private $map;
 
     /**
-     * @var callable
+     * @var FileSystemAccessor
      */
-    private $retrieveCb;
+    private $fsAccessor;
 
     /**
      * LocalRetriever constructor.
      *
      * @param array $map
-     * @param callable $retrieveCb
+     * @param FileSystemAccessor $fsAccessor
      */
-    public function __construct(array $map, callable $retrieveCb = null) {
+    public function __construct(array $map, FileSystemAccessor $fsAccessor = null) {
         $this->map = $map;
-        if ($retrieveCb) {
-            $this->retrieveCb = $retrieveCb;
+        if ($fsAccessor) {
+            $this->fsAccessor = $fsAccessor;
         } else {
-            $this->retrieveCb = function ($file, $base) {
-                $base = realpath($base) . '/';
-                if (!$base) {
-                    return false;
-                }
-                $path = realpath($base . $file);
-                if (!$path) {
-                    return false;
-                }
-                if (strpos($path, $base) !== 0) {
-                    return false;
-                }
-                return @file_get_contents($path);
-            };
+            $this->fsAccessor = new FileSystemAccessor();
         }
     }
 
@@ -49,7 +37,26 @@ class LocalRetriever implements Retriever {
             return false;
         }
         $base = URL::fromString($this->map[$url->getHost()]);
-        return call_user_func($this->retrieveCb, $url->getPath(), $base);
+        $file = $this->getPathInBase($base, $url->getPath());
+        if ($file === false) {
+            return false;
+        }
+        return $this->fsAccessor->file_get_contents($file);
+    }
+
+    private function getPathInBase($base, $file) {
+        $base = $this->fsAccessor->realpath($base);
+        if (!$base) {
+            return false;
+        }
+        $path = $this->fsAccessor->realpath($base . '/' . $file);
+        if (!$path) {
+            return false;
+        }
+        if (strpos($path, $base) !== 0) {
+            return false;
+        }
+        return $path;
     }
 
 }
