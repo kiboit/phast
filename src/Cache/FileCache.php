@@ -59,8 +59,9 @@ class FileCache implements Cache {
         }
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
-        $result = @file_put_contents($tmpFile, $contents);
-        if ($result !== strlen($contents)) {
+        $serialized = serialize($contents);
+        $result = @file_put_contents($tmpFile, $serialized);
+        if ($result !== strlen($serialized)) {
             return;
         }
         @rename($tmpFile, $file);
@@ -71,7 +72,7 @@ class FileCache implements Cache {
         $file = $this->getCacheFilename($key);
         if (file_exists($file) && filemtime($file) + $this->expirationTime > time()) {
             $contents = @file_get_contents($file);
-            return $contents;
+            return unserialize($contents);
         }
         return null;
     }

@@ -64,10 +64,10 @@ class CachedCompositeImageFilterTest extends TestCase {
         $this->cache->method('get')
             ->willReturnCallback(function ($key, $cb) use (&$cache) {
                 if (isset ($cache[$key])) {
-                    return $cache[$key];
+                    return unserialize($cache[$key]);
                 }
                 $content = $cb();
-                $cache[$key] = $content;
+                $cache[$key] = serialize($content);
                 return $content;
             });
         $notCached = $this->filter->apply($originalImage);

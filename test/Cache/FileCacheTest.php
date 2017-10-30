@@ -57,7 +57,7 @@ class FileCacheTest extends TestCase {
         $this->cache->get($key, function () use ($value) { return $value; });
         $expectedFilename = $this->getCacheFileName($key);
         $this->assertFileExists($expectedFilename);
-        $this->assertEquals($value, file_get_contents($expectedFilename));
+        $this->assertEquals(serialize($value), file_get_contents($expectedFilename));
     }
 
     public function testExpiration() {
@@ -73,7 +73,7 @@ class FileCacheTest extends TestCase {
         $this->cache->get('test', $cached);
 
         $this->assertEquals(2, $calledTimes);
-        $this->assertEquals(2, file_get_contents($this->getCacheFileName('test')));
+        $this->assertEquals(serialize(2), file_get_contents($this->getCacheFileName('test')));
     }
 
     public function testNotWritingToUnownedDir() {

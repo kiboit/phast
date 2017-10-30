@@ -45,12 +45,10 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
         sort($this->filtersNames);
         $filters = join('', $this->filtersNames);
         $hash = md5($filters . $this->request['src'] . $this->request['width'] . $this->request['height']);
-        $filtered = null;
-        $data = $this->cache->get($hash, function () use ($image, &$filtered) {
-            $filtered = parent::apply($image);
-            return serialize($filtered);
+        $filtered = $this->cache->get($hash, function () use ($image) {
+            return parent::apply($image);
         });
-        return is_null($filtered) ? unserialize($data) : $filtered;
+        return $filtered;
     }
 
 }
