@@ -49,10 +49,19 @@ class GDImage extends BaseImage implements Image {
                 throw new ImageException('Could not load GD image');
             }
             if (isset ($this->width) && isset ($this->height)) {
-                $gdImage = @imagescale($gdImage, $this->width, $this->height, IMG_BICUBIC);
-                if ($gdImage === false) {
-                    throw new ImageException('Could not resize GD image');
+                $gdCopy = @imagecreatetruecolor($this->width, $this->height);
+                if (!$gdCopy) {
+                    throw new ImageException('Failed to create new GD image for resizing');
                 }
+                @imagealphablending($gdCopy, false);
+                if (!@imagecopyresampled($gdCopy, $gdImage, 0, 0, 0, 0,
+                                         $this->width, $this->height,
+                                         imagesx($gdImage), imagesy($gdImage))
+                ) {
+                    throw new ImageException('Failed to resample GD image');
+                }
+                @imagedestroy($gdImage);
+                $gdImage = $gdCopy;
             }
             @imagesavealpha($gdImage, true);
             if ($this->getType() == Image::TYPE_JPEG) {
