@@ -53,13 +53,13 @@ class FileCache implements Cache {
     private function storeCache($key, $contents) {
         $dir = $this->getCacheDir($key);
         if (!file_exists($dir)) {
-            @mkdir($dir, 0777, true);
+            @mkdir($dir, 0700, true);
         }
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
         @file_put_contents($tmpFile, $contents);
         @rename($tmpFile, $file);
-        @chmod($file, 0777);
+        @chmod($file, 0700);
     }
 
     private function getFromCache($key) {
