@@ -58,9 +58,9 @@ class ResizerImageFilterTest extends TestCase {
 
     private function checkResizing($imageSize, $expectedSize, $defaultMaxSize, $priorityMaxSize = null) {
         list ($imageWidth, $imageHeight) = explode('x', $imageSize);
-        list ($expectedWidth, $expectedHeight) = explode('x', $expectedSize);
-        list ($defaultMaxWidth, $defaultMaxHeight) = explode('x', $defaultMaxSize);
-        list ($priorityMaxWidth, $priorityMaxHeight) = explode('x', $priorityMaxSize);
+        @list ($expectedWidth, $expectedHeight) = explode('x', $expectedSize);
+        @list ($defaultMaxWidth, $defaultMaxHeight) = explode('x', $defaultMaxSize);
+        @list ($priorityMaxWidth, $priorityMaxHeight) = explode('x', $priorityMaxSize);
         $resizer = new ResizerImageFilter($defaultMaxWidth, $defaultMaxHeight, $priorityMaxWidth, $priorityMaxHeight);
         $image = new DummyImage($imageWidth, $imageHeight);
         $actual = $resizer->transformImage($image);
