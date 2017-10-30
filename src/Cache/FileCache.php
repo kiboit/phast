@@ -56,7 +56,7 @@ class FileCache implements Cache {
             @mkdir($dir, 0777, true);
         }
         $file = $this->getCacheFilename($key);
-        $tmpFile = $file . '.' . mt_rand(0, 9999999);
+        $tmpFile = $file . '.' . uniqid('', true);
         @file_put_contents($tmpFile, $contents);
         @rename($tmpFile, $file);
         @chmod($file, 0777);
