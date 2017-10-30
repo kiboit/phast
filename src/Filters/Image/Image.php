@@ -29,6 +29,11 @@ interface Image {
     public function getAsString();
 
     /**
+     * @return integer
+     */
+    public function getSizeAsString();
+
+    /**
      * @param integer $width
      * @param integer $height
      * @return Image

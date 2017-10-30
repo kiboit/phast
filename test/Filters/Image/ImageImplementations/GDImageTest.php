@@ -67,7 +67,7 @@ class GDImageTest extends TestCase {
     public function testOriginalSizeAndImage() {
         $string = $this->getImageString('imagepng', 9, 'Hello, World!');
         $image = $this->makeImage($string);
-        $this->assertEquals(strlen($string), strlen($image->getAsString()));
+        $this->assertEquals(strlen($string), $image->getSizeAsString());
         $this->assertSame($string, $image->getAsString());
     }
 

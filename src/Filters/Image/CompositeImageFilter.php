@@ -18,7 +18,7 @@ class CompositeImageFilter {
         foreach ($this->filters as $filter) {
             $filteredImage = $filter->transformImage($filteredImage);
         }
-        return strlen($filteredImage->getAsString()) < strlen($image->getAsString()) ? $filteredImage : $image;
+        return $filteredImage->getSizeAsString() < $image->getSizeAsString() ? $filteredImage : $image;
     }
 
 }

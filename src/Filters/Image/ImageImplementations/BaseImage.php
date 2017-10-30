@@ -20,6 +20,18 @@ abstract class BaseImage {
     protected $compression;
 
     /**
+     * @return string
+     */
+    abstract public function getAsString();
+
+    /**
+     * @return integer
+     */
+    public function getSizeAsString() {
+        return strlen($this->getAsString());
+    }
+
+    /**
      * @param $width
      * @param $height
      * @return static
@@ -40,4 +52,5 @@ abstract class BaseImage {
         $im->compression = $compression;
         return $im;
     }
+
 }
