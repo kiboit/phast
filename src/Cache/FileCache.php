@@ -10,26 +10,20 @@ class FileCache implements Cache {
     private $cacheRoot;
 
     /**
-     * @var string
-     */
-    private $cacheNS;
-
-    /**
      * @var integer
      */
     private $maxAge;
 
     /**
-     * FileCache constructor.
-     *
-     * @param string $cacheRoot
-     * @param string $cacheNamespace
-     * @param integer $expirationTime
+     * @var string
      */
-    public function __construct($cacheRoot, $cacheNamespace, $expirationTime) {
-        $this->cacheRoot = $cacheRoot;
+    private $cacheNS;
+
+
+    public function __construct(array $config, $cacheNamespace) {
+        $this->cacheRoot = $config['cacheRoot'];
+        $this->maxAge = $config['cacheMaxAge'];
         $this->cacheNS = $cacheNamespace;
-        $this->maxAge = $expirationTime;
     }
 
     public function get($key, callable $cached) {

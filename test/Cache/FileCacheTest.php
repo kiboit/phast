@@ -7,13 +7,11 @@ use PHPUnit\Framework\TestCase;
 class FileCacheTest extends TestCase {
 
     /**
-     * @var string
+     * @var array
      */
-    private $testDir;
+    private $config;
 
     private $nameSpace = 'test';
-
-    private $expirationTime;
 
     /**
      * @var FileCache
@@ -22,15 +20,12 @@ class FileCacheTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->rmDir($this->testDir);
-        $this->testDir = sys_get_temp_dir() . '/test-cache-dir';
-        $this->expirationTime = 10;
+        $this->config = [
+            'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir',
+            'cacheMaxAge' => 10
+        ];
+        $this->rmDir($this->config['cacheRoot']);
         $this->rebuildCache();
-    }
-
-    public function tearDown() {
-        parent::tearDown();
-        $this->rmDir($this->testDir);
     }
 
     public function testCaching() {
@@ -61,7 +56,7 @@ class FileCacheTest extends TestCase {
     }
 
     public function testExpiration() {
-        $this->expirationTime = 0;
+        $this->config['cacheMaxAge'] = 0;
         $this->rebuildCache();
 
         $calledTimes = 0;
@@ -78,9 +73,9 @@ class FileCacheTest extends TestCase {
 
     public function testNotWritingToUnownedDir() {
         $testDir = __DIR__ . '/un-owned-dir';
+        $this->config['cacheRoot'] = $testDir;
         $this->rebuildCache();
-        (new FileCache($testDir, $this->nameSpace, $this->expirationTime))
-            ->get('test-key', function () { return 'test-content'; });
+        $this->cache->get('test-key', function () { return 'test-content'; });
         $dirContents = scandir($testDir . '/test/te');
         $this->assertCount(3, $dirContents);
         $this->assertContains('.', $dirContents);
@@ -107,10 +102,13 @@ class FileCacheTest extends TestCase {
     }
 
     private function rebuildCache() {
-        $this->cache = new FileCache($this->testDir, $this->nameSpace, $this->expirationTime);
+        $this->cache = new FileCache(
+            $this->config,
+            $this->nameSpace
+        );
     }
 
     private function getCacheFileName($key) {
-        return join('/', [$this->testDir, $this->nameSpace, substr($key, 0, 2), $key]);
+        return join('/', [$this->config['cacheRoot'], $this->nameSpace, substr($key, 0, 2), $key]);
     }
 }
