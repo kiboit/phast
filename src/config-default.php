@@ -9,7 +9,11 @@ return [
 
     'cache' => [
         'cacheRoot' => sys_get_temp_dir() . '/phast-cache-' . posix_geteuid(),
-        'cacheMaxAge' => 86400 * 365
+        'cacheMaxAge' => 86400 * 365,
+        'garbageCollection' => [
+            'probability' => 0.1,
+            'maxItems' => 100
+        ]
     ],
 
     'documents' => [

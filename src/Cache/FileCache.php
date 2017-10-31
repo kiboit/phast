@@ -2,6 +2,8 @@
 
 namespace Kibo\Phast\Cache;
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
+
 class FileCache implements Cache {
 
     /**
@@ -19,11 +21,40 @@ class FileCache implements Cache {
      */
     private $cacheNS;
 
+    /**
+     * @var float
+     */
+    private $gcProbaility;
 
-    public function __construct(array $config, $cacheNamespace) {
+    /**
+     * @var integer
+     */
+    private $gcMaxItems;
+
+    /**
+     * @var ObjectifiedFunctions
+     */
+    private $functions;
+
+
+    public function __construct(array $config, $cacheNamespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = $config['cacheRoot'];
         $this->maxAge = $config['cacheMaxAge'];
+        $this->gcProbaility = $config['garbageCollection']['probability'];
+        $this->gcMaxItems = $config['garbageCollection']['maxItems'];
         $this->cacheNS = $cacheNamespace;
+
+        if ($functions) {
+            $this->functions = $functions;
+        } else {
+            $this->functions = new ObjectifiedFunctions();
+        }
+
+        if ($this->shouldCollectGarbage()) {
+            $this->functions->register_shutdown_function(function () {
+                $this->collectGarbage();
+            });
+        }
     }
 
     public function get($key, callable $cached) {
@@ -90,4 +121,61 @@ class FileCache implements Cache {
         }
         return null;
     }
+
+    private function shouldCollectGarbage() {
+        if ($this->gcProbaility <= 0) {
+            return false;
+        }
+        if ($this->gcProbaility >= 1) {
+            return true;
+        }
+        return $this->functions->mt_rand(1, round(1 /  $this->gcProbaility)) == 1;
+    }
+
+    private function collectGarbage() {
+        $dirs = $this->getDirectoryIterator($this->cacheRoot);
+        $fileIterators = [];
+        foreach ($dirs as $dir) {
+            $fileIterators[] = $this->getOldFiles($this->getDirectoryIterator($dir));
+        }
+        shuffle($fileIterators);
+        $deleted = 0;
+        while ($deleted < $this->gcMaxItems && count($fileIterators)) {
+            foreach ($fileIterators as $idx => $iterator) {
+                $file = $iterator->current();
+                if ($file) {
+                    $this->functions->unlink($file);
+                    $iterator->next();
+                    $deleted++;
+                } else {
+                    unset ($fileIterators[$idx]);
+                }
+            }
+        }
+    }
+
+    private function getDirectoryIterator($path) {
+        $dir = $this->functions->opendir($path);
+        while (($item = $this->functions->readdir($dir)) !== false) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+            $full = $path . '/' . $item;
+            yield $full;
+        }
+    }
+
+
+    private function getOldFiles($files) {
+        $maxModificationTime = $this->functions->time() - $this->maxAge;
+        foreach ($files as $file) {
+            if ($this->functions->is_dir($file)) {
+                continue;
+            }
+            if ($this->functions->filemtime($file) < $maxModificationTime) {
+                yield $file;
+            }
+        }
+    }
+
 }
