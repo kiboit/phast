@@ -36,8 +36,8 @@ return [
 
         'filters' => [
             \Kibo\Phast\Filters\Image\ResizerImageFilter::class => [
-                'defaultMaxWidth' => 320,
-                'defaultMaxHeight' => 180
+                'defaultMaxWidth' => 1920 * 2,
+                'defaultMaxHeight' => 1080 * 2
             ],
 
             \Kibo\Phast\Filters\Image\CompressionImageFilter::class => [

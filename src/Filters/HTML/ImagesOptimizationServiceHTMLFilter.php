@@ -52,15 +52,13 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     }
 
     private function rewriteSrc(\DOMElement $img) {
-        $parts = [['src', URL::fromString($img->getAttribute('src'))->withBase($this->baseUrl)]];
+        $params = ['src' => (string) URL::fromString($img->getAttribute('src'))->withBase($this->baseUrl)];
         foreach (['width', 'height'] as $attr) {
             if ($img->hasAttribute($attr)) {
-                $parts[] = [$attr, $img->getAttribute($attr)];
+                $params[$attr] = $img->getAttribute($attr);
             }
         }
-        $query = join('&', array_map(function ($item) {
-            return $item[0] . '=' . urlencode($item[1]);
-        }, $parts));
+        $query = http_build_query($params);
         $query .= '&token=' . $this->signature->sign($query);
         $img->setAttribute('src', $this->serviceUrl . '?' . $query);
     }

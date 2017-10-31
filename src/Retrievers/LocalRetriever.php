@@ -53,11 +53,11 @@ class LocalRetriever implements Retriever {
             return false;
         }
         $base = URL::fromString($this->map[$url->getHost()]);
-        $base = $this->fsAccessor->realpath($base);
+        $base = $this->normalizePath($base);
         if (!$base) {
             return false;
         }
-        $path = $this->fsAccessor->realpath($base . '/' . $url->getPath());
+        $path = $this->normalizePath($base . '/' . $url->getPath());
         if (!$path) {
             return false;
         }
@@ -65,6 +65,27 @@ class LocalRetriever implements Retriever {
             return false;
         }
         return $path;
+    }
+
+    private function normalizePath($path) {
+        $path = explode("\0", $path)[0];
+        $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+        $absolutes = array();
+        $parts = explode(DIRECTORY_SEPARATOR, $path);
+        if ($parts[0] == '') {
+            $absolutes[] = '';
+        }
+        foreach ($parts as $part) {
+            if ('.' == $part || '' == $part) {
+                continue;
+            }
+            if ('..' == $part) {
+                array_pop($absolutes);
+            } else {
+                $absolutes[] = $part;
+            }
+        }
+        return implode(DIRECTORY_SEPARATOR, $absolutes);
     }
 
 }

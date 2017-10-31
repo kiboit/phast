@@ -19,7 +19,7 @@ class ImagesOptimizationSignature {
     }
 
     public function sign($value) {
-        return sha1($this->securityToken . $value);
+        return substr(base_convert(md5($this->securityToken . $value), 16, 36), 0, 16);
     }
 
     public function verify($signature, $value) {

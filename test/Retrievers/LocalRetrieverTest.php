@@ -40,27 +40,23 @@ class LocalRetrieverTest extends TestCase {
                 return 'returned';
             });
         $this->assertEquals('returned', $this->retriever->retrieve(URL::fromString('http://kibo.test/local.file')));
-        $this->assertEquals('local-test//local.file', $this->retrievedFile);
+        $this->assertEquals('local-test/local.file', $this->retrievedFile);
 
         $this->assertFalse($this->retriever->retrieve(URL::fromString('http://test.com/make.me')));
     }
 
     public function testForbiddenPaths() {
-        $this->accessor->method('realpath')->willReturn(false);
         $this->accessor->expects($this->never())
             ->method('file_get_contents');
-        $this->assertFalse($this->retriever->retrieve(URL::fromString('http://kibo.test/forbidden')));
+        $this->assertFalse($this->retriever->retrieve(URL::fromString('http://kibo.test/../forbidden')));
     }
 
     public function testGetLastModificationTime() {
-        $url1 = URL::fromString('http://kibo.test/path1');
+        $url1 = URL::fromString('http://kibo.test/../forbiden');
         $url2 = URL::fromString('http://kibo.test/path2');
-        $this->accessor->method('realpath')
-            ->withConsecutive($url1, $url2)
-            ->will($this->onConsecutiveCalls(false, 'path', 'path'));
         $this->accessor->expects($this->once())
             ->method('filemtime')
-            ->with('path')
+            ->with('local-test/path2')
             ->willReturn(123);
         $this->assertFalse($this->retriever->getLastModificationTime($url1));
         $this->assertEquals(123, $this->retriever->getLastModificationTime($url2));
