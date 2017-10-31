@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Retrievers;
 
-use Kibo\Phast\FileSystem\FileSystemAccessor;
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\ValueObjects\URL;
 
 class LocalRetriever implements Retriever {
@@ -13,22 +13,22 @@ class LocalRetriever implements Retriever {
     private $map;
 
     /**
-     * @var FileSystemAccessor
+     * @var ObjectifiedFunctions
      */
-    private $fsAccessor;
+    private $funcs;
 
     /**
      * LocalRetriever constructor.
      *
      * @param array $map
-     * @param FileSystemAccessor $fsAccessor
+     * @param ObjectifiedFunctions|null $functions
      */
-    public function __construct(array $map, FileSystemAccessor $fsAccessor = null) {
+    public function __construct(array $map, ObjectifiedFunctions $functions = null) {
         $this->map = $map;
-        if ($fsAccessor) {
-            $this->fsAccessor = $fsAccessor;
+        if ($functions) {
+            $this->funcs = $functions;
         } else {
-            $this->fsAccessor = new FileSystemAccessor();
+            $this->funcs = new ObjectifiedFunctions();
         }
     }
 
@@ -37,7 +37,7 @@ class LocalRetriever implements Retriever {
         if ($file === false) {
             return false;
         }
-        return $this->fsAccessor->file_get_contents($file);
+        return @$this->funcs->file_get_contents($file);
     }
 
     public function getLastModificationTime(URL $url) {
@@ -45,7 +45,7 @@ class LocalRetriever implements Retriever {
         if ($file === false) {
             return false;
         }
-        return $this->fsAccessor->filemtime($file);
+        return @$this->funcs->filemtime($file);
     }
 
     private function getFileForURL(URL $url) {
