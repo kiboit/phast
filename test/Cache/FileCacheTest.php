@@ -37,6 +37,7 @@ class FileCacheTest extends TestCase {
         $this->rmDir($this->config['cacheRoot']);
         $this->functions = new ObjectifiedFunctions();
         $this->functions->register_shutdown_function = function () {};
+        $this->functions->error_log = function () {};
         $this->rebuildCache();
     }
 
