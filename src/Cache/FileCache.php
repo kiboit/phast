@@ -68,11 +68,15 @@ class FileCache implements Cache {
     }
 
     private function getCacheDir($key) {
-        return $this->cacheRoot . '/' . ltrim($this->cacheNS, '/') . '/' . substr($key, 0, 2);
+        return $this->cacheRoot . '/' . ltrim($this->cacheNS, '/') . '/' . substr($this->getHashedKey($key), 0, 2);
     }
 
     private function getCacheFilename($key) {
-        return $this->getCacheDir($key) . '/' . $key;
+        return $this->getCacheDir($key) . '/' . $this->getHashedKey($key);
+    }
+
+    private function getHashedKey($key) {
+        return md5($key);
     }
 
     private function storeCache($key, $contents) {

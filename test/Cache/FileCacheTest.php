@@ -261,6 +261,7 @@ class FileCacheTest extends TestCase {
     }
 
     private function getCacheFileName($key) {
-        return join('/', [$this->config['cacheRoot'], $this->nameSpace, substr($key, 0, 2), $key]);
+        $hashedKey = md5($key);
+        return join('/', [$this->config['cacheRoot'], $this->nameSpace, substr($hashedKey, 0, 2), $hashedKey]);
     }
 }

@@ -5,10 +5,10 @@ namespace Kibo\Phast\Cache;
 interface Cache {
 
     /**
-     * @param $key
+     * @param $hashedKey
      * @param callable $cached
      * @return mixed
      */
-    public function get($key, callable $cached);
+    public function get($hashedKey, callable $cached);
 
 }
