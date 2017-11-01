@@ -29,6 +29,9 @@ abstract class Service {
         }
         $token = $request['token'];
         unset ($request['token']);
+        if (isset ($request['service'])) {
+            unset ($request['service']);
+        }
         if (!$this->signature->verify($token, http_build_query($request))) {
             throw new UnauthorizedException();
         }

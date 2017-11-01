@@ -4,11 +4,12 @@ namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
+use Kibo\Phast\Filters\HTML\Helpers\SignedUrlMakerTrait;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ScriptProxyServiceHTMLFilter implements HTMLFilter {
-    use JSDetectorTrait;
+    use JSDetectorTrait, SignedUrlMakerTrait;
 
     /**
      * @var URL
@@ -83,9 +84,10 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
             'src' => $element->getAttribute('src'),
             'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])
         ];
-        $query = http_build_query($params);
-        $newSrc = $this->config['serviceUrl'] . '?' . $query . '&token=' . $this->signature->sign($query);
-        $element->setAttribute('src', $newSrc);
+        $element->setAttribute(
+            'src',
+            $this->makeSignedUrl($this->config['serviceUrl'], $params, $this->signature)
+        );
     }
 
 }

@@ -2,10 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Filters\HTML\Helpers\SignedUrlMakerTrait;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
+    use SignedUrlMakerTrait;
 
     /**
      * @var ServiceSignature
@@ -58,9 +60,10 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
                 $params[$attr] = $img->getAttribute($attr);
             }
         }
-        $query = http_build_query($params);
-        $query .= '&token=' . $this->signature->sign($query);
-        $img->setAttribute('src', $this->serviceUrl . '?' . $query);
+        $img->setAttribute(
+            'src',
+            $this->makeSignedUrl($this->serviceUrl, $params, $this->signature)
+        );
     }
 
 }
