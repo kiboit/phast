@@ -24,7 +24,7 @@ class FileCache implements Cache {
     /**
      * @var float
      */
-    private $gcProbaility;
+    private $gcProbability;
 
     /**
      * @var integer
@@ -40,7 +40,7 @@ class FileCache implements Cache {
     public function __construct(array $config, $cacheNamespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = $config['cacheRoot'];
         $this->maxAge = $config['cacheMaxAge'];
-        $this->gcProbaility = $config['garbageCollection']['probability'];
+        $this->gcProbability = $config['garbageCollection']['probability'];
         $this->gcMaxItems = $config['garbageCollection']['maxItems'];
         $this->cacheNS = $cacheNamespace;
 
@@ -123,13 +123,13 @@ class FileCache implements Cache {
     }
 
     private function shouldCollectGarbage() {
-        if ($this->gcProbaility <= 0) {
+        if ($this->gcProbability <= 0) {
             return false;
         }
-        if ($this->gcProbaility >= 1) {
+        if ($this->gcProbability >= 1) {
             return true;
         }
-        return $this->functions->mt_rand(1, round(1 /  $this->gcProbaility)) == 1;
+        return $this->functions->mt_rand(1, round(1 /  $this->gcProbability)) == 1;
     }
 
     private function collectGarbage() {
