@@ -8,9 +8,7 @@ if (isset ($_GET['src']) && !headers_sent())  {
 
 require_once __DIR__ . '/bootstrap.php';
 $config = require_once PHAST_CONFIG_FILE;
-$service = new \Kibo\Phast\Services\ScriptsProxyService(
-    new \Kibo\Phast\Security\ServiceSignature($config['securityToken'])
-);
+$service = (new \Kibo\Phast\Factories\Services\ScriptsProxyServiceFactory())->make($config);
 $output = $service->serve($_GET);
 
 header_remove('Location');
