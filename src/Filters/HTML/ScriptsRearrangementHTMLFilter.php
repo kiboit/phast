@@ -2,29 +2,15 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-class ScriptsRearrangementHTMLFilter implements HTMLFilter {
+class ScriptsRearrangementHTMLFilter extends RearrangementHTMLFilter {
 
-    public function transformHTMLDOM(\DOMDocument $document) {
-        $body = $this->getBodyElement($document);
-        $scripts = iterator_to_array($document->getElementsByTagName('script'));
+    protected function getElementsToRearrange(\DOMDocument $document) {
+        $scripts = $document->getElementsByTagName('script');
         foreach ($scripts as $script) {
             if ($this->isJSElement($script)) {
-                $body->appendChild($script);
+                yield $script;
             }
         }
-    }
-
-    /**
-     * @param \DOMDocument $document
-     * @return \DOMElement
-     * @throws \Exception
-     */
-    private function getBodyElement(\DOMDocument $document) {
-        $bodies = iterator_to_array($document->getElementsByTagName('body'));
-        if (count($bodies) == 0) {
-            throw new \Exception('No body tag found in document');
-        }
-        return $bodies[0];
     }
 
     /**

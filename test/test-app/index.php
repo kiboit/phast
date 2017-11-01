@@ -3,6 +3,7 @@
 <html>
     <head>
         <link rel="stylesheet" href="css/styles.css">
+        <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
         <script src="js/main.js"></script>
     </head>
     <body>

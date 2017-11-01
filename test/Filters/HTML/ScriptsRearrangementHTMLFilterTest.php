@@ -2,14 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use PHPUnit\Framework\TestCase;
-
-class ScriptsRearrangementHTMLFilterTest extends TestCase {
+class ScriptsRearrangementHTMLFilterTest extends RearrangementHTMLFilterTestCase {
 
     /**
      * @var ScriptsRearrangementHTMLFilter
      */
-    private $filter;
+    protected  $filter;
 
     public function setUp() {
         parent::setUp();
@@ -17,11 +15,9 @@ class ScriptsRearrangementHTMLFilterTest extends TestCase {
     }
 
     public function testScriptsMoving() {
-        $dom = new \DOMDocument();
-        $html = $dom->createElement('html');
-        $dom->appendChild($html);
-        $head = $dom->createElement('head');
-        $html->appendChild($head);
+        $dom = $this->dom;
+        $head = $this->head;
+        $body = $this->body;
 
         $headScriptNoType = $dom->createElement('script');
         $head->appendChild($headScriptNoType);
@@ -37,9 +33,6 @@ class ScriptsRearrangementHTMLFilterTest extends TestCase {
         $headScriptWithTypeCharset = $dom->createElement('script');
         $headScriptWithTypeCharset->setAttribute('type', 'text/javascript; charset="UTF-8"');
         $head->appendChild($headScriptWithTypeCharset);
-
-        $body = $dom->createElement('body');
-        $html->appendChild($body);
 
         $bodyScriptWithTypeJSON = $dom->createElement('script');
         $bodyScriptWithTypeJSON->setAttribute('type', 'application/json');
@@ -63,11 +56,4 @@ class ScriptsRearrangementHTMLFilterTest extends TestCase {
         $this->assertSame($headScriptWithTypeCharset, $body->childNodes[5]);
         $this->assertSame($divScript, $body->childNodes[6]);
     }
-
-    public function testExceptionOnNoBody() {
-        $this->expectException(\Exception::class);
-        $dom = new \DOMDocument();
-        $this->filter->transformHTMLDOM($dom);
-    }
-
 }
