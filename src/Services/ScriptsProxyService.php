@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast;
+namespace Kibo\Phast\Services;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;

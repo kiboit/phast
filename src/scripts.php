@@ -8,7 +8,7 @@ if (isset ($_GET['src']) && !headers_sent())  {
 
 require_once __DIR__ . '/bootstrap.php';
 $config = require_once PHAST_CONFIG_FILE;
-$service = new \Kibo\Phast\ScriptsProxyService(
+$service = new \Kibo\Phast\Services\ScriptsProxyService(
     new \Kibo\Phast\Security\ServiceSignature($config['securityToken'])
 );
 $output = $service->serve($_GET);

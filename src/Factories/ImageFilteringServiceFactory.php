@@ -4,8 +4,8 @@ namespace Kibo\Phast\Factories;
 
 use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
-use Kibo\Phast\ImageFilteringService;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ImageFilteringService;
 
 class ImageFilteringServiceFactory {
 

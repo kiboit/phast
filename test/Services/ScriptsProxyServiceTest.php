@@ -4,7 +4,6 @@ namespace Kibo\Phast\Services;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
-use Kibo\Phast\ScriptsProxyService;
 use Kibo\Phast\Security\ServiceSignature;
 use PHPUnit\Framework\TestCase;
 

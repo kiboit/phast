@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast;
+namespace Kibo\Phast\Services;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
@@ -33,5 +33,4 @@ abstract class Service {
             throw new UnauthorizedException();
         }
     }
-
 }
