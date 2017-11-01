@@ -105,6 +105,16 @@ class URL {
     }
 
     /**
+     * Tells whether $this can be interpreted as at the same host as $url
+     *
+     * @param URL $url
+     * @return bool
+     */
+    public function isLocalTo(URL $url) {
+        return empty ($this->host) || $this->host === $url->host;
+    }
+
+    /**
      * @return string
      */
     public function toString() {

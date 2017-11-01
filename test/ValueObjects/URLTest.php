@@ -51,4 +51,20 @@ class URLTest extends TestCase {
         $this->assertEquals('http://test.com/path/relative/path', (string)$relativeToFile);
     }
 
+    public function testIsLocalTo() {
+        $local = URL::fromString('http://test.com/path1');
+        $local2 = URL::fromString('http://test.com/path2');
+        $local3 = URL::fromString('https://test.com/path3');
+        $local4 = URL::fromString('//test.com/path4');
+        $local5 = URL::fromString('/path5');
+        $notLocal = URL::fromString('http://example.com/path1');
+
+        $this->assertTrue($local->isLocalTo($local2));
+        $this->assertTrue($local->isLocalTo($local3));
+        $this->assertTrue($local->isLocalTo($local4));
+        $this->assertFalse($local->isLocalTo($local5));
+        $this->assertTrue($local5->isLocalTo($local));
+        $this->assertFalse($local->isLocalTo($notLocal));
+    }
+
 }

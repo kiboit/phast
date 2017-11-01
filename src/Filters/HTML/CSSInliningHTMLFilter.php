@@ -35,7 +35,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         return  $link->hasAttribute('rel')
                 && $link->getAttribute('rel') == 'stylesheet'
                 && $link->hasAttribute('href')
-                && !$this->isCrossSiteUrl(URL::fromString($link->getAttribute('href')));
+                && URL::fromString($link->getAttribute('href'))->isLocalTo($this->baseURL);
     }
 
     private function inline(\DOMElement $link, \DOMDocument $document) {
@@ -56,14 +56,6 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         }
         $link->parentNode->insertBefore($style, $link);
         $link->parentNode->removeChild($link);
-    }
-
-    /**
-     * @param URL $url
-     * @return bool
-     */
-    private function isCrossSiteUrl(URL $url) {
-        return !empty ($url->getHost()) && $url->getHost() != $this->baseURL->getHost();
     }
 
     private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
