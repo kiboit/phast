@@ -4,16 +4,16 @@ namespace Kibo\Phast\Security;
 
 use PHPUnit\Framework\TestCase;
 
-class ImagesOptimizationSignatureTest extends TestCase {
+class ServiceSignatureTest extends TestCase {
 
     /**
-     * @var ImagesOptimizationSignature
+     * @var ServiceSignature
      */
     private $signature;
 
     public function setUp() {
         parent::setUp();
-        $this->signature = new ImagesOptimizationSignature('the-token');
+        $this->signature = new ServiceSignature('the-token');
     }
 
     public function testSignAndVerify() {

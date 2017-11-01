@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Security;
 
-class ImagesOptimizationSignature {
+class ServiceSignature {
 
     /**
      * @var string

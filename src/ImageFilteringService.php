@@ -6,7 +6,7 @@ use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
-use Kibo\Phast\Security\ImagesOptimizationSignature;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageFilteringService {
@@ -22,7 +22,7 @@ class ImageFilteringService {
     private $filterFactory;
 
     /**
-     * @var ImagesOptimizationSignature
+     * @var ServiceSignature
      */
     private $signature;
 
@@ -31,12 +31,12 @@ class ImageFilteringService {
      *
      * @param ImageFactory $imageFactory
      * @param CompositeImageFilterFactory $filterFactory
-     * @param ImagesOptimizationSignature $signature
+     * @param ServiceSignature $signature
      */
     public function __construct(
         ImageFactory $imageFactory,
         CompositeImageFilterFactory $filterFactory,
-        ImagesOptimizationSignature $signature
+        ServiceSignature $signature
     ) {
         $this->imageFactory = $imageFactory;
         $this->filterFactory = $filterFactory;

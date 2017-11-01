@@ -2,13 +2,13 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use Kibo\Phast\Security\ImagesOptimizationSignature;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
 
     /**
-     * @var ImagesOptimizationSignature
+     * @var ServiceSignature
      */
     private $signature;
 
@@ -25,11 +25,11 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     /**
      * ImagesOptimizationServiceHTMLFilter constructor.
      *
-     * @param ImagesOptimizationSignature $signature
+     * @param ServiceSignature $signature
      * @param URL $baseUrl
      * @param URL $serviceUrl
      */
-    public function __construct(ImagesOptimizationSignature $signature, URL $baseUrl, URL $serviceUrl) {
+    public function __construct(ServiceSignature $signature, URL $baseUrl, URL $serviceUrl) {
         $this->signature = $signature;
         $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
