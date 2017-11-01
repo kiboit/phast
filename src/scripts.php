@@ -17,5 +17,6 @@ header_remove('Location');
 http_response_code(200);
 header('Content-Length: '  . strlen($output));
 header('Cache-Control: max-age=' . (86400 * 365));
+header('Content-Type: application/javascript');
 
 echo $output;
