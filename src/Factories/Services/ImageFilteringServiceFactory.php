@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Factories;
+namespace Kibo\Phast\Factories\Services;
 
 use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
