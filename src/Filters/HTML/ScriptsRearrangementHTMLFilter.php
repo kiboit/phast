@@ -2,7 +2,10 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
+
 class ScriptsRearrangementHTMLFilter extends RearrangementHTMLFilter {
+    use JSDetectorTrait;
 
     protected function getElementsToRearrange(\DOMDocument $document) {
         $scripts = $document->getElementsByTagName('script');
@@ -12,16 +15,4 @@ class ScriptsRearrangementHTMLFilter extends RearrangementHTMLFilter {
             }
         }
     }
-
-    /**
-     * @param \DOMElement $element
-     * @return bool|int
-     */
-    private function isJSElement(\DOMElement $element) {
-        if (!$element->hasAttribute('type')) {
-            return true;
-        }
-        return preg_match('~^(text|application)/javascript(;|$)~i', $element->getAttribute('type'));
-    }
-
 }
