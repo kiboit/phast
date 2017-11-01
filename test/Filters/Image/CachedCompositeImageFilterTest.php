@@ -57,14 +57,12 @@ class CachedCompositeImageFilterTest extends TestCase {
         $this->filter->addImageFilter($filters[0]);
         sort($filters);
 
-        $hash = md5(
-            get_class($filters[0]) . get_class($filters[1])
+        $key = get_class($filters[0]) . get_class($filters[1])
             . self::LAST_MODIFICATION_TIME
-            . $this->request['src'] . $this->request['width'] . $this->request['height']
-        );
+            . $this->request['src'] . $this->request['width'] . $this->request['height'];
         $this->cache->expects($this->once())
             ->method('get')
-            ->with($hash);
+            ->with($key);
         $this->filter->apply(new DummyImage());
     }
 

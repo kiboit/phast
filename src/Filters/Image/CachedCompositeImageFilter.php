@@ -57,15 +57,14 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
         $url = URL::fromString($this->request['src']);
         $lastModTime = $this->retriever->getLastModificationTime($url);
         sort($this->filtersNames);
-        $toHash = join('', $this->filtersNames) . $lastModTime . $this->request['src'];
+        $key = join('', $this->filtersNames) . $lastModTime . $this->request['src'];
         if (isset ($this->request['width'])) {
-            $toHash .= $this->request['width'];
+            $key .= $this->request['width'];
         }
         if (isset ($this->request['height'])) {
-            $toHash .= $this->request['height'];
+            $key .= $this->request['height'];
         }
-        $hash = md5($toHash);
-        $filtered = $this->cache->get($hash, function () use ($image) {
+        $filtered = $this->cache->get($key, function () use ($image) {
             return parent::apply($image);
         });
         return $filtered;
