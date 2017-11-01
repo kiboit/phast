@@ -83,8 +83,8 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
             'src' => $element->getAttribute('src'),
             'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])
         ];
-        $newSrc = $this->config['serviceUrl'] . '?' . http_build_query($params);
-        $newSrc .= '&token=' . $this->signature->sign($newSrc);
+        $query = http_build_query($params);
+        $newSrc = $this->config['serviceUrl'] . '?' . $query . '&token=' . $this->signature->sign($query);
         $element->setAttribute('src', $newSrc);
     }
 

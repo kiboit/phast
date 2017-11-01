@@ -2,14 +2,12 @@
 
 namespace Kibo\Phast;
 
-use Kibo\Phast\Exceptions\ItemNotFoundException;
-use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
-class ImageFilteringService {
+class ImageFilteringService extends Service {
 
     /**
      * @var ImageFactory
@@ -20,11 +18,6 @@ class ImageFilteringService {
      * @var CompositeImageFilterFactory
      */
     private $filterFactory;
-
-    /**
-     * @var ServiceSignature
-     */
-    private $signature;
 
     /**
      * ImageFilteringService constructor.
@@ -43,25 +36,9 @@ class ImageFilteringService {
         $this->signature = $signature;
     }
 
-    public function serve(array $request) {
-        $this->validateRequest($request);
+    protected function handle(array $request) {
         $image = $this->imageFactory->getForURL(URL::fromString($request['src']));
         $filter = $this->filterFactory->make($request);
         return $filter->apply($image);
     }
-
-    private function validateRequest(array $request) {
-        if (!isset ($request['src'])) {
-            throw new ItemNotFoundException('No source is set!');
-        }
-        if (!isset ($request['token'])) {
-            throw new UnauthorizedException();
-        }
-        $token = $request['token'];
-        unset ($request['token']);
-        if (!$this->signature->verify($token, http_build_query($request))) {
-            throw new UnauthorizedException();
-        }
-    }
-
 }

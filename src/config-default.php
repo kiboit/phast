@@ -32,6 +32,14 @@ return [
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [
                 'serviceUrl' => '/Phast/images.php'
+            ],
+
+            \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
+                'match' => [
+                    '|https://ajax\.googleapis\.com|'
+                ],
+                'serviceUrl' => '/Phast/scripts.php',
+                'urlRefreshTime' => 7200
             ]
 
         ]
