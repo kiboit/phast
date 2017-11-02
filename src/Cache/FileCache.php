@@ -116,9 +116,13 @@ class FileCache implements Cache {
 
     private function getFromCache($key) {
         $file = $this->getCacheFilename($key);
-        if (file_exists($file) && filemtime($file) + $this->maxAge > time()) {
+        $modTime = @$this->functions->filemtime($file);
+        if (@$this->functions->file_exists($file) && $modTime + $this->maxAge > $this->functions->time()) {
             $contents = @file_get_contents($file);
             if ($contents !== false) {
+                if (time() - $modTime >= round($this->maxAge / 10)) {
+                    $this->functions->touch($file);
+                }
                 return unserialize($contents);
             }
             $this->functions->error_log("Phast cache error: Could not read file $file");

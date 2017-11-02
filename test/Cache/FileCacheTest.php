@@ -28,7 +28,7 @@ class FileCacheTest extends TestCase {
         parent::setUp();
         $this->config = [
             'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir',
-            'cacheMaxAge' => 10,
+            'cacheMaxAge' => 20,
             'garbageCollection' => [
                 'probability' => 0,
                 'maxItems' => 100
@@ -96,6 +96,36 @@ class FileCacheTest extends TestCase {
             return 2000;
         };
         $this->cache->get('test-key', function () { return 'test-content'; });
+    }
+
+    public function testTouchingUsedFiles() {
+        $touched = false;
+        $this->functions->touch = function () use (&$touched) {
+            $touched = true;
+        };
+        $this->functions->file_exists = function () {
+            return true;
+        };
+        $this->functions->time = function () {
+            return 1000;
+        };
+        $this->functions->file_get_contents = function () {
+            return 'contents';
+        };
+
+
+        $this->functions->filemtime = function () {
+            return $this->functions->time() - round($this->config['cacheMaxAge'] / 20);
+        };
+        $this->cache->get('asd', function () {});
+        $this->assertFalse($touched);
+
+        $this->functions->filemtime = function () {
+            return $this->functions->time() - round($this->config['cacheMaxAge'] / 10);
+        };
+        $this->cache->get('asd', function () {});
+        $this->assertTrue($touched);
+
     }
 
     public function testGarbageCollectionRunCalculation() {
