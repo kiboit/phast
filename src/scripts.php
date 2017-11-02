@@ -9,7 +9,7 @@ if (isset ($_GET['src']) && !headers_sent())  {
 require_once __DIR__ . '/bootstrap.php';
 $config = require_once PHAST_CONFIG_FILE;
 $service = (new \Kibo\Phast\Factories\Services\ScriptsProxyServiceFactory())->make($config);
-$output = $service->serve($_GET);
+$output = $service->serve(\Kibo\Phast\HTTP\Request::fromGlobals());
 
 header_remove('Location');
 http_response_code(200);

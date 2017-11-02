@@ -5,6 +5,7 @@ namespace Kibo\Phast\Services;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Security\ServiceSignature;
 use PHPUnit\Framework\TestCase;
 
@@ -47,7 +48,7 @@ class ScriptsProxyServiceTest extends TestCase {
             $this->assertEquals('the-script', $url);
             return 'the-content';
         };
-        $result = $this->service->serve($request);
+        $result = $this->service->serve(Request::fromArray($request, []));
         $this->assertEquals('the-content', $result);
     }
 
@@ -58,7 +59,7 @@ class ScriptsProxyServiceTest extends TestCase {
             return false;
         };
         $this->expectException(ItemNotFoundException::class);
-        $this->service->serve($request);
+        $this->service->serve(Request::fromArray($request, []));
     }
 
     public function testCachingOnRequestedSrc() {
@@ -66,7 +67,7 @@ class ScriptsProxyServiceTest extends TestCase {
         $this->cache->expects($this->once())
             ->method('get')
             ->with('the-script123456789');
-        $this->service->serve($request);
+        $this->service->serve(Request::fromArray($request, []));
     }
 
     private function useTransparentCache() {

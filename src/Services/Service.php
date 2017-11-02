@@ -4,6 +4,7 @@ namespace Kibo\Phast\Services;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
+use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Security\ServiceSignature;
 
 abstract class Service {
@@ -15,9 +16,13 @@ abstract class Service {
 
     abstract protected function handle(array $request);
 
-    public function serve(array $request) {
-        $this->validateRequest($request);
-        return $this->handle($request);
+    protected function getParams(Request $request) {
+        return $request->getGet();
+    }
+
+    public function serve(Request $request) {
+        $this->validateRequest($request->getGet());
+        return $this->handle($this->getParams($request));
     }
 
     private function validateRequest(array $request) {
