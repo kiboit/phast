@@ -21,5 +21,7 @@
         <script>
             document.querySelectorAll('img').forEach(i => { i.removeAttribute('width'); i.removeAttribute('height'); });
         </script>
+
+        <iframe src="http://www.businesscat.happyjar.com/?random&nocache=1" width="1200" height="600"></iframe>
     </body>
 </html>

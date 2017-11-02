@@ -30,6 +30,8 @@ return [
 
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [],
 
+            \Kibo\Phast\Filters\HTML\IFrameDelayedLoadingHTMLFilter::class => [],
+
             \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [
                 'serviceUrl' => '/Phast/services.php?service=images'
             ],
@@ -40,7 +42,8 @@ return [
                 'match' => [
                     '~^https?://www\.google-analytics\.com/~',
                 ]
-            ]
+            ],
+
 
         ]
     ],
@@ -66,3 +69,4 @@ return [
         ]
     ]
 ];
+
