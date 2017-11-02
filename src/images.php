@@ -8,6 +8,7 @@ if (isset ($_GET['src']) && !headers_sent())  {
 
 require_once __DIR__ . '/bootstrap.php';
 $config = require_once PHAST_CONFIG_FILE;
+/** @var \Kibo\Phast\Filters\Image\Image $image */
 $image = \Kibo\Phast\Factories\Services\ImageFilteringServiceFactory::make($config)->serve($_GET);
 $type = $image->getType();
 $size = $image->getSizeAsString();
