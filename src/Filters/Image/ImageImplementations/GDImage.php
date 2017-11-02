@@ -89,7 +89,11 @@ class GDImage extends BaseImage implements Image {
             } else {
                 $callback = 'imagepng';
             }
-            $tmpFh = @fopen('php://memory', 'w+');
+            $tmpFile = @tempnam(sys_get_temp_dir(), 'Phast');
+            if (!$tmpFile) {
+                throw new ImageException('Could not create temporary file');
+            }
+            $tmpFh = @fopen($tmpFile, 'w');
             if (!$tmpFh) {
                 throw new ImageException('Could not open temporary file');
             }
@@ -101,20 +105,20 @@ class GDImage extends BaseImage implements Image {
             if (!$ok) {
                 throw new ImageException('Could not write image to temporary file');
             }
-            if (fseek($tmpFh, 0) !== 0) {
-                throw new ImageException('Could not seek to beginning of temporary image file');
-            }
-            $string = stream_get_contents($tmpFh);
+            $string = file_get_contents($tmpFile);
             if ($string === false) {
                 throw new ImageException('Could not read image from temporary file');
             }
             return $string;
         } finally {
-            if (isset ($gdImage)) {
+            if ($gdImage) {
                 @imagedestroy($gdImage);
             }
-            if (isset ($tmpFh)) {
+            if ($tmpFh) {
                 @fclose($tmpFh);
+            }
+            if ($tmpFile) {
+                @unlink ($tmpFile);
             }
         }
     }
