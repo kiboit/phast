@@ -88,7 +88,7 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
     private function rewriteURL($src) {
         $url = URL::fromString($src)->withBase($this->baseUrl);
         if (!$this->shouldRewriteURL($url)) {
-            return $url;
+            return $src;
         }
         $params = [
             'src' => (string) $url,
