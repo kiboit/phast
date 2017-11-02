@@ -54,40 +54,60 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
     public function transformHTMLDOM(\DOMDocument $document) {
         $scripts = $document->getElementsByTagName('script');
         foreach ($scripts as $script) {
-            if ($this->shouldRewrite($script)) {
-                $this->rewrite($script);
+            if (!$this->isJSElement($script)) {
+                continue;
             }
+            $this->rewriteScriptSource($script);
+            $this->rewriteScriptBody($script);
         }
     }
 
-    private function shouldRewrite(\DOMElement $element) {
-        if (!$this->isJSElement($element)) {
-            return false;
-        }
+    private function rewriteScriptSource(\DOMElement $element) {
         if (!$element->hasAttribute('src')) {
+            return;
+        }
+        $element->setAttribute('src', $this->rewriteURL($element->getAttribute('src')));
+    }
+
+    private function rewriteScriptBody(\DOMElement $element) {
+        $pattern = '~
+            ( [\'"] )
+            (
+                (?: http s? : ) ?
+                // (?: [a-z0-9] [a-z0-9-]* \. )* [a-z]+ /
+                [a-z0-9_./?&=-]*
+            )
+            ( \1 )
+        ~x';
+
+        $element->textContent = preg_replace_callback($pattern, function ($match) {
+            return $match[1] . $this->rewriteURL($match[2]) . $match[3];
+        }, $element->textContent);
+    }
+
+    private function rewriteURL($src) {
+        $url = URL::fromString($src)->withBase($this->baseUrl);
+        if (!$this->shouldRewriteURL($url)) {
+            return $url;
+        }
+        $params = [
+            'src' => (string) $url,
+            'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])
+        ];
+        return $this->makeSignedUrl($this->config['serviceUrl'], $params, $this->signature);
+    }
+
+    private function shouldRewriteURL(URL $url) {
+        if ($url->isLocalTo($this->baseUrl)) {
             return false;
         }
-        $src = $element->getAttribute('src');
-        if (URL::fromString($src)->isLocalTo($this->baseUrl)) {
-            return false;
-        }
+        $str = (string) $url;
         foreach ($this->config['match'] as $pattern) {
-            if (preg_match($pattern, $src)) {
+            if (preg_match($pattern, $str)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private function rewrite(\DOMElement $element) {
-        $params = [
-            'src' => $element->getAttribute('src'),
-            'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])
-        ];
-        $element->setAttribute(
-            'src',
-            $this->makeSignedUrl($this->config['serviceUrl'], $params, $this->signature)
-        );
     }
 
 }
