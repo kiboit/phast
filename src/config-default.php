@@ -36,7 +36,7 @@ return [
 
             \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
                 'match' => [
-                    '|https://ajax\.googleapis\.com|'
+                    '~^https?://www\.google-analytics\.com/~',
                 ],
                 'serviceUrl' => '/Phast/services.php?service=scripts',
                 'urlRefreshTime' => 7200
