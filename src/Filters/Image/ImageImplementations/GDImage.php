@@ -111,13 +111,13 @@ class GDImage extends BaseImage implements Image {
             }
             return $string;
         } finally {
-            if ($gdImage) {
+            if (isset ($gdImage) && $gdImage) {
                 @imagedestroy($gdImage);
             }
-            if ($tmpFh) {
+            if (isset ($tmpFh) && $tmpFh) {
                 @fclose($tmpFh);
             }
-            if ($tmpFile) {
+            if (isset ($tmpFile) && $tmpFile) {
                 @unlink ($tmpFile);
             }
         }
