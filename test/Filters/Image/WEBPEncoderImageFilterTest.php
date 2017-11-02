@@ -31,7 +31,7 @@ class WEBPEncoderImageFilterTest extends TestCase {
 
     public function testEncoding() {
         $image = new DummyImage();
-        $image->setType(Image::TYPE_PNG);
+        $image->setType(Image::TYPE_JPEG);
         $image = $image->compress(10);
 
         $this->config['enabled'] = false;
@@ -69,6 +69,12 @@ class WEBPEncoderImageFilterTest extends TestCase {
         $this->assertEquals('short', $encoded->getAsString());
 
         $this->assertSame($image, $nonEncoded);
+    }
+
+    public function testNotEncodingPNG() {
+        $image = new DummyImage();
+        $image->setType(Image::TYPE_PNG);
+        $this->assertSame($image, $this->filter->transformImage($image));
     }
 
     private function getFilter() {
