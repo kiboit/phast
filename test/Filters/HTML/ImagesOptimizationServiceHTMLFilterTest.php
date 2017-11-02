@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -17,7 +18,7 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
     public function setUp() {
         parent::setUp();
         $this->filter = new ImagesOptimizationServiceHTMLFilter(
-            new ServiceSignature('the-token'),
+            new ServiceSignature($this->createMock(Cache::class)),
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL)
         );

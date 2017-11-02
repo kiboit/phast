@@ -4,7 +4,7 @@ namespace Kibo\Phast\Factories\Services;
 
 use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
-use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
 use Kibo\Phast\Services\ImageFilteringService;
 
 class ImageFilteringServiceFactory {
@@ -13,7 +13,7 @@ class ImageFilteringServiceFactory {
         return new ImageFilteringService(
             new ImageFactory($config),
             new CompositeImageFilterFactory($config),
-            new ServiceSignature($config['securityToken'])
+            (new ServiceSignatureFactory())->make($config)
         );
     }
 

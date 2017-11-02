@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
@@ -58,7 +59,7 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
         $filter = new ScriptProxyServiceHTMLFilter(
             URL::fromString('http://local.domain/index.php'),
             $config,
-            new ServiceSignature('the-token'),
+            new ServiceSignature($this->createMock(Cache::class)),
             $functions
         );
         $filter->transformHTMLDOM($this->dom);

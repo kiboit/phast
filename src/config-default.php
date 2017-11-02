@@ -1,7 +1,7 @@
 <?php
 return [
 
-    'securityToken' => 'a-very-secure-token-that-no-one-knows',
+    'securityToken' => null,
 
     'retrieverMap' => [
         $_SERVER['HTTP_HOST'] => $_SERVER['DOCUMENT_ROOT']

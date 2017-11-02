@@ -2,14 +2,14 @@
 
 namespace Kibo\Phast\Factories\Filters\HTML;
 
+use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter;
-use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilterFactory implements HTMLFilterFactory {
 
     public function make(array $config) {
-        $signature = new ServiceSignature($config['securityToken']);
+        $signature = (new ServiceSignatureFactory())->make($config);
         return new ImagesOptimizationServiceHTMLFilter(
             $signature,
             URL::fromString($config['documents']['baseUrl']),
