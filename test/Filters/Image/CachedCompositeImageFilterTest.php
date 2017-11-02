@@ -48,6 +48,7 @@ class CachedCompositeImageFilterTest extends TestCase {
     public function testCorrectHash() {
         $this->request['height'] = 'the-height';
         $this->request['width'] = 'the-width';
+        $this->request['preferredType'] = 'the-type';
         $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $this->request);
         $filters = [
             $this->createMock(ImageFilter::class),
@@ -59,7 +60,9 @@ class CachedCompositeImageFilterTest extends TestCase {
 
         $key = get_class($filters[0]) . get_class($filters[1])
             . self::LAST_MODIFICATION_TIME
-            . $this->request['src'] . $this->request['width'] . $this->request['height'];
+            . $this->request['src']
+            . $this->request['width'] . $this->request['height']
+            . $this->request['preferredType'];
         $this->cache->expects($this->once())
             ->method('get')
             ->with($key);

@@ -64,6 +64,9 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
         if (isset ($this->request['height'])) {
             $key .= $this->request['height'];
         }
+        if (isset ($this->request['preferredType'])) {
+            $key .= $this->request['preferredType'];
+        }
         $filtered = $this->cache->get($key, function () use ($image) {
             return parent::apply($image);
         });
