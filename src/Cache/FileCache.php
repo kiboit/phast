@@ -84,7 +84,7 @@ class FileCache implements Cache {
         if (!file_exists($dir)) {
             @mkdir($dir, 0700, true);
         }
-        if (posix_geteuid() !== fileowner($this->cacheRoot)) {
+        if ($this->functions->posix_geteuid() !== $this->functions->fileowner($this->cacheRoot)) {
             $this->functions->error_log(
                 sprintf(
                     'Phast cache error: Cache root %s owned by %s process user is %s!',
@@ -98,7 +98,7 @@ class FileCache implements Cache {
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
         $serialized = serialize($contents);
-        $result = @file_put_contents($tmpFile, $serialized);
+        $result = @$this->functions->file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
             $this->functions->error_log(
                 sprintf(

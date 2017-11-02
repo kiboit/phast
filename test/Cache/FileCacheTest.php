@@ -85,15 +85,17 @@ class FileCacheTest extends TestCase {
     }
 
     public function testNotWritingToUnownedDir() {
-        $testDir = __DIR__ . '/un-owned-dir';
-        $this->config['cacheRoot'] = $testDir;
-        $this->rebuildCache();
+        $this->functions->file_put_contents = function () {
+            $this->fail('Cache was written');
+        };
+        $this->functions->posix_geteuid = function () {
+            return 1000;
+        };
+        $this->functions->fileowner = function ($dir) {
+            $this->assertEquals($this->config['cacheRoot'], $dir);
+            return 2000;
+        };
         $this->cache->get('test-key', function () { return 'test-content'; });
-        $dirContents = scandir($testDir . '/test/te');
-        $this->assertCount(3, $dirContents);
-        $this->assertContains('.', $dirContents);
-        $this->assertContains('..', $dirContents);
-        $this->assertContains('.gitkeep', $dirContents);
     }
 
     public function testGarbageCollectionRunCalculation() {
