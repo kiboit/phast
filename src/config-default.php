@@ -38,7 +38,7 @@ return [
                 'serviceUrl'     => '/Phast/services.php?service=scripts',
                 'urlRefreshTime' => 7200,
                 'match' => [
-                    '|https://ajax\.googleapis\.com|'
+                    '~^https?://www\.google-analytics\.com/~',
                 ]
             ]
 
