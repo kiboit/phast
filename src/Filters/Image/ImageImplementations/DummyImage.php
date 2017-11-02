@@ -9,11 +9,6 @@ class DummyImage extends BaseImage implements Image {
     /**
      * @var string
      */
-    private $type;
-
-    /**
-     * @var string
-     */
     private $imageString;
 
     private $transformationString;

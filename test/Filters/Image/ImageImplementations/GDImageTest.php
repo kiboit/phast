@@ -46,6 +46,26 @@ class GDImageTest extends TestCase {
         $this->checkCompressing('imagejpeg', 80, 20);
     }
 
+    public function testRecoding() {
+        $jpeg = $this->getImageString('imagejpeg', 80, 'Hello, World');
+        $image = $this->makeImage($jpeg);
+        $recodedPng = $image->encodeTo(Image::TYPE_PNG);
+        $recodedWebp = $image->encodeTo(Image::TYPE_WEBP);
+
+        $this->assertEquals(Image::TYPE_JPEG, $image->getType());
+        $this->assertEquals(Image::TYPE_PNG, $recodedPng->getType());
+        $this->assertEquals(Image::TYPE_WEBP, $recodedWebp->getType());
+
+        $actualPng = getimagesizefromstring($recodedPng->getAsString())[2];
+        $actualJpg = getimagesizefromstring($image->getAsString())[2];
+
+        $this->assertEquals(IMAGETYPE_PNG, $actualPng);
+        $this->assertEquals(IMAGETYPE_JPEG, $actualJpg);
+
+        // getimagesizefromstring returns false for webp
+        $this->assertStringStartsWith('RIFF', $recodedWebp->getAsString());
+    }
+
     public function testExceptionOnBadImageAsString() {
         $image = $this->makeImage('asdasd');
         $this->expectException(ImageException::class);
@@ -87,8 +107,7 @@ class GDImageTest extends TestCase {
     private function makeImage($imageString) {
         $url = URL::fromString('http://kibo.test/the-image');
         $retriever = $this->createMock(Retriever::class);
-        $retriever->expects($this->atMost(1))
-                  ->method('retrieve')
+        $retriever->method('retrieve')
                   ->with($url)
                   ->willReturn($imageString);
         return new GDImage($url, $retriever);

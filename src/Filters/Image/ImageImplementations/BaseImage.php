@@ -20,6 +20,11 @@ abstract class BaseImage {
     protected $compression;
 
     /**
+     * @var string
+     */
+    protected $type;
+
+    /**
      * @return string
      */
     abstract public function getAsString();
@@ -53,4 +58,13 @@ abstract class BaseImage {
         return $im;
     }
 
+    /**
+     * @param $type
+     * @return static
+     */
+    public function encodeTo($type) {
+        $im = clone $this;
+        $im->type = $type;
+        return $im;
+    }
 }

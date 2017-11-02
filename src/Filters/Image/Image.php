@@ -8,6 +8,8 @@ interface Image {
 
     const TYPE_PNG   = 'image/png';
 
+    const TYPE_WEBP  = 'image/webp';
+
     /**
      * @return integer
      */
@@ -45,5 +47,11 @@ interface Image {
      * @return Image
      */
     public function compress($compression);
+
+    /**
+     * @param string $type - One of Image::TYPE_JPEG, Image::TYPE_PNG or Image::TYPE_WEBP
+     * @return Image
+     */
+    public function encodeTo($type);
 
 }

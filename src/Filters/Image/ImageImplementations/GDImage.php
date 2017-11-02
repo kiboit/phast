@@ -55,6 +55,9 @@ class GDImage extends BaseImage implements Image {
     }
 
     public function getType() {
+        if (isset ($this->type)) {
+            return $this->type;
+        }
         $type = @image_type_to_mime_type($this->getImageInfo()[2]);
         if (!$type) {
             throw new ImageException('Could not determine image type');
@@ -84,8 +87,11 @@ class GDImage extends BaseImage implements Image {
                 $gdImage = $gdCopy;
             }
             @imagesavealpha($gdImage, true);
-            if ($this->getType() == Image::TYPE_JPEG) {
+            $imageType = $this->getType();
+            if ($imageType == Image::TYPE_JPEG) {
                 $callback = 'imagejpeg';
+            } else if ($imageType == Image::TYPE_WEBP) {
+                $callback = 'imagewebp';
             } else {
                 $callback = 'imagepng';
             }
