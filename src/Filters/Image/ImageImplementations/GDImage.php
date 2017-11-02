@@ -115,6 +115,9 @@ class GDImage extends BaseImage implements Image {
             if ($string === false) {
                 throw new ImageException('Could not read image from temporary file');
             }
+            if ($callback == 'imagewebp' && strlen($string) % 2 == 1) {
+                $string .= "\0";
+            }
             return $string;
         } finally {
             if (isset ($gdImage) && $gdImage) {
