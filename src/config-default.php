@@ -58,13 +58,19 @@ return [
             ],
 
             \Kibo\Phast\Filters\Image\CompressionImageFilter::class => [
-                \Kibo\Phast\Filters\Image\Image::TYPE_PNG  =>  9,
                 \Kibo\Phast\Filters\Image\Image::TYPE_JPEG => 80
             ],
 
             \Kibo\Phast\Filters\Image\WEBPEncoderImageFilter::class => [
                 'enabled'     => function_exists('imagewebp'),
                 'compression' => 80
+            ],
+
+            \Kibo\Phast\Filters\Image\PNGQuantCompressionImageFilter::class => [
+                'enabled' => file_exists('/usr/bin/pngquant'),
+                'cmdpath' => '/usr/bin/pngquant',
+                'quality' => '0-10',
+                'speed' => 10
             ]
         ]
     ]
