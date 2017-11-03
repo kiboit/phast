@@ -12,18 +12,18 @@ class Request {
     /**
      * @var array
      */
-    private $headers;
+    private $env;
 
     private function __construct() {}
 
     public static function fromGlobals() {
-        return self::fromArray($_GET, getallheaders());
+        return self::fromArray($_GET, $_SERVER);
     }
 
-    public static function fromArray($get, $headers) {
+    public static function fromArray($get, $env) {
         $instance = new self;
         $instance->get = $get;
-        $instance->headers = $headers;
+        $instance->env = $env;
         return $instance;
     }
 
@@ -35,9 +35,15 @@ class Request {
     }
 
     /**
-     * @return array
+     * @param $name string
+     * @return string|null
      */
-    public function getHeaders() {
-        return $this->headers;
+    public function getHeader($name) {
+        $key = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+
+        if (isset($this->env[$key])) {
+            return $this->env[$key];
+        }
     }
+
 }

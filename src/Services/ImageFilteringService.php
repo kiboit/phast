@@ -46,8 +46,7 @@ class ImageFilteringService extends Service {
 
     protected function getParams(Request $request) {
         $params = parent::getParams($request);
-        $headers = $request->getHeaders();
-        if (isset ($headers['Accept']) && strpos($headers['Accept'], 'image/webp') !== false) {
+        if (strpos($request->getHeader('Accept'), 'image/webp') !== false) {
             $params['preferredType'] = Image::TYPE_WEBP;
         }
         return $params;
