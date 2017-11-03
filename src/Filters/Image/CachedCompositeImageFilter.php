@@ -52,6 +52,7 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
     /**
      * @param Image $image
      * @return Image
+     * @throws \Exception
      */
     public function apply(Image $image) {
         $url = URL::fromString($this->request['src']);
@@ -68,8 +69,15 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
             $key .= $this->request['preferredType'];
         }
         $filtered = $this->cache->get($key, function () use ($image) {
-            return parent::apply($image);
+            try {
+                return parent::apply($image);
+            } catch (\Exception $e) {
+                return $e;
+            }
         });
+        if ($filtered instanceof \Exception) {
+            throw $filtered;
+        }
         return $filtered;
     }
 
