@@ -10,10 +10,13 @@ class IFrameDelayedLoadingHTMLFilter implements HTMLFilter {
     private $script = <<<EOS
 window.addEventListener('load', function() {
     window.setTimeout(function() {
-        window.document.querySelectorAll('iframe[data-phast-src]').forEach(function(el) {
-            el.setAttribute('src', el.getAttribute('data-phast-src'));
-            el.removeAttribute('data-phast-src');
-        });
+        Array.prototype.forEach.call(
+            window.document.querySelectorAll('iframe[data-phast-src]'),
+            function(el) {
+                el.setAttribute('src', el.getAttribute('data-phast-src'));
+                el.removeAttribute('data-phast-src');
+            }
+        );
     }, 30);
 });
 EOS;
@@ -31,7 +34,7 @@ EOS;
         }
         if ($addScript) {
             $script = $document->createElement('script');
-            $script->textContent = $this->script;
+            $script->textContent = preg_replace('/\s+/', '', $this->script);
             $this->getBodyElement($document)->appendChild($script);
         }
     }
