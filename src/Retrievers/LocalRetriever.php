@@ -52,39 +52,44 @@ class LocalRetriever implements Retriever {
         if (!isset ($this->map[$url->getHost()])) {
             return false;
         }
-        $base = URL::fromString($this->map[$url->getHost()]);
-        $base = $this->normalizePath($base);
-        if (!$base) {
-            return false;
+        $submap = $this->map[$url->getHost()];
+        if (!is_array($submap)) {
+            return $this->appendNormalized($submap, $url->getPath());
         }
-        $path = $this->normalizePath($base . '/' . $url->getPath());
-        if (!$path) {
-            return false;
+
+        $prefixes = array_keys($submap);
+        usort($prefixes, function ($prefix1, $prefix2) {
+            return strlen($prefix1) > strlen($prefix2) ? -1 : 1;
+        });
+
+        foreach ($prefixes as $prefix) {
+            $pattern = '|^' . preg_quote($prefix, '|') . '(?<path>.*)|';
+            if (preg_match($pattern, $url->getPath(), $matches)) {
+                return $this->appendNormalized($submap[$prefix], $matches['path']);
+            }
         }
-        if (strpos($path, $base) !== 0) {
-            return false;
-        }
-        return $path;
+        return false;
     }
 
-    private function normalizePath($path) {
-        $path = explode("\0", $path)[0];
-        $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+    private function appendNormalized($target, $appended) {
+        $appended = explode("\0", $appended)[0];
+        $appended = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $appended);
+
+        $parts = array_filter(explode(DIRECTORY_SEPARATOR, $appended), function ($part) {
+            return !empty ($part) && $part != '.';
+        });
         $absolutes = array();
-        $parts = explode(DIRECTORY_SEPARATOR, $path);
-        if ($parts[0] == '') {
-            $absolutes[] = '';
-        }
         foreach ($parts as $part) {
-            if ('.' == $part || '' == $part) {
-                continue;
+            if ($part == '..' && empty ($absolutes)) {
+                return false;
             }
-            if ('..' == $part) {
+            if ($part == '..') {
                 array_pop($absolutes);
             } else {
                 $absolutes[] = $part;
             }
         }
+        array_unshift($absolutes, $target);
         return implode(DIRECTORY_SEPARATOR, $absolutes);
     }
 
