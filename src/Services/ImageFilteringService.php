@@ -6,6 +6,7 @@ use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -41,7 +42,15 @@ class ImageFilteringService extends Service {
     protected function handle(array $request) {
         $image = $this->imageFactory->getForURL(URL::fromString($request['src']));
         $filter = $this->filterFactory->make($request);
-        return $filter->apply($image);
+        $image = $filter->apply($image);
+
+        $response = new Response();
+        $response->setHeader('Content-Type', $image->getType());
+        $response->setHeader('Content-Length', $image->getSizeAsString());
+        $response->setHeader('Cache-Control', 'max-age=' . (86400 * 365));
+        $response->setContent($image->getAsString());
+
+        return $response;
     }
 
     protected function getParams(Request $request) {
