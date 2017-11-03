@@ -69,8 +69,7 @@ return [
             \Kibo\Phast\Filters\Image\PNGQuantCompressionImageFilter::class => [
                 'enabled' => file_exists('/usr/bin/pngquant'),
                 'cmdpath' => '/usr/bin/pngquant',
-                'quality' => '0-10',
-                'speed' => 10
+                'quality' => '50-85'
             ]
         ]
     ]
