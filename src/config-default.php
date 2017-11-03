@@ -16,6 +16,8 @@ return [
         ]
     ],
 
+    'servicesUrl' => '/Phast/services.php',
+
     'documents' => [
         'maxBufferSizeToApply' => pow(1024, 3),
 
@@ -32,12 +34,9 @@ return [
 
             \Kibo\Phast\Filters\HTML\IFrameDelayedLoadingHTMLFilter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [
-                'serviceUrl' => '/Phast/services.php?service=images'
-            ],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
-                'serviceUrl'     => '/Phast/services.php?service=scripts',
                 'urlRefreshTime' => 7200,
                 'match' => [
                     '~^https?://www\.google-analytics\.com/~',
