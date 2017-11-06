@@ -26,9 +26,9 @@ return [
 
         'filters' => [
 
-            \Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter::class => [],
-
             \Kibo\Phast\Filters\HTML\CSSRearrangementHTMLFilter::class => [],
+
+            \Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [],
 
