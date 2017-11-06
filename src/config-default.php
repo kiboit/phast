@@ -69,6 +69,11 @@ return [
                 'enabled' => @file_exists('/usr/bin/pngquant'),
                 'cmdpath' => '/usr/bin/pngquant',
                 'quality' => '50-85'
+            ],
+
+            \Kibo\Phast\Filters\Image\JPEGTransEnhancerImageFilter::class => [
+                'enabled' => @file_exists('/usr/bin/jpegtran'),
+                'cmdpath' => '/usr/bin/jpegtran'
             ]
         ]
     ]
