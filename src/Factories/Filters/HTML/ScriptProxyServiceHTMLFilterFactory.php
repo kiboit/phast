@@ -9,6 +9,10 @@ use Kibo\Phast\ValueObjects\URL;
 class ScriptProxyServiceHTMLFilterFactory implements HTMLFilterFactory {
 
     public function make(array $config) {
+        if (!isset ($config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['serviceUrl'])) {
+            $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['serviceUrl']
+            = $config['servicesUrl'] . '?service=scripts';
+        }
         return new ScriptProxyServiceHTMLFilter(
             URL::fromString($config['documents']['baseUrl']),
             $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class],

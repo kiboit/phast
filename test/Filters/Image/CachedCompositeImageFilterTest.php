@@ -7,6 +7,7 @@ use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
+use SebastianBergmann\GlobalState\RuntimeException;
 
 class CachedCompositeImageFilterTest extends TestCase {
 
@@ -104,6 +105,41 @@ class CachedCompositeImageFilterTest extends TestCase {
             $this->assertEquals(100, $output->getWidth());
             $this->assertEquals(200, $output->getHeight());
         }
+
+    }
+
+    public function testCachingExceptions() {
+        $image = new DummyImage();
+        $filter = $this->createMock(ImageFilter::class);
+        $filter->expects($this->once())
+            ->method('transformImage')
+            ->with($image)
+            ->willThrowException(new RuntimeException('except'));
+        $this->filter->addImageFilter($filter);
+
+        $cache = [];
+        $this->cache->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnCallback(function ($key, callable $cb) use (&$cache) {
+                if (!isset ($cache[$key])) {
+                    $cache[$key] = $cb();
+                }
+                return $cache[$key];
+            });
+
+        $thrown = 0;
+        try {
+            $this->filter->apply($image);
+        } catch (RuntimeException $e) {
+            $thrown++;
+        }
+        try {
+            $this->filter->apply($image);
+        } catch (RuntimeException $e) {
+            $thrown++;
+        }
+
+        $this->assertEquals(2, $thrown);
 
     }
 
