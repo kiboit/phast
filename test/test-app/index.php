@@ -1,4 +1,7 @@
-<?php require_once __DIR__ . '/../../src/html-filters.php';?>
+<?php
+define('PHAST_CONFIG_FILE', __DIR__ . '/test-config.php');
+require_once __DIR__ . '/../../src/html-filters.php';
+?>
 <!DOCTYPE html>
 <html>
     <head>
