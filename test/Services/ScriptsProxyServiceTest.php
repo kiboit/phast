@@ -49,7 +49,7 @@ class ScriptsProxyServiceTest extends TestCase {
             return 'the-content';
         };
         $result = $this->service->serve(Request::fromArray($request, []));
-        $this->assertEquals('the-content', $result);
+        $this->assertEquals('the-content', $result->getContent());
     }
 
     public function testExceptionOnNoResult() {
