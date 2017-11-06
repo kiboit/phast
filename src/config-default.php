@@ -57,6 +57,7 @@ return [
             ],
 
             \Kibo\Phast\Filters\Image\CompressionImageFilter::class => [
+                \Kibo\Phast\Filters\Image\Image::TYPE_PNG  =>  9,
                 \Kibo\Phast\Filters\Image\Image::TYPE_JPEG => 80
             ],
 
