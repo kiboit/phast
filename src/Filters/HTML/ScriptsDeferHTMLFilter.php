@@ -13,8 +13,15 @@ class ScriptsDeferHTMLFilter implements HTMLFilter {
     var deferreds = [];
     var replace = function (original, rewritten) {
         original.parentNode.insertBefore(rewritten, original);
-        original.parentNode.removeChild(original);        
+        original.parentNode.removeChild(original);
     };
+    var lastScript;
+    Object.defineProperty(document, 'readyState', {
+        configurable: true,
+        get: function() {
+            return 'loading';
+        }
+    });
     Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"]'), function (el) {
         var script = document.createElement('script');
         Array.prototype.forEach.call(el.attributes, function (attr) {
@@ -33,11 +40,25 @@ class ScriptsDeferHTMLFilter implements HTMLFilter {
             deferreds.push({original: el, rewritten: script});
         } else {
             replace(el, script);
+            lastScript = script;
         }
     });
     deferreds.forEach(function (deferred) {
         replace(deferred.original, deferred.rewritten);
     });
+    lastScript.onload  = restoreReadyState;
+    lastScript.onerror = restoreReadyState;
+    function restoreReadyState() {
+        delete document['readyState'];
+        if (document.onreadystatechange) {
+            exec(document.onreadystatechange, document);
+        }
+    }
+    function exec(func, opt_scopeObject) {
+        try {
+            func.call(opt_scopeObject || window);
+        } catch (err) {}
+    }
 })();
 EOS;
 
