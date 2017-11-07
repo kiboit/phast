@@ -125,6 +125,13 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertSame($this->head->childNodes[0], $theLink);
     }
 
+    public function testMinifying() {
+        $this->makeLink($this->head, 'a-tag { prop: 12% }');
+        $this->filter->transformHTMLDOM($this->dom);
+        $styles = $this->getTheStyles();
+        $this->assertEquals('a-tag{prop:12%}', $styles[0]->textContent);
+    }
+
     /**
      * @param \DOMElement $parent
      * @param string $content

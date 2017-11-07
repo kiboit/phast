@@ -44,18 +44,24 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         if ($content === false) {
             return;
         }
-        // Remove comments
-        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $content);
-        // Remove extraneous whitespace (not before colons)
-        $content = preg_replace('~([,{}:;])\s+~', '$1', $content);
-        $content = preg_replace('~\s+([,{};])~', '$1', $content);
+
         $style = $document->createElement('style');
+        $content = $this->minify($content);
         $style->textContent = $this->rewriteRelativeURLs($content, $location);
         if ($link->hasAttribute('media')) {
             $style->setAttribute('media', $link->getAttribute('media'));
         }
         $link->parentNode->insertBefore($style, $link);
         $link->parentNode->removeChild($link);
+    }
+
+    private function minify($content) {
+        // Remove comments
+        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $content);
+        // Remove extraneous whitespace (not before colons)
+        $content = preg_replace('~([,{}:;])\s+~', '$1', $content);
+        $content = preg_replace('~\s+([,{};])~', '$1', $content);
+        return $content;
     }
 
     private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
