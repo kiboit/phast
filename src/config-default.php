@@ -36,6 +36,8 @@ return [
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
 
+            \Kibo\Phast\Filters\HTML\ScriptsDeferHTMLFilter::class => [],
+
             \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
                 'urlRefreshTime' => 7200,
                 'match' => [

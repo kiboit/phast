@@ -7,12 +7,13 @@ require_once __DIR__ . '/../../src/html-filters.php';
     <head>
         <link rel="stylesheet" href="css/styles.css">
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
-        <script src="js/main.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="js/deferred.js" defer></script>
+        <script src="js/main.js" type="application/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" async></script>
     </head>
     <body>
         <script>
-            console.log('Loaded another one!');
+            console.log('Inline JS loaded!');
         </script>
         <div>This is where we are!</div>
         <img src="wow.jpg" width="100" height="100">
@@ -22,7 +23,10 @@ require_once __DIR__ . '/../../src/html-filters.php';
         <img src="images/batman.jpg" width="84" height="50">
         <img src="https://www.commitstrip.com/wp-content/uploads/2017/09/Strip-Lenfance-du-codeur-Le-piratage-650-finalenglish.jpg">
         <script>
-            document.querySelectorAll('img').forEach(i => { i.removeAttribute('width'); i.removeAttribute('height'); });
+            document.querySelectorAll('img').forEach(function (i) {
+                i.removeAttribute('width');
+                i.removeAttribute('height');
+            });
         </script>
 
         <iframe src="http://www.businesscat.happyjar.com/?random&nocache=1" width="1200" height="600"></iframe>
