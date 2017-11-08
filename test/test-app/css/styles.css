@@ -4,3 +4,10 @@ body {
     color: navajowhite;
     font-family: 'VT323', monospace;
 }
+.my-class {
+    background: red;
+}
+.some-other-class {
+    background: yellow;
+    color: black;
+}

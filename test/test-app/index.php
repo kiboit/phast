@@ -15,7 +15,14 @@ require_once __DIR__ . '/../../src/html-filters.php';
         <script>
             console.log('Inline JS loaded!');
         </script>
-        <div>This is where we are!</div>
+
+        <div class="my-class">This should have a red background</div>
+        <div id="addClass">This should have a yellow background</div>
+
+        <script>
+        document.getElementById('addClass').className = 'some-other-class';
+        </script>
+
         <img src="wow.jpg" width="100" height="100">
         <img src="images/basset.png">
         <img src="images/basset.png" width="130" height="155">
