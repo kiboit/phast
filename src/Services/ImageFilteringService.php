@@ -49,6 +49,9 @@ class ImageFilteringService extends Service {
         $response->setHeader('Content-Length', $image->getSizeAsString());
         $response->setHeader('Cache-Control', 'max-age=' . (86400 * 365));
         $response->setHeader('ETag', md5($image->getType() . "\n" . $image->getAsString()));
+        if ($image->getType() == Image::TYPE_WEBP) {
+            $response->setHeader('Vary', 'Accept');
+        }
         $response->setContent($image->getAsString());
 
         return $response;
