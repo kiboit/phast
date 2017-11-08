@@ -62,6 +62,26 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertSame($this->body->lastChild, $styles[2]);
     }
 
+    public function testOptimizeChildRule() {
+        $this->head->appendChild($this->dom->createElement('style', '
+            .class1 { background: red; }
+            a > .class2 { background: blue; }
+        '));
+
+        $div = $this->dom->createElement('div', 'Hello, World!');
+        $div->setAttribute('class', 'some-class class1 another-class');
+        $this->body->appendChild($div);
+
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $styles = $this->getTheStyles();
+
+        $this->assertContains('.class1', $styles[0]->textContent);
+        $this->assertContains('red', $styles[0]->textContent);
+        $this->assertNotContains('.class2', $styles[0]->textContent);
+        $this->assertNotContains('blue', $styles[0]->textContent);
+    }
+
     /**
      * @return \DOMElement[]
      */
