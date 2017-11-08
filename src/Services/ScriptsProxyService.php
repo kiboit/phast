@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services;
 
+use JSMin\JSMin;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
@@ -40,7 +41,7 @@ class ScriptsProxyService extends Service {
             if ($result === false) {
                 throw new ItemNotFoundException("Could not get {$request['src']}!");
             }
-            return $result;
+            return JSMin::minify($result);
         });
 
         $response = new Response();
