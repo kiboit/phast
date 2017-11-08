@@ -56,16 +56,17 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
     }
 
     private function optimizeStyle(\DOMElement $style) {
-        $re_simple_rule = "[A-Z0-9_.#*:()>+\~\s-]+";
-        $re_rule = "(?: $re_simple_rule | \[[a-z]+\] )+";
+        $re_simple_selector_chars = "[A-Z0-9_.#*:()>+\~\s-]";
+        $re_selector = "(?: $re_simple_selector_chars | \[[a-z]+\] )+";
+        $re_rule = "~
+                (?<= ^ | [;}] ) \s*
+                ( (?: $re_selector , )* $re_selector )
+                ( { [^}]* } )
+        ~xi";
 
         $css = $style->textContent;
         $css = preg_replace_callback(
-            "~
-                (?<= ^ | [;}] ) \s*
-                ( (?: $re_rule , )* $re_rule )
-                ( { [^}]* } )
-            ~xi",
+            $re_rule,
             function ($match) {
                 return $this->optimizeRule($match[1], $match[2]);
             },
