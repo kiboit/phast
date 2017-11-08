@@ -28,6 +28,8 @@ class CompositeHTMLFilter {
      * @return string
      */
     public function apply($buffer) {
+        $time_start = microtime(true);
+
         if (strlen($buffer) > $this->maxBufferSizeToApply) {
             return $buffer;
         }
@@ -56,7 +58,14 @@ class CompositeHTMLFilter {
         libxml_clear_errors();
         libxml_use_internal_errors($xmlErrors);
 
-        return $doc->saveHTML();
+        $output = $doc->saveHTML();
+
+        $time_delta = microtime(true) - $time_start;
+
+        $output .= "<!-- Page optimized by https://kiboit.com/Phast in " .
+                   number_format($time_delta, 3, '.', '') . "s -->\n";
+
+        return $output;
     }
 
     public function addHTMLFilter(HTMLFilter $filter) {
