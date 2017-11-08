@@ -25,7 +25,6 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
             .class1 { background: red; }
             .class2 { background: green; }
             .class3 { background: blue; }
-            .class4 a[href] { color: white; }
         '));
 
         $this->head->appendChild($this->dom->createElement('style', '
@@ -44,8 +43,6 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
 
         $this->assertContains('.class1', $styles[0]->textContent);
         $this->assertContains('red', $styles[0]->textContent);
-        $this->assertContains('.class4', $styles[0]->textContent);
-        $this->assertContains('white', $styles[0]->textContent);
         $this->assertNotContains('.class2', $styles[0]->textContent);
         $this->assertNotContains('green', $styles[0]->textContent);
         $this->assertNotContains('.class3', $styles[0]->textContent);
@@ -65,7 +62,7 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
     /**
      * @dataProvider selectorProvider
      */
-    public function testOptimizeSelectors($selector) {
+    public function testOptimizeSelectors($shouldOptimize, $selector) {
         $this->head->appendChild($this->dom->createElement('style', '
             .class1 { background: red; }
             ' . $selector . ' { background: blue; }
@@ -81,15 +78,23 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
 
         $this->assertContains('.class1', $styles[0]->textContent);
         $this->assertContains('red', $styles[0]->textContent);
-        $this->assertNotContains('.class2', $styles[0]->textContent);
-        $this->assertNotContains('blue', $styles[0]->textContent);
+
+        if ($shouldOptimize) {
+            $this->assertNotContains('.class2', $styles[0]->textContent);
+            $this->assertNotContains('blue', $styles[0]->textContent);
+        } else {
+            $this->assertContains('blue', $styles[0]->textContent);
+        }
     }
 
     public function selectorProvider() {
         return [
-            ['a > .class2'],
-            ['a ~ .class2'],
-            ['a + .class2']
+            [true,  'a > .class2'],
+            [true,  'a ~ .class2'],
+            [true,  'a + .class2'],
+            [true,  '.class2 input[disabled]'],
+            [false, 'input[disabled]'],
+            [false, '.class2 a[rel*="class2"]']
         ];
     }
 
