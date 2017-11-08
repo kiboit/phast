@@ -228,6 +228,16 @@ EOS;
         $this->assertFalse($elements->item(1)->hasAttribute('media'));
     }
 
+    public function testNotInliningImportsInComments() {
+        $css = '/* @import "stuff" ; */ the-css';
+        $this->makeLink($this->head, $css);
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $elements = $this->head->childNodes;
+        $this->assertEquals(1, $elements->length);
+        $this->assertEquals('the-css', $elements->item(0)->textContent);
+    }
+
     /**
      * @param \DOMElement $parent
      * @param string $content

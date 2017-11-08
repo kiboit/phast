@@ -52,7 +52,6 @@ class CSSInliningHTMLFilter implements HTMLFilter {
             return;
         }
         foreach ($elements as $element) {
-            $element->textContent = $this->minify($element->textContent);
             $link->parentNode->insertBefore($element, $link);
         }
         $link->parentNode->removeChild($link);
@@ -72,6 +71,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
             return $currentLevel > 0 ? [$this->makeLink($document, $url, $media)] : [];
         }
 
+        $content = $this->minify($content);
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
         foreach ($urlMatches as $match) {
