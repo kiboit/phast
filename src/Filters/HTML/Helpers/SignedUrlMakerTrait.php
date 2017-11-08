@@ -12,7 +12,7 @@ trait SignedUrlMakerTrait {
      * @param ServiceSignature $signature
      * @return string
      */
-    private function makeSignedUrl($url, $params, ServiceSignature $signature) {
+    protected function makeSignedUrl($url, $params, ServiceSignature $signature) {
         $query = http_build_query($params);
         $query .= '&token=' . $signature->sign($query);
         $glue = strpos($url, '?') === false ? '?' : '&';

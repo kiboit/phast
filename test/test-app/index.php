@@ -10,6 +10,13 @@ require_once __DIR__ . '/../../src/html-filters.php';
         <script src="js/deferred.js" defer></script>
         <script src="js/main.js" type="application/javascript"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" async></script>
+        <style>
+            body {
+                background-image: url(images/python.png);
+                background-repeat: no-repeat;
+                background-position: top right;
+            }
+        </style>
     </head>
     <body>
         <script>

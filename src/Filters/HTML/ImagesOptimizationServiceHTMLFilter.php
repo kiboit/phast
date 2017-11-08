@@ -12,17 +12,17 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     /**
      * @var ServiceSignature
      */
-    private $signature;
+    protected $signature;
 
     /**
      * @var URL
      */
-    private $baseUrl;
+    protected $baseUrl;
 
     /**
      * @var URL
      */
-    private $serviceUrl;
+    protected $serviceUrl;
 
     /**
      * ImagesOptimizationServiceHTMLFilter constructor.
