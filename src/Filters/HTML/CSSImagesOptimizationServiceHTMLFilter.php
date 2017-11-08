@@ -22,7 +22,16 @@ class CSSImagesOptimizationServiceHTMLFilter extends ImagesOptimizationServiceHT
 
     private function rewriteStyle($styleContent) {
         return preg_replace_callback(
-            '/(\b.*(?:image|background):[^;]*\burl\((?:\'|"|))([^\'")]+)/',
+            '~
+                (
+                    \b (?: image | background ):
+                    [^;}]*
+                    \b url \( [:\'"]?
+                )
+                (
+                    [^\'")] +
+                )
+            ~xi',
             function ($matches) {
                 $params = ['src' => (string) URL::fromString($matches[2])->withBase($this->baseUrl)];
                 return $matches[1] . $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
