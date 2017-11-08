@@ -14,10 +14,9 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
         $urls = [
             'http://example.com/script.js',
             'http://test.com/script.js',
+            'http://local.domain/rewrite.js',
             'http://example.com/script1.cs',
             'http://norewrite.com/script.js',
-            'http://local.domain/script.js',
-            '/norewrite.js'
         ];
 
         $rewrite1 = $this->dom->createElement('script');
@@ -25,24 +24,19 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
         $rewrite1->setAttribute('src', $urls[0]);
         $rewrite2 = $this->dom->createElement('script');
         $rewrite2->setAttribute('src', $urls[1]);
+        $rewrite3 = $this->dom->createElement('script');
+        $rewrite3->setAttribute('src', $urls[2]);
         $noRewrite1 = $this->dom->createElement('script');
+        $noRewrite1->setAttribute('src', $urls[3]);
+        $noRewrite1->setAttribute('type', 'application/coffeescript');
         $noRewrite2 = $this->dom->createElement('script');
-        $noRewrite2->setAttribute('src', $urls[2]);
-        $noRewrite2->setAttribute('type', 'application/coffeescript');
-        $noRewrite3 = $this->dom->createElement('script');
-        $noRewrite3->setAttribute('src', $urls[3]);
-        $noRewrite4 = $this->dom->createElement('script');
-        $noRewrite4->setAttribute('src', $urls[4]);
-        $noRewrite5 = $this->dom->createElement('script');
-        $noRewrite5->setAttribute('src', $urls[5]);
+        $noRewrite2->setAttribute('src', $urls[4]);
 
         $this->head->appendChild($rewrite1);
         $this->head->appendChild($rewrite2);
+        $this->head->appendChild($rewrite3);
         $this->head->appendChild($noRewrite1);
         $this->head->appendChild($noRewrite2);
-        $this->head->appendChild($noRewrite3);
-        $this->head->appendChild($noRewrite4);
-        $this->head->appendChild($noRewrite5);
 
         $config = [
             'match' => [
@@ -64,7 +58,7 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
         );
         $filter->transformHTMLDOM($this->dom);
 
-        foreach ([$rewrite1->getAttribute('src'), $rewrite2->getAttribute('src')] as $i => $src) {
+        foreach ([$rewrite1->getAttribute('src'), $rewrite2->getAttribute('src'), $rewrite3->getAttribute('src')] as $i => $src) {
             $url = parse_url($src);
             $this->assertEquals($config['serviceUrl'], $url['path']);
             $query = [];
@@ -77,10 +71,8 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
             $this->assertNotEmpty($query['token']);
         }
 
-        $this->assertEquals($urls[2], $noRewrite2->getAttribute('src'));
-        $this->assertEquals($urls[3], $noRewrite3->getAttribute('src'));
-        $this->assertEquals($urls[4], $noRewrite4->getAttribute('src'));
-        $this->assertEquals($urls[5], $noRewrite5->getAttribute('src'));
+        $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
+        $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
     }
 
 }

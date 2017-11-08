@@ -99,7 +99,7 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
 
     private function shouldRewriteURL(URL $url) {
         if ($url->isLocalTo($this->baseUrl)) {
-            return false;
+            return true;
         }
         $str = (string) $url;
         foreach ($this->config['match'] as $pattern) {
