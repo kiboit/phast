@@ -212,9 +212,9 @@ EOS;
             return $item->getAttribute('media');
         }, iterator_to_array($this->head->childNodes));
 
-        $this->assertEquals('(some or other or screen) and (projection or print)', $medias[0]);
-        $this->assertEquals('(some or other or screen) and (media and non-media)', $medias[1]);
-        $this->assertEquals('(some or other or screen)', $medias[2]);
+        $this->assertEquals('some, other, screen', $medias[0]);
+        $this->assertEquals('some, other, screen', $medias[1]);
+        $this->assertEquals('some, other, screen', $medias[2]);
 
     }
 

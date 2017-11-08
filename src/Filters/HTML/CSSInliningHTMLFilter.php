@@ -46,12 +46,15 @@ class CSSInliningHTMLFilter implements HTMLFilter {
     private function inline(\DOMElement $link, \DOMDocument $document) {
         $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
         $seen = [(string)$location];
-        $media = (string)$link->getAttribute('media');
-        $elements = $this->inlineURL($document, $location, $this->normalizeMediaQuery($media), 0, $seen);
+        $elements = $this->inlineURL($document, $location, 0, $seen);
         if (empty ($elements)) {
             return;
         }
+        $media = (string)$link->getAttribute('media');
         foreach ($elements as $element) {
+            if ($media) {
+                $element->setAttribute('media', $media);
+            }
             $link->parentNode->insertBefore($element, $link);
         }
         $link->parentNode->removeChild($link);
@@ -65,10 +68,10 @@ class CSSInliningHTMLFilter implements HTMLFilter {
      * @param string[] $seen
      * @return \DOMElement[]
      */
-    private function inlineURL(\DOMDocument $document, URL $url, $media, $currentLevel, &$seen) {
+    private function inlineURL(\DOMDocument $document, URL $url, $currentLevel, &$seen) {
         $content = $this->retriever->retrieve($url);
         if ($content === false) {
-            return $currentLevel > 0 ? [$this->makeLink($document, $url, $media)] : [];
+            return $currentLevel > 0 ? [$this->makeLink($document, $url)] : [];
         }
 
         $content = $this->minify($content);
@@ -82,19 +85,18 @@ class CSSInliningHTMLFilter implements HTMLFilter {
             }
             $seen[] = (string)$url;
 
-            $elementMedia = $this->appendMedias($media, $match['media']);
             if ($currentLevel == $this->maxInlineDepth) {
-                $elements[] = $this->makeLink($document, $url, $elementMedia);
+                $elements[] = $this->makeLink($document, $url);
             } else {
                 $elements = array_merge(
                     $elements,
-                    $this->inlineURL($document, $url, $elementMedia, $currentLevel + 1, $seen)
+                    $this->inlineURL($document, $url, $currentLevel + 1, $seen)
                 );
             }
         }
 
         $content = $this->rewriteRelativeURLs($content, $url);
-        $elements[] = $this->makeStyle($document, $content, $media);
+        $elements[] = $this->makeStyle($document, $content);
 
         return $elements;
     }
@@ -118,40 +120,17 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         return $matches;
     }
 
-    private function makeStyle(\DOMDocument $document, $content, $media) {
+    private function makeStyle(\DOMDocument $document, $content) {
         $style = $document->createElement('style');
         $style->textContent = $content;
-        $this->setElementMedia($style, $media);
         return $style;
     }
 
-    private function makeLink(\DOMDocument $document, URL $url, $media) {
+    private function makeLink(\DOMDocument $document, URL $url) {
         $link = $document->createElement('link');
         $link->setAttribute('rel', 'stylesheet');
         $link->setAttribute('href', (string)$url);
-        $this->setElementMedia($link, $media);
         return $link;
-    }
-
-    private function setElementMedia(\DOMElement $element, $media) {
-        if (!empty ($media)) {
-            $element->setAttribute('media', $media);
-        }
-    }
-
-    private function normalizeMediaQuery($query) {
-        if (empty ($query)) {
-            return '';
-        }
-        return '(' . preg_replace('/\s*,\s*/', ' or ', trim($query)) . ')';
-    }
-
-    private function appendMedias($target, $newMedia) {
-        if (empty ($newMedia)) {
-            return $target;
-        }
-        $normalized = $this->normalizeMediaQuery($newMedia);
-        return empty ($target) ? $normalized : $target . ' and ' . $normalized;
     }
 
     private function minify($content) {
