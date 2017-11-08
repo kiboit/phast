@@ -34,6 +34,8 @@ return [
 
             \Kibo\Phast\Filters\HTML\CSSOptimizingHTMLFilter::class => [],
 
+            \Kibo\Phast\Filters\HTML\CSSDeferHTMLFilter::class => [],
+
             \Kibo\Phast\Filters\HTML\IFrameDelayedLoadingHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
