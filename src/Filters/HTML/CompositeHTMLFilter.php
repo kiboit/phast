@@ -51,8 +51,13 @@ class CompositeHTMLFilter {
         $doc = new \DOMDocument();
         $doc->loadHTML($buffer);
 
+        $timings = [];
+
         foreach ($this->filters as $filter) {
+            $time_filter_start = microtime(true);
             $filter->transformHTMLDOM($doc);
+            $time_filter_delta = microtime(true) - $time_filter_start;
+            $timings[get_class($filter)] = $time_filter_delta;
         }
 
         libxml_clear_errors();
@@ -62,8 +67,17 @@ class CompositeHTMLFilter {
 
         $time_delta = microtime(true) - $time_start;
 
-        $output .= "<!-- Page optimized by https://kiboit.com/Phast in " .
-                   number_format($time_delta, 3, '.', '') . "s -->\n";
+        $time_accounted = 0.;
+        $output .= "<!--\n    Page optimized by https://kiboit.com/Phast\n";
+        arsort($timings);
+        foreach ($timings as $cls => $time) {
+            $cls = preg_replace('~^.*\\\\~', '', $cls);
+            $output .= sprintf("      % -43s %.3fs\n", $cls, $time);
+            $time_accounted += $time;
+        }
+        $output .= sprintf("      % 43s %.3fs\n", '(other)', $time_delta - $time_accounted);
+        $output .= sprintf("      % 43s %.3fs\n", '(total)', $time_delta);
+        $output .= "-->\n";
 
         return $output;
     }
