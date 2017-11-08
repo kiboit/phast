@@ -48,18 +48,6 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertSame($this->body->childNodes[0], $styles[1]);
     }
 
-    public function testKeepingMediaAttribute() {
-        $link = $this->makeLink($this->head);
-        $link->setAttribute('media', 'print');
-
-        $this->filter->transformHTMLDOM($this->dom);
-
-        $styles = $this->getTheStyles();
-        $this->assertCount(1, $styles);
-        $this->assertTrue($styles[0]->hasAttribute('media'));
-        $this->assertEquals('print', $styles[0]->getAttribute('media'));
-    }
-
     public function testInliningWithCorrectRel() {
         $badRel = $this->makeLink($this->head);
         $noRel = $this->makeLink($this->head);
@@ -86,13 +74,9 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $relativeUrl = 'style.css';
         $crossSiteUrl = 'http://cross-site.org/css/style.css';
 
-        $this->makeLink($this->head, "@import '$absoluteUrl'");
         $this->makeLink($this->head, "url('$absoluteUrl')");
-        $this->makeLink($this->head, "@import \"$rootUrl\"", '/css/sheet1.css');
         $this->makeLink($this->head, "url(\"$rootUrl\")", '/css/sheet2.css');
-        $this->makeLink($this->head, "@import '$relativeUrl''", '/css/sheet4.css');
         $this->makeLink($this->head, "url('$relativeUrl')", '/css/sheet5.css');
-        $this->makeLink($this->head, "@import '$crossSiteUrl'", '/css/sheet6.css');
         $this->makeLink($this->head, "url('$crossSiteUrl')", '/css/sheet7.css');
 
 
@@ -100,14 +84,10 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
         $styles = $this->getTheStyles();
 
-        $this->assertEquals("@import '$absoluteUrl'", $styles[0]->textContent);
-        $this->assertEquals("url('$absoluteUrl')", $styles[1]->textContent);
-        $this->assertEquals("@import \"$rootUrl\"", $styles[2]->textContent);
-        $this->assertEquals("url(\"$rootUrl\")", $styles[3]->textContent);
-        $this->assertEquals("@import '/css/$relativeUrl''", $styles[4]->textContent);
-        $this->assertEquals("url('/css/$relativeUrl')", $styles[5]->textContent);
-        $this->assertEquals("@import '$crossSiteUrl'", $styles[6]->textContent);
-        $this->assertEquals("url('$crossSiteUrl')", $styles[7]->textContent);
+        $this->assertEquals("url('$absoluteUrl')", $styles[0]->textContent);
+        $this->assertEquals("url(\"$rootUrl\")", $styles[1]->textContent);
+        $this->assertEquals("url('/css/$relativeUrl')", $styles[2]->textContent);
+        $this->assertEquals("url('$crossSiteUrl')", $styles[3]->textContent);
     }
 
     public function testNotInliningOnReadError() {
@@ -130,6 +110,122 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $this->filter->transformHTMLDOM($this->dom);
         $styles = $this->getTheStyles();
         $this->assertEquals('a-tag{prop:12%}', $styles[0]->textContent);
+    }
+
+    public function testInliiningImports() {
+        $css = <<<EOS
+@import 'file1';
+@import "file2";
+@import url("file3");
+@import url('file4');
+
+
+the-style-itself {
+    directive: true;
+}
+EOS;
+        $this->files['/file1'] = 'the-file-1';
+        $this->files['/file2'] = 'the-file-2';
+        $this->files['/file3'] = 'the-file-3';
+        $this->files['/file4'] = 'the-file-4';
+
+        $this->makeLink($this->head, $css);
+        $this->filter->transformHTMLDOM($this->dom);
+        $styles = $this->getTheStyles();
+
+        $this->assertCount(5, $styles);
+
+        $this->assertEquals('the-file-1', $styles[0]->textContent);
+        $this->assertEquals('the-file-2', $styles[1]->textContent);
+        $this->assertEquals('the-file-3', $styles[2]->textContent);
+        $this->assertEquals('the-file-4', $styles[3]->textContent);
+        $this->assertEquals('the-style-itself{directive:true;}', $styles[4]->textContent);
+    }
+
+    public function testTransformingUnreachableStylesToLinks() {
+        $css = '@import "some-file"; the-style-itself';
+        $this->makeLink($this->head, $css);
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $this->assertEquals(2, $this->head->childNodes->length);
+
+        $link = $this->head->childNodes->item(0);
+        $style = $this->head->childNodes->item(1);
+        $this->assertEquals('link', $link->tagName);
+        $this->assertEquals('stylesheet', $link->getAttribute('rel'));
+        $this->assertEquals('/some-file', $link->getAttribute('href'));
+        $this->assertEquals('style', $style->tagName);
+        $this->assertEquals('the-style-itself', $style->textContent);
+    }
+
+    public function testInliningNestedStyles() {
+        $css = '@import "file1"; root';
+        $this->files['/file1'] = '@import "file2"; sub1';
+        $this->files['/file2'] = '@import "file3";  sub2';
+        $this->files['/file3'] = 'we-should-not-see-this';
+        $this->makeLink($this->head, $css);
+
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $children = $this->head->childNodes;
+        $this->assertEquals(4, $children->length);
+
+        $link = $children->item(0);
+        $sub2 = $children->item(1);
+        $sub1 = $children->item(2);
+        $root = $children->item(3);
+
+        $this->assertEquals('link', $link->tagName);
+        $this->assertEquals('stylesheet', $link->getAttribute('rel'));
+        $this->assertEquals('/file3', $link->getAttribute('href'));
+        $this->assertEquals('style', $sub2->tagName);
+        $this->assertEquals('sub2', $sub2->textContent);
+        $this->assertEquals('style', $sub1->tagName);
+        $this->assertEquals('sub1', $sub1->textContent);
+        $this->assertEquals('style', $root->tagName);
+        $this->assertEquals('root', $root->textContent);
+    }
+
+    public function testInliningOneFileOnlyOnce() {
+        $css = '@import "file1"; root';
+        $this->files['/file1'] = '@import "file2"; sub1';
+        $this->files['/file2'] = '@import "file1"; sub2';
+        $this->makeLink($this->head, $css);
+
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $children = $this->head->childNodes;
+        $this->assertEquals(3, $children->length);
+
+        $this->assertEquals('sub2', $children->item(0)->textContent);
+        $this->assertEquals('sub1', $children->item(1)->textContent);
+        $this->assertEquals('root', $children->item(2)->textContent);
+    }
+
+    public function testKeepingMediaTypes() {
+        $css = '@import "something" projection, print; @import "something-else" media and non-media;';
+        $link = $this->makeLink($this->head, $css);
+        $link->setAttribute('media', 'some, other, screen');
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $medias = array_map(function (\DOMElement $item) {
+            return $item->getAttribute('media');
+        }, iterator_to_array($this->head->childNodes));
+
+        $this->assertEquals('(some or other or screen) and (projection or print)', $medias[0]);
+        $this->assertEquals('(some or other or screen) and (media and non-media)', $medias[1]);
+        $this->assertEquals('(some or other or screen)', $medias[2]);
+
+    }
+
+    public function testNotAddingNonSenceMedia() {
+        $css = '@import "something"; the-css';
+        $this->makeLink($this->head, $css);
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $elements = $this->head->childNodes;
+        $this->assertFalse($elements->item(0)->hasAttribute('media'));
+        $this->assertFalse($elements->item(1)->hasAttribute('media'));
     }
 
     /**
