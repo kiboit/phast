@@ -56,8 +56,8 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
     }
 
     private function optimizeStyle(\DOMElement $style) {
-        $re_simple_rule = '[A-Z0-9_.#*:()>+\~\s-]+';
-        $re_rule = '(?: ' . $re_simple_rule . ' | \[[a-z]+\] )+';
+        $re_simple_rule = "[A-Z0-9_.#*:()>+\~\s-]+";
+        $re_rule = "(?: $re_simple_rule | \[[a-z]+\] )+";
 
         $css = $style->textContent;
         $css = preg_replace_callback(
