@@ -26,7 +26,7 @@ return [
 
         'filters' => [
 
-            \Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [],
 
@@ -34,11 +34,11 @@ return [
 
             \Kibo\Phast\Filters\HTML\CSSDeferHTMLFilter::class => [],
 
+            \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
+
             \Kibo\Phast\Filters\HTML\IFrameDelayedLoadingHTMLFilter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
-
-            \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
                 'urlRefreshTime' => 7200,
