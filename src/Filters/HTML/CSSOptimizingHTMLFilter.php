@@ -78,7 +78,8 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
             return;
         }
 
-        $optimized = $style->ownerDocument->createElement('style', $css);
+        $optimized = $style->ownerDocument->createElement('style');
+        $optimized->textContent = $css;
         $optimized->setAttribute('media', $style->getAttribute('media'));
 
         return $optimized;
