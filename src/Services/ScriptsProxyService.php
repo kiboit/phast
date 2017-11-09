@@ -4,11 +4,17 @@ namespace Kibo\Phast\Services;
 
 use JSMin\JSMin;
 use Kibo\Phast\Cache\Cache;
-use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\HTTP\Response;
+use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\ValueObjects\URL;
 
 class ScriptsProxyService extends Service {
+
+    /**
+     * @var Retriever
+     */
+    private $retriever;
 
     /**
      * @var Cache
@@ -16,25 +22,20 @@ class ScriptsProxyService extends Service {
     private $cache;
 
     /**
-     * @var ObjectifiedFunctions
-     */
-    private $functions;
-
-    /**
      * ScriptsProxyService constructor.
      *
+     * @param Retriever $retriever
      * @param Cache $cache
-     * @param ObjectifiedFunctions|null $functions
      */
-    public function __construct(Cache $cache, ObjectifiedFunctions $functions = null) {
+    public function __construct(Retriever $retriever, Cache $cache) {
+        $this->retriever = $retriever;
         $this->cache = $cache;
-        $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
     protected function handle(array $request) {
         $cacheKey = $request['src'] . $request['cacheMarker'];
         $result =  $this->cache->get($cacheKey, function () use ($request) {
-            $result = @$this->functions->file_get_contents($request['src']);
+            $result = $this->retriever->retrieve(URL::fromString($request['src']));
             if ($result === false) {
                 throw new ItemNotFoundException("Could not get {$request['src']}!");
             }
