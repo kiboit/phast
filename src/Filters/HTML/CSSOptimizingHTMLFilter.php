@@ -65,7 +65,7 @@ EOS;
         $xpath = new \DOMXPath($document);
         $classes = [];
 
-        foreach ($xpath->query('//*/@class') as $class) {
+        foreach ($xpath->query('//@class') as $class) {
             foreach (preg_split('/\s+/', $class->value) as $cls) {
                 if ($cls != '') {
                     $classes[$cls] = true;
