@@ -43,7 +43,7 @@ return [
             \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
                 'urlRefreshTime' => 7200,
                 'match' => [
-                    '~^https?://www\.google-analytics\.com/~',
+                    '~^https?://(ssl|www)\.google-analytics\.com/~',
                     '~^https?://static\.hotjar\.com/~',
                     '~' . preg_quote($_SERVER['HTTP_HOST']) . '~'
                 ]
