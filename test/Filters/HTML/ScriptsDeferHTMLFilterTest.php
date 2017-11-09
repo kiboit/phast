@@ -50,7 +50,22 @@ class ScriptsDeferHTMLFilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals(1, $this->body->childNodes->length);
         $this->assertEquals('script', $this->body->childNodes->item(0)->tagName);
+    }
 
+    public function testDisableRewriting() {
+        $script = $this->dom->createElement('script');
+        $script->setAttribute('type', 'text/javascript');
+        $script->setAttribute('src', 'the-src');
+        $script->setAttribute('data-phast-no-defer', '');
+
+        $this->head->appendChild($script);
+
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $elements = $this->head->childNodes;
+        $this->assertEquals(1, $elements->length);
+
+        $this->assertEquals('text/javascript', $elements->item(0)->getAttribute('type'));
     }
 
 }

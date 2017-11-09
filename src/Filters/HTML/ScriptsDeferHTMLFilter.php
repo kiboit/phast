@@ -69,13 +69,18 @@ EOS;
     public function transformHTMLDOM(\DOMDocument $document) {
         $body = $this->getBodyElement($document);
         foreach ($document->getElementsByTagName('script') as $script) {
-            if ($this->isJSElement($script)) {
+            if ($this->shouldRewrite($script)) {
                 $this->rewrite($script);
             }
         }
         $rewriteScript = $document->createElement('script');
         $rewriteScript->textContent = $this->rewriteScript;
         $body->appendChild($rewriteScript);
+    }
+
+    private function shouldRewrite(\DOMElement $script) {
+        return $this->isJSElement($script)
+               && !$script->hasAttribute('data-phast-no-defer');
     }
 
     private function rewrite(\DOMElement $script) {
