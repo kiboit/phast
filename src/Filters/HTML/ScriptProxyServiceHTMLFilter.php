@@ -11,6 +11,44 @@ use Kibo\Phast\ValueObjects\URL;
 class ScriptProxyServiceHTMLFilter implements HTMLFilter {
     use JSDetectorTrait, SignedUrlMakerTrait;
 
+    private $rewriteFunction <<<EOS
+(function(opt) {
+    var url_pattern = /^(https?:)?\/\//;
+    var rewrite_pattern = /^https:\/\/(script|static)\.hotjar\.com\//;
+
+    overrideDOMMethod('appendChild');
+    overrideDOMMethod('insertBefore');
+
+    function overrideDOMMethod(name) {
+        var original = Element.prototype[name];
+        Element.prototype[name] = function () {
+            processNode(arguments[0]);
+            return original.apply(this, arguments);
+        };
+    }
+
+    function processNode(el) {
+        if (!el) {
+            return;
+        }
+        if (el.nodeType !== Node.ELEMENT_NODE) {
+            return;
+        }
+        if (el.tagName !== 'SCRIPT') {
+            return;
+        }
+        if (!url_pattern.test(el.src)) {
+            return;
+        }
+        if (!rewrite_pattern.test(el.src)) {
+            console.log(el.src);
+            return;
+        }
+        el.src = opt.proxyService + '&src=' + escape(el.src);
+    }
+})
+EOS;
+
     /**
      * @var URL
      */
