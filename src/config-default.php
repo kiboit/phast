@@ -26,9 +26,7 @@ return [
 
         'filters' => [
 
-            \Kibo\Phast\Filters\HTML\CSSRearrangementHTMLFilter::class => [],
-
-            \Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [],
 
@@ -36,16 +34,16 @@ return [
 
             \Kibo\Phast\Filters\HTML\CSSDeferHTMLFilter::class => [],
 
+            \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
+
             \Kibo\Phast\Filters\HTML\IFrameDelayedLoadingHTMLFilter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
-
-            \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
                 'urlRefreshTime' => 7200,
                 'match' => [
-                    '~^https?://www\.google-analytics\.com/~',
+                    '~^https?://(ssl|www)\.google-analytics\.com/~',
                     '~^https?://static\.hotjar\.com/~',
                     '~' . preg_quote($_SERVER['HTTP_HOST']) . '~'
                 ]
