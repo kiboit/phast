@@ -12,8 +12,9 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
     use JSDetectorTrait, SignedUrlMakerTrait;
 
     private $rewriteFunction = <<<EOS
-(function(opt) {
-    var url_pattern = /^(https?:)?\/\//;
+(function(config) {
+    var urlPattern = /^(https?:)?\/\//;
+    var cacheMarker = Math.floor((new Date).getTime() / 1000 / config.urlRefreshTime);
 
     overrideDOMMethod('appendChild');
     overrideDOMMethod('insertBefore');
@@ -36,10 +37,11 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
         if (el.tagName !== 'SCRIPT') {
             return;
         }
-        if (!url_pattern.test(el.src)) {
+        if (!urlPattern.test(el.src)) {
             return;
         }
-        el.src = opt.serviceUrl + '&src=' + escape(el.src);
+        el.src = config.serviceUrl + '&src=' + escape(el.src) +
+                                     '&cacheMarker=' + escape(cacheMarker);
     }
 })
 EOS;
@@ -132,11 +134,12 @@ EOS;
     }
 
     private function injectScriptBefore($beforeScript) {
-        $options = [
+        $config = [
             'serviceUrl' => $this->config['serviceUrl'],
+            'urlRefreshTime' => $this->config['urlRefreshTime']
         ];
         $script = $beforeScript->ownerDocument->createElement('script');
-        $script->textContent = $this->rewriteFunction . '(' . json_encode($options) . ')';
+        $script->textContent = $this->rewriteFunction . '(' . json_encode($config) . ')';
         $beforeScript->parentNode->insertBefore($script, $beforeScript);
     }
 
