@@ -39,7 +39,7 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
 
         $styles = $this->getTheStyles();
 
-        $this->assertCount(3, $styles);
+        $this->assertCount(4, $styles);
 
         $this->assertContains('.class1', $styles[0]->textContent);
         $this->assertContains('red', $styles[0]->textContent);
@@ -48,15 +48,20 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertNotContains('.class3', $styles[0]->textContent);
         $this->assertNotContains('blue', $styles[0]->textContent);
 
-        $this->assertContains('.class1', $styles[1]->textContent);
-        $this->assertContains('.class2', $styles[1]->textContent);
-        $this->assertContains('.class3', $styles[1]->textContent);
+        $this->assertEquals('', $styles[1]->textContent);
+
+        $this->assertContains('.class1', $styles[2]->textContent);
+        $this->assertContains('.class2', $styles[2]->textContent);
+        $this->assertContains('.class3', $styles[2]->textContent);
 
         $this->assertSame($this->head, $styles[0]->parentNode);
-        $this->assertSame($this->body, $styles[1]->parentNode);
+        $this->assertSame($this->head, $styles[1]->parentNode);
         $this->assertSame($this->body, $styles[2]->parentNode);
-        $this->assertSame($this->body->lastChild->previousSibling, $styles[1]);
-        $this->assertSame($this->body->lastChild, $styles[2]);
+        $this->assertSame($this->body, $styles[3]->parentNode);
+
+        $scripts = $this->getTheScripts();
+        $this->assertEquals(1, sizeof($scripts));
+        $this->assertSame($this->body->lastChild, $scripts[0]);
     }
 
     /**
@@ -85,6 +90,9 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         } else {
             $this->assertContains('blue', $styles[0]->textContent);
         }
+
+        $scripts = $this->getTheScripts();
+        $this->assertEquals(1, sizeof($scripts));
     }
 
     public function selectorProvider() {
@@ -98,11 +106,28 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         ];
     }
 
+    public function testDontInjectScript() {
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $styles = $this->getTheStyles();
+        $this->assertEquals(0, sizeof($styles));
+
+        $scripts = $this->getTheScripts();
+        $this->assertEquals(0, sizeof($scripts));
+    }
+
     /**
      * @return \DOMElement[]
      */
     private function getTheStyles() {
         return iterator_to_array($this->dom->getElementsByTagName('style'));
+    }
+
+    /**
+     * @return \DOMElement[]
+     */
+    private function getTheScripts() {
+        return iterator_to_array($this->dom->getElementsByTagName('script'));
     }
 
 }

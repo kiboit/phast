@@ -9,11 +9,33 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
 
     private $classes;
 
+    private $loaderScript = <<<EOS
+(function() {
+    Array.prototype.forEach.call(
+        document.querySelectorAll('style[data-phast-css-ref]'),
+        restoreStyle
+    );
+
+    function restoreStyle(style) {
+        var ref = style.getAttribute('data-phast-css-ref');
+        var replace = document.querySelector('style[data-phast-css="' + ref + '"]');
+
+        if (replace) {
+            style.removeAttribute('data-phast-css-ref');
+            replace.parentNode.insertBefore(style, replace);
+            replace.parentNode.removeChild(replace);
+        }
+    };
+})();
+EOS;
+
     public function transformHTMLDOM(\DOMDocument $document) {
         $body = $this->getBodyElement($document);
         $styles = iterator_to_array($document->getElementsByTagName('style'));
 
         $this->classes = $this->getUsedClasses($document);
+
+        $i = 0;
 
         foreach ($styles as $style) {
             if (!$this->isStyle($style)) {
@@ -22,11 +44,20 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
 
             $optimized = $this->optimizeStyle($style);
 
-            if ($optimized) {
-                $style->parentNode->insertBefore($optimized, $style);
-            }
+            $optimized->setAttribute('data-phast-css',     ++$i);
+            $style    ->setAttribute('data-phast-css-ref',   $i);
+
+            $style->parentNode->insertBefore($optimized, $style);
 
             $body->appendChild($style);
+        }
+
+        if ($i > 0) {
+            $script = $document->createElement('script');
+            $script->textContent = $this->loaderScript;
+            $script->setAttribute('async', '');
+            $script->setAttribute('data-phast-no-defer', '');
+            $body->appendChild($script);
         }
     }
 
@@ -59,9 +90,9 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
         $re_simple_selector_chars = "[A-Z0-9_.#*:()>+\~\s-]";
         $re_selector = "(?: $re_simple_selector_chars | \[[a-z]+\] )+";
         $re_rule = "~
-                (?<= ^ | [;}] ) \s*
-                ( (?: $re_selector , )* $re_selector )
-                ( { [^}]* } )
+            (?<= ^ | [;}] ) \s*
+            ( (?: $re_selector , )* $re_selector )
+            ( { [^}]* } )
         ~xi";
 
         $css = $style->textContent;
@@ -73,10 +104,6 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
             $css
         );
         $css = trim($css);
-
-        if ($css == '') {
-            return;
-        }
 
         $optimized = $style->ownerDocument->createElement('style');
         $optimized->textContent = $css;
