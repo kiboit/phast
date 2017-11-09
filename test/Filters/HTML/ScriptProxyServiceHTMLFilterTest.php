@@ -10,7 +10,6 @@ use Kibo\Phast\ValueObjects\URL;
 class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
 
     public function testRewrite() {
-
         $urls = [
             'http://example.com/script.js',
             'http://test.com/script.js',
@@ -38,6 +37,57 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
         $this->head->appendChild($noRewrite1);
         $this->head->appendChild($noRewrite2);
 
+        $this->runFilter();
+
+        foreach ([$rewrite1->getAttribute('src'), $rewrite2->getAttribute('src'), $rewrite3->getAttribute('src')] as $i => $src) {
+            $url = parse_url($src);
+            $this->assertEquals('script-proxy.php', $url['path']);
+            $query = [];
+            parse_str($url['query'], $query);
+            $this->assertArrayHasKey('src', $query);
+            $this->assertArrayHasKey('cacheMarker', $query);
+            $this->assertArrayHasKey('token', $query);
+            $this->assertEquals($urls[$i], $query['src']);
+            $this->assertEquals(2, $query['cacheMarker']);
+            $this->assertNotEmpty($query['token']);
+        }
+
+        $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
+        $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
+    }
+
+    public function testInjectScript() {
+        $script = $this->dom->createElement('script');
+        $this->head->appendChild($script);
+
+        $this->runFilter();
+
+        $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
+        $this->assertEquals(2, sizeof($scripts));
+        $this->assertSame($script, $scripts[1]);
+        $this->assertContains('script-proxy.php', $scripts[0]->textContent);
+    }
+
+    public function testDontInjectScriptForNothing() {
+        $this->runFilter();
+
+        $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
+        $this->assertEquals(0, sizeof($scripts));
+    }
+
+    public function testDontInjectScriptForNonJS() {
+        $script = $this->dom->createElement('script');
+        $script->setAttribute('type', 'nonsense');
+        $this->head->appendChild($script);
+
+        $this->runFilter();
+
+        $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
+        $this->assertEquals(1, sizeof($scripts));
+        $this->assertSame($script, $scripts[0]);
+    }
+
+    private function runFilter() {
         $config = [
             'match' => [
                 '/example\.com/',
@@ -57,22 +107,6 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
             $functions
         );
         $filter->transformHTMLDOM($this->dom);
-
-        foreach ([$rewrite1->getAttribute('src'), $rewrite2->getAttribute('src'), $rewrite3->getAttribute('src')] as $i => $src) {
-            $url = parse_url($src);
-            $this->assertEquals($config['serviceUrl'], $url['path']);
-            $query = [];
-            parse_str($url['query'], $query);
-            $this->assertArrayHasKey('src', $query);
-            $this->assertArrayHasKey('cacheMarker', $query);
-            $this->assertArrayHasKey('token', $query);
-            $this->assertEquals($urls[$i], $query['src']);
-            $this->assertEquals(2, $query['cacheMarker']);
-            $this->assertNotEmpty($query['token']);
-        }
-
-        $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
-        $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
     }
 
 }

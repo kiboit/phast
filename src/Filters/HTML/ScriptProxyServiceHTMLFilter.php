@@ -11,7 +11,7 @@ use Kibo\Phast\ValueObjects\URL;
 class ScriptProxyServiceHTMLFilter implements HTMLFilter {
     use JSDetectorTrait, SignedUrlMakerTrait;
 
-    private $rewriteFunction <<<EOS
+    private $rewriteFunction = <<<EOS
 (function(opt) {
     var url_pattern = /^(https?:)?\/\//;
     var rewrite_pattern = /^https:\/\/(script|static)\.hotjar\.com\//;
@@ -44,7 +44,7 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
             console.log(el.src);
             return;
         }
-        el.src = opt.proxyService + '&src=' + escape(el.src);
+        el.src = opt.serviceUrl + '&src=' + escape(el.src);
     }
 })
 EOS;
@@ -90,12 +90,17 @@ EOS;
     }
 
     public function transformHTMLDOM(\DOMDocument $document) {
-        $scripts = $document->getElementsByTagName('script');
+        $scripts = iterator_to_array($document->getElementsByTagName('script'));
+        $didInject = false;
         foreach ($scripts as $script) {
             if (!$this->isJSElement($script)) {
                 continue;
             }
             $this->rewriteScriptSource($script);
+            if (!$didInject) {
+                $this->injectScriptBefore($script);
+                $didInject = true;
+            }
         }
     }
 
@@ -129,6 +134,15 @@ EOS;
             }
         }
         return false;
+    }
+
+    private function injectScriptBefore($beforeScript) {
+        $options = [
+            'serviceUrl' => $this->config['serviceUrl'],
+        ];
+        $script = $beforeScript->ownerDocument->createElement('script');
+        $script->textContent = $this->rewriteFunction . '(' . json_encode($options) . ')';
+        $beforeScript->parentNode->insertBefore($script, $beforeScript);
     }
 
 }
