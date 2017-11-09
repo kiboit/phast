@@ -41,16 +41,10 @@ class ScriptsDeferHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertTrue($notInline->hasAttribute('defer'));
         $this->assertTrue($notInline->hasAttribute('async'));
 
-
         $this->assertEquals('phast-script', $inline->getAttribute('type'));
         $this->assertEquals('application/javascript', $inline->getAttribute('data-phast-original-type'));
         $this->assertFalse($inline->hasAttribute('async'));
-        $this->assertTrue($inline->hasAttribute('src'));
-        $this->assertEquals(
-            'data:text/javascript;base64,' . base64_encode('the-inline-content'),
-            $inline->getAttribute('src')
-        );
-        $this->assertEmpty($inline->textContent);
+        $this->assertEquals('the-inline-content', $inline->textContent);
 
         $this->assertEquals('non-js', $nonJS->getAttribute('type'));
 
