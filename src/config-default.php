@@ -46,6 +46,7 @@ return [
                 'urlRefreshTime' => 7200,
                 'match' => [
                     '~^https?://www\.google-analytics\.com/~',
+                    '~^https?://static\.hotjar\.com/~',
                 ]
             ],
 
