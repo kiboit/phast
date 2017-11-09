@@ -26,7 +26,7 @@ class CSSImagesOptimizationServiceHTMLFilter extends ImagesOptimizationServiceHT
                 (
                     \b (?: image | background ):
                     [^;}]*
-                    \b url \( [:\'"]?
+                    \b url \( [\'"]?
                 )
                 (
                     [^\'")] +
