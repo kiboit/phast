@@ -11,6 +11,6 @@ RUN apt-get update && apt-get install -y \
             --with-vpx-dir=/usr/include/ \
     && docker-php-ext-install -j$(nproc) gd
 
-RUN curl -sSf -o /usr/local/bin/composer \
+RUN curl -sSfLo /usr/local/bin/composer \
         'https://github.com/composer/composer/releases/download/1.5.2/composer.phar' && \
     chmod +x /usr/local/bin/composer
