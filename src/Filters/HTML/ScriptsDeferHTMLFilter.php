@@ -36,6 +36,9 @@ class ScriptsDeferHTMLFilter implements HTMLFilter {
         } else {
             script.removeAttribute('type');
         }
+        if (!el.hasAttribute('src')) {
+            script.setAttribute('src', 'data:text/javascript;base64,' + window.btoa(el.textContent));
+        }
         if (el.hasAttribute('defer')) {
             deferreds.push({original: el, rewritten: script});
         } else {
@@ -80,12 +83,6 @@ EOS;
             $script->setAttribute('data-phast-original-type', $script->getAttribute('type'));
         }
         $script->setAttribute('type', 'phast-script');
-        if (!$script->hasAttribute('src')) {
-            $phastSrc = 'data:text/javascript;base64,' . base64_encode($script->textContent);
-            $script->setAttribute('src', $phastSrc);
-            $script->textContent = '';
-        }
     }
-
 
 }
