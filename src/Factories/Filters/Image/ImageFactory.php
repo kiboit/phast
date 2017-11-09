@@ -5,6 +5,8 @@ namespace Kibo\Phast\Factories\Filters\Image;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Filters\Image\ImageImplementations\GDImage;
 use Kibo\Phast\Retrievers\LocalRetriever;
+use Kibo\Phast\Retrievers\RemoteRetriever;
+use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageFactory {
@@ -21,8 +23,10 @@ class ImageFactory {
      * @throws ItemNotFoundException
      */
     public function getForURL(URL $url) {
-        $locator = new LocalRetriever($this->config['retrieverMap']);
-        return new GDImage($url, $locator);
+        $retriever = new UniversalRetriever();
+        $retriever->addRetriever(new LocalRetriever($this->config['retrieverMap']));
+        $retriever->addRetriever(new RemoteRetriever());
+        return new GDImage($url, $retriever);
     }
 
 }

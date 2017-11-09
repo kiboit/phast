@@ -33,8 +33,11 @@ class CSSImagesOptimizationServiceHTMLFilter extends ImagesOptimizationServiceHT
                 )
             ~xi',
             function ($matches) {
-                $params = ['src' => (string) URL::fromString($matches[2])->withBase($this->baseUrl)];
-                return $matches[1] . $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+                if ($this->shouldRewriteUrl($matches[2])) {
+                    $params = ['src' => (string) URL::fromString($matches[2])->withBase($this->baseUrl)];
+                    return $matches[1] . $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+                }
+                return $matches[1] . $matches[2];
             },
             $styleContent
         );

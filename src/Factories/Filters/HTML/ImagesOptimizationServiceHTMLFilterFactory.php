@@ -21,7 +21,8 @@ class ImagesOptimizationServiceHTMLFilterFactory implements HTMLFilterFactory {
         return new $class(
             $signature,
             URL::fromString($config['documents']['baseUrl']),
-            URL::fromString($serviceUrl)
+            URL::fromString($serviceUrl),
+            $config['images']['whitelist']
         );
     }
 

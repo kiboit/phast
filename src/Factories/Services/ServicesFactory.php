@@ -39,7 +39,8 @@ class ServicesFactory {
         return new ImageFilteringService(
             new ImageFactory($config),
             new CompositeImageFilterFactory($config),
-            (new ServiceSignatureFactory())->make($config)
+            (new ServiceSignatureFactory())->make($config),
+            $config['images']['whitelist']
         );
     }
 

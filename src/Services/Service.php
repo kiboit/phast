@@ -16,6 +16,11 @@ abstract class Service {
     protected $signature;
 
     /**
+     * @var string[]
+     */
+    protected $whitelist = [];
+
+    /**
      * @param array $request
      * @return Response
      */
@@ -49,5 +54,17 @@ abstract class Service {
         if (!$this->signature->verify($token, http_build_query($request))) {
             throw new UnauthorizedException();
         }
+        if (!$this->isWhitelistedUrl($request['src'])) {
+            throw new UnauthorizedException('Not allowed url: ' . $request['src']);
+        }
+    }
+
+    protected function isWhitelistedUrl($url) {
+        foreach ($this->whitelist as $pattern) {
+            if (preg_match($pattern, $url)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
