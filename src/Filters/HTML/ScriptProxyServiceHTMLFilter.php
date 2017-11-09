@@ -58,7 +58,6 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
                 continue;
             }
             $this->rewriteScriptSource($script);
-            $this->rewriteScriptBody($script);
         }
     }
 
@@ -67,22 +66,6 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
             return;
         }
         $element->setAttribute('src', $this->rewriteURL($element->getAttribute('src')));
-    }
-
-    private function rewriteScriptBody(\DOMElement $element) {
-        $pattern = '~
-            ( [\'"] )
-            (
-                (?: http s? : ) ?
-                // (?: [a-z0-9] [a-z0-9-]* \. )* [a-z]+ /
-                [a-z0-9_./?&=-]*
-            )
-            ( \1 )
-        ~x';
-
-        $element->textContent = preg_replace_callback($pattern, function ($match) {
-            return $match[1] . $this->rewriteURL($match[2]) . $match[3];
-        }, $element->textContent);
     }
 
     private function rewriteURL($src) {
