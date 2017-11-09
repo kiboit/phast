@@ -66,6 +66,7 @@ class ScriptsDeferHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertEquals(1, $elements->length);
 
         $this->assertEquals('text/javascript', $elements->item(0)->getAttribute('type'));
+        $this->assertFalse($elements->item(0)->hasAttribute('data-phast-no-defer'));
     }
 
 }
