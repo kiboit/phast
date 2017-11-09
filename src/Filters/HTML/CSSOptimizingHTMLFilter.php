@@ -103,6 +103,18 @@ EOS;
             },
             $css
         );
+
+        if ($css === null) {
+            $err = preg_last_error();
+            foreach (get_defined_constants(true)['pcre'] as $constant => $value) {
+                if ($value == $err && preg_match('/_ERROR$/', $constant)) {
+                    $err = $constant;
+                    break;
+                }
+            }
+            $css = "/* Phast got $err */ {$style->textContent}";
+        }
+
         $css = trim($css);
 
         $optimized = $style->ownerDocument->createElement('style');
