@@ -7,6 +7,7 @@ use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
 use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
+use Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
@@ -52,7 +53,8 @@ class ServicesFactory {
         $retriever->addRetriever(new RemoteRetriever());
         return new ScriptsProxyService(
             $retriever,
-            new FileCache($config['cache'], 'scripts')
+            new FileCache($config['cache'], 'scripts'),
+            $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match']
         );
     }
 

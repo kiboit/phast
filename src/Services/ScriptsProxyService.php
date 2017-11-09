@@ -5,6 +5,7 @@ namespace Kibo\Phast\Services;
 use JSMin\JSMin;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
@@ -22,14 +23,21 @@ class ScriptsProxyService extends Service {
     private $cache;
 
     /**
+     * @var string[]
+     */
+    private $allowedPatterns;
+
+    /**
      * ScriptsProxyService constructor.
      *
      * @param Retriever $retriever
      * @param Cache $cache
+     * @param string[] $allowedPatterns
      */
-    public function __construct(Retriever $retriever, Cache $cache) {
+    public function __construct(Retriever $retriever, Cache $cache, array $allowedPatterns) {
         $this->retriever = $retriever;
         $this->cache = $cache;
+        $this->allowedPatterns = $allowedPatterns;
     }
 
     protected function handle(array $request) {
@@ -52,7 +60,12 @@ class ScriptsProxyService extends Service {
     }
 
     protected function validateRequest(array $request) {
-        return true;
+        foreach ($this->allowedPatterns as $pattern) {
+            if (preg_match($pattern, $request['src'])) {
+                return true;
+            }
+        }
+        throw new UnauthorizedException('Not allowed url: ' . $request['src']);
     }
 
 }

@@ -47,6 +47,7 @@ return [
                 'match' => [
                     '~^https?://www\.google-analytics\.com/~',
                     '~^https?://static\.hotjar\.com/~',
+                    '~' . preg_quote($_SERVER['HTTP_HOST']) . '~'
                 ]
             ],
 
