@@ -1,10 +1,22 @@
+RUN = docker run -it -v $(shell pwd):/data -w /data $(shell cat .docker-image-id)
+
+
 all : vendor/autoload.php
 
+
+.PHONY : test update
+
 test : all
-	docker-compose run -w /data php ./vendor/phpunit/phpunit/phpunit
+	$(RUN) ./vendor/phpunit/phpunit/phpunit
 
 update : all
-	docker-compose run -w /data php composer update
+	$(RUN) composer update
 
-vendor/autoload.php : composer.json composer.lock
-	docker-compose run -w /data php composer install
+
+vendor/autoload.php : docker composer.json composer.lock
+	$(RUN) composer install
+
+docker : .docker-image-id
+.docker-image-id : Dockerfile docker/entrypoint
+	docker build -q . > $@~
+	mv $@~ $@
