@@ -39,18 +39,19 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
 
     public function transformHTMLDOM(\DOMDocument $document) {
         $images = $document->getElementsByTagName('img');
+        /** @var \DOMElement $img */
         foreach ($images as $img) {
             if ($this->shouldRewriteSrc($img)) {
                 $this->rewriteSrc($img);
+            }
+            if ($img->hasAttribute('srcset')) {
+                $this->rewriteSrcset($img);
             }
         }
     }
 
     private function shouldRewriteSrc(\DOMElement $img) {
-        if (!$img->hasAttribute('src') || $img->hasAttribute('srcset')) {
-            return false;
-        }
-        return substr($img->getAttribute('src'), 0, 5) !== 'data:';
+        return $img->hasAttribute('src') && substr($img->getAttribute('src'), 0, 5) !== 'data:';
     }
 
     private function rewriteSrc(\DOMElement $img) {
@@ -64,6 +65,22 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
             'src',
             $this->makeSignedUrl($this->serviceUrl, $params, $this->signature)
         );
+    }
+
+    private function rewriteSrcset(\DOMElement $img) {
+        $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) {
+            if (substr($match[1], 0, 5) === 'data:') {
+                $url = $match[1];
+            } else {
+                $params = ['src' => (string) URL::fromString($match[1])->withBase($this->baseUrl)];
+                $url =  $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+            }
+            if (isset ($match[2])) {
+                return $url . $match[2];
+            }
+            return $url;
+        }, $img->getAttribute('srcset'));
+        $img->setAttribute('srcset', $rewritten);
     }
 
 }

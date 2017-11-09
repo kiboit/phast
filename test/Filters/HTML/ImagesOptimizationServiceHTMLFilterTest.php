@@ -55,11 +55,24 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertFalse($img->hasAttribute('src'));
     }
 
-    public function testNoRewriteForImagesWithSrcsetAttrSet() {
+    public function testRewriteForSrcsetAttr() {
         $img = $this->makeImage('src', 20, 30);
-        $img->setAttribute('srcset', 'val');
+        $img->setAttribute('srcset', '/val 2x, /val2, /val3 6w, data:blah 53');
         $this->filter->transformHTMLDOM($this->dom);
-        $this->assertEquals('src', $img->getAttribute('src'));
+
+        $sets = array_map(function ($size) {
+            return explode(' ', trim($size));
+        }, explode(',', $img->getAttribute('srcset')));
+
+        $this->assertCount(4, $sets);
+        $this->checkSrc($sets[0][0], ['src' => '/val']);
+        $this->assertEquals('2x', $sets[0][1]);
+        $this->checkSrc($sets[1][0], ['src' => '/val2']);
+        $this->assertCount(1, $sets[1]);
+        $this->checkSrc($sets[2][0], ['src' => '/val3']);
+        $this->assertEquals('6w', $sets[2][1]);
+        $this->assertEquals('data:blah', $sets[3][0]);
+        $this->assertEquals('53', $sets[3][1]);
     }
 
     private function makeImage($src, $width = null, $height = null) {
