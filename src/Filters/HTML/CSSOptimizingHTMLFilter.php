@@ -107,7 +107,10 @@ EOS;
 
         $optimized = $style->ownerDocument->createElement('style');
         $optimized->textContent = $css;
-        $optimized->setAttribute('media', $style->getAttribute('media'));
+
+        if ($style->hasAttribute('media')) {
+            $optimized->setAttribute('media', $style->getAttribute('media'));
+        }
 
         return $optimized;
     }
