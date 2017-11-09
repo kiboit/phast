@@ -14,7 +14,6 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
     private $rewriteFunction = <<<EOS
 (function(opt) {
     var url_pattern = /^(https?:)?\/\//;
-    var rewrite_pattern = /^https:\/\/(script|static)\.hotjar\.com\//;
 
     overrideDOMMethod('appendChild');
     overrideDOMMethod('insertBefore');
@@ -38,10 +37,6 @@ class ScriptProxyServiceHTMLFilter implements HTMLFilter {
             return;
         }
         if (!url_pattern.test(el.src)) {
-            return;
-        }
-        if (!rewrite_pattern.test(el.src)) {
-            console.log(el.src);
             return;
         }
         el.src = opt.serviceUrl + '&src=' + escape(el.src);
