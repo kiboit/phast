@@ -45,7 +45,6 @@ class ServicesFactory {
      */
     public function makeScriptsService(array $config) {
         return new ScriptsProxyService(
-            (new ServiceSignatureFactory())->make($config),
             new FileCache($config['cache'], 'scripts')
         );
     }

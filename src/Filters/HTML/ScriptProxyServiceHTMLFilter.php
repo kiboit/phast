@@ -4,12 +4,10 @@ namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
-use Kibo\Phast\Filters\HTML\Helpers\SignedUrlMakerTrait;
-use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ScriptProxyServiceHTMLFilter implements HTMLFilter {
-    use JSDetectorTrait, SignedUrlMakerTrait;
+    use JSDetectorTrait;
 
     private $rewriteFunction = <<<EOS
 (function(config) {
@@ -57,11 +55,6 @@ EOS;
     private $config;
 
     /**
-     * @var ServiceSignature
-     */
-    private $signature;
-
-    /**
      * @var ObjectifiedFunctions
      */
     private $functions;
@@ -71,18 +64,15 @@ EOS;
      *
      * @param URL $baseUrl
      * @param array $config
-     * @param ServiceSignature $signature
      * @param ObjectifiedFunctions|null $functions
      */
     public function __construct(
         URL $baseUrl,
         array $config,
-        ServiceSignature $signature,
         ObjectifiedFunctions $functions = null
     ) {
         $this->baseUrl = $baseUrl;
         $this->config = $config;
-        $this->signature = $signature;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
@@ -117,7 +107,9 @@ EOS;
             'src' => (string) $url,
             'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])
         ];
-        return $this->makeSignedUrl($this->config['serviceUrl'], $params, $this->signature);
+        $query = http_build_query($params);
+        $glue = strpos($this->config['serviceUrl'], '?') === false ? '?' : '&';
+        return $this->config['serviceUrl'] . $glue . $query;
     }
 
     private function shouldRewriteURL(URL $url) {

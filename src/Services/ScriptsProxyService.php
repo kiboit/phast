@@ -7,7 +7,6 @@ use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\HTTP\Response;
-use Kibo\Phast\Security\ServiceSignature;
 
 class ScriptsProxyService extends Service {
 
@@ -24,12 +23,10 @@ class ScriptsProxyService extends Service {
     /**
      * ScriptsProxyService constructor.
      *
-     * @param ServiceSignature $signature
      * @param Cache $cache
      * @param ObjectifiedFunctions|null $functions
      */
-    public function __construct(ServiceSignature $signature, Cache $cache, ObjectifiedFunctions $functions = null) {
-        $this->signature = $signature;
+    public function __construct(Cache $cache, ObjectifiedFunctions $functions = null) {
         $this->cache = $cache;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
@@ -51,6 +48,10 @@ class ScriptsProxyService extends Service {
         $response->setContent($result);
 
         return $response;
+    }
+
+    protected function validateRequest(array $request) {
+        return true;
     }
 
 }

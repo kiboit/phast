@@ -34,7 +34,7 @@ abstract class Service {
         return $this->handle($this->getParams($request));
     }
 
-    private function validateRequest(array $request) {
+    protected  function validateRequest(array $request) {
         if (!isset ($request['src'])) {
             throw new ItemNotFoundException('No source is set!');
         }

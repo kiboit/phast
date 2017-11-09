@@ -6,7 +6,6 @@ use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\HTTP\Request;
-use Kibo\Phast\Security\ServiceSignature;
 use PHPUnit\Framework\TestCase;
 
 class ScriptsProxyServiceTest extends TestCase {
@@ -29,12 +28,8 @@ class ScriptsProxyServiceTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
-        $signature = $this->createMock(ServiceSignature::class);
-        $signature->expects($this->once())
-            ->method('verify')
-            ->willReturn(true);
         $this->functions = new ObjectifiedFunctions();
-        $this->service = new ScriptsProxyService($signature, $this->cache, $this->functions);
+        $this->service = new ScriptsProxyService($this->cache, $this->functions);
     }
 
     public function testFetching() {

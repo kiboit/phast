@@ -2,9 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
-use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
@@ -46,10 +44,8 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
             parse_str($url['query'], $query);
             $this->assertArrayHasKey('src', $query);
             $this->assertArrayHasKey('cacheMarker', $query);
-            $this->assertArrayHasKey('token', $query);
             $this->assertEquals($urls[$i], $query['src']);
             $this->assertEquals(2, $query['cacheMarker']);
-            $this->assertNotEmpty($query['token']);
         }
 
         $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
@@ -103,7 +99,6 @@ class ScriptProxyServiceHTMLFilterTest extends HTMLFilterTestCase {
         $filter = new ScriptProxyServiceHTMLFilter(
             URL::fromString('http://local.domain/index.php'),
             $config,
-            new ServiceSignature($this->createMock(Cache::class)),
             $functions
         );
         $filter->transformHTMLDOM($this->dom);
