@@ -16,7 +16,7 @@ return [
         ]
     ],
 
-    'servicesUrl' => '/Phast/services.php',
+    'servicesUrl' => '/phast.php',
 
     'documents' => [
         'maxBufferSizeToApply' => pow(1024, 3),
