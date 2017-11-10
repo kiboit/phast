@@ -11,7 +11,7 @@ use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
-class ScriptsProxyService extends Service {
+class ProxyService extends Service {
 
     /**
      * @var Retriever

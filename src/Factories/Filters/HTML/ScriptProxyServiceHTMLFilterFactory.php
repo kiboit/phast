@@ -10,7 +10,7 @@ class ScriptProxyServiceHTMLFilterFactory implements HTMLFilterFactory {
     public function make(array $config) {
         if (!isset ($config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['serviceUrl'])) {
             $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['serviceUrl']
-            = $config['servicesUrl'] . '?service=scripts';
+            = $config['servicesUrl'] . '?service=proxy';
         }
         return new ScriptProxyServiceHTMLFilter(
             URL::fromString($config['documents']['baseUrl']),
