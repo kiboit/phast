@@ -258,6 +258,17 @@ EOS;
         $this->assertEquals('the-css', $elements->item(0)->textContent);
     }
 
+    public function testInlineUTF8() {
+        $css = 'body { content: "ü"; }';
+        $this->makeLink($this->head, $css);
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $elements = $this->head->childNodes;
+        $this->assertEquals(1, $elements->length);
+        $this->assertContains('ü', $elements->item(0)->textContent);
+        $this->assertContains('ü', $this->dom->saveHTML($this->dom->firstChild));
+    }
+
     /**
      * @param \DOMElement $parent
      * @param string $content
