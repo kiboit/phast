@@ -12,7 +12,7 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
     private $loaderScript = <<<EOS
 (function() {
     Array.prototype.forEach.call(
-        document.querySelectorAll('style[data-phast-css-ref]'),
+        document.querySelectorAll('script[data-phast-css-ref]'),
         restoreStyle
     );
 
@@ -21,9 +21,7 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
         var replace = document.querySelector('style[data-phast-css="' + ref + '"]');
 
         if (replace) {
-            style.removeAttribute('data-phast-css-ref');
-            replace.parentNode.insertBefore(style, replace);
-            replace.parentNode.removeChild(replace);
+            replace.textContent = style.textContent;
         }
     };
 })();
@@ -42,18 +40,20 @@ EOS;
                 continue;
             }
 
-            $optimized = $this->optimizeStyle($style);
+            $optimized_css = $this->optimizeCSS($style->textContent);
 
-            if (!$optimized) {
+            if ($optimized_css === null) {
                 continue;
             }
 
-            $optimized->setAttribute('data-phast-css',     ++$i);
-            $style    ->setAttribute('data-phast-css-ref',   $i);
+            $script = $document->createElement('script');
+            $script->textContent = $style->textContent;
+            $script->setAttribute('data-phast-css-ref', ++$i);
 
-            $style->parentNode->insertBefore($optimized, $style);
+            $style->textContent = $optimized_css;
+            $style->setAttribute('data-phast-css', $i);
 
-            $body->appendChild($style);
+            $body->appendChild($script);
         }
 
         if ($i > 0) {
@@ -90,7 +90,7 @@ EOS;
         return true;
     }
 
-    private function optimizeStyle(\DOMElement $style) {
+    private function optimizeCSS($css) {
         $re_simple_selector_chars = "[A-Z0-9_.#*:()>+\~\s-]";
         $re_selector = "(?: $re_simple_selector_chars | \[[a-z]+\] )+";
         $re_rule = "~
@@ -104,23 +104,14 @@ EOS;
             function ($match) {
                 return $this->optimizeRule($match[1], $match[2]);
             },
-            $style->textContent
+            $css
         );
 
         if ($css === null) {
             return;
         }
 
-        $css = trim($css);
-
-        $optimized = $style->ownerDocument->createElement('style');
-        $optimized->textContent = $css;
-
-        if ($style->hasAttribute('media')) {
-            $optimized->setAttribute('media', $style->getAttribute('media'));
-        }
-
-        return $optimized;
+        return trim($css);
     }
 
     private function optimizeRule($selectors, $body) {

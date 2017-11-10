@@ -21,15 +21,18 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
     }
 
     public function testOptimizingCSS() {
-        $this->head->appendChild($this->makeElement('style', '
+        $firstCSS = '
             .class1 { background: red; }
             .class2 { background: green; }
             .class3 { background: blue; }
-        '));
+        ';
 
-        $this->head->appendChild($this->makeElement('style', '
+        $secondCSS = '
             .class2 { background: yellow; }
-        '));
+        ';
+
+        $this->head->appendChild($this->makeElement('style', $firstCSS));
+        $this->head->appendChild($this->makeElement('style', $secondCSS));
 
         $div = $this->makeElement('div', 'Hello, World!');
         $div->setAttribute('class', 'some-class class1 another-class');
@@ -39,7 +42,7 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
 
         $styles = $this->getTheStyles();
 
-        $this->assertCount(4, $styles);
+        $this->assertCount(2, $styles);
 
         $this->assertContains('.class1', $styles[0]->textContent);
         $this->assertContains('red', $styles[0]->textContent);
@@ -50,18 +53,19 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals('', $styles[1]->textContent);
 
-        $this->assertContains('.class1', $styles[2]->textContent);
-        $this->assertContains('.class2', $styles[2]->textContent);
-        $this->assertContains('.class3', $styles[2]->textContent);
-
         $this->assertSame($this->head, $styles[0]->parentNode);
         $this->assertSame($this->head, $styles[1]->parentNode);
-        $this->assertSame($this->body, $styles[2]->parentNode);
-        $this->assertSame($this->body, $styles[3]->parentNode);
 
         $scripts = $this->getTheScripts();
-        $this->assertEquals(1, sizeof($scripts));
-        $this->assertSame($this->body->lastChild, $scripts[0]);
+
+        $this->assertEquals(3, sizeof($scripts));
+
+        $this->assertEquals($firstCSS, $scripts[0]->textContent);
+        $this->assertEquals($secondCSS, $scripts[1]->textContent);
+
+        $this->assertSame($this->body, $scripts[0]->parentNode);
+        $this->assertSame($this->body, $scripts[1]->parentNode);
+        $this->assertSame($this->body, $scripts[2]->parentNode);
     }
 
     /**
@@ -92,7 +96,7 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         }
 
         $scripts = $this->getTheScripts();
-        $this->assertEquals(1, sizeof($scripts));
+        $this->assertEquals(2, sizeof($scripts));
     }
 
     public function selectorProvider() {
@@ -124,7 +128,10 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         $this->filter->transformHTMLDOM($this->dom);
 
         $styles = $this->getTheStyles();
-        $this->assertEquals(2, sizeof($styles));
+        $this->assertEquals(1, sizeof($styles));
+
+        $scripts = $this->getTheScripts();
+        $this->assertEquals(2, sizeof($scripts));
     }
 
     /**
