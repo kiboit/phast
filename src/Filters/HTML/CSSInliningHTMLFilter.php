@@ -148,7 +148,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
                 (
                     url\( \s* (?:"|\'|)
                 )
-                (?! (?:[a-z]+:)? // )
+                (?! [a-z]+: | // )
                 ([A-Za-z0-9_/.-])
             ~xi',
             function ($match) use ($cssUrl) {
