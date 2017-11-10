@@ -63,7 +63,6 @@ class CSSInliningHTMLFilter implements HTMLFilter {
     /**
      * @param \DOMDocument $document
      * @param URL $url
-     * @param string $media
      * @param int $currentLevel
      * @param string[] $seen
      * @return \DOMElement[]
