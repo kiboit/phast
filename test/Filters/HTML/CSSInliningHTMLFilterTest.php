@@ -228,13 +228,9 @@ EOS;
         $link->setAttribute('media', 'some, other, screen');
         $this->filter->transformHTMLDOM($this->dom);
 
-        $medias = array_map(function (\DOMElement $item) {
-            return $item->getAttribute('media');
-        }, iterator_to_array($this->head->childNodes));
-
-        $this->assertEquals('some, other, screen', $medias[0]);
-        $this->assertEquals('some, other, screen', $medias[1]);
-        $this->assertEquals('some, other, screen', $medias[2]);
+        $this->assertEquals(1, $this->head->childNodes->length);
+        $this->assertEquals('style', $this->head->childNodes->item(0)->tagName);
+        $this->assertEquals('some, other, screen', $this->head->childNodes->item(0)->getAttribute('media'));
 
     }
 

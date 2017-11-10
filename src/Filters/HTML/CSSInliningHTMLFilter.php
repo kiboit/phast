@@ -79,7 +79,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         foreach ($urlMatches as $match) {
             $content = str_replace($match[0], '', $content);
             $url = URL::fromString($match['url'])->withBase($url);
-            if (in_array((string)$url, $seen)) {
+            if (in_array((string)$url, $seen) || !empty ($match['media'])) {
                 continue;
             }
             $seen[] = (string)$url;
