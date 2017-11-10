@@ -57,6 +57,10 @@ return [
     'images' => [
         'enable-cache' => true,
 
+        'whitelist' => [
+            '~' . preg_quote($_SERVER['HTTP_HOST']) . '~'
+        ],
+
         'filters' => [
             \Kibo\Phast\Filters\Image\ResizerImageFilter::class => [
                 'defaultMaxWidth'  => 1920 * 2,

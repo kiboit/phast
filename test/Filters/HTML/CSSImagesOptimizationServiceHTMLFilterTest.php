@@ -39,14 +39,13 @@ class CSSImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         ];
 
         $securityToken = $this->createMock(ServiceSignature::class);
-        $securityToken->expects($this->exactly(2))
-                      ->method('sign')
-                      ->willReturn('the-token');
+        $securityToken->method('sign')->willReturn('the-token');
 
         $this->filter = new CSSImagesOptimizationServiceHTMLFilter(
             $securityToken,
             URL::fromString('http://kibo-test.com/css/'),
-            URL::fromString('http://kibo-test.com/images.php')
+            URL::fromString('http://kibo-test.com/images.php'),
+            ['~' . preg_quote('http://kibo-test.com') . '~']
         );
     }
 
@@ -75,6 +74,21 @@ class CSSImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals($this->expected[0], $div1->getAttribute('style'));
         $this->assertEquals($this->expected[1], $div2->getAttribute('style'));
+    }
+
+    public function testNotRewritingNonWhitelistedUrls() {
+        $css = 'background: url("http://somewhere.else/img.png")';
+        $style = $this->dom->createElement('style');
+        $style->textContent = $css;
+        $this->body->appendChild($style);
+        $div = $this->dom->createElement('div');
+        $div->setAttribute('style', $css);
+        $this->body->appendChild($div);
+
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $this->assertEquals($css, $style->textContent);
+        $this->assertEquals($css, $div->getAttribute('style'));
     }
 
 }

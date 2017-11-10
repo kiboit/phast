@@ -19,8 +19,9 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         parent::setUp();
         $this->filter = new ImagesOptimizationServiceHTMLFilter(
             new ServiceSignature($this->createMock(Cache::class)),
-            URL::fromString(self::BASE_URL),
-            URL::fromString(self::SERVICE_URL)
+            URL::fromString('http://kibo-test.org'),
+            URL::fromString(self::SERVICE_URL),
+            ['~' . preg_quote('http://kibo-test.org') . '~']
         );
     }
 
@@ -35,10 +36,13 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         /** @var \DOMElement[] $images */
         $images = iterator_to_array($this->dom->getElementsByTagName('img'));
 
-        $this->checkSrc($images[0]->getAttribute('src'), ['src' => '/img?1']);
-        $this->checkSrc($images[1]->getAttribute('src'), ['src' => '/img?2', 'width' => 20]);
-        $this->checkSrc($images[2]->getAttribute('src'), ['src' => '/img?3', 'height' => 30]);
-        $this->checkSrc($images[3]->getAttribute('src'), ['src' => '/img?4', 'width' => 40, 'height' => 50]);
+        $this->checkSrc($images[0]->getAttribute('src'), ['src' => 'http://kibo-test.org/img?1']);
+        $this->checkSrc($images[1]->getAttribute('src'), ['src' => 'http://kibo-test.org/img?2', 'width' => 20]);
+        $this->checkSrc($images[2]->getAttribute('src'), ['src' => 'http://kibo-test.org/img?3', 'height' => 30]);
+        $this->checkSrc(
+            $images[3]->getAttribute('src'),
+            ['src' => 'http://kibo-test.org/img?4', 'width' => 40, 'height' => 50]
+        );
     }
 
     public function testNoRewriteForImagesWithInlineSource() {
@@ -65,14 +69,22 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         }, explode(',', $img->getAttribute('srcset')));
 
         $this->assertCount(4, $sets);
-        $this->checkSrc($sets[0][0], ['src' => '/val']);
+        $this->checkSrc($sets[0][0], ['src' => 'http://kibo-test.org/val']);
         $this->assertEquals('2x', $sets[0][1]);
-        $this->checkSrc($sets[1][0], ['src' => '/val2']);
+        $this->checkSrc($sets[1][0], ['src' => 'http://kibo-test.org/val2']);
         $this->assertCount(1, $sets[1]);
-        $this->checkSrc($sets[2][0], ['src' => '/val3']);
+        $this->checkSrc($sets[2][0], ['src' => 'http://kibo-test.org/val3']);
         $this->assertEquals('6w', $sets[2][1]);
         $this->assertEquals('data:blah', $sets[3][0]);
         $this->assertEquals('53', $sets[3][1]);
+    }
+
+    public function testNotRewritingNonWhitelistHosts() {
+        $img = $this->makeImage('http://external.place/img.png');
+        $img->setAttribute('srcset', 'http://other.place/img.png, http://place3.place/img.png');
+        $this->filter->transformHTMLDOM($this->dom);
+        $this->assertEquals('http://external.place/img.png', $img->getAttribute('src'));
+        $this->assertEquals('http://other.place/img.png, http://place3.place/img.png', $img->getAttribute('srcset'));
     }
 
     private function makeImage($src, $width = null, $height = null) {

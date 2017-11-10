@@ -23,21 +23,16 @@ class ScriptsProxyService extends Service {
     private $cache;
 
     /**
-     * @var string[]
-     */
-    private $allowedPatterns;
-
-    /**
      * ScriptsProxyService constructor.
      *
      * @param Retriever $retriever
      * @param Cache $cache
-     * @param string[] $allowedPatterns
+     * @param string[] $whitelist
      */
-    public function __construct(Retriever $retriever, Cache $cache, array $allowedPatterns) {
+    public function __construct(Retriever $retriever, Cache $cache, array $whitelist) {
         $this->retriever = $retriever;
         $this->cache = $cache;
-        $this->allowedPatterns = $allowedPatterns;
+        $this->whitelist = $whitelist;
     }
 
     protected function handle(array $request) {
@@ -60,12 +55,9 @@ class ScriptsProxyService extends Service {
     }
 
     protected function validateRequest(array $request) {
-        foreach ($this->allowedPatterns as $pattern) {
-            if (preg_match($pattern, $request['src'])) {
-                return true;
-            }
+        if (!$this->isWhitelistedUrl($request['src'])) {
+            throw new UnauthorizedException('Not allowed url: ' . $request['src']);
         }
-        throw new UnauthorizedException('Not allowed url: ' . $request['src']);
     }
 
 }
