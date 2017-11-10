@@ -28,7 +28,13 @@ return [
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
 
-            \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [
+                'whitelist' => [
+                    '~^https?://fonts\.googleapis\.com/css~' => [
+                        'ieCompatible' => false
+                    ]
+                ]
+            ],
 
             \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
 

@@ -21,9 +21,24 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('retrieve')
             ->willReturnCallback(function (URL $url) {
-                return isset ($this->files[$url->getPath()]) ? $this->files[$url->getPath()] : false;
+                if (isset ($this->files[$url->getPath()])) {
+                    return $this->files[$url->getPath()];
+                }
+                if (isset ($this->files[(string)$url])) {
+                    return $this->files[(string)$url];
+                }
+                return false;
             });
-        $this->filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retriever);
+        $this->filter = new CSSInliningHTMLFilter(
+            URL::fromString(self::BASE_URL),
+            [
+                '~' . preg_quote(self::BASE_URL) . '~',
+                '~https://fonts\.googleapis\.com~' => [
+                    'ieCompatible' => false
+                ]
+            ],
+            $retriever
+        );
     }
 
     public function testInliningCSS() {
@@ -118,7 +133,11 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
                   @trigger_error('An error', E_USER_WARNING);
                   return false;
               });
-        $filter = new CSSInliningHTMLFilter(URL::fromString(self::BASE_URL), $retriever);
+        $filter = new CSSInliningHTMLFilter(
+            URL::fromString(self::BASE_URL),
+            ['~' . preg_quote(self::BASE_URL) . '~'],
+            $retriever
+        );
         $filter->transformHTMLDOM($this->dom);
 
         $this->assertEmpty($this->getTheStyles());
@@ -160,22 +179,6 @@ EOS;
         $this->assertEquals('the-file-3', $styles[2]->textContent);
         $this->assertEquals('the-file-4', $styles[3]->textContent);
         $this->assertEquals('the-style-itself{directive:true;}', $styles[4]->textContent);
-    }
-
-    public function testTransformingUnreachableStylesToLinks() {
-        $css = '@import "some-file"; the-style-itself';
-        $this->makeLink($this->head, $css);
-        $this->filter->transformHTMLDOM($this->dom);
-
-        $this->assertEquals(2, $this->head->childNodes->length);
-
-        $link = $this->head->childNodes->item(0);
-        $style = $this->head->childNodes->item(1);
-        $this->assertEquals('link', $link->tagName);
-        $this->assertEquals('stylesheet', $link->getAttribute('rel'));
-        $this->assertEquals(self::BASE_URL . '/some-file', $link->getAttribute('href'));
-        $this->assertEquals('style', $style->tagName);
-        $this->assertEquals('the-style-itself', $style->textContent);
     }
 
     public function testInliningNestedStyles() {
@@ -250,7 +253,6 @@ EOS;
 
         $elements = $this->head->childNodes;
         $this->assertFalse($elements->item(0)->hasAttribute('media'));
-        $this->assertFalse($elements->item(1)->hasAttribute('media'));
     }
 
     public function testNotInliningImportsInComments() {
@@ -261,6 +263,56 @@ EOS;
         $elements = $this->head->childNodes;
         $this->assertEquals(1, $elements->length);
         $this->assertEquals('the-css', $elements->item(0)->textContent);
+    }
+
+    public function testHandlingIEIncompatibilities() {
+        $this->makeLink(
+            $this->head,
+            '@import "https://not-allowed.com/css"; @import "https://fonts.googleapis.com/css3"; css1',
+            'https://fonts.googleapis.com/css1'
+        );
+        $this->files['https://fonts.googleapis.com/css3'] = 'the-import';
+        $this->makeLink($this->head, 'css2', 'https://fonts.googleapis.com/css2');
+        $this->makeLink($this->head, 'css3');
+        $this->filter->transformHTMLDOM($this->dom);
+
+
+        $import = $this->head->childNodes->item(0);
+        $ie = $this->head->childNodes->item(1);
+        $ie2 = $this->head->childNodes->item(2);
+        $nonIe = $this->head->childNodes->item(3);
+
+
+        $this->assertEquals('style', $import->tagName);
+        $this->assertEquals('the-import', $import->textContent);
+        $this->assertFalse($import->hasAttribute('data-phast-ie-fallback-url'));
+        $this->assertEquals('1', $import->getAttribute('data-phast-ie-fallback-group'));
+
+        $this->assertEquals('style', $ie->tagName);
+        $this->assertEquals('@import "https://not-allowed.com/css";css1', $ie->textContent);
+        $this->assertEquals('1', $import->getAttribute('data-phast-ie-fallback-group'));
+        $this->assertEquals('https://fonts.googleapis.com/css1', $ie->getAttribute('data-phast-ie-fallback-url'));
+
+        $this->assertEquals('style', $ie2->tagName);
+        $this->assertEquals('css2', $ie2->textContent);
+        $this->assertEquals('2', $ie2->getAttribute('data-phast-ie-fallback-group'));
+        $this->assertEquals('https://fonts.googleapis.com/css2', $ie2->getAttribute('data-phast-ie-fallback-url'));
+
+        $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-group'));
+        $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-url'));
+        $script = $this->body->childNodes->item(0);
+        $this->assertEquals('script', $script->tagName);
+
+    }
+
+    public function testNotRewritingNotWhitelisted() {
+        $this->makeLink($this->head, 'css', 'http://not-allowed.com');
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $this->assertEquals(1, $this->head->childNodes->length);
+        $link = $this->head->childNodes->item(0);
+        $this->assertEquals('link', $link->tagName);
+        $this->assertEquals('http://not-allowed.com', $link->getAttribute('href'));
     }
 
     public function testInlineUTF8() {

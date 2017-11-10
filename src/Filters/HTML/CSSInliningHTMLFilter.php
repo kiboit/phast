@@ -2,10 +2,53 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilter implements HTMLFilter {
+    use BodyFinderTrait;
+
+    /**
+     * @var string
+     */
+    private $ieFallbackScript = <<<EOJS
+(function() {
+    
+    var ua = window.navigator.userAgent;
+    if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident/') === -1) {
+        return;
+    }
+    
+    Array.prototype.forEach.call(
+        document.querySelectorAll('style[data-phast-ie-fallback-url]'),
+        function (el) {
+            var link = document.createElement('link');
+            if (el.hasAttribute('media')) {
+                link.setAttribute('media', el.getAttribute('media'));
+            }
+            link.setAttribute('rel', 'stylesheet');
+            link.setAttribute('href', el.getAttribute('data-phast-ie-fallback-url'));
+            el.parentNode.insertBefore(link, el);
+           
+            var group = el.getAttribute('data-phast-ie-fallback-group');
+            Array.prototype.forEach.call(
+                document.querySelectorAll('style[data-phast-ie-fallback-group="' + group + '"]'),
+                function (groupEl) {
+                    groupEl.parentNode.removeChild(groupEl);
+                }
+            );
+        }
+    );
+    
+})();
+EOJS;
+
+
+    /**
+     * @var bool
+     */
+    private $ieFallbackGroup = 0;
 
     /**
      * @var int
@@ -18,12 +61,18 @@ class CSSInliningHTMLFilter implements HTMLFilter {
     private $baseURL;
 
     /**
+     * @var string[]
+     */
+    private $whitelist;
+
+    /**
      * @var Retriever
      */
     private $retriever;
 
-    public function __construct(URL $baseURL, Retriever $retriever) {
+    public function __construct(URL $baseURL, array $whitelist, Retriever $retriever) {
         $this->baseURL = $baseURL;
+        $this->whitelist = $whitelist;
         $this->retriever = $retriever;
     }
 
@@ -34,30 +83,68 @@ class CSSInliningHTMLFilter implements HTMLFilter {
                 $this->inline($link, $document);
             }
         }
+        if ($this->ieFallbackGroup) {
+            $this->ieFallbackGroup = 0;
+            $script = $document->createElement('script');
+            $script->textContent = $this->ieFallbackScript;
+            $this->getBodyElement($document)->appendChild($script);
+        }
     }
 
     private function shouldInline(\DOMElement $link) {
         return  $link->hasAttribute('rel')
                 && $link->getAttribute('rel') == 'stylesheet'
-                && $link->hasAttribute('href')
-                && URL::fromString($link->getAttribute('href'))->isLocalTo($this->baseURL);
+                && $link->hasAttribute('href');
     }
 
     private function inline(\DOMElement $link, \DOMDocument $document) {
         $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
+        $whitelistEntry = $this->findInWhitelist($location);
+        if (!$whitelistEntry) {
+            return;
+        }
+        if (!$whitelistEntry['ieCompatible']) {
+            $this->ieFallbackGroup++;
+        }
+
         $seen = [(string)$location];
         $elements = $this->inlineURL($document, $location, 0, $seen);
         if (empty ($elements)) {
             return;
         }
+
         $media = (string)$link->getAttribute('media');
         foreach ($elements as $element) {
             if ($media) {
                 $element->setAttribute('media', $media);
             }
+            if (!$whitelistEntry['ieCompatible']) {
+                $element->setAttribute('data-phast-ie-fallback-group', $this->ieFallbackGroup);
+            }
             $link->parentNode->insertBefore($element, $link);
+
+        }
+        if (!$whitelistEntry['ieCompatible']) {
+            $element->setAttribute('data-phast-ie-fallback-url', $link->getAttribute('href'));
         }
         $link->parentNode->removeChild($link);
+    }
+
+    private function findInWhitelist(URL $url) {
+        $stringUrl = (string)$url;
+        foreach ($this->whitelist as $key => $item) {
+            if (is_array($item)) {
+                $pattern = $key;
+                $ieCompatible = !isset ($item['ieCompatible']) || $item['ieCompatible'];
+            } else {
+                $pattern = $item;
+                $ieCompatible = true;
+            }
+            if (preg_match($pattern, $stringUrl)) {
+                return compact('pattern', 'ieCompatible');
+            }
+        }
+        return false;
     }
 
     /**
@@ -70,26 +157,29 @@ class CSSInliningHTMLFilter implements HTMLFilter {
     private function inlineURL(\DOMDocument $document, URL $url, $currentLevel, &$seen) {
         $content = $this->retriever->retrieve($url);
         if ($content === false) {
-            return $currentLevel > 0 ? [$this->makeLink($document, $url)] : [];
+            return [];
         }
 
         $content = $this->minify($content);
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
         foreach ($urlMatches as $match) {
-            $content = str_replace($match[0], '', $content);
-            $url = URL::fromString($match['url'])->withBase($url);
-            if (in_array((string)$url, $seen)) {
+            $matchedUrl = URL::fromString($match['url'])->withBase($url);
+            if (!$this->findInWhitelist($matchedUrl)) {
                 continue;
             }
-            $seen[] = (string)$url;
+            $content = str_replace($match[0], '', $content);
+            if (in_array((string)$matchedUrl, $seen)) {
+                continue;
+            }
+            $seen[] = (string)$matchedUrl;
 
             if ($currentLevel == $this->maxInlineDepth) {
-                $elements[] = $this->makeLink($document, $url);
+                $elements[] = $this->makeLink($document, $matchedUrl);
             } else {
                 $elements = array_merge(
                     $elements,
-                    $this->inlineURL($document, $url, $currentLevel + 1, $seen)
+                    $this->inlineURL($document, $matchedUrl, $currentLevel + 1, $seen)
                 );
             }
         }
@@ -106,7 +196,7 @@ class CSSInliningHTMLFilter implements HTMLFilter {
                 @import \s+
                 (?: url \s* \( )?
                 (?:"|\'|)
-                (?<url>[A-Za-z0-9_/.-]+)
+                (?<url>[A-Za-z0-9_/.:-]+)
                 (?:"|\'|) (?: \) )?
                 \s*
                 ;
