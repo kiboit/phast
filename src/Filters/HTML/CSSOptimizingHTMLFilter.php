@@ -95,7 +95,7 @@ EOS;
         $re_selector = "(?: $re_simple_selector_chars | \[[a-z]+\] )+";
         $re_rule = "~
             (?<= ^ | [;}] ) \s*
-            ( (?: $re_selector , )* $re_selector )
+            ( (?: $re_selector , )*+ $re_selector )
             ( { [^}]* } )
         ~xi";
 
