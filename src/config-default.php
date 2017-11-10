@@ -30,11 +30,11 @@ return [
 
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [],
 
+            \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
+
             \Kibo\Phast\Filters\HTML\CSSOptimizingHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSDeferHTMLFilter::class => [],
-
-            \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\IFrameDelayedLoadingHTMLFilter::class => [],
 
