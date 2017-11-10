@@ -68,26 +68,46 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertSame($crossSite, $this->head->childNodes[3]);
     }
 
-    public function testCSSContentsRelativeURLsRewriting() {
-        $absoluteUrl = 'http://' . self::BASE_URL . '/style.css';
-        $rootUrl = '/style.css';
-        $relativeUrl = 'style.css';
-        $crossSiteUrl = 'http://cross-site.org/css/style.css';
-
-        $this->makeLink($this->head, "url('$absoluteUrl')");
-        $this->makeLink($this->head, "url(\"$rootUrl\")", '/css/sheet2.css');
-        $this->makeLink($this->head, "url('$relativeUrl')", '/css/sheet5.css');
-        $this->makeLink($this->head, "url('$crossSiteUrl')", '/css/sheet7.css');
-
+    /**
+     * @dataProvider urlProvider
+     */
+    public function testCSSContentsRelativeURLsRewriting($input, $output) {
+        $this->makeLink($this->head, "url($input)", '/css/test.css');
+        $this->makeLink($this->head, "url('$input')", '/css/test2.css');
+        $this->makeLink($this->head, "url(\"$input\")", '/css/test3.css');
 
         $this->filter->transformHTMLDOM($this->dom);
 
         $styles = $this->getTheStyles();
 
-        $this->assertEquals("url('$absoluteUrl')", $styles[0]->textContent);
-        $this->assertEquals("url(\"$rootUrl\")", $styles[1]->textContent);
-        $this->assertEquals("url('/css/$relativeUrl')", $styles[2]->textContent);
-        $this->assertEquals("url('$crossSiteUrl')", $styles[3]->textContent);
+        $this->assertEquals("url($output)", $styles[0]->textContent);
+        $this->assertEquals("url('$output')", $styles[1]->textContent);
+        $this->assertEquals("url(\"$output\")", $styles[2]->textContent);
+    }
+
+    public function urlProvider() {
+        return [
+            [
+                'http://' . self::BASE_URL . '/style.css',
+                'http://' . self::BASE_URL . '/style.css'
+            ],
+            [
+                '/style.css',
+                '/style.css'
+            ],
+            [
+                'style.css',
+                '/css/style.css'
+            ],
+            [
+                'http://cross-site.org/css/style.css',
+                'http://cross-site.org/css/style.css'
+            ],
+            [
+                'data:abcd',
+                'data:abcd'
+            ]
+        ];
     }
 
     public function testNotInliningOnReadError() {
