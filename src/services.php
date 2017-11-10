@@ -17,9 +17,14 @@ if (isset ($_GET['src']) && !headers_sent())  {
 
 require_once __DIR__ . '/bootstrap.php';
 $config = require_once PHAST_CONFIG_FILE;
-$response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
-    ->make($service, $config)
-    ->serve(\Kibo\Phast\HTTP\Request::fromGlobals());
+try {
+
+    $response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
+        ->make($service, $config)
+        ->serve(\Kibo\Phast\HTTP\Request::fromGlobals());
+} catch (\Kibo\Phast\Exceptions\UnauthorizedException $e) {
+    exit();
+}
 
 header_remove('Location');
 http_response_code($response->getCode());
