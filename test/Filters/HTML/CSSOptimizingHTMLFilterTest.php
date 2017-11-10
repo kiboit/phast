@@ -21,17 +21,17 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
     }
 
     public function testOptimizingCSS() {
-        $this->head->appendChild($this->dom->createElement('style', '
+        $this->head->appendChild($this->makeElement('style', '
             .class1 { background: red; }
             .class2 { background: green; }
             .class3 { background: blue; }
         '));
 
-        $this->head->appendChild($this->dom->createElement('style', '
+        $this->head->appendChild($this->makeElement('style', '
             .class2 { background: yellow; }
         '));
 
-        $div = $this->dom->createElement('div', 'Hello, World!');
+        $div = $this->makeElement('div', 'Hello, World!');
         $div->setAttribute('class', 'some-class class1 another-class');
         $this->body->appendChild($div);
 
@@ -68,12 +68,12 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
      * @dataProvider selectorProvider
      */
     public function testOptimizeSelectors($shouldOptimize, $selector) {
-        $this->head->appendChild($this->dom->createElement('style', '
+        $this->head->appendChild($this->makeElement('style', '
             .class1 { background: red; }
             ' . $selector . ' { background: blue; }
         '));
 
-        $div = $this->dom->createElement('div', 'Hello, World!');
+        $div = $this->makeElement('div', 'Hello, World!');
         $div->setAttribute('class', 'some-class class1 another-class');
         $this->body->appendChild($div);
 
@@ -116,6 +116,17 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertEquals(0, sizeof($scripts));
     }
 
+    public function testLargeCSS() {
+        $css = file_get_contents(__DIR__ . '/../../resources/large.css');
+        $this->assertNotFalse($css);
+
+        $this->head->appendChild($this->makeElement('style', $css));
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $styles = $this->getTheStyles();
+        $this->assertEquals(2, sizeof($styles));
+    }
+
     /**
      * @return \DOMElement[]
      */
@@ -128,6 +139,12 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
      */
     private function getTheScripts() {
         return iterator_to_array($this->dom->getElementsByTagName('script'));
+    }
+
+    private function makeElement($tag, $content) {
+        $el = $this->dom->createElement($tag);
+        $el->textContent = $content;
+        return $el;
     }
 
 }
