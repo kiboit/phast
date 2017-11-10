@@ -44,6 +44,10 @@ EOS;
 
             $optimized = $this->optimizeStyle($style);
 
+            if (!$optimized) {
+                continue;
+            }
+
             $optimized->setAttribute('data-phast-css',     ++$i);
             $style    ->setAttribute('data-phast-css-ref',   $i);
 
@@ -95,24 +99,16 @@ EOS;
             ( { [^}]* } )
         ~xi";
 
-        $css = $style->textContent;
         $css = preg_replace_callback(
             $re_rule,
             function ($match) {
                 return $this->optimizeRule($match[1], $match[2]);
             },
-            $css
+            $style->textContent
         );
 
         if ($css === null) {
-            $err = preg_last_error();
-            foreach (get_defined_constants(true)['pcre'] as $constant => $value) {
-                if ($value == $err && preg_match('/_ERROR$/', $constant)) {
-                    $err = $constant;
-                    break;
-                }
-            }
-            $css = "/* Phast got $err */ {$style->textContent}";
+            return;
         }
 
         $css = trim($css);
