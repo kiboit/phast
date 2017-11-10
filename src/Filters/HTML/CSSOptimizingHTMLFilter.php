@@ -48,6 +48,7 @@ EOS;
 
             $script = $document->createElement('script');
             $script->textContent = $style->textContent;
+            $script->setAttribute('type', 'phast-css');
             $script->setAttribute('data-phast-css-ref', ++$i);
 
             $style->textContent = $optimized_css;
