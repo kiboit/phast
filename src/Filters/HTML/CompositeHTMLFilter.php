@@ -49,7 +49,7 @@ class CompositeHTMLFilter {
 
         $xmlErrors = libxml_use_internal_errors(true);
         $doc = new \DOMDocument();
-        $doc->loadHTML($buffer);
+        $doc->loadHTML('<?xml encoding="utf-8"?>' . $buffer);
 
         $timings = [];
 
@@ -63,7 +63,15 @@ class CompositeHTMLFilter {
         libxml_clear_errors();
         libxml_use_internal_errors($xmlErrors);
 
-        $output = $doc->saveHTML();
+        // This gets us UTF-8 instead of entities
+        $output = '<!doctype html>';
+        foreach ($doc->childNodes as $node) {
+            if (!$node instanceof \DOMDocumentType
+                && !$node instanceof \DOMProcessingInstruction
+            ) {
+                $output .= $doc->saveHTML($node);
+            }
+        }
 
         $time_delta = microtime(true) - $time_start;
 

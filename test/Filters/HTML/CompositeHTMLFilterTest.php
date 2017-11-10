@@ -21,7 +21,8 @@ class CompositeHTMLFilterTest extends TestCase {
     public function testShouldApplyOnHTML() {
         $this->shouldTransform();
         $buffer = "<!DOCTYPE html>\n<html>\n<body></body>\n</html>";
-        $this->filter->apply($buffer);
+        $filtered = $this->filter->apply($buffer);
+        $this->assertRegExp("~^<!doctype html><html><body></body></html>~", $filtered);
     }
 
     public function testShouldApplyOnXHTML() {
@@ -95,6 +96,20 @@ class CompositeHTMLFilterTest extends TestCase {
         $buffer = sprintf('<html><body>%s</body></html>', str_pad('', self::MAX_BUFFER_SIZE_TO_APPLY, 's'));
         $filtered = $this->filter->apply($buffer);
         $this->assertEquals($buffer, $filtered);
+    }
+
+    public function testShouldOutputUTF8WithDeclaration() {
+        $this->shouldTransform();
+        $buffer = '<html><head><meta charset=utf8></head><body>ü</body></html>';
+        $filtered = $this->filter->apply($buffer);
+        $this->assertContains('ü', $filtered);
+    }
+
+    public function testShouldOutputUTF8WithoutDeclaration() {
+        $this->shouldTransform();
+        $buffer = '<html><body>ü</body></html>';
+        $filtered = $this->filter->apply($buffer);
+        $this->assertContains('ü', $filtered);
     }
 
     private function setExpectation($expectation) {
