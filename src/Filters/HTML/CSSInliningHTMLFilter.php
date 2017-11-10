@@ -77,9 +77,12 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
         foreach ($urlMatches as $match) {
+            if (!empty ($match['media'])) {
+                continue;
+            }
             $content = str_replace($match[0], '', $content);
             $url = URL::fromString($match['url'])->withBase($url);
-            if (in_array((string)$url, $seen) || !empty ($match['media'])) {
+            if (in_array((string)$url, $seen)) {
                 continue;
             }
             $seen[] = (string)$url;
@@ -145,6 +148,8 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         return preg_replace_callback(
             '~
                 (
+                    @import \s* (?:"|\'|)
+                    |
                     url\( \s* (?:"|\'|)
                 )
                 (?! [a-z]+: | // )

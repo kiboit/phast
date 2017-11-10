@@ -229,8 +229,17 @@ EOS;
         $this->filter->transformHTMLDOM($this->dom);
 
         $this->assertEquals(1, $this->head->childNodes->length);
-        $this->assertEquals('style', $this->head->childNodes->item(0)->tagName);
-        $this->assertEquals('some, other, screen', $this->head->childNodes->item(0)->getAttribute('media'));
+        $style = $this->head->childNodes->item(0);
+        $this->assertEquals('style', $style->tagName);
+        $this->assertEquals('some, other, screen', $style->getAttribute('media'));
+        $this->assertEquals(
+            '@import "'
+                . self::BASE_URL
+                . '/something" projection,print;@import "'
+                . self::BASE_URL
+                . '/something-else" media and non-media;',
+            $style->textContent
+        );
 
     }
 
