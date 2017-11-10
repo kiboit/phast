@@ -24,9 +24,9 @@ class CSSImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
 
         $this->filter = new CSSImagesOptimizationServiceHTMLFilter(
             $securityToken,
-            URL::fromString('http://kibo-test.com/css/'),
-            URL::fromString('http://kibo-test.com/images.php'),
-            ['~' . preg_quote('http://kibo-test.com') . '~']
+            URL::fromString(self::BASE_URL . '/css/'),
+            URL::fromString(self::BASE_URL . '/images.php'),
+            ['~' . preg_quote(self::BASE_URL . '') . '~']
         );
     }
 
@@ -57,16 +57,16 @@ class CSSImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
             [
                 'background: url("images/image1")',
                 'background: url("'
-                . 'http://kibo-test.com/images.php?src='
-                . urlencode('http://kibo-test.com/css/images/image1')
+                . self::BASE_URL . '/images.php?src='
+                . urlencode(self::BASE_URL . '/css/images/image1')
                 . '&token=the-token'
                 . '")'
             ],
             [
                 "border-image: url('/images/image2')",
                 'border-image: url(\''
-                . 'http://kibo-test.com/images.php?src='
-                . urlencode('http://kibo-test.com/images/image2')
+                . self::BASE_URL . '/images.php?src='
+                . urlencode(self::BASE_URL . '/images/image2')
                 . '&token=the-token'
                 . '\')'
             ]

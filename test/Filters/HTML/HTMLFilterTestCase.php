@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class HTMLFilterTestCase extends TestCase {
 
-    const BASE_URL = 'kibo-test.org';
+    const BASE_URL = 'http://kibo-test.org';
 
     /**
      * @var \DOMDocument

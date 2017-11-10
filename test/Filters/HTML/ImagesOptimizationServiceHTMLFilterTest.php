@@ -19,9 +19,9 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         parent::setUp();
         $this->filter = new ImagesOptimizationServiceHTMLFilter(
             new ServiceSignature($this->createMock(Cache::class)),
-            URL::fromString('http://kibo-test.org'),
+            URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
-            ['~' . preg_quote('http://kibo-test.org') . '~']
+            ['~' . preg_quote(self::BASE_URL) . '~']
         );
     }
 
@@ -36,12 +36,12 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         /** @var \DOMElement[] $images */
         $images = iterator_to_array($this->dom->getElementsByTagName('img'));
 
-        $this->checkSrc($images[0]->getAttribute('src'), ['src' => 'http://kibo-test.org/img?1']);
-        $this->checkSrc($images[1]->getAttribute('src'), ['src' => 'http://kibo-test.org/img?2', 'width' => 20]);
-        $this->checkSrc($images[2]->getAttribute('src'), ['src' => 'http://kibo-test.org/img?3', 'height' => 30]);
+        $this->checkSrc($images[0]->getAttribute('src'), ['src' => self::BASE_URL . '/img?1']);
+        $this->checkSrc($images[1]->getAttribute('src'), ['src' => self::BASE_URL . '/img?2', 'width' => 20]);
+        $this->checkSrc($images[2]->getAttribute('src'), ['src' => self::BASE_URL . '/img?3', 'height' => 30]);
         $this->checkSrc(
             $images[3]->getAttribute('src'),
-            ['src' => 'http://kibo-test.org/img?4', 'width' => 40, 'height' => 50]
+            ['src' => self::BASE_URL . '/img?4', 'width' => 40, 'height' => 50]
         );
     }
 
@@ -69,11 +69,11 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         }, explode(',', $img->getAttribute('srcset')));
 
         $this->assertCount(4, $sets);
-        $this->checkSrc($sets[0][0], ['src' => 'http://kibo-test.org/val']);
+        $this->checkSrc($sets[0][0], ['src' => self::BASE_URL . '/val']);
         $this->assertEquals('2x', $sets[0][1]);
-        $this->checkSrc($sets[1][0], ['src' => 'http://kibo-test.org/val2']);
+        $this->checkSrc($sets[1][0], ['src' => self::BASE_URL . '/val2']);
         $this->assertCount(1, $sets[1]);
-        $this->checkSrc($sets[2][0], ['src' => 'http://kibo-test.org/val3']);
+        $this->checkSrc($sets[2][0], ['src' => self::BASE_URL . '/val3']);
         $this->assertEquals('6w', $sets[2][1]);
         $this->assertEquals('data:blah', $sets[3][0]);
         $this->assertEquals('53', $sets[3][1]);

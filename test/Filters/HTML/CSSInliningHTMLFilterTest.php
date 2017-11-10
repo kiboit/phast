@@ -88,16 +88,16 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
     public function urlProvider() {
         return [
             [
-                'http://' . self::BASE_URL . '/style.css',
-                'http://' . self::BASE_URL . '/style.css'
+                self::BASE_URL . '/style.css',
+                self::BASE_URL . '/style.css'
             ],
             [
                 '/style.css',
-                '/style.css'
+                self::BASE_URL . '/style.css'
             ],
             [
                 'style.css',
-                '/css/style.css'
+                self::BASE_URL . '/css/style.css'
             ],
             [
                 'http://cross-site.org/css/style.css',
@@ -173,7 +173,7 @@ EOS;
         $style = $this->head->childNodes->item(1);
         $this->assertEquals('link', $link->tagName);
         $this->assertEquals('stylesheet', $link->getAttribute('rel'));
-        $this->assertEquals('/some-file', $link->getAttribute('href'));
+        $this->assertEquals(self::BASE_URL . '/some-file', $link->getAttribute('href'));
         $this->assertEquals('style', $style->tagName);
         $this->assertEquals('the-style-itself', $style->textContent);
     }
@@ -197,7 +197,7 @@ EOS;
 
         $this->assertEquals('link', $link->tagName);
         $this->assertEquals('stylesheet', $link->getAttribute('rel'));
-        $this->assertEquals('/file3', $link->getAttribute('href'));
+        $this->assertEquals(self::BASE_URL . '/file3', $link->getAttribute('href'));
         $this->assertEquals('style', $sub2->tagName);
         $this->assertEquals('sub2', $sub2->textContent);
         $this->assertEquals('style', $sub1->tagName);
