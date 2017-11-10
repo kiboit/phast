@@ -7,6 +7,7 @@ use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
@@ -31,7 +32,17 @@ class ScriptsProxyServiceTest extends TestCase {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
         $this->retriever = $this->createMock(Retriever::class);
-        $this->service = new ScriptsProxyService($this->retriever, $this->cache, ['~http://allowed\.com~']);
+        $signature = $this->createMock(ServiceSignature::class);
+        $signature->method('verify')
+            ->willReturnCallback(function ($token) {
+                return $token == 'the-token';
+            });
+        $this->service = new ScriptsProxyService(
+            $signature,
+            ['~http://allowed\.com~'],
+            $this->retriever,
+            $this->cache
+        );
     }
 
     public function testFetching() {
@@ -53,6 +64,11 @@ class ScriptsProxyServiceTest extends TestCase {
     public function testExceptionOnNotAllowedURL() {
         $this->expectException(UnauthorizedException::class);
         $request = ['src' => 'http://not-allowed.com/the-script', 'cacheMarker' => 123456789];
+        $this->service->serve(Request::fromArray($request, []));
+    }
+
+    public function testNoExceptionOnNotAllowedURLWithToken() {
+        $request = ['src' => 'http://not-allowed.com/the-script', 'cacheMarker' => 123456789, 'token' => 'the-token'];
         $this->service->serve(Request::fromArray($request, []));
     }
 

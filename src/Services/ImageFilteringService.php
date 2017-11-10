@@ -25,21 +25,20 @@ class ImageFilteringService extends Service {
     /**
      * ImageFilteringService constructor.
      *
-     * @param ImageFactory $imageFactory
-     * @param CompositeImageFilterFactory $filterFactory
      * @param ServiceSignature $signature
      * @param string[] $whitelist
+     * @param ImageFactory $imageFactory
+     * @param CompositeImageFilterFactory $filterFactory
      */
     public function __construct(
-        ImageFactory $imageFactory,
-        CompositeImageFilterFactory $filterFactory,
         ServiceSignature $signature,
-        array $whitelist
+        array $whitelist,
+        ImageFactory $imageFactory,
+        CompositeImageFilterFactory $filterFactory
     ) {
+        parent::__construct($signature, $whitelist);
         $this->imageFactory = $imageFactory;
         $this->filterFactory = $filterFactory;
-        $this->signature = $signature;
-        $this->whitelist = $whitelist;
     }
 
     protected function handle(array $request) {

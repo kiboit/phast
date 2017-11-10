@@ -37,10 +37,10 @@ class ServicesFactory {
      */
     public function makeImagesService(array $config) {
         return new ImageFilteringService(
-            new ImageFactory($config),
-            new CompositeImageFilterFactory($config),
             (new ServiceSignatureFactory())->make($config),
-            $config['images']['whitelist']
+            $config['images']['whitelist'],
+            new ImageFactory($config),
+            new CompositeImageFilterFactory($config)
         );
     }
 
@@ -53,9 +53,10 @@ class ServicesFactory {
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
         $retriever->addRetriever(new RemoteRetriever());
         return new ScriptsProxyService(
+            (new ServiceSignatureFactory())->make($config),
+            $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match'],
             $retriever,
-            new FileCache($config['cache'], 'scripts'),
-            $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match']
+            new FileCache($config['cache'], 'scripts')
         );
     }
 

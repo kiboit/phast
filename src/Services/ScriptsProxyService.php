@@ -8,6 +8,7 @@ use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ScriptsProxyService extends Service {
@@ -25,14 +26,15 @@ class ScriptsProxyService extends Service {
     /**
      * ScriptsProxyService constructor.
      *
+     * @param ServiceSignature $signature
+     * @param string[] $whitelist
      * @param Retriever $retriever
      * @param Cache $cache
-     * @param string[] $whitelist
      */
-    public function __construct(Retriever $retriever, Cache $cache, array $whitelist) {
+    public function __construct(ServiceSignature $signature, array $whitelist, Retriever $retriever, Cache $cache) {
+        parent::__construct($signature, $whitelist);
         $this->retriever = $retriever;
         $this->cache = $cache;
-        $this->whitelist = $whitelist;
     }
 
     protected function handle(array $request) {
@@ -55,8 +57,11 @@ class ScriptsProxyService extends Service {
     }
 
     protected function validateRequest(array $request) {
-        if (!$this->isWhitelistedUrl($request['src'])) {
-            throw new UnauthorizedException('Not allowed url: ' . $request['src']);
+        $this->validateIntegrity($request);
+        try {
+            $this->validateToken($request);
+        } catch (UnauthorizedException $e) {
+            $this->validateWhitelisted($request);
         }
     }
 

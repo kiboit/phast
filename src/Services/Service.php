@@ -31,6 +31,17 @@ abstract class Service {
     }
 
     /**
+     * Service constructor.
+     *
+     * @param ServiceSignature $signature
+     * @param string[] $whitelist
+     */
+    public function __construct(ServiceSignature $signature, array $whitelist) {
+        $this->signature = $signature;
+        $this->whitelist = $whitelist;
+    }
+
+    /**
      * @param Request $request
      * @return Response
      */
@@ -40,9 +51,18 @@ abstract class Service {
     }
 
     protected  function validateRequest(array $request) {
+        $this->validateIntegrity($request);
+        $this->validateToken($request);
+        $this->validateWhitelisted($request);
+    }
+
+    protected function validateIntegrity(array $request) {
         if (!isset ($request['src'])) {
             throw new ItemNotFoundException('No source is set!');
         }
+    }
+
+    protected function validateToken(array $request) {
         if (!isset ($request['token'])) {
             throw new UnauthorizedException();
         }
@@ -54,17 +74,14 @@ abstract class Service {
         if (!$this->signature->verify($token, http_build_query($request))) {
             throw new UnauthorizedException();
         }
-        if (!$this->isWhitelistedUrl($request['src'])) {
-            throw new UnauthorizedException('Not allowed url: ' . $request['src']);
-        }
     }
 
-    protected function isWhitelistedUrl($url) {
+    protected function validateWhitelisted(array $request) {
         foreach ($this->whitelist as $pattern) {
-            if (preg_match($pattern, $url)) {
-                return true;
+            if (preg_match($pattern, $request['src'])) {
+                return;
             }
         }
-        return false;
+        throw new UnauthorizedException('Not allowed url: ' . $request['src']);
     }
 }
