@@ -101,7 +101,7 @@ class FileCache implements Cache {
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
         $expirationTime = $expiresIn > 0 ? $this->functions->time() + $expiresIn : 0;
-        $serialized = pack('J', $expirationTime) . serialize($contents);
+        $serialized = pack('q', $expirationTime) . serialize($contents);
         $result = @$this->functions->file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
             $this->functions->error_log(
@@ -128,7 +128,7 @@ class FileCache implements Cache {
             $this->functions->error_log("Phast cache error: Could not read file $file");
             return null;
         }
-        $expirationTime = unpack('J', $contents)[1];
+        $expirationTime = unpack('q', $contents)[1];
         $data = substr($contents, 8);
         if ($expirationTime > $this->functions->time() || $expirationTime == 0) {
             if (time() - @$this->functions->filemtime($file) >= round($this->gcMaxAge / 10)) {
