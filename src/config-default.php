@@ -33,6 +33,9 @@ return [
                 'whitelist' => [
                     '~^https?://fonts\.googleapis\.com/css~' => [
                         'ieCompatible' => false
+                    ],
+                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~' => [
+                        'ieCompatible' => false
                     ]
                 ]
             ],
@@ -52,7 +55,7 @@ return [
                 'match' => [
                     '~^https?://(ssl|www)\.google-analytics\.com/~',
                     '~^https?://static\.hotjar\.com/~',
-                    '~' . preg_quote($_SERVER['HTTP_HOST']) . '~'
+                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~'
                 ]
             ],
 
