@@ -9,6 +9,7 @@ use Kibo\Phast\Factories\Filters\Image\ImageFactory;
 use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
 use Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter;
 use Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter;
+use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
@@ -53,12 +54,17 @@ class ServicesFactory {
     public function makeScriptsService(array $config) {
         $retriever = new UniversalRetriever();
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
-        $retriever->addRetriever(new RemoteRetriever());
+        $retriever->addRetriever(
+            new CachingRetriever(
+                new FileCache($config['cache'], 'scripts'),
+                new RemoteRetriever(),
+                7200
+            )
+        );
         return new ScriptsProxyService(
             (new ServiceSignatureFactory())->make($config),
             $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match'],
-            $retriever,
-            new FileCache($config['cache'], 'scripts')
+            $retriever
         );
     }
 
@@ -69,12 +75,17 @@ class ServicesFactory {
     public function makeCssService(array $config) {
         $retriever = new UniversalRetriever();
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
-        $retriever->addRetriever(new RemoteRetriever());
+        $retriever->addRetriever(
+            new CachingRetriever(
+                new FileCache($config['cache'], 'css'),
+                new RemoteRetriever(),
+                7200
+            )
+        );
         return new CSSProxyService(
             (new ServiceSignatureFactory())->make($config),
             array_keys($config['documents']['filters'][CSSInliningHTMLFilter::class]['whitelist']),
-            $retriever,
-            new FileCache($config['cache'], 'css')
+            $retriever
         );
     }
 

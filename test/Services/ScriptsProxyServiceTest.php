@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Services;
 
-use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
@@ -16,11 +15,6 @@ class ScriptsProxyServiceTest extends TestCase {
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    private $cache;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
     private $retriever;
 
     /**
@@ -30,7 +24,6 @@ class ScriptsProxyServiceTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->cache = $this->createMock(Cache::class);
         $this->retriever = $this->createMock(Retriever::class);
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('verify')
@@ -40,16 +33,13 @@ class ScriptsProxyServiceTest extends TestCase {
         $this->service = new ScriptsProxyService(
             $signature,
             ['~http://allowed\.com~'],
-            $this->retriever,
-            $this->cache
+            $this->retriever
         );
     }
 
     public function testFetching() {
-        $this->useTransparentCache();
         $request = [
-            'src' => 'http://allowed.com/the-script',
-            'cacheMarker' => 123456789
+            'src' => 'http://allowed.com/the-script'
         ];
         $this->retriever->expects($this->once())
             ->method('retrieve')
@@ -73,29 +63,12 @@ class ScriptsProxyServiceTest extends TestCase {
     }
 
     public function testExceptionOnNoResult() {
-        $this->useTransparentCache();
         $request = ['src' => 'http://allowed.com/the-script', 'cacheMarker' => 123456789];
         $this->retriever->expects($this->once())
             ->method('retrieve')
             ->willReturn(false);
         $this->expectException(ItemNotFoundException::class);
         $this->service->serve(Request::fromArray($request, []));
-    }
-
-    public function testCachingOnRequestedSrc() {
-        $request = ['src' => 'http://allowed.com/the-script', 'cacheMarker' => 123456789];
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->with('http://allowed.com/the-script123456789');
-        $this->service->serve(Request::fromArray($request, []));
-    }
-
-    private function useTransparentCache() {
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->willReturnCallback(function ($key, callable $cb) {
-                return $cb();
-            });
     }
 
 }

@@ -4,8 +4,8 @@ namespace Kibo\Phast\Factories\Filters\HTML;
 
 use Kibo\Phast\Cache\FileCache;
 use Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter;
+use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
-use Kibo\Phast\Retrievers\ProxyServiceCacheRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -15,9 +15,8 @@ class CSSInliningHTMLFilterFactory implements HTMLFilterFactory {
         $retriever = new UniversalRetriever();
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
         $retriever->addRetriever(
-            new ProxyServiceCacheRetriever(
-                new FileCache($config['cache'], 'css'),
-                $config['documents']['filters'][CSSInliningHTMLFilter::class]['urlRefreshTime']
+            new CachingRetriever(
+                new FileCache($config['cache'], 'css')
             )
         );
 

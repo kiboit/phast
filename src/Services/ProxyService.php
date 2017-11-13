@@ -28,19 +28,14 @@ class ProxyService extends Service {
      * @param ServiceSignature $signature
      * @param string[] $whitelist
      * @param Retriever $retriever
-     * @param Cache $cache
      */
-    public function __construct(ServiceSignature $signature, array $whitelist, Retriever $retriever, Cache $cache) {
+    public function __construct(ServiceSignature $signature, array $whitelist, Retriever $retriever) {
         parent::__construct($signature, $whitelist);
         $this->retriever = $retriever;
-        $this->cache = $cache;
     }
 
     protected function handle(array $request) {
-        $cacheKey = $request['src'] . $request['cacheMarker'];
-        $result = $this->cache->get($cacheKey, function () use ($request) {
-            return $this->doRequest($request);
-        });
+        $result = $this->doRequest($request);
 
         $response = new Response();
         $response->setHeader('Content-Length', strlen($result));
