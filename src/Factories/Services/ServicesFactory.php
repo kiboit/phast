@@ -84,7 +84,7 @@ class ServicesFactory {
         );
         return new CSSProxyService(
             (new ServiceSignatureFactory())->make($config),
-            array_keys($config['documents']['filters'][CSSInliningHTMLFilter::class]['whitelist']),
+            $config['documents']['filters'][CSSInliningHTMLFilter::class]['whitelist'],
             $retriever
         );
     }
