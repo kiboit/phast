@@ -123,29 +123,12 @@ EOJS;
         $seen = [(string)$location];
         $elements = $this->inlineURL($document, $location, 0, $seen);
         if (empty ($elements)) {
-            $params = [
-                'src' => $link->getAttribute('href'),
-                'cacheMarker' => floor(time() / $this->urlRefreshTime)
-            ];
-            $glue = strpos($this->serviceUrl, '?') !== false ? '&' : '?';
-            $link->setAttribute('href', $this->serviceUrl . $glue . http_build_query($params));
+            $this->redirectLinkToService($link);
             return;
+        } else {
+            $this->transformLinkToElements($link, $elements, $whitelistEntry['ieCompatible']);
         }
-        $media = (string)$link->getAttribute('media');
-        foreach ($elements as $element) {
-            if ($media) {
-                $element->setAttribute('media', $media);
-            }
-            if (!$whitelistEntry['ieCompatible']) {
-                $element->setAttribute('data-phast-ie-fallback-group', $this->ieFallbackGroup);
-            }
-            $link->parentNode->insertBefore($element, $link);
 
-        }
-        if (!$whitelistEntry['ieCompatible']) {
-            $element->setAttribute('data-phast-ie-fallback-url', $link->getAttribute('href'));
-        }
-        $link->parentNode->removeChild($link);
     }
 
     private function findInWhitelist(URL $url) {
@@ -205,6 +188,32 @@ EOJS;
         $elements[] = $this->makeStyle($document, $content);
 
         return $elements;
+    }
+
+    private function redirectLinkToService(\DOMElement $link) {
+        $params = [
+            'src' => $link->getAttribute('href'),
+            'cacheMarker' => floor(time() / $this->urlRefreshTime)
+        ];
+        $glue = strpos($this->serviceUrl, '?') !== false ? '&' : '?';
+        $link->setAttribute('href', $this->serviceUrl . $glue . http_build_query($params));
+    }
+
+    private function transformLinkToElements(\DOMElement $link, array $elements, $ieCompatible) {
+        $media = (string)$link->getAttribute('media');
+        foreach ($elements as $element) {
+            if ($media) {
+                $element->setAttribute('media', $media);
+            }
+            if (!$ieCompatible) {
+                $element->setAttribute('data-phast-ie-fallback-group', $this->ieFallbackGroup);
+            }
+            $link->parentNode->insertBefore($element, $link);
+        }
+        if (!$ieCompatible) {
+            $element->setAttribute('data-phast-ie-fallback-url', $link->getAttribute('href'));
+        }
+        $link->parentNode->removeChild($link);
     }
 
     private function getImportedURLs($cssContent) {
