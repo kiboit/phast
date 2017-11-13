@@ -41,6 +41,7 @@ EOS;
 
         if ($insert_loader) {
             $loader = $document->createElement('script', self::LOADER_JS);
+            $loader->setAttribute('data-phast-no-defer', '');
             $this->getBodyElement($document)->appendChild($loader);
         }
     }

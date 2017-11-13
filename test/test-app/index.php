@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../src/html-filters.php';
     <head>
         <link rel="stylesheet" href="css/styles.css">
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet">
         <script src="js/deferred.js" defer></script>
         <script src="js/main.js" type="application/javascript"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" async></script>
