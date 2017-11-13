@@ -7,6 +7,10 @@ use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
+    const SERVICE_URL = self::BASE_URL . '/service.php';
+
+    const URL_REFRESH_TIME = 7200;
+
     private $files;
 
     /**
@@ -32,10 +36,14 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $this->filter = new CSSInliningHTMLFilter(
             URL::fromString(self::BASE_URL),
             [
-                '~' . preg_quote(self::BASE_URL) . '~',
-                '~https://fonts\.googleapis\.com~' => [
-                    'ieCompatible' => false
-                ]
+                'whitelist' => [
+                    '~' . preg_quote(self::BASE_URL) . '~',
+                    '~https://fonts\.googleapis\.com~' => [
+                        'ieCompatible' => false
+                    ]
+                ],
+                'serviceUrl' => self::SERVICE_URL,
+                'urlRefreshTime' => self::URL_REFRESH_TIME
             ],
             $retriever
         );
@@ -125,8 +133,8 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         ];
     }
 
-    public function testNotInliningOnReadError() {
-        $theLink = $this->makeLink($this->head);
+    public function testRedirectingToProxyServiceOnReadError() {
+        $theLink = $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('retrieve')
               ->willReturnCallback(function () {
@@ -135,13 +143,30 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
               });
         $filter = new CSSInliningHTMLFilter(
             URL::fromString(self::BASE_URL),
-            ['~' . preg_quote(self::BASE_URL) . '~'],
+            [
+                'whitelist' => [
+                    '~' . preg_quote(self::BASE_URL) . '~',
+                    '~https://fonts\.googleapis\.com~' => [
+                        'ieCompatible' => false
+                    ]
+                ],
+                'serviceUrl' => self::SERVICE_URL,
+                'urlRefreshTime' => self::URL_REFRESH_TIME
+            ],
             $retriever
         );
         $filter->transformHTMLDOM($this->dom);
 
         $this->assertEmpty($this->getTheStyles());
         $this->assertSame($this->head->childNodes[0], $theLink);
+
+        $expectedQuery = [
+            'src' => self::BASE_URL . '/the-css.css',
+            'cacheMarker' => floor(time() / self::URL_REFRESH_TIME)
+        ];
+        $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);
+        $this->assertEquals($expectedUrl, $theLink->getAttribute('href'));
+
     }
 
     public function testMinifying() {

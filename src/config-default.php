@@ -29,6 +29,7 @@ return [
             \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [
+                'urlRefreshTime' => 7200,
                 'whitelist' => [
                     '~^https?://fonts\.googleapis\.com/css~' => [
                         'ieCompatible' => false

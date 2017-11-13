@@ -3,66 +3,18 @@
 namespace Kibo\Phast\Services;
 
 use JSMin\JSMin;
-use Kibo\Phast\Cache\Cache;
-use Kibo\Phast\Exceptions\ItemNotFoundException;
-use Kibo\Phast\Exceptions\UnauthorizedException;
-use Kibo\Phast\HTTP\Response;
-use Kibo\Phast\Retrievers\Retriever;
-use Kibo\Phast\Security\ServiceSignature;
-use Kibo\Phast\ValueObjects\URL;
 
-class ScriptsProxyService extends Service {
-
-    /**
-     * @var Retriever
-     */
-    private $retriever;
-
-    /**
-     * @var Cache
-     */
-    private $cache;
-
-    /**
-     * ScriptsProxyService constructor.
-     *
-     * @param ServiceSignature $signature
-     * @param string[] $whitelist
-     * @param Retriever $retriever
-     * @param Cache $cache
-     */
-    public function __construct(ServiceSignature $signature, array $whitelist, Retriever $retriever, Cache $cache) {
-        parent::__construct($signature, $whitelist);
-        $this->retriever = $retriever;
-        $this->cache = $cache;
-    }
+class ScriptsProxyService extends ProxyService {
 
     protected function handle(array $request) {
-        $cacheKey = $request['src'] . $request['cacheMarker'];
-        $result =  $this->cache->get($cacheKey, function () use ($request) {
-            $result = $this->retriever->retrieve(URL::fromString($request['src']));
-            if ($result === false) {
-                throw new ItemNotFoundException("Could not get {$request['src']}!");
-            }
-            return JSMin::minify($result);
-        });
-
-        $response = new Response();
-        $response->setHeader('Content-Length', strlen($result));
-        $response->setHeader('Cache-Control', 'max-age=' . (86400 * 365));
+        $response = parent::handle($request);
         $response->setHeader('Content-Type', 'application/javascript');
-        $response->setContent($result);
-
         return $response;
     }
 
-    protected function validateRequest(array $request) {
-        $this->validateIntegrity($request);
-        try {
-            $this->validateToken($request);
-        } catch (UnauthorizedException $e) {
-            $this->validateWhitelisted($request);
-        }
+    protected function doRequest(array $request) {
+        $result = parent::doRequest($request);
+        return JSMin::minify($result);
     }
 
 }

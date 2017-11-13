@@ -66,13 +66,26 @@ EOJS;
     private $whitelist;
 
     /**
+     * @var string
+     */
+    private $serviceUrl;
+
+    /**
+     * @var int
+     */
+    private $urlRefreshTime;
+
+
+    /**
      * @var Retriever
      */
     private $retriever;
 
-    public function __construct(URL $baseURL, array $whitelist, Retriever $retriever) {
+    public function __construct(URL $baseURL, array $config, Retriever $retriever) {
         $this->baseURL = $baseURL;
-        $this->whitelist = $whitelist;
+        $this->whitelist = (array)$config['whitelist'];
+        $this->serviceUrl = (string)$config['serviceUrl'];
+        $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->retriever = $retriever;
     }
 
@@ -110,9 +123,14 @@ EOJS;
         $seen = [(string)$location];
         $elements = $this->inlineURL($document, $location, 0, $seen);
         if (empty ($elements)) {
+            $params = [
+                'src' => $link->getAttribute('href'),
+                'cacheMarker' => floor(time() / $this->urlRefreshTime)
+            ];
+            $glue = strpos($this->serviceUrl, '?') !== false ? '&' : '?';
+            $link->setAttribute('href', $this->serviceUrl . $glue . http_build_query($params));
             return;
         }
-
         $media = (string)$link->getAttribute('media');
         foreach ($elements as $element) {
             if ($media) {
@@ -159,7 +177,6 @@ EOJS;
         if ($content === false) {
             return [];
         }
-
         $content = $this->minify($content);
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
