@@ -41,6 +41,18 @@ class FileCacheTest extends TestCase {
         $this->rebuildCache();
     }
 
+    public function testCallingWithNoDefault() {
+        $shouldBeNull = $this->cache->get('key');
+        $shouldBeFive = $this->cache->get('key', function () {
+            return 5;
+        });
+        $shouldBeFive2 = $this->cache->get('key');
+
+        $this->assertNull($shouldBeNull);
+        $this->assertEquals(5, $shouldBeFive);
+        $this->assertEquals(5, $shouldBeFive2);
+    }
+
     public function testCaching() {
         $value = 'the-pirate-cache';
         $key = 'the-key-we-have';

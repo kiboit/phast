@@ -9,6 +9,6 @@ interface Cache {
      * @param callable $cached
      * @return mixed
      */
-    public function get($hashedKey, callable $cached);
+    public function get($hashedKey, callable $cached = null);
 
 }

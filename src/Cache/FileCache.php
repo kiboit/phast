@@ -57,10 +57,13 @@ class FileCache implements Cache {
         }
     }
 
-    public function get($key, callable $cached) {
+    public function get($key, callable $cached = null) {
         $contents = $this->getFromCache($key);
         if (!is_null($contents)) {
             return $contents;
+        }
+        if (is_null($cached)) {
+            return null;
         }
         $contents = $cached();
         $this->storeCache($key, $contents);
