@@ -11,7 +11,7 @@ use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
-class ProxyServiceTest extends TestCase {
+class ScriptsProxyServiceTest extends TestCase {
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -24,7 +24,7 @@ class ProxyServiceTest extends TestCase {
     private $retriever;
 
     /**
-     * @var ProxyService
+     * @var ScriptsProxyService
      */
     private $service;
 
@@ -37,7 +37,7 @@ class ProxyServiceTest extends TestCase {
             ->willReturnCallback(function ($token) {
                 return $token == 'the-token';
             });
-        $this->service = new ProxyService(
+        $this->service = new ScriptsProxyService(
             $signature,
             ['~http://allowed\.com~'],
             $this->retriever,

@@ -12,7 +12,7 @@ use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\Services\ImageFilteringService;
-use Kibo\Phast\Services\ProxyService;
+use Kibo\Phast\Services\ScriptsProxyService;
 use Kibo\Phast\Services\Service;
 
 class ServicesFactory {
@@ -46,13 +46,13 @@ class ServicesFactory {
 
     /**
      * @param array $config
-     * @return ProxyService
+     * @return ScriptsProxyService
      */
-    public function makeProxyService(array $config) {
+    public function makeScriptsService(array $config) {
         $retriever = new UniversalRetriever();
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
         $retriever->addRetriever(new RemoteRetriever());
-        return new ProxyService(
+        return new ScriptsProxyService(
             (new ServiceSignatureFactory())->make($config),
             $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match'],
             $retriever,
