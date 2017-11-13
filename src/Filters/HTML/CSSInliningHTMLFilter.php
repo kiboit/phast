@@ -63,7 +63,7 @@ EOJS;
     /**
      * @var string[]
      */
-    private $whitelist;
+    private $whitelist = [];
 
     /**
      * @var string
@@ -83,10 +83,21 @@ EOJS;
 
     public function __construct(URL $baseURL, array $config, Retriever $retriever) {
         $this->baseURL = $baseURL;
-        $this->whitelist = (array)$config['whitelist'];
         $this->serviceUrl = (string)$config['serviceUrl'];
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->retriever = $retriever;
+
+        foreach ($config['whitelist'] as $key => $value) {
+            if (!is_array($value)) {
+                $this->whitelist[$value] = ['ieCompatible' => true];
+                $key = $value;
+            } else {
+                $this->whitelist[$key] = $value;
+            }
+            if (!isset ($this->whitelist[$key]['ieCompatible'])) {
+                $this->whitelist[$key] = true;
+            }
+        }
     }
 
     public function transformHTMLDOM(\DOMDocument $document) {
@@ -133,16 +144,9 @@ EOJS;
 
     private function findInWhitelist(URL $url) {
         $stringUrl = (string)$url;
-        foreach ($this->whitelist as $key => $item) {
-            if (is_array($item)) {
-                $pattern = $key;
-                $ieCompatible = !isset ($item['ieCompatible']) || $item['ieCompatible'];
-            } else {
-                $pattern = $item;
-                $ieCompatible = true;
-            }
+        foreach ($this->whitelist as $pattern => $settings) {
             if (preg_match($pattern, $stringUrl)) {
-                return compact('pattern', 'ieCompatible');
+                return $settings;
             }
         }
         return false;
