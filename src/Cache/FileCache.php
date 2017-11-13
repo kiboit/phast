@@ -12,14 +12,14 @@ class FileCache implements Cache {
     private $cacheRoot;
 
     /**
-     * @var integer
-     */
-    private $maxAge;
-
-    /**
      * @var string
      */
     private $cacheNS;
+
+    /**
+     * @var integer
+     */
+    private $gcMaxAge;
 
     /**
      * @var float
@@ -39,7 +39,7 @@ class FileCache implements Cache {
 
     public function __construct(array $config, $cacheNamespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = $config['cacheRoot'];
-        $this->maxAge = $config['cacheMaxAge'];
+        $this->gcMaxAge = $config['garbageCollection']['maxAge'];
         $this->gcProbability = $config['garbageCollection']['probability'];
         $this->gcMaxItems = $config['garbageCollection']['maxItems'];
         $this->cacheNS = $cacheNamespace;
@@ -123,10 +123,10 @@ class FileCache implements Cache {
             return null;
         }
         $modTime = @$this->functions->filemtime($file);
-        if ($modTime + $this->maxAge > $this->functions->time()) {
+        if ($modTime + $this->gcMaxAge > $this->functions->time()) {
             $contents = @file_get_contents($file);
             if ($contents !== false) {
-                if (time() - $modTime >= round($this->maxAge / 10)) {
+                if (time() - $modTime >= round($this->gcMaxAge / 10)) {
                     $this->functions->touch($file);
                 }
                 return unserialize($contents);
@@ -181,7 +181,7 @@ class FileCache implements Cache {
 
 
     private function getOldFiles($files) {
-        $maxModificationTime = $this->functions->time() - $this->maxAge;
+        $maxModificationTime = $this->functions->time() - $this->gcMaxAge;
         foreach ($files as $file) {
             if ($this->functions->is_dir($file)) {
                 continue;

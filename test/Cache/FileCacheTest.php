@@ -28,10 +28,10 @@ class FileCacheTest extends TestCase {
         parent::setUp();
         $this->config = [
             'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir',
-            'cacheMaxAge' => 20,
             'garbageCollection' => [
                 'probability' => 0,
-                'maxItems' => 100
+                'maxItems' => 100,
+                'maxAge' => 20
             ]
         ];
         $this->rmDir($this->config['cacheRoot']);
@@ -81,7 +81,7 @@ class FileCacheTest extends TestCase {
     }
 
     public function testExpiration() {
-        $this->config['cacheMaxAge'] = 0;
+        $this->config['garbageCollection']['maxAge'] = 0;
         $this->rebuildCache();
 
         $calledTimes = 0;
@@ -224,7 +224,7 @@ class FileCacheTest extends TestCase {
 
     private function executeCacheTest() {
         $this->config['garbageCollection']['probability'] = 1;
-        $this->config['cacheMaxAge'] = 60;
+        $this->config['garbageCollection']['maxAge'] = 60;
         $items = [
             'dir1' => [
                 'item1' => 30,
