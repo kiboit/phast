@@ -119,8 +119,11 @@ class FileCache implements Cache {
 
     private function getFromCache($key) {
         $file = $this->getCacheFilename($key);
+        if (!@$this->functions->file_exists($file)) {
+            return null;
+        }
         $modTime = @$this->functions->filemtime($file);
-        if (@$this->functions->file_exists($file) && $modTime + $this->maxAge > $this->functions->time()) {
+        if ($modTime + $this->maxAge > $this->functions->time()) {
             $contents = @file_get_contents($file);
             if ($contents !== false) {
                 if (time() - $modTime >= round($this->maxAge / 10)) {
