@@ -57,7 +57,7 @@ class FileCache implements Cache {
         }
     }
 
-    public function get($key, callable $cached = null) {
+    public function get($key, callable $cached = null, $expiresIn = 0) {
         $contents = $this->getFromCache($key);
         if (!is_null($contents)) {
             return $contents;
@@ -66,7 +66,7 @@ class FileCache implements Cache {
             return null;
         }
         $contents = $cached();
-        $this->storeCache($key, $contents);
+        $this->storeCache($key, $contents, $expiresIn);
         return $contents;
     }
 
@@ -82,7 +82,7 @@ class FileCache implements Cache {
         return md5($key);
     }
 
-    private function storeCache($key, $contents) {
+    private function storeCache($key, $contents, $expiresIn) {
         $dir = $this->getCacheDir($key);
         if (!file_exists($dir)) {
             @mkdir($dir, 0700, true);
@@ -100,7 +100,8 @@ class FileCache implements Cache {
         }
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
-        $serialized = serialize($contents);
+        $expirationTime = $expiresIn > 0 ? $this->functions->time() + $expiresIn : 0;
+        $serialized = pack('J', $expirationTime) . serialize($contents);
         $result = @$this->functions->file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
             $this->functions->error_log(
@@ -122,16 +123,18 @@ class FileCache implements Cache {
         if (!@$this->functions->file_exists($file)) {
             return null;
         }
-        $modTime = @$this->functions->filemtime($file);
-        if ($modTime + $this->gcMaxAge > $this->functions->time()) {
-            $contents = @file_get_contents($file);
-            if ($contents !== false) {
-                if (time() - $modTime >= round($this->gcMaxAge / 10)) {
-                    $this->functions->touch($file);
-                }
-                return unserialize($contents);
-            }
+        $contents = @file_get_contents($file);
+        if ($contents === false) {
             $this->functions->error_log("Phast cache error: Could not read file $file");
+            return null;
+        }
+        $expirationTime = unpack('J', $contents)[1];
+        $data = substr($contents, 8);
+        if ($expirationTime > $this->functions->time() || $expirationTime == 0) {
+            if (time() - @$this->functions->filemtime($file) >= round($this->gcMaxAge / 10)) {
+                $this->functions->touch($file);
+            }
+            return unserialize($data);
         }
         return null;
     }

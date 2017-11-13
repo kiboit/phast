@@ -74,26 +74,33 @@ class FileCacheTest extends TestCase {
     public function testCorrectStorage() {
         $value = 'the-pirate-cache';
         $key = 'the-key-we-have';
-        $this->cache->get($key, function () use ($value) { return $value; });
+        $this->functions->time = function () {
+            return 30;
+        };
+        $this->cache->get($key, function () use ($value) { return $value; }, 20);
         $expectedFilename = $this->getCacheFileName($key);
         $this->assertFileExists($expectedFilename);
-        $this->assertEquals(serialize($value), file_get_contents($expectedFilename));
+        $this->assertEquals(pack('J', 50) . serialize($value), file_get_contents($expectedFilename));
     }
 
     public function testExpiration() {
-        $this->config['garbageCollection']['maxAge'] = 0;
-        $this->rebuildCache();
-
         $calledTimes = 0;
         $cached = function () use (&$calledTimes) {
             $calledTimes++;
             return $calledTimes;
         };
-        $this->cache->get('test', $cached);
+        $this->functions->time = function () {
+            return 10;
+        };
+        $this->cache->get('test', $cached, 10);
         $this->cache->get('test', $cached);
 
+        $this->assertEquals(1, $calledTimes);
+        $this->functions->time = function () {
+            return 30;
+        };
+        $this->cache->get('test', $cached, 10);
         $this->assertEquals(2, $calledTimes);
-        $this->assertEquals(serialize(2), file_get_contents($this->getCacheFileName('test')));
     }
 
     public function testNotWritingToUnownedDir() {

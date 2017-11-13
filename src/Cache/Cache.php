@@ -7,8 +7,9 @@ interface Cache {
     /**
      * @param $hashedKey
      * @param callable $cached
+     * @param int $expiresIn
      * @return mixed
      */
-    public function get($hashedKey, callable $cached = null);
+    public function get($hashedKey, callable $cached = null, $expiresIn = 0);
 
 }
