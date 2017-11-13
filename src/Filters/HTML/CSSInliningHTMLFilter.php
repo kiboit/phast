@@ -20,6 +20,18 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         return;
     }
     
+    document.addEventListener('readystatechange', function () {
+        Array.prototype.forEach.call(
+            document.querySelectorAll('link[data-phast-ie-fallback-url]'),
+            function (el) {
+                console.log(el);
+                el.getAttribute('data-phast-ie-fallback-url');
+                el.setAttribute('href', el.getAttribute('data-phast-ie-fallback-url'));
+            }
+        );
+    })
+
+    
     Array.prototype.forEach.call(
         document.querySelectorAll('style[data-phast-ie-fallback-url]'),
         function (el) {
@@ -110,6 +122,7 @@ EOJS;
         if ($this->ieFallbackGroup) {
             $this->ieFallbackGroup = 0;
             $script = $document->createElement('script');
+            $script->setAttribute('data-phast-no-defer', 'data-phast-no-defer');
             $script->textContent = $this->ieFallbackScript;
             $this->getBodyElement($document)->appendChild($script);
         }
@@ -134,7 +147,7 @@ EOJS;
         $seen = [(string)$location];
         $elements = $this->inlineURL($document, $location, 0, $seen);
         if (empty ($elements)) {
-            $this->redirectLinkToService($link);
+            $this->redirectLinkToService($link, $whitelistEntry['ieCompatible']);
             return;
         } else {
             $this->transformLinkToElements($link, $elements, $whitelistEntry['ieCompatible']);
@@ -194,13 +207,18 @@ EOJS;
         return $elements;
     }
 
-    private function redirectLinkToService(\DOMElement $link) {
+    private function redirectLinkToService(\DOMElement $link, $ieCompatible) {
+        $originalHref = $link->getAttribute('href');
         $params = [
-            'src' => $link->getAttribute('href'),
+            'src' => $originalHref,
             'cacheMarker' => floor(time() / $this->urlRefreshTime)
         ];
         $glue = strpos($this->serviceUrl, '?') !== false ? '&' : '?';
         $link->setAttribute('href', $this->serviceUrl . $glue . http_build_query($params));
+        if (!$ieCompatible) {
+            $link->setAttribute('data-phast-ie-fallback-url', $originalHref);
+        }
+        $this->ieFallbackGroup++;
     }
 
     private function transformLinkToElements(\DOMElement $link, array $elements, $ieCompatible) {

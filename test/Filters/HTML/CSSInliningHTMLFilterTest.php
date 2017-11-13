@@ -299,6 +299,9 @@ EOS;
         $this->files['https://fonts.googleapis.com/css3'] = 'the-import';
         $this->makeLink($this->head, 'css2', 'https://fonts.googleapis.com/css2');
         $this->makeLink($this->head, 'css3');
+        $this->makeLink($this->head, 'css4', 'https://fonts.googleapis.com/missing');
+        unset ($this->files['https://fonts.googleapis.com/missing']);
+
         $this->filter->transformHTMLDOM($this->dom);
 
 
@@ -306,6 +309,8 @@ EOS;
         $ie = $this->head->childNodes->item(1);
         $ie2 = $this->head->childNodes->item(2);
         $nonIe = $this->head->childNodes->item(3);
+        $ieLink = $this->head->childNodes->item(4);
+
 
 
         $this->assertEquals('style', $import->tagName);
@@ -325,8 +330,12 @@ EOS;
 
         $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-group'));
         $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-url'));
+
         $script = $this->body->childNodes->item(0);
         $this->assertEquals('script', $script->tagName);
+        $this->assertTrue($script->hasAttribute('data-phast-no-defer'));
+
+        $this->assertEquals('https://fonts.googleapis.com/missing', $ieLink->getAttribute('data-phast-ie-fallback-url'));
 
     }
 
