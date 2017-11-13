@@ -140,6 +140,9 @@ class FileCache implements Cache {
     }
 
     private function shouldCollectGarbage() {
+        if (!$this->functions->file_exists($this->cacheRoot)) {
+            return false;
+        }
         if ($this->gcProbability <= 0) {
             return false;
         }

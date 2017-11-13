@@ -153,6 +153,9 @@ class FileCacheTest extends TestCase {
             $actualMin = $min;
             $actualMax = $max;
         };
+        $this->functions->file_exists = function () {
+            return true;
+        };
         $this->config['garbageCollection']['probability'] = 0.5;
         $this->rebuildCache();
         $this->assertEquals(1, $actualMin);
@@ -163,6 +166,9 @@ class FileCacheTest extends TestCase {
         $deployed = 0;
         $this->functions->register_shutdown_function = function () use (&$deployed) {
             $deployed++;
+        };
+        $this->functions->file_exists = function () {
+            return true;
         };
 
         $this->config['garbageCollection']['probability'] = 1;
@@ -190,6 +196,18 @@ class FileCacheTest extends TestCase {
         }
         $this->assertLessThan(100, $deployed);
         $this->assertGreaterThan(0, $deployed);
+    }
+
+    public function testNotExplodingWhenGarbageCollectingOnMissingCacheRoot() {
+        $this->config['garbageCollection']['probability'] = 1;
+        $this->rebuildCache();
+
+        $cleanup = null;
+        $this->functions->register_shutdown_function = function (callable $cb) use (&$cleanup) {
+            $cleanup = $cb;
+        };
+        $this->rebuildCache();
+        $this->assertNull($cleanup);
     }
 
     public function testGarbageCollection() {
