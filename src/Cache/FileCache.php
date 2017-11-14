@@ -51,9 +51,7 @@ class FileCache implements Cache {
         }
 
         if ($this->shouldCollectGarbage()) {
-            $this->functions->register_shutdown_function(function () {
-                $this->collectGarbage();
-            });
+            $this->collectGarbage();
         }
     }
 
