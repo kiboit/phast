@@ -26,11 +26,11 @@ class CompositeImageFilterTest extends TestCase {
     public function testApplicationOnAllFilters() {
         $this->getMockFilter();
         $this->getMockFilter();
-        $this->filter->apply($this->image);
+        $this->filter->apply($this->image, []);
     }
 
     public function testReturnOriginalWhenNoFilters() {
-        $actual = $this->filter->apply($this->image);
+        $actual = $this->filter->apply($this->image, []);
         $this->assertSame($this->image, $actual);
     }
 
@@ -39,7 +39,7 @@ class CompositeImageFilterTest extends TestCase {
         $small = new DummyImage();
         $small->setImageString('small');
         $this->getMockFilter($small);
-        $actual = $this->filter->apply($this->image);
+        $actual = $this->filter->apply($this->image, []);
         $this->assertSame($small, $actual);
     }
 
@@ -48,7 +48,7 @@ class CompositeImageFilterTest extends TestCase {
         $big = new DummyImage();
         $big->setImageString('very-very-big');
         $this->getMockFilter($big);
-        $actual = $this->filter->apply($this->image);
+        $actual = $this->filter->apply($this->image, []);
         $this->assertSame($this->image, $actual);
     }
 

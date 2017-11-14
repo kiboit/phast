@@ -6,8 +6,9 @@ interface ImageFilter {
 
     /**
      * @param Image $image
+     * @param array $request
      * @return Image
      */
-    public function transformImage(Image $image);
+    public function transformImage(Image $image, array $request);
 
 }

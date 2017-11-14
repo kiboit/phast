@@ -61,7 +61,7 @@ class CachedCompositeImageFilterTest extends TestCase {
                 $this->assertEquals(0, $ttl);
                 return $this->imageArr;
             });
-        $this->filter->apply(new DummyImage());
+        $this->filter->apply(new DummyImage(), $this->request);
 
         $this->setUp(0);
         $this->cache->expects($this->once())
@@ -70,7 +70,7 @@ class CachedCompositeImageFilterTest extends TestCase {
                 $this->assertEquals(86400, $ttl);
                 return $this->imageArr;
             });
-        $this->filter->apply(new DummyImage());
+        $this->filter->apply(new DummyImage(), $this->request);
     }
 
     /**
@@ -92,7 +92,7 @@ class CachedCompositeImageFilterTest extends TestCase {
                 $this->checkHashKey($key);
                 return $this->imageArr;
             });
-        $this->filter->apply(new DummyImage());
+        $this->filter->apply(new DummyImage(), $this->request);
     }
 
     public function correctHashData() {
@@ -133,8 +133,8 @@ class CachedCompositeImageFilterTest extends TestCase {
                 $cache[$key] = json_encode($content);
                 return $content;
             });
-        $notCached = $this->filter->apply($originalImage);
-        $cached = $this->filter->apply($originalImage);
+        $notCached = $this->filter->apply($originalImage, $this->request);
+        $cached = $this->filter->apply($originalImage, $this->request);
 
         $this->assertNotSame($notCached, $originalImage);
         $this->assertNotSame($cached, $originalImage);
@@ -170,12 +170,12 @@ class CachedCompositeImageFilterTest extends TestCase {
 
         $thrown = 0;
         try {
-            $this->filter->apply($image);
+            $this->filter->apply($image, $this->request);
         } catch (CachedExceptionException $e) {
             $thrown++;
         }
         try {
-            $this->filter->apply($image);
+            $this->filter->apply($image, $this->request);
         } catch (CachedExceptionException $e) {
             $thrown++;
         }

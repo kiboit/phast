@@ -46,7 +46,7 @@ class ResizerImageFilter implements ImageFilter {
      * @param Image $image
      * @return Image
      */
-    public function transformImage(Image $image) {
+    public function transformImage(Image $image, array $request) {
         $hasBiggerWidth  = $this->maxWidth  && $image->getWidth()  > $this->maxWidth;
         $hasBiggerHeight = $this->maxHeight && $image->getHeight() > $this->maxHeight;
 

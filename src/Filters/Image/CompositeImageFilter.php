@@ -13,10 +13,10 @@ class CompositeImageFilter {
         $this->filters[] = $filter;
     }
 
-    public function apply(Image $image) {
+    public function apply(Image $image, array $request) {
         $filteredImage = $image;
         foreach ($this->filters as $filter) {
-            $filteredImage = $filter->transformImage($filteredImage);
+            $filteredImage = $filter->transformImage($filteredImage, $request);
         }
         return $filteredImage->getSizeAsString() < $image->getSizeAsString() ? $filteredImage : $image;
     }

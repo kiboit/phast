@@ -31,7 +31,7 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         $this->config = $config;
     }
 
-    public function transformImage(Image $image) {
+    public function transformImage(Image $image, array $request) {
         if (!$this->shouldApply($image)) {
             return $image;
         }

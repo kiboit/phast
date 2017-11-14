@@ -15,7 +15,7 @@ class WEBPEncoderImageFilter implements ImageFilter {
         $this->compression = $config['compression'];
     }
 
-    public function transformImage(Image $image) {
+    public function transformImage(Image $image, array $request) {
         if ($this->encode && $image->getType() != Image::TYPE_PNG) {
             $encoded = $image->encodeTo(Image::TYPE_WEBP)
                 ->compress($this->compression);

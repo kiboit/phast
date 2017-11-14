@@ -53,10 +53,11 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
 
     /**
      * @param Image $image
+     * @param array $request
      * @return Image
-     * @throws \Exception
+     * @throws CachedExceptionException
      */
-    public function apply(Image $image) {
+    public function apply(Image $image, array $request) {
         $url = URL::fromString($this->request['src']);
         $lastModTime = $this->retriever->getLastModificationTime($url);
         sort($this->filtersNames);
@@ -71,9 +72,9 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
             $key[] = $this->request['preferredType'];
         }
         $key = implode("\n", $key);
-        $result = $this->cache->get($key, function () use ($image) {
+        $result = $this->cache->get($key, function () use ($image, $request) {
             try {
-                return $this->serializeImage(parent::apply($image));
+                return $this->serializeImage(parent::apply($image, $request));
             } catch (\Exception $e) {
                 return $this->serializeException($e);
             }

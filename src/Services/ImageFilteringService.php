@@ -44,7 +44,7 @@ class ImageFilteringService extends Service {
     protected function handle(array $request) {
         $image = $this->imageFactory->getForURL(URL::fromString($request['src']));
         $filter = $this->filterFactory->make($request);
-        $image = $filter->apply($image);
+        $image = $filter->apply($image, $request);
 
         $response = new Response();
         $response->setHeader('Content-Type', $image->getType());
