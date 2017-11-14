@@ -2,7 +2,14 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
+
 class CompositeHTMLFilter {
+
+    /**
+     * @var ObjectifiedFunctions
+     */
+    private $functions;
 
     /**
      * @var integer
@@ -19,8 +26,9 @@ class CompositeHTMLFilter {
      *
      * @param int $maxBufferSizeToApply
      */
-    public function __construct($maxBufferSizeToApply) {
+    public function __construct($maxBufferSizeToApply, ObjectifiedFunctions $functions = null) {
         $this->maxBufferSizeToApply = $maxBufferSizeToApply;
+        $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
     /**
@@ -47,6 +55,28 @@ class CompositeHTMLFilter {
             return $buffer;
         }
 
+        try {
+            $output = $this->tryToApply($buffer, $time_start);
+        } catch (\Exception $e) {
+            $this->functions->error_log(sprintf(
+                'Phast: CompositeHTMLFilter: %s: Msg: %s, Code: %s, File: %s, Line: %s',
+                get_class($e),
+                $e->getMessage(),
+                $e->getCode(),
+                $e->getFile(),
+                $e->getLine()
+
+            ));
+            $output = $buffer;
+        }
+        return $output;
+    }
+
+    public function addHTMLFilter(HTMLFilter $filter) {
+        $this->filters[] = $filter;
+    }
+
+    private function tryToApply($buffer, $time_start) {
         $xmlErrors = libxml_use_internal_errors(true);
         $doc = new \DOMDocument();
         $doc->loadHTML('<?xml encoding="utf-8"?>' . $buffer);
@@ -88,10 +118,6 @@ class CompositeHTMLFilter {
         $output .= "-->\n";
 
         return $output;
-    }
-
-    public function addHTMLFilter(HTMLFilter $filter) {
-        $this->filters[] = $filter;
     }
 
 }

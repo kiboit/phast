@@ -2,11 +2,17 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use PHPUnit\Framework\TestCase;
 
 class CompositeHTMLFilterTest extends TestCase {
 
     const MAX_BUFFER_SIZE_TO_APPLY = 1024;
+
+    /**
+     * @var ObjectifiedFunctions
+     */
+    private $functions;
 
     /**
      * @var CompositeHTMLFilter
@@ -15,7 +21,8 @@ class CompositeHTMLFilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new CompositeHTMLFilter(self::MAX_BUFFER_SIZE_TO_APPLY);
+        $this->functions = new ObjectifiedFunctions();
+        $this->filter = new CompositeHTMLFilter(self::MAX_BUFFER_SIZE_TO_APPLY, $this->functions);
     }
 
     public function testShouldApplyOnHTML() {
@@ -112,10 +119,29 @@ class CompositeHTMLFilterTest extends TestCase {
         $this->assertContains('ü', $filtered);
     }
 
+    public function testShouldHandleExceptions() {
+        $filter = $this->createMock(HTMLFilter::class);
+        $filter->expects($this->once())
+            ->method('transformHTMLDOM')
+            ->willThrowException(new \Exception());
+        $this->filter->addHTMLFilter($filter);
+        $buffer = '<html><body></body></html>';
+
+        $logMsg = null;
+        $this->functions->error_log = function ($msg) use (&$logMsg) {
+            $logMsg = $msg;
+        };
+
+        $actual = $this->filter->apply($buffer);
+        $this->assertEquals($buffer, $actual);
+        $this->assertStringStartsWith('Phast: CompositeHTMLFilter: ', $logMsg);
+    }
+
     private function setExpectation($expectation) {
         $filterMock = $this->createMock(HTMLFilter::class);
         $filterMock->expects($expectation)->method('transformHTMLDOM');
         $this->filter->addHTMLFilter($filterMock);
+        return $filterMock;
     }
 
     private function shouldTransform() {
