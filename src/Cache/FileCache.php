@@ -174,7 +174,10 @@ class FileCache implements Cache {
     }
 
     private function getDirectoryIterator($path) {
-        $dir = $this->functions->opendir($path);
+        $dir = @$this->functions->opendir($path);
+        if (!$dir) {
+            return;
+        }
         while (($item = $this->functions->readdir($dir)) !== false) {
             if ($item == '.' || $item == '..') {
                 continue;
@@ -188,10 +191,10 @@ class FileCache implements Cache {
     private function getOldFiles($files) {
         $maxModificationTime = $this->functions->time() - $this->gcMaxAge;
         foreach ($files as $file) {
-            if ($this->functions->is_dir($file)) {
+            if (@$this->functions->is_dir($file)) {
                 continue;
             }
-            if ($this->functions->filemtime($file) < $maxModificationTime) {
+            if (@$this->functions->filemtime($file) < $maxModificationTime) {
                 yield $file;
             }
         }
