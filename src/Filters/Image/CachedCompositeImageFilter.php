@@ -58,7 +58,7 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
         $url = URL::fromString($this->request['src']);
         $lastModTime = $this->retriever->getLastModificationTime($url);
         sort($this->filtersNames);
-        $key = join('', $this->filtersNames) . $lastModTime . $this->request['src'];
+        $key = implode("\n", array_merge([$lastModTime, $this->request['src']], $this->filtersNames));
         if (isset ($this->request['width'])) {
             $key .= $this->request['width'];
         }
