@@ -63,22 +63,40 @@ class CachedCompositeImageFilterTest extends TestCase {
         $this->filter->apply(new DummyImage());
     }
 
-    public function testCorrectHash() {
-        $this->request['height'] = 'the-height';
-        $this->request['width'] = 'the-width';
-        $this->request['preferredType'] = 'the-type';
-        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $this->request);
+    /**
+     * @dataProvider correctHashData
+     */
+    public function testCorrectHash(array $params) {
+        $request = array_merge($this->request, $params);
+        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $request);
         $filters = [
             $this->createMock(ImageFilter::class),
             $this->createMock(ImageFilter::class)
         ];
         $this->filter->addImageFilter($filters[1]);
         $this->filter->addImageFilter($filters[0]);
-        sort($filters);
 
         $this->cache->expects($this->once())
-            ->method('get');
+            ->method('get')
+            ->willReturnCallback(function ($key) {
+                $this->checkHashKey($key);
+            });
         $this->filter->apply(new DummyImage());
+    }
+
+    public function correctHashData() {
+        return [
+            [['height' => 'the-height']],
+            [['height' => 'the-height', 'width' => 'the-width']],
+            [['height' => 'the-height', 'width' => 'the-width', 'preferredType' => 'the-type']],
+            [['height' => 'the-height-1', 'width' => 'the-width-1', 'preferredType' => 'the-type-1']]
+        ];
+    }
+
+    private function checkHashKey($key) {
+        static $lastKey = null;
+        $this->assertNotEquals($lastKey, $key);
+        $lastKey = $key;
     }
 
     public function testReturningImageFromCache() {
