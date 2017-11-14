@@ -135,27 +135,9 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
     public function testRedirectingToProxyServiceOnReadError() {
         $theLink = $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
-        $retriever = $this->createMock(Retriever::class);
-        $retriever->method('retrieve')
-              ->willReturnCallback(function () {
-                  @trigger_error('An error', E_USER_WARNING);
-                  return false;
-              });
-        $filter = new CSSInliningHTMLFilter(
-            URL::fromString(self::BASE_URL),
-            [
-                'whitelist' => [
-                    '~' . preg_quote(self::BASE_URL) . '~',
-                    '~https://fonts\.googleapis\.com~' => [
-                        'ieCompatible' => false
-                    ]
-                ],
-                'serviceUrl' => self::SERVICE_URL,
-                'urlRefreshTime' => self::URL_REFRESH_TIME
-            ],
-            $retriever
-        );
-        $filter->transformHTMLDOM($this->dom);
+        unset ($this->files[self::BASE_URL . '/the-css.css']);
+
+        $this->filter->transformHTMLDOM($this->dom);
 
         $this->assertEmpty($this->getTheStyles());
         $this->assertSame($this->head->childNodes[0], $theLink);
