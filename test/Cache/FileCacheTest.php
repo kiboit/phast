@@ -162,52 +162,9 @@ class FileCacheTest extends TestCase {
         $this->assertEquals(2, $actualMax);
     }
 
-    public function testGarbageCollectionDeployment() {
-        $deployed = 0;
-        $this->functions->register_shutdown_function = function () use (&$deployed) {
-            $deployed++;
-        };
-        $this->functions->file_exists = function () {
-            return true;
-        };
-
-        $this->config['garbageCollection']['probability'] = 1;
-        $this->rebuildCache();
-        $this->assertEquals(1, $deployed);
-
-        $this->config['garbageCollection']['probability'] = 0;
-        $deployed = 0;
-        $this->rebuildCache();
-        $this->assertEquals(0, $deployed);
-
-        $this->config['garbageCollection']['probability'] = -1;
-        $this->rebuildCache();
-        $this->assertEquals(0, $deployed);
-
-        $this->config['garbageCollection']['probability'] = 2;
-        $deployed = 0;
-        $this->rebuildCache();
-        $this->assertEquals(1, $deployed);
-
-        $this->config['garbageCollection']['probability'] = 0.5;
-        $deployed = 0;
-        for ($i = 0; $i < 100; $i++) {
-            $this->rebuildCache();
-        }
-        $this->assertLessThan(100, $deployed);
-        $this->assertGreaterThan(0, $deployed);
-    }
-
     public function testNotExplodingWhenGarbageCollectingOnMissingCacheRoot() {
         $this->config['garbageCollection']['probability'] = 1;
         $this->rebuildCache();
-
-        $cleanup = null;
-        $this->functions->register_shutdown_function = function (callable $cb) use (&$cleanup) {
-            $cleanup = $cb;
-        };
-        $this->rebuildCache();
-        $this->assertNull($cleanup);
     }
 
     public function testGarbageCollection() {
@@ -274,15 +231,7 @@ class FileCacheTest extends TestCase {
             }
         }
 
-
-        $cleanup = null;
-        $this->functions->register_shutdown_function = function (callable $cb) use (&$cleanup) {
-            $cleanup = $cb;
-        };
-
         $this->rebuildCache();
-        $this->assertTrue(is_callable($cleanup));
-        call_user_func($cleanup);
 
         $getDirItems = function ($path) {
             return array_filter(scandir($path), function ($item) {
