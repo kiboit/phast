@@ -33,17 +33,34 @@ class CachedCompositeImageFilterTest extends TestCase {
      */
     private $request;
 
-    public function setUp() {
+    public function setUp($modTime = null) {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
         $this->request = ['src' => 'the-src'];
         $this->retriever = $this->createMock(Retriever::class);
         $this->retriever->method('getLastModificationTime')
-            ->willReturnCallback(function (URL $url) {
+            ->willReturnCallback(function (URL $url) use ($modTime) {
                 $this->assertEquals('the-src', $url->getPath());
-                return self::LAST_MODIFICATION_TIME;
+                return is_null($modTime) ? self::LAST_MODIFICATION_TIME : $modTime;
             });
         $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $this->request);
+    }
+
+    public function testCorrectTimeToCache() {
+        $this->cache->expects($this->once())
+            ->method('get')
+            ->willReturnCallback(function ($key, callable $cb, $ttl) {
+                $this->assertEquals(0, $ttl);
+            });
+        $this->filter->apply(new DummyImage());
+
+        $this->setUp(0);
+        $this->cache->expects($this->once())
+            ->method('get')
+            ->willReturnCallback(function ($key, callable $cb, $ttl) {
+                $this->assertEquals(86400, $ttl);
+            });
+        $this->filter->apply(new DummyImage());
     }
 
     public function testCorrectHash() {

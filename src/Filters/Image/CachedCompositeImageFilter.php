@@ -75,7 +75,7 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
             } catch (\Exception $e) {
                 return $e;
             }
-        });
+        }, $lastModTime ? 0 : 86400);
         if ($filtered instanceof \Exception) {
             throw $filtered;
         }
