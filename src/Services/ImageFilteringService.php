@@ -2,8 +2,8 @@
 
 namespace Kibo\Phast\Services;
 
-use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
+use Kibo\Phast\Filters\Image\CompositeImageFilter;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\Response;
@@ -18,9 +18,9 @@ class ImageFilteringService extends Service {
     private $imageFactory;
 
     /**
-     * @var CompositeImageFilterFactory
+     * @var CompositeImageFilter
      */
-    private $filterFactory;
+    private $filter;
 
     /**
      * ImageFilteringService constructor.
@@ -28,23 +28,22 @@ class ImageFilteringService extends Service {
      * @param ServiceSignature $signature
      * @param string[] $whitelist
      * @param ImageFactory $imageFactory
-     * @param CompositeImageFilterFactory $filterFactory
+     * @param CompositeImageFilter $filter
      */
     public function __construct(
         ServiceSignature $signature,
         array $whitelist,
         ImageFactory $imageFactory,
-        CompositeImageFilterFactory $filterFactory
+        CompositeImageFilter $filter
     ) {
         parent::__construct($signature, $whitelist);
         $this->imageFactory = $imageFactory;
-        $this->filterFactory = $filterFactory;
+        $this->filter = $filter;
     }
 
     protected function handle(array $request) {
         $image = $this->imageFactory->getForURL(URL::fromString($request['src']));
-        $filter = $this->filterFactory->make($request);
-        $image = $filter->apply($image);
+        $image = $this->filter->apply($image, $request);
 
         $response = new Response();
         $response->setHeader('Content-Type', $image->getType());

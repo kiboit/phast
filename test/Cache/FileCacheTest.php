@@ -80,7 +80,7 @@ class FileCacheTest extends TestCase {
         $this->cache->get($key, function () use ($value) { return $value; }, 20);
         $expectedFilename = $this->getCacheFileName($key);
         $this->assertFileExists($expectedFilename);
-        $this->assertEquals(pack('q', 50) . serialize($value), file_get_contents($expectedFilename));
+        $this->assertEquals('50 ' . json_encode($value), file_get_contents($expectedFilename));
     }
 
     public function testExpiration() {
@@ -153,43 +153,18 @@ class FileCacheTest extends TestCase {
             $actualMin = $min;
             $actualMax = $max;
         };
+        $this->functions->file_exists = function () {
+            return true;
+        };
         $this->config['garbageCollection']['probability'] = 0.5;
         $this->rebuildCache();
         $this->assertEquals(1, $actualMin);
         $this->assertEquals(2, $actualMax);
     }
 
-    public function testGarbageCollectionDeployment() {
-        $deployed = 0;
-        $this->functions->register_shutdown_function = function () use (&$deployed) {
-            $deployed++;
-        };
-
+    public function testNotExplodingWhenGarbageCollectingOnMissingCacheRoot() {
         $this->config['garbageCollection']['probability'] = 1;
         $this->rebuildCache();
-        $this->assertEquals(1, $deployed);
-
-        $this->config['garbageCollection']['probability'] = 0;
-        $deployed = 0;
-        $this->rebuildCache();
-        $this->assertEquals(0, $deployed);
-
-        $this->config['garbageCollection']['probability'] = -1;
-        $this->rebuildCache();
-        $this->assertEquals(0, $deployed);
-
-        $this->config['garbageCollection']['probability'] = 2;
-        $deployed = 0;
-        $this->rebuildCache();
-        $this->assertEquals(1, $deployed);
-
-        $this->config['garbageCollection']['probability'] = 0.5;
-        $deployed = 0;
-        for ($i = 0; $i < 100; $i++) {
-            $this->rebuildCache();
-        }
-        $this->assertLessThan(100, $deployed);
-        $this->assertGreaterThan(0, $deployed);
     }
 
     public function testGarbageCollection() {
@@ -256,15 +231,7 @@ class FileCacheTest extends TestCase {
             }
         }
 
-
-        $cleanup = null;
-        $this->functions->register_shutdown_function = function (callable $cb) use (&$cleanup) {
-            $cleanup = $cb;
-        };
-
         $this->rebuildCache();
-        $this->assertTrue(is_callable($cleanup));
-        call_user_func($cleanup);
 
         $getDirItems = function ($path) {
             return array_filter(scandir($path), function ($item) {

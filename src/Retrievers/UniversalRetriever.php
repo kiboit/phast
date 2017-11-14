@@ -12,17 +12,25 @@ class UniversalRetriever implements Retriever {
     private $retrievers = [];
 
     public function retrieve(URL $url) {
+        return $this->iterateRetrievers(function (Retriever $retriever) use ($url) {
+            return $retriever->retrieve($url);
+        });
+    }
+
+    public function getLastModificationTime(URL $url) {
+        return $this->iterateRetrievers(function (Retriever $retriever) use ($url) {
+            return $retriever->getLastModificationTime($url);
+        });
+    }
+
+    private function iterateRetrievers(callable $callback) {
         foreach ($this->retrievers as $retriever) {
-            $result = $retriever->retrieve($url);
+            $result = $callback($retriever);
             if ($result !== false) {
                 return $result;
             }
         }
         return false;
-    }
-
-    public function getLastModificationTime(URL $url) {
-        throw new \RuntimeException('Not implemented');
     }
 
     public function addRetriever(Retriever $retriever) {

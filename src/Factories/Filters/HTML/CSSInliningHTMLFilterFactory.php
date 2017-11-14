@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Factories\Filters\HTML;
 
 use Kibo\Phast\Cache\FileCache;
+use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
 use Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
@@ -27,6 +28,7 @@ class CSSInliningHTMLFilterFactory implements HTMLFilterFactory {
         }
 
         return new CSSInliningHTMLFilter(
+            (new ServiceSignatureFactory())->make($config),
             URL::fromString($config['documents']['baseUrl']),
             $config['documents']['filters'][CSSInliningHTMLFilter::class],
             $retriever

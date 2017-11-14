@@ -31,7 +31,7 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         $this->config = $config;
     }
 
-    public function transformImage(Image $image) {
+    public function transformImage(Image $image, array $request) {
         if (!$this->shouldApply($image)) {
             return $image;
         }
@@ -53,11 +53,11 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         $status = proc_close($proc);
 
         if ($status != 0) {
-            throw new RuntimeException("External image processing command failed with status {$status}: {$command}");
+            throw new \RuntimeException("External image processing command failed with status {$status}: {$command}");
         }
 
         if ($compressed == '') {
-            throw new RuntimeException("External image processing command did not output anything: {$command}");
+            throw new \RuntimeException("External image processing command did not output anything: {$command}");
         }
 
         $newImage = new DummyImage();

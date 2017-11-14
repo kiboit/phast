@@ -18,7 +18,7 @@ class RemoteRetriever implements Retriever {
     }
 
     public function getLastModificationTime(URL $url) {
-        throw new \RuntimeException('Not implemented');
+        return false;
     }
 
 }

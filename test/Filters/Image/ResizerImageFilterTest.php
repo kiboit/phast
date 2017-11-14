@@ -61,9 +61,16 @@ class ResizerImageFilterTest extends TestCase {
         @list ($expectedWidth, $expectedHeight) = explode('x', $expectedSize);
         @list ($defaultMaxWidth, $defaultMaxHeight) = explode('x', $defaultMaxSize);
         @list ($priorityMaxWidth, $priorityMaxHeight) = explode('x', $priorityMaxSize);
-        $resizer = new ResizerImageFilter($defaultMaxWidth, $defaultMaxHeight, $priorityMaxWidth, $priorityMaxHeight);
+        $request = [];
+        if ($priorityMaxWidth) {
+            $request['width'] = $priorityMaxWidth;
+        }
+        if ($priorityMaxHeight) {
+            $request['height'] = $priorityMaxHeight;
+        }
         $image = new DummyImage($imageWidth, $imageHeight);
-        $actual = $resizer->transformImage($image);
+        $resizer = new ResizerImageFilter($defaultMaxWidth, $defaultMaxHeight);
+        $actual = $resizer->transformImage($image, $request);
         $this->assertEquals($expectedWidth, $actual->getWidth());
         $this->assertEquals($expectedHeight, $actual->getHeight());
     }

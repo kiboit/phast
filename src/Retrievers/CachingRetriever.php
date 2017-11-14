@@ -42,6 +42,10 @@ class CachingRetriever implements Retriever {
         return $this->getFromCacheOnly($url);
     }
 
+    public function getLastModificationTime(URL $url) {
+        return false;
+    }
+
     private function getCachedWithRetriever(URL $url) {
         return $this->cache->get((string)$url, function () use ($url) {
             return $this->retriever->retrieve($url);
@@ -54,10 +58,6 @@ class CachingRetriever implements Retriever {
             return false;
         }
         return $cached;
-    }
-
-    public function getLastModificationTime(URL $url) {
-        throw new \RuntimeException('Not implemented');
     }
 
 }

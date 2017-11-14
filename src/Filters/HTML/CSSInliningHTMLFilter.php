@@ -3,11 +3,13 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
+use Kibo\Phast\Filters\HTML\Helpers\SignedUrlMakerTrait;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilter implements HTMLFilter {
-    use BodyFinderTrait;
+    use BodyFinderTrait, SignedUrlMakerTrait;
 
     /**
      * @var string
@@ -20,6 +22,18 @@ class CSSInliningHTMLFilter implements HTMLFilter {
         return;
     }
     
+    document.addEventListener('readystatechange', function () {
+        Array.prototype.forEach.call(
+            document.querySelectorAll('link[data-phast-ie-fallback-url]'),
+            function (el) {
+                console.log(el);
+                el.getAttribute('data-phast-ie-fallback-url');
+                el.setAttribute('href', el.getAttribute('data-phast-ie-fallback-url'));
+            }
+        );
+    });
+
+    
     Array.prototype.forEach.call(
         document.querySelectorAll('style[data-phast-ie-fallback-url]'),
         function (el) {
@@ -30,25 +44,28 @@ class CSSInliningHTMLFilter implements HTMLFilter {
             link.setAttribute('rel', 'stylesheet');
             link.setAttribute('href', el.getAttribute('data-phast-ie-fallback-url'));
             el.parentNode.insertBefore(link, el);
-           
-            var group = el.getAttribute('data-phast-ie-fallback-group');
-            Array.prototype.forEach.call(
-                document.querySelectorAll('style[data-phast-ie-fallback-group="' + group + '"]'),
-                function (groupEl) {
-                    groupEl.parentNode.removeChild(groupEl);
-                }
-            );
+            el.parentNode.removeChild(el);
+        }
+    );
+    Array.prototype.forEach.call(
+        document.querySelectorAll('style[data-phast-nested-inlined]'),
+        function (groupEl) {
+            groupEl.parentNode.removeChild(groupEl);
         }
     );
     
 })();
 EOJS;
 
+    /**
+     * @var ServiceSignature
+     */
+    private $signature;
 
     /**
      * @var bool
      */
-    private $ieFallbackGroup = 0;
+    private $withIEFallback = false;
 
     /**
      * @var int
@@ -81,7 +98,8 @@ EOJS;
      */
     private $retriever;
 
-    public function __construct(URL $baseURL, array $config, Retriever $retriever) {
+    public function __construct(ServiceSignature $signature, URL $baseURL, array $config, Retriever $retriever) {
+        $this->signature = $signature;
         $this->baseURL = $baseURL;
         $this->serviceUrl = (string)$config['serviceUrl'];
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
@@ -107,11 +125,8 @@ EOJS;
                 $this->inline($link, $document);
             }
         }
-        if ($this->ieFallbackGroup) {
-            $this->ieFallbackGroup = 0;
-            $script = $document->createElement('script');
-            $script->textContent = $this->ieFallbackScript;
-            $this->getBodyElement($document)->appendChild($script);
+        if ($this->withIEFallback) {
+            $this->addIEFallbackScript($document);
         }
     }
 
@@ -128,13 +143,13 @@ EOJS;
             return;
         }
         if (!$whitelistEntry['ieCompatible']) {
-            $this->ieFallbackGroup++;
+            $this->withIEFallback = true;
         }
 
         $seen = [(string)$location];
         $elements = $this->inlineURL($document, $location, 0, $seen);
         if (empty ($elements)) {
-            $this->redirectLinkToService($link);
+            $this->redirectLinkToService($link, $whitelistEntry['ieCompatible']);
             return;
         } else {
             $this->transformLinkToElements($link, $elements, $whitelistEntry['ieCompatible']);
@@ -194,13 +209,18 @@ EOJS;
         return $elements;
     }
 
-    private function redirectLinkToService(\DOMElement $link) {
+    private function redirectLinkToService(\DOMElement $link, $ieCompatible) {
+        $originalHref = $link->getAttribute('href');
         $params = [
-            'src' => $link->getAttribute('href'),
+            'src' => $originalHref,
             'cacheMarker' => floor(time() / $this->urlRefreshTime)
         ];
-        $glue = strpos($this->serviceUrl, '?') !== false ? '&' : '?';
-        $link->setAttribute('href', $this->serviceUrl . $glue . http_build_query($params));
+        $url = $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+        $link->setAttribute('href', $url);
+        if (!$ieCompatible) {
+            $link->setAttribute('data-phast-ie-fallback-url', $originalHref);
+        }
+        $this->withIEFallback++;
     }
 
     private function transformLinkToElements(\DOMElement $link, array $elements, $ieCompatible) {
@@ -210,14 +230,23 @@ EOJS;
                 $element->setAttribute('media', $media);
             }
             if (!$ieCompatible) {
-                $element->setAttribute('data-phast-ie-fallback-group', $this->ieFallbackGroup);
+                $element->setAttribute('data-phast-nested-inlined', '');
             }
             $link->parentNode->insertBefore($element, $link);
         }
         if (!$ieCompatible) {
             $element->setAttribute('data-phast-ie-fallback-url', $link->getAttribute('href'));
+            $element->removeAttribute('data-phast-nested-inlined');
         }
         $link->parentNode->removeChild($link);
+    }
+
+    private function addIEFallbackScript(\DOMDocument $document) {
+        $this->withIEFallback = false;
+        $script = $document->createElement('script');
+        $script->setAttribute('data-phast-no-defer', 'data-phast-no-defer');
+        $script->textContent = $this->ieFallbackScript;
+        $this->getBodyElement($document)->appendChild($script);
     }
 
     private function getImportedURLs($cssContent) {

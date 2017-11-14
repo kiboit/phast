@@ -3,6 +3,8 @@
 namespace Kibo\Phast\Filters\Image;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Exceptions\CachedExceptionException;
+use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -33,12 +35,10 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
      *
      * @param Cache $cache
      * @param Retriever $retriever
-     * @param array $request
      */
-    public function __construct(Cache $cache, Retriever $retriever, array $request) {
+    public function __construct(Cache $cache, Retriever $retriever) {
         $this->cache = $cache;
         $this->retriever = $retriever;
-        $this->request = $request;
     }
 
     /**
@@ -51,34 +51,73 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
 
     /**
      * @param Image $image
+     * @param array $request
      * @return Image
-     * @throws \Exception
+     * @throws CachedExceptionException
      */
-    public function apply(Image $image) {
-        $url = URL::fromString($this->request['src']);
+    public function apply(Image $image, array $request) {
+        $url = URL::fromString($request['src']);
         $lastModTime = $this->retriever->getLastModificationTime($url);
         sort($this->filtersNames);
-        $key = join('', $this->filtersNames) . $lastModTime . $this->request['src'];
-        if (isset ($this->request['width'])) {
-            $key .= $this->request['width'];
+        $key = array_merge([$lastModTime, $request['src']], $this->filtersNames);
+        if (isset ($request['width'])) {
+            $key[] = $request['width'];
         }
-        if (isset ($this->request['height'])) {
-            $key .= $this->request['height'];
+        if (isset ($request['height'])) {
+            $key[] = $request['height'];
         }
-        if (isset ($this->request['preferredType'])) {
-            $key .= $this->request['preferredType'];
+        if (isset ($request['preferredType'])) {
+            $key[] = $request['preferredType'];
         }
-        $filtered = $this->cache->get($key, function () use ($image) {
+        $key = implode("\n", $key);
+        $result = $this->cache->get($key, function () use ($image, $request) {
             try {
-                return parent::apply($image);
+                return $this->serializeImage(parent::apply($image, $request));
             } catch (\Exception $e) {
-                return $e;
+                return $this->serializeException($e);
             }
-        });
-        if ($filtered instanceof \Exception) {
-            throw $filtered;
+        }, $lastModTime ? 0 : 86400);
+        if ($result['dataType'] == 'exception') {
+            throw $this->deserializeException($result);
         }
-        return $filtered;
+        return $this->deserializeImage($result);
+    }
+
+    private function serializeImage(Image $image) {
+        return [
+            'dataType' => 'image',
+            'width' => $image->getWidth(),
+            'height' => $image->getHeight(),
+            'type' => $image->getType(),
+            'blob' => base64_encode($image->getAsString())
+        ];
+    }
+
+    private function deserializeImage(array $data) {
+        $image = new DummyImage($data['width'], $data['height']);
+        $image->setType($data['type']);
+        $image->setImageString(base64_decode($data['blob']));
+        return $image;
+    }
+
+    private function serializeException(\Exception $e) {
+        return [
+            'dataType' => 'exception',
+            'class' => get_class($e),
+            'msg' => $e->getMessage(),
+            'code' => $e->getCode(),
+        ];
+    }
+
+    private function deserializeException(array $data) {
+        return new CachedExceptionException(
+            sprintf(
+                'Phast: CachedCompositeImageFilter: Type: %s, Msg: %s, Code: %s',
+                $data['class'],
+                $data['msg'],
+                $data['code']
+            )
+        );
     }
 
 }

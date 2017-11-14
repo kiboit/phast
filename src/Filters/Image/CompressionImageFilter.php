@@ -18,7 +18,7 @@ class CompressionImageFilter implements ImageFilter {
         $this->compressions = $compressions;
     }
 
-    public function transformImage(Image $image) {
+    public function transformImage(Image $image, array $request) {
         if (isset ($this->compressions[$image->getType()])) {
             return $image->compress($this->compressions[$image->getType()]);
         }

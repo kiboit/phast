@@ -51,9 +51,7 @@ class FileCache implements Cache {
         }
 
         if ($this->shouldCollectGarbage()) {
-            $this->functions->register_shutdown_function(function () {
-                $this->collectGarbage();
-            });
+            $this->collectGarbage();
         }
     }
 
@@ -90,7 +88,7 @@ class FileCache implements Cache {
         if ($this->functions->posix_geteuid() !== $this->functions->fileowner($this->cacheRoot)) {
             $this->functions->error_log(
                 sprintf(
-                    'Phast cache error: Cache root %s owned by %s process user is %s!',
+                    'Phast: FileCache: Cache root %s owned by %s process user is %s!',
                     $this->cacheRoot,
                     fileowner($this->cacheRoot),
                     posix_geteuid()
@@ -101,12 +99,12 @@ class FileCache implements Cache {
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
         $expirationTime = $expiresIn > 0 ? $this->functions->time() + $expiresIn : 0;
-        $serialized = pack('q', $expirationTime) . serialize($contents);
+        $serialized = $expirationTime . ' ' . json_encode($contents);
         $result = @$this->functions->file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
             $this->functions->error_log(
                 sprintf(
-                    'Phast cache error: Error writing to file %s. %s of %s bytes written!',
+                    'Phast: FileCache: Error writing to file %s. %s of %s bytes written!',
                     $tmpFile,
                     (int)$result,
                     strlen($serialized)
@@ -125,21 +123,23 @@ class FileCache implements Cache {
         }
         $contents = @file_get_contents($file);
         if ($contents === false) {
-            $this->functions->error_log("Phast cache error: Could not read file $file");
+            $this->functions->error_log("Phast: FileCache: Could not read file $file");
             return null;
         }
-        $expirationTime = unpack('q', $contents)[1];
-        $data = substr($contents, 8);
+        list ($expirationTime, $data) = explode(" ", $contents, 2);
         if ($expirationTime > $this->functions->time() || $expirationTime == 0) {
             if (time() - @$this->functions->filemtime($file) >= round($this->gcMaxAge / 10)) {
                 $this->functions->touch($file);
             }
-            return unserialize($data);
+            return json_decode($data, true);
         }
         return null;
     }
 
     private function shouldCollectGarbage() {
+        if (!$this->functions->file_exists($this->cacheRoot)) {
+            return false;
+        }
         if ($this->gcProbability <= 0) {
             return false;
         }
@@ -172,7 +172,10 @@ class FileCache implements Cache {
     }
 
     private function getDirectoryIterator($path) {
-        $dir = $this->functions->opendir($path);
+        $dir = @$this->functions->opendir($path);
+        if (!$dir) {
+            return;
+        }
         while (($item = $this->functions->readdir($dir)) !== false) {
             if ($item == '.' || $item == '..') {
                 continue;
@@ -186,10 +189,10 @@ class FileCache implements Cache {
     private function getOldFiles($files) {
         $maxModificationTime = $this->functions->time() - $this->gcMaxAge;
         foreach ($files as $file) {
-            if ($this->functions->is_dir($file)) {
+            if (@$this->functions->is_dir($file)) {
                 continue;
             }
-            if ($this->functions->filemtime($file) < $maxModificationTime) {
+            if (@$this->functions->filemtime($file) < $maxModificationTime) {
                 yield $file;
             }
         }

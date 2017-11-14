@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
@@ -33,7 +34,11 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
                 }
                 return false;
             });
+        $signature = $this->createMock(ServiceSignature::class);
+        $signature->method('sign')
+            ->willReturn('the-token');
         $this->filter = new CSSInliningHTMLFilter(
+            $signature,
             URL::fromString(self::BASE_URL),
             [
                 'whitelist' => [
@@ -135,34 +140,17 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
     public function testRedirectingToProxyServiceOnReadError() {
         $theLink = $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
-        $retriever = $this->createMock(Retriever::class);
-        $retriever->method('retrieve')
-              ->willReturnCallback(function () {
-                  @trigger_error('An error', E_USER_WARNING);
-                  return false;
-              });
-        $filter = new CSSInliningHTMLFilter(
-            URL::fromString(self::BASE_URL),
-            [
-                'whitelist' => [
-                    '~' . preg_quote(self::BASE_URL) . '~',
-                    '~https://fonts\.googleapis\.com~' => [
-                        'ieCompatible' => false
-                    ]
-                ],
-                'serviceUrl' => self::SERVICE_URL,
-                'urlRefreshTime' => self::URL_REFRESH_TIME
-            ],
-            $retriever
-        );
-        $filter->transformHTMLDOM($this->dom);
+        unset ($this->files[self::BASE_URL . '/the-css.css']);
+
+        $this->filter->transformHTMLDOM($this->dom);
 
         $this->assertEmpty($this->getTheStyles());
         $this->assertSame($this->head->childNodes[0], $theLink);
 
         $expectedQuery = [
             'src' => self::BASE_URL . '/the-css.css',
-            'cacheMarker' => floor(time() / self::URL_REFRESH_TIME)
+            'cacheMarker' => floor(time() / self::URL_REFRESH_TIME),
+            'token' => 'the-token'
         ];
         $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);
         $this->assertEquals($expectedUrl, $theLink->getAttribute('href'));
@@ -297,36 +285,40 @@ EOS;
             'https://fonts.googleapis.com/css1'
         );
         $this->files['https://fonts.googleapis.com/css3'] = 'the-import';
-        $this->makeLink($this->head, 'css2', 'https://fonts.googleapis.com/css2');
         $this->makeLink($this->head, 'css3');
+        $this->makeLink($this->head, 'css4', 'https://fonts.googleapis.com/missing');
+        unset ($this->files['https://fonts.googleapis.com/missing']);
+
         $this->filter->transformHTMLDOM($this->dom);
 
 
         $import = $this->head->childNodes->item(0);
         $ie = $this->head->childNodes->item(1);
-        $ie2 = $this->head->childNodes->item(2);
-        $nonIe = $this->head->childNodes->item(3);
-
+        $nonIe = $this->head->childNodes->item(2);
+        $ieLink = $this->head->childNodes->item(3);
 
         $this->assertEquals('style', $import->tagName);
         $this->assertEquals('the-import', $import->textContent);
         $this->assertFalse($import->hasAttribute('data-phast-ie-fallback-url'));
-        $this->assertEquals('1', $import->getAttribute('data-phast-ie-fallback-group'));
+        $this->assertTrue($import->hasAttribute('data-phast-nested-inlined'));
 
         $this->assertEquals('style', $ie->tagName);
         $this->assertEquals('@import "https://not-allowed.com/css";css1', $ie->textContent);
-        $this->assertEquals('1', $import->getAttribute('data-phast-ie-fallback-group'));
+        $this->assertFalse($ie->hasAttribute('data-phast-nested-inlined'));
         $this->assertEquals('https://fonts.googleapis.com/css1', $ie->getAttribute('data-phast-ie-fallback-url'));
 
-        $this->assertEquals('style', $ie2->tagName);
-        $this->assertEquals('css2', $ie2->textContent);
-        $this->assertEquals('2', $ie2->getAttribute('data-phast-ie-fallback-group'));
-        $this->assertEquals('https://fonts.googleapis.com/css2', $ie2->getAttribute('data-phast-ie-fallback-url'));
-
-        $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-group'));
+        $this->assertFalse($nonIe->hasAttribute('data-phast-nested-inlined'));
         $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-url'));
+
+        $this->assertEquals(
+            'https://fonts.googleapis.com/missing',
+            $ieLink->getAttribute('data-phast-ie-fallback-url')
+        );
+
         $script = $this->body->childNodes->item(0);
         $this->assertEquals('script', $script->tagName);
+        $this->assertTrue($script->hasAttribute('data-phast-no-defer'));
+
 
     }
 

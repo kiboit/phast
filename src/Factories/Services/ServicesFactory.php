@@ -7,7 +7,6 @@ use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Factories\Filters\Image\CompositeImageFilterFactory;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
 use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
-use Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter;
 use Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
@@ -43,7 +42,7 @@ class ServicesFactory {
             (new ServiceSignatureFactory())->make($config),
             $config['images']['whitelist'],
             new ImageFactory($config),
-            new CompositeImageFilterFactory($config)
+            (new CompositeImageFilterFactory($config))->make()
         );
     }
 
@@ -84,7 +83,6 @@ class ServicesFactory {
         );
         return new CSSProxyService(
             (new ServiceSignatureFactory())->make($config),
-            $config['documents']['filters'][CSSInliningHTMLFilter::class]['whitelist'],
             $retriever
         );
     }
