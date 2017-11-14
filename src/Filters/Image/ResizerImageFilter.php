@@ -19,48 +19,45 @@ class ResizerImageFilter implements ImageFilter {
      *
      * @param int $defaultMaxWidth Set to zero for no limit on width
      * @param int $defaultMaxHeight Set to zero for no limit on height
-     * @param int $priorityMaxWidth If set will override $defaultMaxWidth
-     *                              and will set $defaultMaxHeight to 0
-     *                              unless $priorityMaxHeight is specified
-     * @param int $priorityMaxHeight If set will override $defaultMaxHeight
-     *                              and will set $defaultMaxWidth to 0
-     *                              unless $priorityMaxWidth is specified
      */
-    public function __construct($defaultMaxWidth, $defaultMaxHeight, $priorityMaxWidth, $priorityMaxHeight) {
-        $usePriority = (bool)$priorityMaxWidth || (bool)$priorityMaxHeight;
-        if ($usePriority) {
-            $this->maxWidth = (int)$priorityMaxWidth;
-            $this->maxHeight = (int)$priorityMaxHeight;
-        } else {
-            $this->maxWidth = (int)$defaultMaxWidth;
-            $this->maxHeight = (int)$defaultMaxHeight;
-        }
+    public function __construct($defaultMaxWidth, $defaultMaxHeight) {
+        $this->maxWidth = (int)$defaultMaxWidth;
+        $this->maxHeight = (int)$defaultMaxHeight;
     }
 
     /**
      * Resizes image, keeping its original proportions,
-     * to a maximum width ot height, set at construction time.
+     * to a maximum width ot height, set at construction time or passed in the request.
      * If both width and height of the image exceed the maximums set,
      * the image will be resized to the bigger possible size.
      *
      * @param Image $image
+     * @param array $request
      * @return Image
      */
     public function transformImage(Image $image, array $request) {
-        $hasBiggerWidth  = $this->maxWidth  && $image->getWidth()  > $this->maxWidth;
-        $hasBiggerHeight = $this->maxHeight && $image->getHeight() > $this->maxHeight;
+        if (isset ($request['width']) || isset ($request['height'])) {
+            $maxWidth  = isset ($request['width'])  ? (int)$request['width']  : 0;
+            $maxHeight = isset ($request['height']) ? (int)$request['height'] : 0;
+        } else {
+            $maxWidth = $this->maxWidth;
+            $maxHeight = $this->maxHeight;
+        }
+
+        $hasBiggerWidth  = $maxWidth  && $image->getWidth()  > $maxWidth;
+        $hasBiggerHeight = $maxHeight && $image->getHeight() > $maxHeight;
 
         if ($hasBiggerWidth && $hasBiggerHeight) {
-            $sizeW = $this->getNewSizeByWidth($image);
-            $sizeH = $this->getNewSizeByHeight($image);
+            $sizeW = $this->getNewSizeByWidth($image, $maxWidth);
+            $sizeH = $this->getNewSizeByHeight($image, $maxHeight);
             if ($this->isBiggerSize($sizeW, $sizeH)) {
                 return $this->setSize($image, $sizeW);
             }
             return $this->setSize($image, $sizeH);
         } else if ($hasBiggerWidth) {
-            return $this->setSize($image, $this->getNewSizeByWidth($image));
+            return $this->setSize($image, $this->getNewSizeByWidth($image, $maxWidth));
         } else if ($hasBiggerHeight) {
-            return $this->setSize($image, $this->getNewSizeByHeight($image));
+            return $this->setSize($image, $this->getNewSizeByHeight($image, $maxHeight));
         }
         return $image;
     }
@@ -71,15 +68,16 @@ class ResizerImageFilter implements ImageFilter {
      * with a certain maximum width.
      *
      * @param Image $image
+     * @param int $maxWidth
      * @return array
      */
-    private function getNewSizeByWidth(Image $image) {
+    private function getNewSizeByWidth(Image $image, $maxWidth) {
         return [
-            $this->maxWidth,
+            $maxWidth,
             $this->calculateNewSide(
                 $image->getWidth(),
                 $image->getHeight(),
-                $this->maxWidth
+                $maxWidth
             )
         ];
     }
@@ -90,16 +88,17 @@ class ResizerImageFilter implements ImageFilter {
      * with a certain maximum height.
      *
      * @param Image $image
+     * @param int $maxHeight
      * @return array
      */
-    private function getNewSizeByHeight(Image $image) {
+    private function getNewSizeByHeight(Image $image, $maxHeight) {
         return [
             $this->calculateNewSide(
                 $image->getHeight(),
                 $image->getWidth(),
-                $this->maxHeight
+                $maxHeight
             ),
-            $this->maxHeight
+            $maxHeight
         ];
     }
 
