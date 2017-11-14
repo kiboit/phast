@@ -45,6 +45,6 @@ require_once __DIR__ . '/../../src/html-filters.php';
             });
         </script>
 
-        <iframe src="http://www.businesscat.happyjar.com/?random&nocache=1" width="1200" height="600"></iframe>
+        <iframe src="http://www.businesscat.happyjar.com/wp-content/uploads/2015/04/2015-04-24-Bonding.png" width="1200" height="600"></iframe>
     </body>
 </html>
