@@ -43,7 +43,7 @@ class ImageFilteringService extends Service {
 
     protected function handle(array $request) {
         $image = $this->imageFactory->getForURL(URL::fromString($request['src']));
-        $filter = $this->filterFactory->make($request);
+        $filter = $this->filterFactory->make();
         $image = $filter->apply($image, $request);
 
         $response = new Response();

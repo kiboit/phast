@@ -6,10 +6,9 @@ use Kibo\Phast\Filters\Image\WEBPEncoderImageFilter;
 
 class WEBPEncoderImageFilterFactory {
 
-    public function make(array $config, array $request) {
+    public function make(array $config) {
         return new WEBPEncoderImageFilter(
-            $config['images']['filters'][WEBPEncoderImageFilter::class],
-            $request
+            $config['images']['filters'][WEBPEncoderImageFilter::class]
         );
     }
 

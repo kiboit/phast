@@ -23,19 +23,18 @@ class CompositeImageFilterFactory {
         $this->config = $config;
     }
 
-    public function make(array $request) {
+    public function make() {
         if ($this->config['images']['enable-cache']) {
             $retriever = new LocalRetriever($this->config['retrieverMap']);
             $composite = new CachedCompositeImageFilter(
                 new FileCache($this->config['cache'], 'images'),
-                $retriever,
-                $request
+                $retriever
             );
         } else {
             $composite = new CompositeImageFilter();
         }
         foreach (array_keys($this->config['images']['filters']) as $class) {
-            $filter = $this->makeFactory($class)->make($this->config, $request);
+            $filter = $this->makeFactory($class)->make($this->config);
             $composite->addImageFilter($filter);
         }
         return $composite;
