@@ -285,7 +285,6 @@ EOS;
             'https://fonts.googleapis.com/css1'
         );
         $this->files['https://fonts.googleapis.com/css3'] = 'the-import';
-        $this->makeLink($this->head, 'css2', 'https://fonts.googleapis.com/css2');
         $this->makeLink($this->head, 'css3');
         $this->makeLink($this->head, 'css4', 'https://fonts.googleapis.com/missing');
         unset ($this->files['https://fonts.googleapis.com/missing']);
@@ -295,35 +294,31 @@ EOS;
 
         $import = $this->head->childNodes->item(0);
         $ie = $this->head->childNodes->item(1);
-        $ie2 = $this->head->childNodes->item(2);
-        $nonIe = $this->head->childNodes->item(3);
-        $ieLink = $this->head->childNodes->item(4);
-
-
+        $nonIe = $this->head->childNodes->item(2);
+        $ieLink = $this->head->childNodes->item(3);
 
         $this->assertEquals('style', $import->tagName);
         $this->assertEquals('the-import', $import->textContent);
         $this->assertFalse($import->hasAttribute('data-phast-ie-fallback-url'));
-        $this->assertEquals('1', $import->getAttribute('data-phast-ie-fallback-group'));
+        $this->assertTrue($import->hasAttribute('data-phast-nested-inlined'));
 
         $this->assertEquals('style', $ie->tagName);
         $this->assertEquals('@import "https://not-allowed.com/css";css1', $ie->textContent);
-        $this->assertEquals('1', $import->getAttribute('data-phast-ie-fallback-group'));
+        $this->assertFalse($ie->hasAttribute('data-phast-nested-inlined'));
         $this->assertEquals('https://fonts.googleapis.com/css1', $ie->getAttribute('data-phast-ie-fallback-url'));
 
-        $this->assertEquals('style', $ie2->tagName);
-        $this->assertEquals('css2', $ie2->textContent);
-        $this->assertEquals('2', $ie2->getAttribute('data-phast-ie-fallback-group'));
-        $this->assertEquals('https://fonts.googleapis.com/css2', $ie2->getAttribute('data-phast-ie-fallback-url'));
-
-        $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-group'));
+        $this->assertFalse($nonIe->hasAttribute('data-phast-nested-inlined'));
         $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-url'));
+
+        $this->assertEquals(
+            'https://fonts.googleapis.com/missing',
+            $ieLink->getAttribute('data-phast-ie-fallback-url')
+        );
 
         $script = $this->body->childNodes->item(0);
         $this->assertEquals('script', $script->tagName);
         $this->assertTrue($script->hasAttribute('data-phast-no-defer'));
 
-        $this->assertEquals('https://fonts.googleapis.com/missing', $ieLink->getAttribute('data-phast-ie-fallback-url'));
 
     }
 
