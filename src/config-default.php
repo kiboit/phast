@@ -34,9 +34,7 @@ return [
                     '~^https?://fonts\.googleapis\.com/css~' => [
                         'ieCompatible' => false
                     ],
-                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~' => [
-                        'ieCompatible' => false
-                    ]
+                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
                 ]
             ],
 
