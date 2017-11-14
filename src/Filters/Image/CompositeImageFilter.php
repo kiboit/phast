@@ -13,6 +13,11 @@ class CompositeImageFilter {
         $this->filters[] = $filter;
     }
 
+    /**
+     * @param Image $image
+     * @param array $request
+     * @return Image
+     */
     public function apply(Image $image, array $request) {
         $filteredImage = $image;
         foreach ($this->filters as $filter) {

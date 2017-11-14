@@ -42,7 +42,7 @@ class ServicesFactory {
             (new ServiceSignatureFactory())->make($config),
             $config['images']['whitelist'],
             new ImageFactory($config),
-            new CompositeImageFilterFactory($config)
+            (new CompositeImageFilterFactory($config))->make()
         );
     }
 
