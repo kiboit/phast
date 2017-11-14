@@ -3,15 +3,23 @@
 namespace Kibo\Phast\Filters\Image;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Exceptions\CachedExceptionException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
-use SebastianBergmann\GlobalState\RuntimeException;
 
 class CachedCompositeImageFilterTest extends TestCase {
 
     const LAST_MODIFICATION_TIME = 123456789;
+
+    private $imageArr = [
+        'width' => 100,
+        'height' => 100,
+        'type' => 'asd',
+        'blob' => 'the-blob',
+        'dataType' => 'image'
+    ];
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -51,6 +59,7 @@ class CachedCompositeImageFilterTest extends TestCase {
             ->method('get')
             ->willReturnCallback(function ($key, callable $cb, $ttl) {
                 $this->assertEquals(0, $ttl);
+                return $this->imageArr;
             });
         $this->filter->apply(new DummyImage());
 
@@ -59,6 +68,7 @@ class CachedCompositeImageFilterTest extends TestCase {
             ->method('get')
             ->willReturnCallback(function ($key, callable $cb, $ttl) {
                 $this->assertEquals(86400, $ttl);
+                return $this->imageArr;
             });
         $this->filter->apply(new DummyImage());
     }
@@ -80,6 +90,7 @@ class CachedCompositeImageFilterTest extends TestCase {
             ->method('get')
             ->willReturnCallback(function ($key) {
                 $this->checkHashKey($key);
+                return $this->imageArr;
             });
         $this->filter->apply(new DummyImage());
     }
@@ -116,10 +127,10 @@ class CachedCompositeImageFilterTest extends TestCase {
         $this->cache->method('get')
             ->willReturnCallback(function ($key, $cb) use (&$cache) {
                 if (isset ($cache[$key])) {
-                    return unserialize($cache[$key]);
+                    return json_decode($cache[$key], true);
                 }
                 $content = $cb();
-                $cache[$key] = serialize($content);
+                $cache[$key] = json_encode($content);
                 return $content;
             });
         $notCached = $this->filter->apply($originalImage);
@@ -133,6 +144,7 @@ class CachedCompositeImageFilterTest extends TestCase {
             $this->assertEquals('the-type', $output->getType());
             $this->assertEquals(100, $output->getWidth());
             $this->assertEquals(200, $output->getHeight());
+            $this->assertEquals('filtered', $output->getAsString());
         }
 
     }
@@ -143,7 +155,7 @@ class CachedCompositeImageFilterTest extends TestCase {
         $filter->expects($this->once())
             ->method('transformImage')
             ->with($image)
-            ->willThrowException(new RuntimeException('except'));
+            ->willThrowException(new \RuntimeException('except'));
         $this->filter->addImageFilter($filter);
 
         $cache = [];
@@ -159,12 +171,12 @@ class CachedCompositeImageFilterTest extends TestCase {
         $thrown = 0;
         try {
             $this->filter->apply($image);
-        } catch (RuntimeException $e) {
+        } catch (CachedExceptionException $e) {
             $thrown++;
         }
         try {
             $this->filter->apply($image);
-        } catch (RuntimeException $e) {
+        } catch (CachedExceptionException $e) {
             $thrown++;
         }
 

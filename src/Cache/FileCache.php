@@ -99,7 +99,7 @@ class FileCache implements Cache {
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
         $expirationTime = $expiresIn > 0 ? $this->functions->time() + $expiresIn : 0;
-        $serialized = $expirationTime . ' ' . serialize($contents);
+        $serialized = $expirationTime . ' ' . json_encode($contents);
         $result = @$this->functions->file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
             $this->functions->error_log(
@@ -131,7 +131,7 @@ class FileCache implements Cache {
             if (time() - @$this->functions->filemtime($file) >= round($this->gcMaxAge / 10)) {
                 $this->functions->touch($file);
             }
-            return unserialize($data);
+            return json_decode($data, true);
         }
         return null;
     }
