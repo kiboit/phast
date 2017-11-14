@@ -3,11 +3,13 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
+use Kibo\Phast\Filters\HTML\Helpers\SignedUrlMakerTrait;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilter implements HTMLFilter {
-    use BodyFinderTrait;
+    use BodyFinderTrait, SignedUrlMakerTrait;
 
     /**
      * @var string
@@ -56,6 +58,10 @@ class CSSInliningHTMLFilter implements HTMLFilter {
 })();
 EOJS;
 
+    /**
+     * @var ServiceSignature
+     */
+    private $signature;
 
     /**
      * @var bool
@@ -93,7 +99,8 @@ EOJS;
      */
     private $retriever;
 
-    public function __construct(URL $baseURL, array $config, Retriever $retriever) {
+    public function __construct(ServiceSignature $signature, URL $baseURL, array $config, Retriever $retriever) {
+        $this->signature = $signature;
         $this->baseURL = $baseURL;
         $this->serviceUrl = (string)$config['serviceUrl'];
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
@@ -214,7 +221,8 @@ EOJS;
             'cacheMarker' => floor(time() / $this->urlRefreshTime)
         ];
         $glue = strpos($this->serviceUrl, '?') !== false ? '&' : '?';
-        $link->setAttribute('href', $this->serviceUrl . $glue . http_build_query($params));
+        $url = $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+        $link->setAttribute('href', $url);
         if (!$ieCompatible) {
             $link->setAttribute('data-phast-ie-fallback-url', $originalHref);
         }

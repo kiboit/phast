@@ -83,7 +83,6 @@ class ServicesFactory {
         );
         return new CSSProxyService(
             (new ServiceSignatureFactory())->make($config),
-            [],
             $retriever
         );
     }

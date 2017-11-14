@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
@@ -33,7 +34,11 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
                 }
                 return false;
             });
+        $signature = $this->createMock(ServiceSignature::class);
+        $signature->method('sign')
+            ->willReturn('the-token');
         $this->filter = new CSSInliningHTMLFilter(
+            $signature,
             URL::fromString(self::BASE_URL),
             [
                 'whitelist' => [
@@ -144,7 +149,8 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
 
         $expectedQuery = [
             'src' => self::BASE_URL . '/the-css.css',
-            'cacheMarker' => floor(time() / self::URL_REFRESH_TIME)
+            'cacheMarker' => floor(time() / self::URL_REFRESH_TIME),
+            'token' => 'the-token'
         ];
         $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);
         $this->assertEquals($expectedUrl, $theLink->getAttribute('href'));
