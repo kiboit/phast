@@ -35,12 +35,10 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
      *
      * @param Cache $cache
      * @param Retriever $retriever
-     * @param array $request
      */
-    public function __construct(Cache $cache, Retriever $retriever, array $request) {
+    public function __construct(Cache $cache, Retriever $retriever) {
         $this->cache = $cache;
         $this->retriever = $retriever;
-        $this->request = $request;
     }
 
     /**
@@ -58,18 +56,18 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
      * @throws CachedExceptionException
      */
     public function apply(Image $image, array $request) {
-        $url = URL::fromString($this->request['src']);
+        $url = URL::fromString($request['src']);
         $lastModTime = $this->retriever->getLastModificationTime($url);
         sort($this->filtersNames);
-        $key = array_merge([$lastModTime, $this->request['src']], $this->filtersNames);
-        if (isset ($this->request['width'])) {
-            $key[] = $this->request['width'];
+        $key = array_merge([$lastModTime, $request['src']], $this->filtersNames);
+        if (isset ($request['width'])) {
+            $key[] = $request['width'];
         }
-        if (isset ($this->request['height'])) {
-            $key[] = $this->request['height'];
+        if (isset ($request['height'])) {
+            $key[] = $request['height'];
         }
-        if (isset ($this->request['preferredType'])) {
-            $key[] = $this->request['preferredType'];
+        if (isset ($request['preferredType'])) {
+            $key[] = $request['preferredType'];
         }
         $key = implode("\n", $key);
         $result = $this->cache->get($key, function () use ($image, $request) {

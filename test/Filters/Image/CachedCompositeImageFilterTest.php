@@ -51,7 +51,7 @@ class CachedCompositeImageFilterTest extends TestCase {
                 $this->assertEquals('the-src', $url->getPath());
                 return is_null($modTime) ? self::LAST_MODIFICATION_TIME : $modTime;
             });
-        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $this->request);
+        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever);
     }
 
     public function testCorrectTimeToCache() {
@@ -78,7 +78,7 @@ class CachedCompositeImageFilterTest extends TestCase {
      */
     public function testCorrectHash(array $params) {
         $request = array_merge($this->request, $params);
-        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever, $request);
+        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever);
         $filters = [
             $this->createMock(ImageFilter::class),
             $this->createMock(ImageFilter::class)
@@ -92,7 +92,7 @@ class CachedCompositeImageFilterTest extends TestCase {
                 $this->checkHashKey($key);
                 return $this->imageArr;
             });
-        $this->filter->apply(new DummyImage(), $this->request);
+        $this->filter->apply(new DummyImage(), $request);
     }
 
     public function correctHashData() {
