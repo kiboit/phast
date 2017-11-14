@@ -4,24 +4,27 @@ namespace Kibo\Phast\Filters\Image;
 
 class WEBPEncoderImageFilter implements ImageFilter {
 
-    private $encode;
+    private $enabled;
 
     private $compression;
 
-    public function __construct(array $config, array $request) {
-        $this->encode = $config['enabled']
-                        && isset ($request['preferredType'])
-                        && $request['preferredType'] == Image::TYPE_WEBP;
+    public function __construct(array $config) {
+        $this->enabled = $config['enabled'];
         $this->compression = $config['compression'];
     }
 
     public function transformImage(Image $image, array $request) {
-        if ($this->encode && $image->getType() != Image::TYPE_PNG) {
-            $encoded = $image->encodeTo(Image::TYPE_WEBP)
-                ->compress($this->compression);
-            if ($encoded->getSizeAsString() <= $image->getSizeAsString()) {
-                return $encoded;
-            }
+        $encode = $this->enabled
+                  && isset ($request['preferredType'])
+                  && $request['preferredType'] == Image::TYPE_WEBP
+                  && $image->getType() != Image::TYPE_PNG;
+        if (!$encode) {
+            return $image;
+        }
+        $encoded = $image->encodeTo(Image::TYPE_WEBP)
+                         ->compress($this->compression);
+        if ($encoded->getSizeAsString() <= $image->getSizeAsString()) {
+            return $encoded;
         }
         return $image;
     }

@@ -35,20 +35,20 @@ class WEBPEncoderImageFilterTest extends TestCase {
         $image = $image->compress(10);
 
         $this->config['enabled'] = false;
-        $this->assertSame($image, $this->getFilter()->transformImage($image, []));
+        $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
 
         $this->request['preferredType'] = Image::TYPE_PNG;
-        $this->assertSame($image, $this->getFilter()->transformImage($image, []));
+        $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
 
         $this->config['enabled'] = true;
-        $this->assertSame($image, $this->getFilter()->transformImage($image, []));
+        $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
 
         unset ($this->request['preferredType']);
-        $this->assertSame($image, $this->getFilter()->transformImage($image, []));
+        $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
 
         $this->request['preferredType'] = Image::TYPE_WEBP;
         /** @var DummyImage $actual */
-        $actual = $this->getFilter()->transformImage($image, []);
+        $actual = $this->getFilter()->transformImage($image, $this->request);
         $this->assertNotSame($image, $actual);
         $this->assertEquals(Image::TYPE_WEBP, $actual->getType());
         $this->assertEquals(80, $actual->getCompression());
@@ -59,11 +59,11 @@ class WEBPEncoderImageFilterTest extends TestCase {
 
         $image->setImageString('super-super-long');
         $image->setTransformationString('short');
-        $encoded = $this->filter->transformImage($image, []);
+        $encoded = $this->filter->transformImage($image, $this->request);
 
         $image->setImageString('short');
         $image->setTransformationString('super-super-long');
-        $nonEncoded = $this->filter->transformImage($image, []);
+        $nonEncoded = $this->filter->transformImage($image, $this->request);
 
         $this->assertNotSame($image, $encoded);
         $this->assertEquals('short', $encoded->getAsString());
@@ -74,11 +74,11 @@ class WEBPEncoderImageFilterTest extends TestCase {
     public function testNotEncodingPNG() {
         $image = new DummyImage();
         $image->setType(Image::TYPE_PNG);
-        $this->assertSame($image, $this->filter->transformImage($image, []));
+        $this->assertSame($image, $this->filter->transformImage($image, $this->request));
     }
 
     private function getFilter() {
-        return new WEBPEncoderImageFilter($this->config, $this->request);
+        return new WEBPEncoderImageFilter($this->config);
     }
 
 }
