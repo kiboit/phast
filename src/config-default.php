@@ -31,12 +31,11 @@ return [
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [
                 'urlRefreshTime' => 7200,
                 'whitelist' => [
+                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
                     '~^https?://fonts\.googleapis\.com/css~' => [
                         'ieCompatible' => false
                     ],
-                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~' => [
-                        'ieCompatible' => false
-                    ]
+                    '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~'
                 ]
             ],
 
@@ -53,9 +52,9 @@ return [
             \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
                 'urlRefreshTime' => 7200,
                 'match' => [
+                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
                     '~^https?://(ssl|www)\.google-analytics\.com/~',
-                    '~^https?://static\.hotjar\.com/~',
-                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~'
+                    '~^https?://static\.hotjar\.com/~'
                 ]
             ],
 
@@ -68,7 +67,8 @@ return [
         'enable-cache' => true,
 
         'whitelist' => [
-            '~' . preg_quote($_SERVER['HTTP_HOST']) . '~'
+            '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
+            '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~'
         ],
 
         'filters' => [

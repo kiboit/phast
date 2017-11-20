@@ -210,15 +210,15 @@ EOJS;
     }
 
     private function redirectLinkToService(\DOMElement $link, $ieCompatible) {
-        $originalHref = $link->getAttribute('href');
+        $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
         $params = [
-            'src' => $originalHref,
+            'src' => (string) $location,
             'cacheMarker' => floor(time() / $this->urlRefreshTime)
         ];
         $url = $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
         $link->setAttribute('href', $url);
         if (!$ieCompatible) {
-            $link->setAttribute('data-phast-ie-fallback-url', $originalHref);
+            $link->setAttribute('data-phast-ie-fallback-url', $location);
         }
         $this->withIEFallback++;
     }
