@@ -106,13 +106,14 @@ class CompositeHTMLFilter {
         $time_delta = microtime(true) - $time_start;
 
         $time_accounted = 0.;
-        $log = "Page optimized by Phast\n";
+        $log = "Page automatically optimized by Phast\n\n";
         arsort($timings);
         foreach ($timings as $cls => $time) {
             $cls = preg_replace('~^.*\\\\~', '', $cls);
             $log .= sprintf("      % -43s % 4dms\n", $cls, $time*1000);
             $time_accounted += $time;
         }
+        $log .= "\n";
         $log .= sprintf("      % 43s % 4dms\n", '(other)', ($time_delta - $time_accounted)*1000);
         $log .= sprintf("      % 43s % 4dms\n", '(total)', $time_delta*1000);
 
