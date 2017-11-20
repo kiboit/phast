@@ -79,7 +79,7 @@ class CompositeHTMLFilter {
     private function tryToApply($buffer, $time_start) {
         $xmlErrors = libxml_use_internal_errors(true);
         $doc = new \DOMDocument();
-        $doc->loadHTML('<?xml encoding="utf-8"?>' . $buffer);
+        $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $buffer);
 
         $timings = [];
 
