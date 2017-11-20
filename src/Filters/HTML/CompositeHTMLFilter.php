@@ -106,16 +106,17 @@ class CompositeHTMLFilter {
         $time_delta = microtime(true) - $time_start;
 
         $time_accounted = 0.;
-        $output .= "<!--\n    Page optimized by https://kiboit.com/Phast\n";
+        $log = "Page optimized by Phast\n";
         arsort($timings);
         foreach ($timings as $cls => $time) {
             $cls = preg_replace('~^.*\\\\~', '', $cls);
-            $output .= sprintf("      % -43s %.3fs\n", $cls, $time);
+            $log .= sprintf("      % -43s % 4dms\n", $cls, $time*1000);
             $time_accounted += $time;
         }
-        $output .= sprintf("      % 43s %.3fs\n", '(other)', $time_delta - $time_accounted);
-        $output .= sprintf("      % 43s %.3fs\n", '(total)', $time_delta);
-        $output .= "-->\n";
+        $log .= sprintf("      % 43s % 4dms\n", '(other)', ($time_delta - $time_accounted)*1000);
+        $log .= sprintf("      % 43s % 4dms\n", '(total)', $time_delta*1000);
+
+        $output .= '<script>window.console&&console.log(' . json_encode($log) . ')</script>';
 
         return $output;
     }
