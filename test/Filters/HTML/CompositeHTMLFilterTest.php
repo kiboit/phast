@@ -29,7 +29,7 @@ class CompositeHTMLFilterTest extends TestCase {
         $this->shouldTransform();
         $buffer = "<!DOCTYPE html>\n<html>\n<body></body>\n</html>";
         $filtered = $this->filter->apply($buffer);
-        $this->assertRegExp("~^<!doctype html><html><body></body></html>~", $filtered);
+        $this->assertRegExp("~^<!doctype html><html>\s*<body></body>\s*</html>~", $filtered);
     }
 
     public function testShouldApplyOnXHTML() {
