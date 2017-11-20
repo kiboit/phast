@@ -64,8 +64,9 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     private function rewriteSrc(\DOMElement $img) {
         $params = ['src' => (string) URL::fromString($img->getAttribute('src'))->withBase($this->baseUrl)];
         foreach (['width', 'height'] as $attr) {
-            if ($img->hasAttribute($attr)) {
-                $params[$attr] = $img->getAttribute($attr);
+            $value = $img->getAttribute($attr);
+            if (preg_match('/^[1-9][0-9]*$/', $value)) {
+                $params[$attr] = $value;
             }
         }
         $img->setAttribute(
