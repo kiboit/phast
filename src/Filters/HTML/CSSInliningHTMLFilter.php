@@ -119,8 +119,12 @@ EOJS;
 
     public function transformHTMLDOM(\DOMDocument $document) {
         $links = iterator_to_array($document->getElementsByTagName('link'));
+        $styles = iterator_to_array($document->getElementsByTagName('style'));
         foreach ($links as $link) {
             $this->inlineLink($link);
+        }
+        foreach ($styles as $style) {
+            $this->inlineStyle($style);
         }
         if ($this->withIEFallback) {
             $this->addIEFallbackScript($document);
@@ -144,10 +148,19 @@ EOJS;
         $media = $link->getAttribute('media');
         $elements = $this->inlineURL($link->ownerDocument, $location, $media);
 
-        foreach ($elements as $element) {
-            $link->parentNode->insertBefore($element, $link);
+        $this->replaceElement($elements, $link);
+    }
+
+    private function inlineStyle(\DOMElement $style) {
+        $elements = $this->inlineCSS($style->ownerDocument, $this->baseURL, $style->textContent, $style->getAttribute('media'));
+        $this->replaceElement($elements, $style);
+    }
+
+    private function replaceElement($replacements, $element) {
+        foreach ($replacements as $replacement) {
+            $element->parentNode->insertBefore($replacement, $element);
         }
-        $link->parentNode->removeChild($link);
+        $element->parentNode->removeChild($element);
     }
 
     private function findInWhitelist(URL $url) {
@@ -198,6 +211,12 @@ EOJS;
             return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
         }
 
+        $elements = $this->inlineCSS($document, $url, $content, $media, $ieCompatible, $currentLevel, $seen);
+        $this->addIEFallback($ieFallbackUrl, $elements);
+        return $elements;
+    }
+
+    private function inlineCSS(\DOMDocument $document, URL $url, $content, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
         $content = $this->minify($content);
 
         $urlMatches = $this->getImportedURLs($content);
@@ -211,8 +230,6 @@ EOJS;
 
         $content = $this->rewriteRelativeURLs($content, $url);
         $elements[] = $this->makeStyle($document, $content, $media);
-
-        $this->addIEFallback($ieFallbackUrl, $elements);
 
         return $elements;
     }

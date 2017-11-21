@@ -363,6 +363,20 @@ EOS;
         $this->assertEquals('style', $this->head->childNodes->item(1)->tagName);
     }
 
+    public function testInlineImportInStyle() {
+        $style = $this->dom->createElement('style');
+        $style->textContent = '@import url(/test); moar;';
+        $this->head->appendChild($style);
+
+        $this->files['/test'] = 'hello';
+
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $this->assertEquals(2, $this->head->childNodes->length);
+        $this->assertEquals('hello', $this->head->childNodes->item(0)->textContent);
+        $this->assertEquals('moar;', $this->head->childNodes->item(1)->textContent);
+    }
+
     public function testNotRewritingNotWhitelisted() {
         $this->makeLink($this->head, 'css', 'http://not-allowed.com');
         $this->filter->transformHTMLDOM($this->dom);
