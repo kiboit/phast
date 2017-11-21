@@ -293,7 +293,7 @@ EOJS;
         return preg_replace_callback(
             '~
                 (
-                    @import \s* (?:"|\'|)
+                    @import \s+ (?: url\( \s* )?+ (?:"|\'|)
                     |
                     url\( \s* (?:"|\'|)
                 )
