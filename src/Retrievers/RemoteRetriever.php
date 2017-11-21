@@ -8,13 +8,19 @@ class RemoteRetriever implements Retriever {
 
     public function retrieve(URL $url) {
         $ch = curl_init((string)$url);
-        curl_setopt(
-            $ch,
-            CURLOPT_HTTPHEADER,
-            ['User-Agent: Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0']
-        );
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        return @curl_exec($ch);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['User-Agent: Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0']
+        ]);
+        $response = @curl_exec($ch);
+        if ($response === false) {
+            return false;
+        }
+        $info = curl_getinfo($ch);
+        if (!preg_match('/^2/', $info['http_code'])) {
+            return false;
+        }
+        return $response;
     }
 
     public function getLastModificationTime(URL $url) {
