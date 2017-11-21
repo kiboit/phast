@@ -274,7 +274,7 @@ EOJS;
                 @import \s++
                 ( url \( )?+                # url() is optional
                 ( (?(1) ["\']?+ | ["\'] ) ) # without url() a quote is necessary
-                (?<url>[A-Za-z0-9_/.:?&=+%-]++)
+                (?<url>[A-Za-z0-9_/.:?&=+%,-]++)
                 \2                          # match ending quote
                 (?(1)\))                    # match closing paren if url( was used
                 \s*+ ;

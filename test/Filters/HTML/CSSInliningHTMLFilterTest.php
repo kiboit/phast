@@ -43,7 +43,7 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
             [
                 'whitelist' => [
                     '~' . preg_quote(self::BASE_URL) . '~',
-                    '~https://fonts\.googleapis\.com~' => [
+                    '~https?://fonts\.googleapis\.com~' => [
                         'ieCompatible' => false
                     ]
                 ],
@@ -326,9 +326,12 @@ EOS;
         $this->assertTrue($script->hasAttribute('data-phast-no-defer'));
     }
 
-    public function testIrretrievableImport() {
+    /**
+     * @dataProvider whitelistedImportProvider
+     */
+    public function testWhitelistedImport($importFormat, $importUrl) {
         $css = '
-            @import "https://fonts.googleapis.com/css1";
+            ' . sprintf($importFormat, $importUrl) . '
             body { color: red; }
         ';
         $this->makeLink($this->head, $css);
@@ -341,12 +344,34 @@ EOS;
         $link = array_shift($elements);
         $this->assertEquals('link', $link->tagName);
         $this->assertContains('service.php', $link->getAttribute('href'));
-        $this->assertContains('fonts.googleapis.com', $link->getAttribute('href'));
+        $this->assertContains($importUrl, urldecode($link->getAttribute('href')));
 
         $style = array_shift($elements);
         $this->assertEquals('style', $style->tagName);
-        $this->assertNotContains('fonts.googleapis.com', $style->textContent);
+        $this->assertNotContains($importUrl, $style->textContent);
         $this->assertContains('red', $style->textContent);
+    }
+
+    public function whitelistedImportProvider() {
+        $urls = [
+            'https://fonts.googleapis.com/css1',
+            'https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700',
+            '//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700'
+        ];
+
+        $formats = [
+            '@import "%s";',
+            "@import '%s';",
+            '@import url(%s);',
+            '@import url("%s");',
+            "@import url('%s');"
+        ];
+
+        foreach ($urls as $url) {
+            foreach ($formats as $format) {
+                yield [$format, $url];
+            }
+        }
     }
 
     public function testIEHackWithImport() {
