@@ -253,12 +253,12 @@ EOJS;
         preg_match_all(
             '~
                 @import \s+
-                (?: url \s* \( )?
-                (?:"|\'|)
+                ( url \( )?                 # url() is optional
+                ( (?(1) ["\']? | ["\'] ) )  # without url() a quote is necessary
                 (?<url>[A-Za-z0-9_/.:-]+)
-                (?:"|\'|) (?: \) )?
-                \s*
-                ;
+                \2                          # match ending quote
+                (?(1)\))                    # match closing paren if url( was used
+                \s* ;
             ~xi',
             $cssContent,
             $matches,
