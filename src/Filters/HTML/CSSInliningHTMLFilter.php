@@ -252,13 +252,13 @@ EOJS;
     private function getImportedURLs($cssContent) {
         preg_match_all(
             '~
-                @import \s+
-                ( url \( )?                 # url() is optional
-                ( (?(1) ["\']? | ["\'] ) )  # without url() a quote is necessary
-                (?<url>[A-Za-z0-9_/.:-]+)
+                @import \s++
+                ( url \( )?+                # url() is optional
+                ( (?(1) ["\']?+ | ["\'] ) ) # without url() a quote is necessary
+                (?<url>[A-Za-z0-9_/.:-]++)
                 \2                          # match ending quote
                 (?(1)\))                    # match closing paren if url( was used
-                \s* ;
+                \s*+ ;
             ~xi',
             $cssContent,
             $matches,
