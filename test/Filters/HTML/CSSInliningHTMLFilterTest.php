@@ -145,7 +145,10 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
         $this->filter->transformHTMLDOM($this->dom);
 
         $this->assertEmpty($this->getTheStyles());
-        $this->assertSame($this->head->childNodes[0], $theLink);
+        $this->assertEquals(1, $this->head->childNodes->length);
+
+        $newLink = $this->head->childNodes[0];
+        $this->assertEquals('link', $newLink->tagName);
 
         $expectedQuery = [
             'src' => self::BASE_URL . '/the-css.css',
@@ -153,8 +156,7 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
             'token' => 'the-token'
         ];
         $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);
-        $this->assertEquals($expectedUrl, $theLink->getAttribute('href'));
-
+        $this->assertEquals($expectedUrl, $newLink->getAttribute('href'));
     }
 
     public function testMinifying() {
@@ -291,25 +293,29 @@ EOS;
 
         $this->filter->transformHTMLDOM($this->dom);
 
+        $notAllowedLink = $this->head->childNodes->item(0);
+        $this->assertEquals('link', $notAllowedLink->tagName);
+        $this->assertEquals('https://not-allowed.com/css', $notAllowedLink->getAttribute('href'));
+        $this->assertFalse($notAllowedLink->hasAttribute('data-phast-ie-fallback-url'));
+        $this->assertTrue($notAllowedLink->hasAttribute('data-phast-nested-inlined'));
 
-        $import = $this->head->childNodes->item(0);
-        $ie = $this->head->childNodes->item(1);
-        $nonIe = $this->head->childNodes->item(2);
-        $ieLink = $this->head->childNodes->item(3);
-
+        $import = $this->head->childNodes->item(1);
         $this->assertEquals('style', $import->tagName);
         $this->assertEquals('the-import', $import->textContent);
         $this->assertFalse($import->hasAttribute('data-phast-ie-fallback-url'));
         $this->assertTrue($import->hasAttribute('data-phast-nested-inlined'));
 
+        $ie = $this->head->childNodes->item(2);
         $this->assertEquals('style', $ie->tagName);
-        $this->assertEquals('@import "https://not-allowed.com/css";css1', $ie->textContent);
+        $this->assertEquals('css1', $ie->textContent);
         $this->assertFalse($ie->hasAttribute('data-phast-nested-inlined'));
         $this->assertEquals('https://fonts.googleapis.com/css1', $ie->getAttribute('data-phast-ie-fallback-url'));
 
+        $nonIe = $this->head->childNodes->item(3);
         $this->assertFalse($nonIe->hasAttribute('data-phast-nested-inlined'));
         $this->assertFalse($nonIe->hasAttribute('data-phast-ie-fallback-url'));
 
+        $ieLink = $this->head->childNodes->item(4);
         $this->assertEquals(
             'https://fonts.googleapis.com/missing',
             $ieLink->getAttribute('data-phast-ie-fallback-url')
@@ -318,8 +324,43 @@ EOS;
         $script = $this->body->childNodes->item(0);
         $this->assertEquals('script', $script->tagName);
         $this->assertTrue($script->hasAttribute('data-phast-no-defer'));
+    }
 
+    public function testIrretrievableImport() {
+        $css = '
+            @import "https://fonts.googleapis.com/css1";
+            body { color: red; }
+        ';
+        $this->makeLink($this->head, $css);
+        $this->filter->transformHTMLDOM($this->dom);
 
+        $this->assertEquals(2, $this->head->childNodes->length);
+
+        $elements = iterator_to_array($this->head->childNodes);
+
+        $link = array_shift($elements);
+        $this->assertEquals('link', $link->tagName);
+        $this->assertContains('service.php', $link->getAttribute('href'));
+        $this->assertContains('fonts.googleapis.com', $link->getAttribute('href'));
+
+        $style = array_shift($elements);
+        $this->assertEquals('style', $style->tagName);
+        $this->assertNotContains('fonts.googleapis.com', $style->textContent);
+        $this->assertContains('red', $style->textContent);
+    }
+
+    public function testIEHackWithImport() {
+        $css = '
+            @import "https://fonts.googleapis.com/css1";
+            body { color: red; }
+        ';
+        $this->makeLink($this->head, $css);
+        $this->files['https://fonts.googleapis.com/css1'] = 'hello-world;';
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $this->assertEquals(2, $this->head->childNodes->length);
+        $this->assertEquals('style', $this->head->childNodes->item(0)->tagName);
+        $this->assertEquals('style', $this->head->childNodes->item(1)->tagName);
     }
 
     public function testNotRewritingNotWhitelisted() {
@@ -367,6 +408,5 @@ EOS;
     private function getTheStyles() {
         return iterator_to_array($this->dom->getElementsByTagName('style'));
     }
-
 
 }

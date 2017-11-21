@@ -92,7 +92,6 @@ EOJS;
      */
     private $urlRefreshTime;
 
-
     /**
      * @var Retriever
      */
@@ -121,40 +120,34 @@ EOJS;
     public function transformHTMLDOM(\DOMDocument $document) {
         $links = iterator_to_array($document->getElementsByTagName('link'));
         foreach ($links as $link) {
-            if ($this->shouldInline($link)) {
-                $this->inline($link, $document);
-            }
+            $this->inlineLink($link, $document);
         }
         if ($this->withIEFallback) {
             $this->addIEFallbackScript($document);
         }
     }
 
-    private function shouldInline(\DOMElement $link) {
-        return  $link->hasAttribute('rel')
-                && $link->getAttribute('rel') == 'stylesheet'
-                && $link->hasAttribute('href');
-    }
+    private function inlineLink(\DOMElement $link, \DOMDocument $document) {
+        if (!$link->hasAttribute('rel')
+            || $link->getAttribute('rel') != 'stylesheet'
+            || !$link->hasAttribute('href')
+        ) {
+            return;
+        }
 
-    private function inline(\DOMElement $link, \DOMDocument $document) {
         $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
-        $whitelistEntry = $this->findInWhitelist($location);
-        if (!$whitelistEntry) {
+
+        if (!$this->findInWhitelist($location)) {
             return;
         }
-        if (!$whitelistEntry['ieCompatible']) {
-            $this->withIEFallback = true;
-        }
 
-        $seen = [(string)$location];
-        $elements = $this->inlineURL($document, $location, 0, $seen);
-        if (empty ($elements)) {
-            $this->redirectLinkToService($link, $whitelistEntry['ieCompatible']);
-            return;
-        } else {
-            $this->transformLinkToElements($link, $elements, $whitelistEntry['ieCompatible']);
-        }
+        $media = $link->getAttribute('media');
+        $elements = $this->inlineURL($document, $location, $media);
 
+        foreach ($elements as $element) {
+            $link->parentNode->insertBefore($element, $link);
+        }
+        $link->parentNode->removeChild($link);
     }
 
     private function findInWhitelist(URL $url) {
@@ -170,75 +163,84 @@ EOJS;
     /**
      * @param \DOMDocument $document
      * @param URL $url
+     * @param string $media
+     * @param boolean $ieCompatible
      * @param int $currentLevel
      * @param string[] $seen
      * @return \DOMElement[]
      */
-    private function inlineURL(\DOMDocument $document, URL $url, $currentLevel, &$seen) {
-        $content = $this->retriever->retrieve($url);
-        if ($content === false) {
+    private function inlineURL(\DOMDocument $document, URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
+        $whitelistEntry = $this->findInWhitelist($url);
+
+        if (!$whitelistEntry) {
+            return [$this->makeLink($document, $url, $media)];
+        }
+
+        if (!$whitelistEntry['ieCompatible']) {
+            $ieFallbackUrl = $ieCompatible ? $url : null;
+            $ieCompatible = false;
+        } else {
+            $ieFallbackUrl = null;
+        }
+
+        if (in_array($url, $seen)) {
             return [];
         }
+
+        if ($currentLevel > $this->maxInlineDepth) {
+            return $this->addIEFallback($ieFallbackUrl, [$this->makeLink($document, $url, $media)]);
+        }
+
+        $seen[] = $url;
+
+        $content = $this->retriever->retrieve($url);
+        if ($content === false) {
+            return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
+        }
+
         $content = $this->minify($content);
+
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
         foreach ($urlMatches as $match) {
-            $matchedUrl = URL::fromString($match['url'])->withBase($url);
-            if (!$this->findInWhitelist($matchedUrl)) {
-                continue;
-            }
             $content = str_replace($match[0], '', $content);
-            if (in_array((string)$matchedUrl, $seen)) {
-                continue;
-            }
-            $seen[] = (string)$matchedUrl;
-
-            if ($currentLevel == $this->maxInlineDepth) {
-                $elements[] = $this->makeLink($document, $matchedUrl);
-            } else {
-                $elements = array_merge(
-                    $elements,
-                    $this->inlineURL($document, $matchedUrl, $currentLevel + 1, $seen)
-                );
-            }
+            $matchedUrl = URL::fromString($match['url'])->withBase($url);
+            $replacement = $this->inlineURL($document, $matchedUrl, $media, $ieCompatible, $currentLevel + 1, $seen);
+            $elements = array_merge($elements, $replacement);
         }
 
         $content = $this->rewriteRelativeURLs($content, $url);
-        $elements[] = $this->makeStyle($document, $content);
+        $elements[] = $this->makeStyle($document, $content, $media);
+
+        $this->addIEFallback($ieFallbackUrl, $elements);
 
         return $elements;
     }
 
-    private function redirectLinkToService(\DOMElement $link, $ieCompatible) {
-        $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
+    private function makeServiceLink(\DOMDocument $document, URL $location, $media) {
         $params = [
             'src' => (string) $location,
             'cacheMarker' => floor(time() / $this->urlRefreshTime)
         ];
         $url = $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
-        $link->setAttribute('href', $url);
-        if (!$ieCompatible) {
-            $link->setAttribute('data-phast-ie-fallback-url', $location);
-        }
-        $this->withIEFallback++;
+        return $this->makeLink($document, URL::fromString($url), $media);
     }
 
-    private function transformLinkToElements(\DOMElement $link, array $elements, $ieCompatible) {
-        $media = (string)$link->getAttribute('media');
+    private function addIEFallback(URL $fallbackUrl = null, array $elements) {
+        if ($fallbackUrl === null || !$elements) {
+            return $elements;
+        }
+
         foreach ($elements as $element) {
-            if ($media) {
-                $element->setAttribute('media', $media);
-            }
-            if (!$ieCompatible) {
-                $element->setAttribute('data-phast-nested-inlined', '');
-            }
-            $link->parentNode->insertBefore($element, $link);
+            $element->setAttribute('data-phast-nested-inlined', '');
         }
-        if (!$ieCompatible) {
-            $element->setAttribute('data-phast-ie-fallback-url', $link->getAttribute('href'));
-            $element->removeAttribute('data-phast-nested-inlined');
-        }
-        $link->parentNode->removeChild($link);
+
+        $element->setAttribute('data-phast-ie-fallback-url', (string)$fallbackUrl);
+        $element->removeAttribute('data-phast-nested-inlined');
+
+        $this->withIEFallback = true;
+
+        return $elements;
     }
 
     private function addIEFallbackScript(\DOMDocument $document) {
@@ -267,16 +269,22 @@ EOJS;
         return $matches;
     }
 
-    private function makeStyle(\DOMDocument $document, $content) {
+    private function makeStyle(\DOMDocument $document, $content, $media) {
         $style = $document->createElement('style');
+        if ($media !== '') {
+            $style->setAttribute('media', $media);
+        }
         $style->textContent = $content;
         return $style;
     }
 
-    private function makeLink(\DOMDocument $document, URL $url) {
+    private function makeLink(\DOMDocument $document, URL $url, $media) {
         $link = $document->createElement('link');
         $link->setAttribute('rel', 'stylesheet');
         $link->setAttribute('href', (string)$url);
+        if ($media !== '') {
+            $link->setAttribute('media', $media);
+        }
         return $link;
     }
 
