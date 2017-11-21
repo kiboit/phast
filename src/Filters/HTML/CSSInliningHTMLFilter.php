@@ -120,14 +120,14 @@ EOJS;
     public function transformHTMLDOM(\DOMDocument $document) {
         $links = iterator_to_array($document->getElementsByTagName('link'));
         foreach ($links as $link) {
-            $this->inlineLink($link, $document);
+            $this->inlineLink($link);
         }
         if ($this->withIEFallback) {
             $this->addIEFallbackScript($document);
         }
     }
 
-    private function inlineLink(\DOMElement $link, \DOMDocument $document) {
+    private function inlineLink(\DOMElement $link) {
         if (!$link->hasAttribute('rel')
             || $link->getAttribute('rel') != 'stylesheet'
             || !$link->hasAttribute('href')
@@ -142,7 +142,7 @@ EOJS;
         }
 
         $media = $link->getAttribute('media');
-        $elements = $this->inlineURL($document, $location, $media);
+        $elements = $this->inlineURL($link->ownerDocument, $location, $media);
 
         foreach ($elements as $element) {
             $link->parentNode->insertBefore($element, $link);
