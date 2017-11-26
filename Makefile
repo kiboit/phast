@@ -6,7 +6,7 @@ all : vendor/autoload.php
 
 .PHONY : test update
 
-test : all
+test : all docker
 	$(RUN) ./vendor/phpunit/phpunit/phpunit
 
 test-local : all
