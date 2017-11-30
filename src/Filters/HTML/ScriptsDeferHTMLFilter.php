@@ -37,7 +37,7 @@ class ScriptsDeferHTMLFilter implements HTMLFilter {
             script.removeAttribute('type');
         }
         if (!el.hasAttribute('src')) {
-            script.setAttribute('src', 'data:text/javascript;base64,' + window.btoa(el.textContent));
+            script.setAttribute('src', 'data:text/javascript;base64,' + utoa(el.textContent));
         }
         if (el.hasAttribute('defer')) {
             deferreds.push({original: el, rewritten: script});
@@ -61,6 +61,16 @@ class ScriptsDeferHTMLFilter implements HTMLFilter {
         try {
             func.call(opt_scopeObject || window);
         } catch (err) {}
+    }
+    function utoa(str) {
+        return btoa(
+            encodeURIComponent(str).replace(
+                /%([0-9A-F]{2})/g,
+                function toSolidBytes(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                }
+            )
+        );
     }
 })();
 EOS;
