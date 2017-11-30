@@ -119,6 +119,20 @@ class CompositeHTMLFilterTest extends TestCase {
         $this->assertContains('ü', $filtered);
     }
 
+    public function testHandleMixedUTF8AndWindows1252() {
+        $this->shouldTransform();
+        $buffer = "<html><body>ü\xfc</body></html>";
+        $filtered = $this->filter->apply($buffer);
+        $this->assertContains('üü', $filtered);
+    }
+
+    public function testHandleMixedUTF8AndWindows1252WithEuroSign() {
+        $this->shouldTransform();
+        $buffer = "<html><body>ü\x80</body></html>";
+        $filtered = $this->filter->apply($buffer);
+        $this->assertContains('ü€', $filtered);
+    }
+
     public function testShouldHandleExceptions() {
         $filter = $this->createMock(HTMLFilter::class);
         $filter->expects($this->once())

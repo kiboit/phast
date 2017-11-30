@@ -77,9 +77,11 @@ class CompositeHTMLFilter {
     }
 
     private function tryToApply($buffer, $time_start) {
+        $utf8Buffer = $this->cleanUTF8($buffer);
+
         $xmlErrors = libxml_use_internal_errors(true);
         $doc = new \DOMDocument();
-        $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $buffer);
+        $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $utf8Buffer);
 
         $timings = [];
 
@@ -120,6 +122,32 @@ class CompositeHTMLFilter {
         $output .= '<script>window.console&&console.log(' . json_encode($log) . ')</script>';
 
         return $output;
+    }
+
+    private function cleanUTF8($buffer) {
+        // Treat every byte that is not valid UTF-8 as Windows-1252
+        // https://www.w3.org/International/questions/qa-forms-utf-8
+        return preg_replace_callback(
+            '~
+                [\x09\x0A\x0D\x20-\x7E]            # ASCII
+              | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
+              |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
+              | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
+              |  \xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
+              |  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
+              | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
+              |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
+              | (.)
+            ~xs',
+            function($match) {
+                if (isset($match[1]) && strlen($match[1])) {
+                    return mb_convert_encoding($match[1], 'UTF-8', 'Windows-1252');
+                } else {
+                    return $match[0];
+                }
+            },
+            $buffer
+        );
     }
 
 }
