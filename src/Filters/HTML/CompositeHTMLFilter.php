@@ -129,7 +129,7 @@ class CompositeHTMLFilter {
         // https://www.w3.org/International/questions/qa-forms-utf-8
         return preg_replace_callback(
             '~
-                [\x09\x0A\x0D\x20-\x7E]            # ASCII
+                [\x09\x0A\x0D\x20-\x7E]++          # ASCII
               | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
               |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
               | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
