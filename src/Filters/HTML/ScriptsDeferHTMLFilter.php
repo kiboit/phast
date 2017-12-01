@@ -53,9 +53,14 @@ class ScriptsDeferHTMLFilter implements HTMLFilter {
     lastScript.onerror = restoreReadyState;
     function restoreReadyState() {
         delete document['readyState'];
+
         if (document.onreadystatechange) {
             exec(document.onreadystatechange, document);
         }
+
+        var dcl = document.createEvent("Event");
+        dcl.initEvent("DOMContentLoaded", true, true);
+        window.document.dispatchEvent(dcl);
     }
     function exec(func, opt_scopeObject) {
         try {
