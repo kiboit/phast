@@ -23,32 +23,32 @@ class ServiceRequestTest extends TestCase {
             [
                 ['src' => '/images/file.png'],
                 'src=%2Fimages%2Ffile.png',
-                '/src=-2Fimages-2Ffile.png'
+                '/-2Fimages-2Ffile.png'
             ],
             [
                 ['src' => 'http://example.com/path/file.png'],
                 'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile.png',
-                '/src=http-3A-2F-2Fexample.com-2Fpath-2Ffile.png'
+                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile.png'
             ],
             [
                 ['src' => 'http://example.com///path////file.png'],
                 'src=http%3A%2F%2Fexample.com%2F%2F%2Fpath%2F%2F%2F%2Ffile.png',
-                '/src=http-3A-2F-2Fexample.com-2F-2F-2Fpath-2F-2F-2F-2Ffile.png'
+                '/http-3A-2F-2Fexample.com-2F-2F-2Fpath-2F-2F-2F-2Ffile.png'
             ],
             [
                 ['src' => 'http://example.com/path/file-file.png'],
                 'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile-file.png',
-                '/src=http-3A-2F-2Fexample.com-2Fpath-2Ffile-2Dfile.png'
+                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile-2Dfile.png'
             ],
             [
                 ['src' => 'the-file.png', 'width' => 20],
                 'src=the-file.png&width=20',
-                '/src=the-2Dfile.png/width=20'
+                '/the-2Dfile.png/width=20'
             ],
             [
                 ['src' => 'the-file.png', 'width' => 20, 'height' => 30],
                 'src=the-file.png&width=20&height=30',
-                '/src=the-2Dfile.png/width=20/height=30'
+                '/the-2Dfile.png/width=20/height=30'
             ]
         ];
     }
@@ -62,7 +62,7 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testFromHTTPRequest() {
-        $pathInfo = '/src=http-3A-2F-2Fexample.com-2Fthe-2Dimage.png/key2=value2';
+        $pathInfo = '/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png/key2=value2';
         $getParams = ['key3' => 'value3'];
         $expectedParams = [
             'src' => 'http://example.com/the-image.png',
@@ -82,25 +82,25 @@ class ServiceRequestTest extends TestCase {
                 'images.php',
                 ['src' => 'http://example.com/the-image.png'],
                 'images.php?src=http%3A%2F%2Fexample.com%2Fthe-image.png',
-                'images.php/src=http-3A-2F-2Fexample.com-2Fthe-2Dimage.png'
+                'images.php/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png'
             ],
             [
                 'images.php?param=some-value',
                 ['src' => 'the-image.png'],
                 'images.php?param=some-value&src=the-image.png',
-                'images.php/param=some-2Dvalue/src=the-2Dimage.png'
+                'images.php/the-2Dimage.png/param=some-2Dvalue'
             ],
             [
                 'images-service/',
                 ['src' => 'the-image.png'],
                 'images-service/?src=the-image.png',
-                'images-service/src=the-2Dimage.png'
+                'images-service/the-2Dimage.png'
             ],
             [
                 'images.php?param=value&src=overridden',
                 ['src' => 'image.png'],
                 'images.php?param=value&src=image.png',
-                'images.php/param=value/src=image.png'
+                'images.php/image.png/param=value'
             ]
         ];
     }
@@ -108,7 +108,7 @@ class ServiceRequestTest extends TestCase {
     public function testSigning() {
         $signature = new ServiceSignature($this->createMock(Cache::class));
         $signature->setSecurityToken('some-token');
-        $request = (new ServiceRequest())->withParams(['a' => 'b'])->sign($signature);
+        $request = (new ServiceRequest())->withParams(['width' => 10, 'src' => 'url'])->sign($signature);
 
 
         $this->assertTrue($request->verify($signature));
@@ -121,8 +121,8 @@ class ServiceRequestTest extends TestCase {
         $pathFormat = $request->serialize(ServiceRequest::FORMAT_PATH);
         $pathRequest = ServiceRequest::fromHTTPRequest(Request::fromArray([], ['PATH_INFO' => $pathFormat]));
 
-        $this->assertStringStartsWith('a=b&token=', $request->serialize(ServiceRequest::FORMAT_QUERY));
-        $this->assertStringStartsWith('/a=b/token=', $request->serialize(ServiceRequest::FORMAT_PATH));
+        $this->assertStringStartsWith('width=10&src=url&token=', $request->serialize(ServiceRequest::FORMAT_QUERY));
+        $this->assertStringStartsWith('/url/width=10/token=', $request->serialize(ServiceRequest::FORMAT_PATH));
 
         $this->assertTrue($queryRequest->verify($signature));
         $this->assertTrue($pathRequest->verify($signature));

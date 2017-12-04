@@ -56,7 +56,7 @@ class ServiceRequest {
             if (isset ($pair[1])) {
                 $values[$pair[0]] = self::decodeSingleValue($pair[1]);
             } else {
-                $values[] = self::decodeSingleValue($pair[0]);
+                $values['src'] = self::decodeSingleValue($pair[0]);
             }
         }
         return $values;
@@ -90,12 +90,18 @@ class ServiceRequest {
     }
 
     public function sign(ServiceSignature $signature) {
-        $token = $signature->sign(http_build_query($this->getAllParams()));
+        $token = $signature->sign($this->getVirificationString());
         return $this->cloneWithProperty('token', $token);
     }
 
     public function verify(ServiceSignature $signature) {
-        return $signature->verify($this->token, http_build_query($this->params));
+        return $signature->verify($this->token, $this->getVirificationString());
+    }
+
+    private function getVirificationString() {
+        $params = $this->getAllParams();
+        ksort($params);
+        return http_build_query($params);
     }
 
     private function cloneWithProperty($property, $value) {
@@ -137,9 +143,18 @@ class ServiceRequest {
     }
 
     private function serializeToPathFormat(array $params) {
+        $srcValue = null;
         $values = [];
         foreach ($params as $key => $value) {
-            $values[] = $key . '=' . str_replace(['-', '%'], ['%2D', '-'], urlencode($value));
+            $encodedValue = str_replace(['-', '%'], ['%2D', '-'], urlencode($value));
+            if ($key == 'src') {
+                $srcValue = $encodedValue;
+            } else {
+                $values[] = $key . '=' . $encodedValue;
+            }
+        }
+        if ($srcValue) {
+            array_unshift($values, $srcValue);
         }
         $params = '/' . join('/', $values);
         if (isset ($this->url)) {

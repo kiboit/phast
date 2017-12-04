@@ -15,12 +15,12 @@ if (defined('PHAST_SERVICE')) {
     $service = $serviceParams['service'];
 }
 
-if (isset ($serviceParams['src']) && !headers_sent())  {
-    header('Location: ' . $serviceParams['src']);
-} else {
-    http_response_code(404);
-    exit;
-}
+//if (isset ($serviceParams['src']) && !headers_sent())  {
+//    header('Location: ' . $serviceParams['src']);
+//} else {
+//    http_response_code(404);
+//    exit;
+//}
 
 $config = require_once PHAST_CONFIG_FILE;
 try {
@@ -28,6 +28,7 @@ try {
         ->make($service, $config)
         ->serve($serviceRequest);
 } catch (\Kibo\Phast\Exceptions\UnauthorizedException $e) {
+    var_dump($e);
     exit();
 }
 
