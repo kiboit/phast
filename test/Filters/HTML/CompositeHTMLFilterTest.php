@@ -141,6 +141,14 @@ class CompositeHTMLFilterTest extends TestCase {
         $this->assertContains($script, $filtered);
     }
 
+    public function testShouldAllowSelfClosingDiv() {
+        $this->shouldTransform();
+        $div = "<div /><span></span></div>";
+        $buffer = "<html><body>$div</body></html>";
+        $filtered = $this->filter->apply($buffer);
+        $this->assertContains('<div><span></span></div>', $filtered);
+    }
+
     public function testShouldHandleExceptions() {
         $filter = $this->createMock(HTMLFilter::class);
         $filter->expects($this->once())
