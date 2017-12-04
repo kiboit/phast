@@ -34,7 +34,7 @@ class CompositeHTMLFilterTest extends TestCase {
 
     public function testShouldApplyOnXHTML() {
         $this->shouldTransform();
-        $buffer = "<?xml version=\"1.0\"?><!DOCTYPE html>\n<html>\n<body></body>\n</html>";
+        $buffer = "<?xml version=\"1.0\"?\><!DOCTYPE html>\n<html>\n<body></body>\n</html>";
         $this->filter->apply($buffer);
     }
 
@@ -64,7 +64,7 @@ class CompositeHTMLFilterTest extends TestCase {
 
     public function testShouldNotApplyIfNotHTML() {
         $this->shouldNotTransform();
-        $buffer = '<?xml version="1.0"?><tag>asd</tag>';
+        $buffer = '<?xml version="1.0"?\><tag>asd</tag>';
         $this->filter->apply($buffer);
     }
 
@@ -131,6 +131,14 @@ class CompositeHTMLFilterTest extends TestCase {
         $buffer = "<html><body>ü\x80</body></html>";
         $filtered = $this->filter->apply($buffer);
         $this->assertContains('ü€', $filtered);
+    }
+
+    public function testShouldHandleTagCloseInScript() {
+        $this->shouldTransform();
+        $script = "<script>document.write('<div></div>');</script>";
+        $buffer = "<html><body>$script</body></html>";
+        $filtered = $this->filter->apply($buffer);
+        $this->assertContains($script, $filtered);
     }
 
     public function testShouldHandleExceptions() {
