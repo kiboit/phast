@@ -41,7 +41,15 @@ class Request {
     public function getHeader($name) {
         $key = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
 
-        if (isset($this->env[$key])) {
+        return $this->getEnvValue($key);
+    }
+
+    public function getPathInfo() {
+        return $this->getEnvValue('PATH_INFO');
+    }
+
+    public function getEnvValue($key) {
+        if (isset ($this->env[$key])) {
             return $this->env[$key];
         }
     }

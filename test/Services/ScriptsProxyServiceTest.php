@@ -38,37 +38,38 @@ class ScriptsProxyServiceTest extends TestCase {
     }
 
     public function testFetching() {
-        $request = [
-            'src' => 'http://allowed.com/the-script'
-        ];
+        $httpRequest = Request::fromArray(['src' => 'http://allowed.com/the-script'], []);
         $this->retriever->expects($this->once())
             ->method('retrieve')
             ->willReturnCallback(function (URL $url) {
                 $this->assertEquals('http://allowed.com/the-script', (string)$url);
                 return 'the-content';
             });
-        $result = $this->service->serve(Request::fromArray($request, []));
+        $result = $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
         $this->assertEquals('the-content', $result->getContent());
     }
 
     public function testExceptionOnNotAllowedURL() {
         $this->expectException(UnauthorizedException::class);
         $request = ['src' => 'http://not-allowed.com/the-script', 'cacheMarker' => 123456789];
-        $this->service->serve(Request::fromArray($request, []));
+        $httpRequest = Request::fromArray($request, []);
+        $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
     }
 
     public function testNoExceptionOnNotAllowedURLWithToken() {
         $request = ['src' => 'http://not-allowed.com/the-script', 'cacheMarker' => 123456789, 'token' => 'the-token'];
-        $this->service->serve(Request::fromArray($request, []));
+        $httpRequest = Request::fromArray($request, []);
+        $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
     }
 
     public function testExceptionOnNoResult() {
         $request = ['src' => 'http://allowed.com/the-script', 'cacheMarker' => 123456789];
+        $httpRequest = Request::fromArray($request, []);
         $this->retriever->expects($this->once())
             ->method('retrieve')
             ->willReturn(false);
         $this->expectException(ItemNotFoundException::class);
-        $this->service->serve(Request::fromArray($request, []));
+        $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
     }
 
 }

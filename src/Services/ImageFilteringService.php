@@ -5,7 +5,6 @@ namespace Kibo\Phast\Services;
 use Kibo\Phast\Factories\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\CompositeImageFilter;
 use Kibo\Phast\Filters\Image\Image;
-use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
@@ -58,9 +57,9 @@ class ImageFilteringService extends Service {
         return $response;
     }
 
-    protected function getParams(Request $request) {
+    protected function getParams(ServiceRequest $request) {
         $params = parent::getParams($request);
-        if (strpos($request->getHeader('Accept'), 'image/webp') !== false) {
+        if (strpos($request->getHTTPRequest()->getHeader('Accept'), 'image/webp') !== false) {
             $params['preferredType'] = Image::TYPE_WEBP;
         }
         return $params;

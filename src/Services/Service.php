@@ -4,7 +4,6 @@ namespace Kibo\Phast\Services;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
-use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Security\ServiceSignature;
 
@@ -26,8 +25,8 @@ abstract class Service {
      */
     abstract protected function handle(array $request);
 
-    protected function getParams(Request $request) {
-        return $request->getGet();
+    protected function getParams(ServiceRequest $request) {
+        return $request->getParams();
     }
 
     /**
@@ -42,46 +41,40 @@ abstract class Service {
     }
 
     /**
-     * @param Request $request
+     * @param ServiceRequest $request
      * @return Response
      */
-    public function serve(Request $request) {
-        $this->validateRequest($request->getGet());
+    public function serve(ServiceRequest $request) {
+        $this->validateRequest($request);
         return $this->handle($this->getParams($request));
     }
 
-    protected  function validateRequest(array $request) {
+    protected  function validateRequest(ServiceRequest $request) {
         $this->validateIntegrity($request);
         $this->validateToken($request);
         $this->validateWhitelisted($request);
     }
 
-    protected function validateIntegrity(array $request) {
-        if (!isset ($request['src'])) {
+    protected function validateIntegrity(ServiceRequest $request) {
+        $params = $request->getParams();
+        if (!isset ($params['src'])) {
             throw new ItemNotFoundException('No source is set!');
         }
     }
 
-    protected function validateToken(array $request) {
-        if (!isset ($request['token'])) {
-            throw new UnauthorizedException();
-        }
-        $token = $request['token'];
-        unset ($request['token']);
-        if (isset ($request['service'])) {
-            unset ($request['service']);
-        }
-        if (!$this->signature->verify($token, http_build_query($request))) {
+    protected function validateToken(ServiceRequest $request) {
+        if (!$request->verify($this->signature)) {
             throw new UnauthorizedException();
         }
     }
 
-    protected function validateWhitelisted(array $request) {
+    protected function validateWhitelisted(ServiceRequest $request) {
+        $params = $request->getParams();
         foreach ($this->whitelist as $pattern) {
-            if (preg_match($pattern, $request['src'])) {
+            if (preg_match($pattern, $params['src'])) {
                 return;
             }
         }
-        throw new UnauthorizedException('Not allowed url: ' . $request['src']);
+        throw new UnauthorizedException('Not allowed url: ' . $params['src']);
     }
 }

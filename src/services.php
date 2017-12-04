@@ -19,9 +19,12 @@ require_once __DIR__ . '/bootstrap.php';
 $config = require_once PHAST_CONFIG_FILE;
 try {
 
+    $serviceRequest = \Kibo\Phast\Services\ServiceRequest::fromHTTPRequest(
+        \Kibo\Phast\HTTP\Request::fromGlobals()
+    );
     $response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
         ->make($service, $config)
-        ->serve(\Kibo\Phast\HTTP\Request::fromGlobals());
+        ->serve($serviceRequest);
 } catch (\Kibo\Phast\Exceptions\UnauthorizedException $e) {
     exit();
 }

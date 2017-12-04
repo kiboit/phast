@@ -53,7 +53,7 @@ class ProxyService extends Service {
         return $result;
     }
 
-    protected function validateRequest(array $request) {
+    protected function validateRequest(ServiceRequest $request) {
         $this->validateIntegrity($request);
         try {
             $this->validateToken($request);
