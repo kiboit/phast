@@ -26,7 +26,9 @@ return [
 
         'filters' => [
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [
+                'rewriteFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH
+            ],
 
             \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [
                 'urlRefreshTime' => 7200,

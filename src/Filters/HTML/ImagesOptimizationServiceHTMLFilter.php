@@ -29,6 +29,11 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     protected $whitelist;
 
     /**
+     * @var integer
+     */
+    protected $serviceRequestFormat;
+
+    /**
      * ImagesOptimizationServiceHTMLFilter constructor.
      *
      * @param ServiceSignature $signature
@@ -36,11 +41,20 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
      * @param URL $serviceUrl
      * @param string[] $whitelist
      */
-    public function __construct(ServiceSignature $signature, URL $baseUrl, URL $serviceUrl, array $whitelist) {
+    public function __construct(
+        ServiceSignature $signature,
+        URL $baseUrl,
+        URL $serviceUrl,
+        array $whitelist,
+        $serviceRequestFormat = null
+    ) {
         $this->signature = $signature;
         $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
         $this->whitelist = $whitelist;
+        $this->serviceRequestFormat = $serviceRequestFormat == ServiceRequest::FORMAT_PATH
+                                    ? ServiceRequest::FORMAT_PATH
+                                    : ServiceRequest::FORMAT_QUERY;
     }
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
@@ -104,7 +118,7 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
         return (new ServiceRequest())->withParams($params)
             ->withUrl($url)
             ->sign($signature)
-            ->serialize(ServiceRequest::FORMAT_QUERY);
+            ->serialize($this->serviceRequestFormat);
     }
 
 }

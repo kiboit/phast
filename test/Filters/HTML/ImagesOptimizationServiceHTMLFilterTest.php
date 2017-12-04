@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
@@ -15,13 +16,14 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
      */
     private $filter;
 
-    public function setUp() {
+    public function setUp($rewriteFormat = null) {
         parent::setUp();
         $this->filter = new ImagesOptimizationServiceHTMLFilter(
             new ServiceSignature($this->createMock(Cache::class)),
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
-            ['~' . preg_quote(self::BASE_URL) . '~']
+            ['~' . preg_quote(self::BASE_URL) . '~'],
+            $rewriteFormat
         );
     }
 
@@ -43,6 +45,19 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
             $images[3]->getAttribute('src'),
             ['src' => self::BASE_URL . '/img?4', 'width' => 40, 'height' => 50]
         );
+    }
+
+    public function testUsingCorrectRewriteFormat() {
+        $this->makeImage('/img');
+        $this->filter->transformHTMLDOM($this->dom);
+        $queryFormat = $this->dom->getElementsByTagName('img')->item(0)->getAttribute('src');
+
+        $this->setUp(ServiceRequest::FORMAT_PATH);
+        $this->makeImage('/img');
+        $this->filter->transformHTMLDOM($this->dom);
+        $pathFormat = $this->dom->getElementsByTagName('img')->item(0)->getAttribute('src');
+
+        $this->assertNotEquals($queryFormat, $pathFormat);
     }
 
     public function testNoRewriteForImagesWithInlineSource() {
