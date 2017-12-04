@@ -77,11 +77,12 @@ class CompositeHTMLFilter {
     }
 
     private function tryToApply($buffer, $time_start) {
-        $utf8Buffer = $this->cleanUTF8($buffer);
+        $fixedBuffer = $this->cleanUTF8($buffer);
+        $fixedBuffer = $this->escapeCloseTagInScript($fixedBuffer);
 
         $xmlErrors = libxml_use_internal_errors(true);
         $doc = new \DOMDocument();
-        $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $utf8Buffer);
+        $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
 
         $timings = [];
 
@@ -145,6 +146,20 @@ class CompositeHTMLFilter {
                 } else {
                     return $match[0];
                 }
+            },
+            $buffer
+        );
+    }
+
+    private function escapeCloseTagInScript($buffer) {
+        return preg_replace_callback(
+            '~
+                (<script(?:\s[^>]*)?>)
+                (.*?)
+                (</script)
+            ~xsi',
+            function ($match) {
+                return $match[1] . str_replace('</', '<\\/', $match[2]) . $match[3];
             },
             $buffer
         );
