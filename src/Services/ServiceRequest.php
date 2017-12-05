@@ -110,7 +110,7 @@ class ServiceRequest {
         return $clone;
     }
 
-    public function serialize($format) {
+    public function serialize($format = self::FORMAT_QUERY) {
         $urlParams = [];
         if ($this->url) {
             parse_str($this->url->getQuery(), $urlParams);

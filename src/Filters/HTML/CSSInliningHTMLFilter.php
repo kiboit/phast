@@ -3,13 +3,13 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
-use Kibo\Phast\Filters\HTML\Helpers\SignedUrlMakerTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilter implements HTMLFilter {
-    use BodyFinderTrait, SignedUrlMakerTrait;
+    use BodyFinderTrait;
 
     /**
      * @var string
@@ -100,7 +100,7 @@ EOJS;
     public function __construct(ServiceSignature $signature, URL $baseURL, array $config, Retriever $retriever) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
-        $this->serviceUrl = (string)$config['serviceUrl'];
+        $this->serviceUrl = URL::fromString((string)$config['serviceUrl']);
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->retriever = $retriever;
 
@@ -239,7 +239,7 @@ EOJS;
             'src' => (string) $location,
             'cacheMarker' => floor(time() / $this->urlRefreshTime)
         ];
-        $url = $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+        $url = $this->makeSignedUrl($params);
         return $this->makeLink($document, URL::fromString($url), $media);
     }
 
@@ -355,5 +355,12 @@ EOJS;
         );
 
         return $cssContent;
+    }
+
+    protected function makeSignedUrl($params) {
+        return (new ServiceRequest())->withParams($params)
+            ->withUrl($this->serviceUrl)
+            ->sign($this->signature)
+            ->serialize();
     }
 }

@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class ScriptProxyServiceHTMLFilter implements HTMLFilter {
@@ -107,9 +108,10 @@ EOS;
             'src' => (string) $url,
             'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])
         ];
-        $query = http_build_query($params);
-        $glue = strpos($this->config['serviceUrl'], '?') === false ? '?' : '&';
-        return $this->config['serviceUrl'] . $glue . $query;
+        return (new ServiceRequest())
+            ->withUrl(URL::fromString($this->config['serviceUrl']))
+            ->withParams($params)
+            ->serialize();
     }
 
     private function shouldRewriteURL(URL $url) {

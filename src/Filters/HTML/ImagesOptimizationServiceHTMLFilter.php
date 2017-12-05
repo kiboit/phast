@@ -40,6 +40,7 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
      * @param URL $baseUrl
      * @param URL $serviceUrl
      * @param string[] $whitelist
+     * @param null|int $serviceRequestFormat
      */
     public function __construct(
         ServiceSignature $signature,
@@ -78,7 +79,7 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
         }
         $img->setAttribute(
             'src',
-            $this->makeSignedUrl($this->serviceUrl, $params, $this->signature)
+            $this->makeSignedUrl($params)
         );
     }
 
@@ -90,7 +91,7 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) {
             if ($url = $this->shouldRewriteUrl($match[1])) {
                 $params = ['src' => $url];
-                $url = $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+                $url = $this->makeSignedUrl($params);
             } else {
                 $url = $match[1];
             }
@@ -114,10 +115,10 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
         }
     }
 
-    protected function makeSignedUrl($url, $params, ServiceSignature $signature) {
+    protected function makeSignedUrl($params) {
         return (new ServiceRequest())->withParams($params)
-            ->withUrl($url)
-            ->sign($signature)
+            ->withUrl($this->serviceUrl)
+            ->sign($this->signature)
             ->serialize($this->serviceRequestFormat);
     }
 
