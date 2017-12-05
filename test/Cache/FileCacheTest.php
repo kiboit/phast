@@ -27,7 +27,7 @@ class FileCacheTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->config = [
-            'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir',
+            'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir-' . posix_geteuid(),
             'garbageCollection' => [
                 'probability' => 0,
                 'maxItems' => 100,
