@@ -35,7 +35,7 @@ class ServiceSignature {
     }
 
     public function sign($value) {
-        return substr(base_convert(md5($this->getSecurityToken() . $value), 16, 36), 0, 16);
+        return substr(md5($this->getSecurityToken() . $value), 0, 16);
     }
 
     public function verify($signature, $value) {
