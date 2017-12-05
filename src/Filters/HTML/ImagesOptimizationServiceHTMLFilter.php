@@ -45,7 +45,7 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     }
 
     public function transformHTMLDOM(\DOMDocument $document) {
-        $images = $document->getElementsByTagName('img');
+        $images = (new \DOMXPath($document))->query('//img');
         /** @var \DOMElement $img */
         foreach ($images as $img) {
             $this->rewriteSrc($img);
