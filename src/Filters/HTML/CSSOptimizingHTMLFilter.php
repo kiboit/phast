@@ -7,7 +7,9 @@ use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 class CSSOptimizingHTMLFilter implements HTMLFilter {
     use BodyFinderTrait;
 
-    private $classes;
+    private $classNamePattern = '-?[_a-zA-Z]++[_a-zA-Z0-9-]*+';
+
+    private $usedSelectorPattern;
 
     private $loaderScript = <<<EOS
 (function() {
@@ -31,7 +33,7 @@ EOS;
         $body = $this->getBodyElement($document);
         $styles = iterator_to_array($document->getElementsByTagName('style'));
 
-        $this->classes = $this->getUsedClasses($document);
+        $this->usedSelectorPattern = $this->getUsedSelectorPattern($document);
 
         $i = 0;
 
@@ -66,19 +68,31 @@ EOS;
         }
     }
 
+    private function getUsedSelectorPattern(\DOMDocument $document) {
+        $classes = $this->getUsedClasses($document);
+
+        $re_class = $classes ? '(?!' . implode('|', $classes) . ')' : '';
+        $re_selector = "~\.$re_class{$this->classNamePattern}~";
+
+        return $re_selector;
+    }
+
     private function getUsedClasses(\DOMDocument $document) {
         $xpath = new \DOMXPath($document);
         $classes = [];
 
         foreach ($xpath->query('//@class') as $class) {
             foreach (preg_split('/\s+/', $class->value) as $cls) {
-                if ($cls != '') {
+                if ($cls != ''
+                    && !isset($classes[$cls])
+                    && preg_match("/^{$this->classNamePattern}$/", $cls)
+                ) {
                     $classes[$cls] = true;
                 }
             }
         }
 
-        return $classes;
+        return array_keys($classes);
     }
 
     private function isStyle(\DOMElement $style) {
@@ -132,15 +146,7 @@ EOS;
     }
 
     private function selectorCouldMatch($selector) {
-        preg_match_all('~\.(-?[_A-Z]+[_A-Z0-9-]*)~xi', $selector, $matches);
-
-        foreach ($matches[1] as $class) {
-            if (!isset($this->classes[$class])) {
-                return false;
-            }
-        }
-
-        return true;
+        return !preg_match($this->usedSelectorPattern, $selector);
     }
 
 }

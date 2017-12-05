@@ -110,6 +110,25 @@ class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
         ];
     }
 
+    public function testOptimizeWithoutClasses() {
+        $this->head->appendChild($this->makeElement('style', '
+            .class1 { background: red; }
+            span { background: blue; }
+        '));
+
+        $div = $this->makeElement('div', 'Hello, World!');
+        $this->body->appendChild($div);
+
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $styles = $this->getTheStyles();
+        $this->assertNotContains('.class1', $styles[0]->textContent);
+        $this->assertContains('span', $styles[0]->textContent);
+
+        $scripts = $this->getTheScripts();
+        $this->assertEquals(2, sizeof($scripts));
+    }
+
     public function testDontInjectScript() {
         $this->filter->transformHTMLDOM($this->dom);
 
