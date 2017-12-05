@@ -309,8 +309,8 @@ EOJS;
         // Remove comments
         $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $content);
         // Remove extraneous whitespace (not before colons)
-        $content = preg_replace('~([,{}:;])\s+~', '$1', $content);
-        $content = preg_replace('~\s+([,{};])~', '$1', $content);
+        $content = preg_replace('~([,{}:;])\s++~', '$1', $content);
+        $content = preg_replace('~\s++([,{};])~', '$1', $content);
         return trim($content);
     }
 
