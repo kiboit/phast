@@ -69,24 +69,19 @@ class URL {
      * @return URL
      */
     public function withBase(URL $base) {
-        $classVars = get_class_vars(self::class);
-        unset ($classVars['query']);
-        unset ($classVars['fragment']);
+        $new = clone $this;
 
-        $fromBase = [];
-        foreach (array_keys($classVars) as $key) {
+        foreach (['scheme', 'host', 'port', 'user', 'pass', 'path'] as $key) {
             if ($key == 'path') {
-                $fromBase['path'] = $this->resolvePath($base->path, $this->path);
-            } else if (!isset ($this->$key) && isset ($base->$key)) {
-                $fromBase[$key] = $base->$key;
+                $new->path = $this->resolvePath($base->path, $this->path);
+            } elseif (!isset ($this->$key) && isset ($base->$key)) {
+                $new->$key = $base->$key;
             } elseif (isset ($this->$key)) {
                 break;
             }
         }
 
-        $cleaned = array_filter(get_object_vars($this));
-
-        return self::fromArray(array_merge($cleaned, $fromBase));
+        return $new;
     }
 
     private function resolvePath($base, $requested) {
