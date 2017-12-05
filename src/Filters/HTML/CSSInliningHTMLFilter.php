@@ -326,20 +326,34 @@ EOJS;
     }
 
     private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
-        return preg_replace_callback(
+        $callback = function($match) use ($cssUrl) {
+            if (preg_match('~^[a-z]+:~i', $match[3])) {
+                return $match[0];
+            }
+            return $match[1] . URL::fromString($match[3])->withBase($cssUrl) . $match[4];
+        };
+
+        $cssContent = preg_replace_callback(
             '~
-                (
-                    @import \s+ (?: url\( \s* )?+ (?:"|\'|)
-                    |
-                    url\( \s* (?:"|\'|)
-                )
-                (?! [a-z]+: | // )
-                ([A-Za-z0-9_/.-])
-            ~xi',
-            function ($match) use ($cssUrl) {
-                return $match[1] . URL::fromString($match[2])->withBase($cssUrl);
-            },
+                \b
+                ( url\( ([\'"]?) )
+                ([A-Za-z0-9_/.:?&=+%,#-]+)
+                ( \2 \) )
+            ~x',
+            $callback,
             $cssContent
         );
+
+        $cssContent = preg_replace_callback(
+            '~
+                ( @import \s+ ([\'"]) )
+                ([A-Za-z0-9_/.:?&=+%,#-]+)
+                ( \2 )
+            ~x',
+            $callback,
+            $cssContent
+        );
+
+        return $cssContent;
     }
 }
