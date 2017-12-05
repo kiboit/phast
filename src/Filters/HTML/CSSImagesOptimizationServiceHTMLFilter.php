@@ -29,9 +29,9 @@ class CSSImagesOptimizationServiceHTMLFilter extends ImagesOptimizationServiceHT
                     \b url \( [\'"]?
                 )
                 (
-                    [^\'")] +
+                    [^\'")] ++
                 )
-            ~xi',
+            ~xiS',
             function ($matches) {
                 if ($this->shouldRewriteUrl($matches[2])) {
                     $params = ['src' => (string) URL::fromString($matches[2])->withBase($this->baseUrl)];
