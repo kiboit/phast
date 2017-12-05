@@ -48,21 +48,16 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
         $images = $document->getElementsByTagName('img');
         /** @var \DOMElement $img */
         foreach ($images as $img) {
-            if ($this->shouldRewriteSrc($img)) {
-                $this->rewriteSrc($img);
-            }
-            if ($img->hasAttribute('srcset')) {
-                $this->rewriteSrcset($img);
-            }
+            $this->rewriteSrc($img);
+            $this->rewriteSrcset($img);
         }
     }
 
-    private function shouldRewriteSrc(\DOMElement $img) {
-        return $img->hasAttribute('src') && $this->shouldRewriteUrl($img->getAttribute('src'));
-    }
-
     private function rewriteSrc(\DOMElement $img) {
-        $params = ['src' => (string) URL::fromString($img->getAttribute('src'))->withBase($this->baseUrl)];
+        if (!($url = $this->shouldRewriteUrl($img->getAttribute('src')))) {
+            return;
+        }
+        $params = ['src' => $url];
         foreach (['width', 'height'] as $attr) {
             $value = $img->getAttribute($attr);
             if (preg_match('/^[1-9][0-9]*$/', $value)) {
@@ -76,10 +71,14 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     }
 
     private function rewriteSrcset(\DOMElement $img) {
+        $srcset = $img->getAttribute('srcset');
+        if (!$srcset) {
+            return;
+        }
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) {
-            if ($this->shouldRewriteUrl($match[1])) {
-                $params = ['src' => (string) URL::fromString($match[1])->withBase($this->baseUrl)];
-                $url =  $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
+            if ($url = $this->shouldRewriteUrl($match[1])) {
+                $params = ['src' => $url];
+                $url = $this->makeSignedUrl($this->serviceUrl, $params, $this->signature);
             } else {
                 $url = $match[1];
             }
@@ -87,21 +86,20 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
                 return $url . $match[2];
             }
             return $url;
-        }, $img->getAttribute('srcset'));
+        }, $srcset);
         $img->setAttribute('srcset', $rewritten);
     }
 
     protected function shouldRewriteUrl($url) {
-        if (substr($url, 0, 5) === 'data:') {
-            return false;
+        if (!$url || substr($url, 0, 5) === 'data:') {
+            return;
         }
         $absolute = URL::fromString($url)->withBase($this->baseUrl)->toString();
         foreach ($this->whitelist as $pattern) {
             if (preg_match($pattern, $absolute)) {
-                return true;
+                return $absolute;
             }
         }
-        return false;
     }
 
 }
