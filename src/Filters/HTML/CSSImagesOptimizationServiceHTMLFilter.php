@@ -7,7 +7,7 @@ use Kibo\Phast\ValueObjects\URL;
 class CSSImagesOptimizationServiceHTMLFilter extends ImagesOptimizationServiceHTMLFilter {
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
-        $styleTags = $document->getElementsByTagName('style');
+        $styleTags = $document->query('//style');
         /** @var \DOMElement $styleTag */
         foreach ($styleTags as $styleTag) {
             $styleTag->textContent = $this->rewriteStyle($styleTag->textContent);

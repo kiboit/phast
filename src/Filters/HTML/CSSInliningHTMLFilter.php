@@ -118,8 +118,8 @@ EOJS;
     }
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
-        $links = iterator_to_array($document->getElementsByTagName('link'));
-        $styles = iterator_to_array($document->getElementsByTagName('style'));
+        $links = iterator_to_array($document->query('//link'));
+        $styles = iterator_to_array($document->query('//style'));
         foreach ($links as $link) {
             $this->inlineLink($link);
         }

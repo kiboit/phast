@@ -25,7 +25,7 @@ EOS;
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $insert_loader = false;
 
-        foreach (iterator_to_array($document->getElementsByTagName('link')) as $link) {
+        foreach (iterator_to_array($document->query('//link')) as $link) {
             if ($link->getAttribute('rel') != 'stylesheet') {
                 continue;
             }

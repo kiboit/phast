@@ -31,7 +31,7 @@ EOS;
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $body = $this->getBodyElement($document);
-        $styles = iterator_to_array($document->getElementsByTagName('style'));
+        $styles = iterator_to_array($document->query('//style'));
 
         $this->usedSelectorPattern = $this->getUsedSelectorPattern($document);
 

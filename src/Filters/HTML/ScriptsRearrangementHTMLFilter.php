@@ -8,7 +8,7 @@ class ScriptsRearrangementHTMLFilter extends RearrangementHTMLFilter {
     use JSDetectorTrait;
 
     protected function getElementsToRearrange(\Kibo\Phast\Common\DOMDocument $document) {
-        $scripts = $document->getElementsByTagName('script');
+        $scripts = $document->query('//script');
         foreach ($scripts as $script) {
             if ($this->isJSElement($script)) {
                 yield $script;

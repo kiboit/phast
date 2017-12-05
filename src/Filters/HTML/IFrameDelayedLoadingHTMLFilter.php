@@ -23,7 +23,7 @@ EOS;
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $addScript = false;
-        foreach ($document->getElementsByTagName('iframe') as $iframe) {
+        foreach ($document->query('//iframe') as $iframe) {
             /** @var \DOMElement $iframe */
             if (!$iframe->hasAttribute('src')) {
                 continue;

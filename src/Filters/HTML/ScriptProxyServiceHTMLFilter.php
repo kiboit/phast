@@ -77,7 +77,7 @@ EOS;
     }
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
-        $scripts = iterator_to_array($document->getElementsByTagName('script'));
+        $scripts = iterator_to_array($document->query('//script'));
         $didInject = false;
         foreach ($scripts as $script) {
             if (!$this->isJSElement($script)) {

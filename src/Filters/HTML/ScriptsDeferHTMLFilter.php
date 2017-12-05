@@ -83,7 +83,7 @@ EOS;
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $body = $this->getBodyElement($document);
-        foreach ($document->getElementsByTagName('script') as $script) {
+        foreach ($document->query('//script') as $script) {
             if ($script->hasAttribute('data-phast-no-defer')) {
                 $script->removeAttribute('data-phast-no-defer');
             } elseif ($this->isJSElement($script)) {
