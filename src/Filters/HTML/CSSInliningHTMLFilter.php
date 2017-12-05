@@ -306,13 +306,12 @@ EOJS;
     }
 
     private function minify($content) {
-        return preg_replace('~
-            \s*+/\*[^*]*\*+(?:[^/*][^*]*\*+)*/\s*+
-            | \s*+([,{};])\s*+
-            | (:)\s*+
-            | ^\s++
-            | \s++$
-        ~xS', '$1$2', $content);
+        // Remove comments
+        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $content);
+        // Remove extraneous whitespace (not before colons)
+        $content = preg_replace('~([,{}:;])\s++~', '$1', $content);
+        $content = preg_replace('~\s++([,{};])~', '$1', $content);
+        return trim($content);
     }
 
     private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
