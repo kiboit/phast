@@ -26,65 +26,13 @@ class ServicesFactory {
      * @throws ItemNotFoundException
      */
     public function make($service, array $config) {
-        $method = 'make' . ucfirst($service) . 'Service';
-        if (method_exists($this, $method)) {
-            return $this->$method($config);
+        if (!ctype_alpha($service)) {
+            throw new ItemNotFoundException('Bad service');
+        }
+        $class = __NAMESPACE__ . '\\' . ucfirst($service) . 'ServiceFactory';
+        if (class_exists($class)) {
+            return (new $class())->make($config);
         }
         throw new ItemNotFoundException('Unknown service');
     }
-
-    /**
-     * @param array $config
-     * @return ImageFilteringService
-     */
-    public function makeImagesService(array $config) {
-        return new ImageFilteringService(
-            (new ServiceSignatureFactory())->make($config),
-            $config['images']['whitelist'],
-            new ImageFactory($config),
-            (new CompositeImageFilterFactory($config))->make()
-        );
-    }
-
-    /**
-     * @param array $config
-     * @return ScriptsProxyService
-     */
-    public function makeScriptsService(array $config) {
-        $retriever = new UniversalRetriever();
-        $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
-        $retriever->addRetriever(
-            new CachingRetriever(
-                new FileCache($config['cache'], 'scripts'),
-                new RemoteRetriever(),
-                7200
-            )
-        );
-        return new ScriptsProxyService(
-            (new ServiceSignatureFactory())->make($config),
-            $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match'],
-            $retriever
-        );
-    }
-
-    /**
-     * @param array $config
-     * @return CSSProxyService
-     */
-    public function makeCssService(array $config) {
-        $retriever = new UniversalRetriever();
-        $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
-        $retriever->addRetriever(
-            new CachingRetriever(
-                new FileCache($config['cache'], 'css'),
-                new RemoteRetriever(),
-                7200
-            )
-        );
-        return new CSSProxyService(
-            (new ServiceSignatureFactory())->make($config),
-            $retriever
-        );
-    }
-
 }
