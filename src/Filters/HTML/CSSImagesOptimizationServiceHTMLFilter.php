@@ -13,7 +13,7 @@ class CSSImagesOptimizationServiceHTMLFilter extends ImagesOptimizationServiceHT
             $styleTag->textContent = $this->rewriteStyle($styleTag->textContent);
         }
 
-        $styleAttrs = (new \DOMXPath($document))->query('//@style');
+        $styleAttrs = $document->query('//@style');
         /** @var \DOMAttr $styleAttr */
         foreach ($styleAttrs as $styleAttr) {
             $styleAttr->value = htmlspecialchars($this->rewriteStyle($styleAttr->value));

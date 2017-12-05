@@ -78,10 +78,9 @@ EOS;
     }
 
     private function getUsedClasses(\Kibo\Phast\Common\DOMDocument $document) {
-        $xpath = new \DOMXPath($document);
         $classes = [];
 
-        foreach ($xpath->query('//@class') as $class) {
+        foreach ($document->query('//@class') as $class) {
             foreach (preg_split('/\s+/', $class->value) as $cls) {
                 if ($cls != ''
                     && !isset($classes[$cls])

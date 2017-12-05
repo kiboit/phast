@@ -45,9 +45,8 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     }
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
-        $images = (new \DOMXPath($document))->query('//img');
         /** @var \DOMElement $img */
-        foreach ($images as $img) {
+        foreach ($document->query('//img') as $img) {
             $this->rewriteSrc($img);
             $this->rewriteSrcset($img);
         }
