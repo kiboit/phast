@@ -6,7 +6,7 @@ class DOMDocument extends \DOMDocument {
 
     private $xpath;
 
-    public function xpath($query) {
+    public function query($query) {
         if (!isset($this->xpath)) {
             $this->xpath = new \DOMXPath($this);
         }
