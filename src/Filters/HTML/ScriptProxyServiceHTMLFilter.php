@@ -76,7 +76,7 @@ EOS;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
-    public function transformHTMLDOM(\DOMDocument $document) {
+    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $scripts = iterator_to_array($document->getElementsByTagName('script'));
         $didInject = false;
         foreach ($scripts as $script) {

@@ -81,7 +81,7 @@ class CompositeHTMLFilter {
         $fixedBuffer = $this->escapeCloseTagInScript($fixedBuffer);
 
         $xmlErrors = libxml_use_internal_errors(true);
-        $doc = new \DOMDocument();
+        $doc = new \Kibo\Phast\Common\DOMDocument();
         $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
 
         $timings = [];
@@ -99,7 +99,7 @@ class CompositeHTMLFilter {
         // This gets us UTF-8 instead of entities
         $output = '<!doctype html>';
         foreach ($doc->childNodes as $node) {
-            if (!$node instanceof \DOMDocumentType
+            if (!$node instanceof \Kibo\Phast\Common\DOMDocumentType
                 && !$node instanceof \DOMProcessingInstruction
             ) {
                 $output .= $doc->saveHTML($node);

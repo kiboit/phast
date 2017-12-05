@@ -21,7 +21,7 @@ window.addEventListener('load', function() {
 });
 EOS;
 
-    public function transformHTMLDOM(\DOMDocument $document) {
+    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $addScript = false;
         foreach ($document->getElementsByTagName('iframe') as $iframe) {
             /** @var \DOMElement $iframe */

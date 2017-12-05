@@ -9,7 +9,7 @@ class HTMLFilterTestCase extends TestCase {
     const BASE_URL = 'http://kibo-test.org';
 
     /**
-     * @var \DOMDocument
+     * @var \Kibo\Phast\Common\DOMDocument
      */
     protected $dom;
 
@@ -31,7 +31,7 @@ class HTMLFilterTestCase extends TestCase {
     public function setUp() {
         parent::setUp();
 
-        $this->dom = new \DOMDocument();
+        $this->dom = new \Kibo\Phast\Common\DOMDocument();
         $this->html = $this->dom->createElement('html');
         $this->dom->appendChild($this->html);
         $this->head = $this->dom->createElement('head');

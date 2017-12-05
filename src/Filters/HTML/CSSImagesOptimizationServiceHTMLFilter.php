@@ -6,7 +6,7 @@ use Kibo\Phast\ValueObjects\URL;
 
 class CSSImagesOptimizationServiceHTMLFilter extends ImagesOptimizationServiceHTMLFilter {
 
-    public function transformHTMLDOM(\DOMDocument $document) {
+    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $styleTags = $document->getElementsByTagName('style');
         /** @var \DOMElement $styleTag */
         foreach ($styleTags as $styleTag) {

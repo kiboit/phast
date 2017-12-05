@@ -71,7 +71,7 @@ class CompositeHTMLFilterTest extends TestCase {
     public function testNotLoadingBadHTML() {
         $this->shouldNotTransform();
         $buffer = "\0<html><body></body></html>";
-        $doc = new \DOMDocument();
+        $doc = new \Kibo\Phast\Common\DOMDocument();
         $loads = @$doc->loadHTML($buffer);
         $this->assertFalse($loads);
         $this->assertEquals($buffer, $this->filter->apply($buffer));

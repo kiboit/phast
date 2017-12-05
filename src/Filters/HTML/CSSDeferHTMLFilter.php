@@ -22,7 +22,7 @@ class CSSDeferHTMLFilter implements HTMLFilter {
 })();
 EOS;
 
-    public function transformHTMLDOM(\DOMDocument $document) {
+    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $insert_loader = false;
 
         foreach (iterator_to_array($document->getElementsByTagName('link')) as $link) {

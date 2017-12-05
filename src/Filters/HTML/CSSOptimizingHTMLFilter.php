@@ -29,7 +29,7 @@ class CSSOptimizingHTMLFilter implements HTMLFilter {
 })();
 EOS;
 
-    public function transformHTMLDOM(\DOMDocument $document) {
+    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $body = $this->getBodyElement($document);
         $styles = iterator_to_array($document->getElementsByTagName('style'));
 
@@ -68,7 +68,7 @@ EOS;
         }
     }
 
-    private function getUsedSelectorPattern(\DOMDocument $document) {
+    private function getUsedSelectorPattern(\Kibo\Phast\Common\DOMDocument $document) {
         $classes = $this->getUsedClasses($document);
 
         $re_class = $classes ? '(?!' . implode('|', $classes) . ')' : '';
@@ -77,7 +77,7 @@ EOS;
         return $re_selector;
     }
 
-    private function getUsedClasses(\DOMDocument $document) {
+    private function getUsedClasses(\Kibo\Phast\Common\DOMDocument $document) {
         $xpath = new \DOMXPath($document);
         $classes = [];
 

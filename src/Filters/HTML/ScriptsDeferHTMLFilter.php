@@ -81,7 +81,7 @@ class ScriptsDeferHTMLFilter implements HTMLFilter {
 EOS;
 
 
-    public function transformHTMLDOM(\DOMDocument $document) {
+    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $body = $this->getBodyElement($document);
         foreach ($document->getElementsByTagName('script') as $script) {
             if ($script->hasAttribute('data-phast-no-defer')) {

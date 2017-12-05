@@ -44,7 +44,7 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
         $this->whitelist = $whitelist;
     }
 
-    public function transformHTMLDOM(\DOMDocument $document) {
+    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $images = (new \DOMXPath($document))->query('//img');
         /** @var \DOMElement $img */
         foreach ($images as $img) {
