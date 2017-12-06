@@ -50,7 +50,7 @@ class PHPErrorLogWriterTest extends TestCase {
         ];
         $writer->writeEntry(new LogEntry(LogLevel::DEBUG, $message, $context));
         $this->assertEquals(
-            "100\tID\tthe-service\tthe-class\tthe-method\t20\tThe message with v2 here",
+            "ID\tthe-service\tthe-class\tthe-method\t20\tThe message with v2 here",
             $actualMessage
         );
 

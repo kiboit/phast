@@ -48,9 +48,11 @@ class PHPErrorLogWriter extends BaseLogWriter {
     private function interpolate($message, $context) {
         $prefix = '';
         $prefixKeys = [
-            'timestamp', 'requestId',
-            'service', 'class',
-            'method', 'line'
+            'requestId',
+            'service',
+            'class',
+            'method',
+            'line'
         ];
         foreach ($prefixKeys as $key) {
             if (isset ($context[$key])) {
