@@ -13,10 +13,11 @@ class Log {
      */
     private static $logger;
 
-    public static function init(array $config, Request $request) {
+    public static function init(array $config, Request $request, $service) {
         $writer = (new LogWritersFactory())->make($config, $request);
-        self::$logger = new Logger($writer);
-        // TODO: set default context for logger
+        $logger = new Logger($writer);
+        // TODO: set request id in default context
+        self::$logger = $logger->withContext(['service' => $service]);
     }
 
     /**
