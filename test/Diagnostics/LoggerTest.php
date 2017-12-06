@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Diagnostics;
 
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use PHPUnit\Framework\TestCase;
 
 class LoggerTest extends TestCase {
@@ -30,7 +31,11 @@ class LoggerTest extends TestCase {
             ->willReturnCallback(function (LogEntry $message) {
                 $this->messageWritten = $message;
             });
-        $this->logger = new Logger($this->writer);
+        $functions = new ObjectifiedFunctions();
+        $functions->microtime = function () {
+            return 1000;
+        };
+        $this->logger = new Logger($this->writer, $functions);
     }
 
     /**
@@ -38,7 +43,7 @@ class LoggerTest extends TestCase {
      */
     public function testLevel($method, $level) {
         $theMessage = 'The message';
-        $theContext = ['key' => 'value'];
+        $theContext = ['key' => 'value', 'timestamp' => 10];
         call_user_func([$this->logger, $method], $theMessage, $theContext);
         $this->assertInstanceOf(LogEntry::class, $this->messageWritten);
         $this->assertEquals($level, $this->messageWritten->getLevel());
@@ -62,17 +67,23 @@ class LoggerTest extends TestCase {
     public function testWithContext() {
         // test setting a default context and merging it with message context
         $logger = $this->logger->withContext(['k1' => 'v1']);
-        $logger->debug('A message', ['mk1' => 'mv1']);
-        $this->assertEquals(['k1' => 'v1', 'mk1' => 'mv1'], $this->messageWritten->getContext());
+        $logger->debug('A message', ['mk1' => 'mv1', 'timestamp' => 10]);
+        $this->assertEquals(['k1' => 'v1', 'mk1' => 'mv1', 'timestamp' => 10], $this->messageWritten->getContext());
 
         // test merging new default context with old default context
         $logger = $logger->withContext(['k2' => 'v2']);
-        $logger->debug('A message');
-        $this->assertEquals(['k1' => 'v1', 'k2' => 'v2'], $this->messageWritten->getContext());
+        $logger->debug('A message', ['timestamp' => 10]);
+        $this->assertEquals(['k1' => 'v1', 'k2' => 'v2', 'timestamp' => 10], $this->messageWritten->getContext());
 
         // test overriding contexts
         $logger = $logger->withContext(['k2' => 'v3']);
-        $logger->debug('A message', ['k1' => 'mv3']);
-        $this->assertEquals(['k1' => 'mv3', 'k2' => 'v3'], $this->messageWritten->getContext());
+        $logger->debug('A message', ['k1' => 'mv3', 'timestamp' => 10]);
+        $this->assertEquals(['k1' => 'mv3', 'k2' => 'v3', 'timestamp' => 10], $this->messageWritten->getContext());
+    }
+
+    public function testSettingTimestampInContext() {
+        $this->logger->debug('A message');
+        $context = $this->messageWritten->getContext();
+        $this->assertEquals(1000, $context['timestamp']);
     }
 }

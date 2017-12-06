@@ -2,6 +2,8 @@
 
 namespace Kibo\Phast\Diagnostics;
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
+
 class Logger {
 
     /**
@@ -15,11 +17,17 @@ class Logger {
     private $context = [];
 
     /**
+     * @var ObjectifiedFunctions
+     */
+    private $functions;
+
+    /**
      * Logger constructor.
      * @param LogWriter $writer
      */
-    public function __construct(LogWriter $writer) {
+    public function __construct(LogWriter $writer, ObjectifiedFunctions $functions = null) {
         $this->writer = $writer;
+        $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
     /**
@@ -143,7 +151,7 @@ class Logger {
     }
 
     protected function log($level, $message, array $context = []) {
-        // TODO: add a microtimestamp to the context
+        $context = array_merge(['timestamp' => $this->functions->microtime(true)], $context);
         $this->writer->writeEntry(new LogEntry($level, $message, array_merge($this->context, $context)));
     }
 }
