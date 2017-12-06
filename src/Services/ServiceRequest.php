@@ -90,15 +90,15 @@ class ServiceRequest {
     }
 
     public function sign(ServiceSignature $signature) {
-        $token = $signature->sign($this->getVirificationString());
+        $token = $signature->sign($this->getVerificationString());
         return $this->cloneWithProperty('token', $token);
     }
 
     public function verify(ServiceSignature $signature) {
-        return $signature->verify($this->token, $this->getVirificationString());
+        return $signature->verify($this->token, $this->getVerificationString());
     }
 
-    private function getVirificationString() {
+    private function getVerificationString() {
         $params = $this->getAllParams();
         ksort($params);
         return http_build_query($params);
