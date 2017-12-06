@@ -119,7 +119,7 @@ return [
 
                 [
                     'class' => \Kibo\Phast\Diagnostics\LogDrivers\JSONLFileLogWriter::class,
-                    'logRoot' => sys_get_temp_dir()
+                    'logRoot' => sys_get_temp_dir() . '/phast-logs'
                 ]
             ]
         ]
