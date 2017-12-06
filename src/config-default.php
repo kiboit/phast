@@ -123,16 +123,6 @@ return [
                 ]
             ]
         ]
-//        'logWriter' => [
-//            'class' => \Kibo\Phast\Diagnostics\LogDrivers\PHPErrorLogWriter::class,
-//            'levelMask' =>
-//                \Kibo\Phast\Diagnostics\LogLevel::EMERGENCY
-//                | \Kibo\Phast\Diagnostics\LogLevel::ALERT
-//                | \Kibo\Phast\Diagnostics\LogLevel::CRITICAL
-//                | \Kibo\Phast\Diagnostics\LogLevel::ERROR
-//                | \Kibo\Phast\Diagnostics\LogLevel::WARNING
-//        ]
-
     ]
 ];
 
