@@ -11,8 +11,11 @@ class LogWritersFactory {
     public function make(array $config, Request $request) {
         $class = $config['class'];
         $factoryClass = str_replace('Kibo\Phast\\', 'Kibo\Phast\Factories\\', $class) . 'Factory';
-        // TODO: set the logging level on the filter before we return it
-        return (new $factoryClass())->make($config, $request);
+        $writer = (new $factoryClass())->make($config, $request);
+        if (isset ($config['levelMask'])) {
+            $writer->setLevelMask($config['levelMask']);
+        }
+        return $writer;
     }
 
 }
