@@ -100,6 +100,39 @@ return [
                 'cmdpath' => '/usr/bin/jpegtran'
             ]
         ]
+    ],
+
+    'diagnostics' => [
+
+        'logWriter' => [
+            'class' => \Kibo\Phast\Diagnostics\LogDrivers\CompositeLogWriter::class,
+            'logWriters' => [
+                [
+                    'class' => \Kibo\Phast\Diagnostics\LogDrivers\PHPErrorLogWriter::class,
+                    'levelMask' =>
+                          \Kibo\Phast\Diagnostics\LogLevel::EMERGENCY
+                        | \Kibo\Phast\Diagnostics\LogLevel::ALERT
+                        | \Kibo\Phast\Diagnostics\LogLevel::CRITICAL
+                        | \Kibo\Phast\Diagnostics\LogLevel::ERROR
+                        | \Kibo\Phast\Diagnostics\LogLevel::WARNING
+                ],
+
+                [
+                    'class' => \Kibo\Phast\Diagnostics\LogDrivers\JSONLFileLogWriter::class,
+                    'logRoot' => sys_get_temp_dir()
+                ]
+            ]
+        ]
+//        'logWriter' => [
+//            'class' => \Kibo\Phast\Diagnostics\LogDrivers\PHPErrorLogWriter::class,
+//            'levelMask' =>
+//                \Kibo\Phast\Diagnostics\LogLevel::EMERGENCY
+//                | \Kibo\Phast\Diagnostics\LogLevel::ALERT
+//                | \Kibo\Phast\Diagnostics\LogLevel::CRITICAL
+//                | \Kibo\Phast\Diagnostics\LogLevel::ERROR
+//                | \Kibo\Phast\Diagnostics\LogLevel::WARNING
+//        ]
+
     ]
 ];
 
