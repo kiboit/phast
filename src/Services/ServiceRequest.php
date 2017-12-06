@@ -89,6 +89,11 @@ class ServiceRequest {
         return $this->cloneWithProperty('url', $url);
     }
 
+    public function getRequestId() {
+        // TODO: Implement a real service id
+        return 'hardcoded-request-id';
+    }
+
     public function sign(ServiceSignature $signature) {
         $token = $signature->sign($this->getVerificationString());
         return $this->cloneWithProperty('token', $token);

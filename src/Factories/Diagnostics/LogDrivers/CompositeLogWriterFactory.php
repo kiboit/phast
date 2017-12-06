@@ -4,11 +4,11 @@
 namespace Kibo\Phast\Factories\Diagnostics\LogDrivers;
 
 use Kibo\Phast\Diagnostics\LogDrivers\CompositeLogWriter;
-use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\Services\ServiceRequest;
 
 class CompositeLogWriterFactory {
 
-    public function make(array $config, Request $request) {
+    public function make(array $config, ServiceRequest $request) {
         $writer = new CompositeLogWriter();
         $factory = new LogWritersFactory();
         foreach ($config['logWriters'] as $writerConfig) {

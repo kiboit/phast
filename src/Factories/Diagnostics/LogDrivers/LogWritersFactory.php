@@ -4,11 +4,11 @@
 namespace Kibo\Phast\Factories\Diagnostics\LogDrivers;
 
 
-use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\Services\ServiceRequest;
 
 class LogWritersFactory {
 
-    public function make(array $config, Request $request) {
+    public function make(array $config, ServiceRequest $request) {
         $class = $config['class'];
         $factoryClass = str_replace('Kibo\Phast\\', 'Kibo\Phast\Factories\\', $class) . 'Factory';
         $writer = (new $factoryClass())->make($config, $request);

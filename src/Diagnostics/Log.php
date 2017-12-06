@@ -4,7 +4,7 @@ namespace Kibo\Phast\Diagnostics;
 
 
 use Kibo\Phast\Factories\Diagnostics\LogDrivers\LogWritersFactory;
-use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\Services\ServiceRequest;
 
 class Log {
 
@@ -13,11 +13,13 @@ class Log {
      */
     private static $logger;
 
-    public static function init(array $config, Request $request, $service) {
+    public static function init(array $config, ServiceRequest $request, $service) {
         $writer = (new LogWritersFactory())->make($config, $request);
         $logger = new Logger($writer);
-        // TODO: set request id in default context
-        self::$logger = $logger->withContext(['service' => $service]);
+        self::$logger = $logger->withContext([
+            'requestId' => $request->getRequestId(),
+            'service' => $service
+        ]);
     }
 
     /**

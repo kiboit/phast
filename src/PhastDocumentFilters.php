@@ -5,11 +5,13 @@ namespace Kibo\Phast;
 use Kibo\Phast\Diagnostics\Log;
 use Kibo\Phast\Factories\Filters\HTML\CompositeHTMLFilterFactory;
 use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\Services\ServiceRequest;
 
 class PhastDocumentFilters {
 
     public static function deploy(array $config) {
-        Log::init($config['diagnostics']['logWriter'], Request::fromGlobals(), 'dom-filters');
+        $request = ServiceRequest::fromHTTPRequest(Request::fromGlobals());
+        Log::init($config['diagnostics']['logWriter'], $request, 'dom-filters');
         $filter = (new CompositeHTMLFilterFactory())->make($config);
         Log::info('Phast deployed!');
         ob_start([$filter, 'apply']);
