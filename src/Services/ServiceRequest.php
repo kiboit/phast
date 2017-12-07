@@ -73,6 +73,9 @@ class ServiceRequest {
         return $this->params;
     }
 
+    /**
+     * @return Request
+     */
     public function getHTTPRequest() {
         return $this->httpRequest;
     }
