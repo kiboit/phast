@@ -2,12 +2,14 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Common\DOMDocument;
+
 interface HTMLFilter {
 
     /**
-     * @param \Kibo\Phast\Common\DOMDocument $document
+     * @param DOMDocument $document
      * @return null
      */
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document);
+    public function transformHTMLDOM(DOMDocument $document);
 
 }
