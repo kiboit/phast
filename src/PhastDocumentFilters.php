@@ -11,7 +11,7 @@ class PhastDocumentFilters {
 
     public static function deploy(array $config) {
         $request = ServiceRequest::fromHTTPRequest(Request::fromGlobals());
-        Log::init($config['diagnostics']['logWriter'], $request, 'dom-filters');
+        Log::init($config['logging'], $request, 'dom-filters');
         $filter = (new CompositeHTMLFilterFactory())->make($config);
         Log::info('Phast deployed!');
         ob_start([$filter, 'apply']);
