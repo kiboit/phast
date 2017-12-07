@@ -24,8 +24,11 @@ if (isset ($serviceParams['src']) && !headers_sent())  {
 
 $config = require_once PHAST_CONFIG_FILE;
 try {
+    $runtimeConfig = (new \Kibo\Phast\Environment\Configuration($config))
+        ->withServiceRequest($serviceRequest)
+        ->toArray();
     $response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
-        ->make($service, $config)
+        ->make($service, $runtimeConfig)
         ->serve($serviceRequest);
 } catch (\Kibo\Phast\Exceptions\UnauthorizedException $e) {
     exit();

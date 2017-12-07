@@ -114,10 +114,16 @@ return [
                     | \Kibo\Phast\Logging\LogLevel::WARNING
             ],
             [
+                'enabled' => 'diagnostics',
                 'class' => \Kibo\Phast\Logging\LogWriters\JSONLFileLogWriter::class,
                 'logRoot' => sys_get_temp_dir() . '/phast-logs'
             ]
         ]
+    ],
+
+    'switches' => [
+        'phast' => true,
+        'diagnostics' => false
     ]
 ];
 

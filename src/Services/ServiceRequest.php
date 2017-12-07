@@ -69,6 +69,13 @@ class ServiceRequest {
     /**
      * @return array
      */
+    public function getSwitches() {
+        return [];
+    }
+
+    /**
+     * @return array
+     */
     public function getParams() {
         return $this->params;
     }
