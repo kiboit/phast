@@ -70,7 +70,19 @@ class ServiceRequest {
      * @return array
      */
     public function getSwitches() {
-        return [];
+        $params = $this->getParams();
+        if (!isset ($params['switches'])) {
+            return [];
+        }
+        $switches = [];
+        foreach (explode('.', $params['switches']) as $switch) {
+            if ($switch[0] == '-') {
+                $switches[substr($switch, 1)] = false;
+            } else {
+                $switches[$switch] = true;
+            }
+        }
+        return $switches;
     }
 
     /**

@@ -142,6 +142,38 @@ class ServiceRequestTest extends TestCase {
         $this->assertFalse($queryRequest->verify($signature2));
         $this->assertFalse($pathRequest->verify($signature2));
     }
+
+    public function testGettingSwitchesFromGet() {
+        $get = ['switches' => 'images.-webp'];
+        $httpRequest = Request::fromArray($get, []);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+
+        $expected = [
+            'images' => true,
+            'webp' => false,
+        ];
+        $this->assertEquals($expected, $serviceRequest->getSwitches());
+    }
+
+    public function testGettingSwitchesFromPathInfo() {
+        $pathInfo = '/switches=-2Ddiagnostics.phast';
+        $httpRequest = Request::fromArray([], ['PATH_INFO' => $pathInfo]);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+
+        $expected = [
+            'diagnostics' => false,
+            'phast' => true,
+        ];
+        $this->assertEquals($expected, $serviceRequest->getSwitches());
+    }
+
+    public function testGettingDefaultSwitches() {
+        $httpRequest = Request::fromArray([], []);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $this->assertEquals([], $serviceRequest->getSwitches());
+    }
+
+
     
     private function checkRequest(ServiceRequest $request, $expectedQuery, $expectedPath) {
         $actualQuery = $request->serialize(ServiceRequest::FORMAT_QUERY);
