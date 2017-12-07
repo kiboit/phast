@@ -173,6 +173,14 @@ class ServiceRequestTest extends TestCase {
         $this->assertEquals([], $serviceRequest->getSwitches());
     }
 
+    public function testPropagatingSwitches() {
+        $httpRequest = Request::fromArray(['switches' => 's1.s2.-s3'], []);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $url = $serviceRequest->withUrl(URL::fromString('phast.php?service=images'))
+                ->withParams(['k' => 'v'])
+                ->serialize();
+        $this->assertContains('switches=s1.s2.-s3', $url);
+    }
 
     
     private function checkRequest(ServiceRequest $request, $expectedQuery, $expectedPath) {

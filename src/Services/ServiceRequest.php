@@ -12,6 +12,8 @@ class ServiceRequest {
 
     const FORMAT_PATH  = 2;
 
+    private static $switches = '';
+
     /**
      * @var Request
      */
@@ -45,6 +47,9 @@ class ServiceRequest {
             unset ($params['token']);
         }
         $instance->params = $params;
+        if (isset ($params['switches'])) {
+            self::$switches = $params['switches'];
+        }
         return $instance;
     }
 
@@ -158,6 +163,9 @@ class ServiceRequest {
             parse_str($this->url->getQuery(), $urlParams);
         }
         $params = array_merge($urlParams, $this->params);
+        if (!empty (self::$switches)) {
+            $params['switches'] = self::$switches;
+        }
         return $params;
     }
 
