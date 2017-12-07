@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Kibo\Phast\Factories\Diagnostics\LogDrivers;
+namespace Kibo\Phast\Factories\Diagnostics\LogWriters;
 
 
 use Kibo\Phast\Services\ServiceRequest;

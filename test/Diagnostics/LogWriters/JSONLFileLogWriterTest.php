@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Diagnostics\LogDrivers;
+namespace Kibo\Phast\Diagnostics\LogWriters;
 
 
 use PHPUnit\Framework\TestCase;

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Kibo\Phast\Factories\Diagnostics\LogDrivers;
+namespace Kibo\Phast\Factories\Diagnostics\LogWriters;
 
-use Kibo\Phast\Diagnostics\LogDrivers\CompositeLogWriter;
+use Kibo\Phast\Diagnostics\LogWriters\CompositeLogWriter;
 use Kibo\Phast\Services\ServiceRequest;
 
 class CompositeLogWriterFactory {

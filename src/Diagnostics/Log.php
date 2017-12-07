@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Diagnostics;
 
 
-use Kibo\Phast\Factories\Diagnostics\LogDrivers\LogWritersFactory;
+use Kibo\Phast\Factories\Diagnostics\LogWriters\LogWritersFactory;
 use Kibo\Phast\Services\ServiceRequest;
 
 class Log {

@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Kibo\Phast\Factories\Diagnostics\LogDrivers;
+namespace Kibo\Phast\Factories\Diagnostics\LogWriters;
 
 
-use Kibo\Phast\Diagnostics\LogDrivers\JSONLFileLogWriter;
+use Kibo\Phast\Diagnostics\LogWriters\JSONLFileLogWriter;
 use Kibo\Phast\Services\ServiceRequest;
 
 class JSONLFileLogWriterFactory {
