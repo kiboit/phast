@@ -17,9 +17,6 @@ if (defined('PHAST_SERVICE')) {
 
 if (isset ($serviceParams['src']) && !headers_sent())  {
     header('Location: ' . $serviceParams['src']);
-} else {
-    http_response_code(404);
-    exit;
 }
 
 $config = require_once PHAST_CONFIG_FILE;

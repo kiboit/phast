@@ -2,33 +2,11 @@
 
 namespace Kibo\Phast\Logging\LogWriters;
 
+use Kibo\Phast\Logging\Common\JSONLFileLogTrait;
 use Kibo\Phast\Logging\LogEntry;
 
 class JSONLFileLogWriter extends BaseLogWriter {
-
-    /**
-     * @var string
-     */
-    private $dir;
-
-    /**
-     * @var string
-     */
-    private $filename;
-
-    /**
-     * JSONLFileLogWriter constructor.
-     * @param string $dir
-     * @param string $suffix
-     */
-    public function __construct($dir, $suffix) {
-        $this->dir = $dir;
-        $suffix = preg_replace('/[^0-9A-Za-z_-]/', '', (string)$suffix);
-        if (!empty ($suffix)) {
-            $suffix = '-' . $suffix;
-        }
-        $this->filename = $this->dir . '/log' . $suffix . '.jsonl';
-    }
+    use JSONLFileLogTrait;
 
     /**
      * @param LogEntry $entry
