@@ -27,6 +27,8 @@ try {
     $runtimeConfig = (new \Kibo\Phast\Environment\Configuration($config))
         ->withServiceRequest($serviceRequest)
         ->toArray();
+    \Kibo\Phast\Logging\Log::init($runtimeConfig['logging'], $serviceRequest, $service);
+    \Kibo\Phast\Logging\Log::info('Starting service');
     $response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
         ->make($service, $runtimeConfig)
         ->serve($serviceRequest);
