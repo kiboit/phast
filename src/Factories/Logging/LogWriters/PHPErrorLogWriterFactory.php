@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Kibo\Phast\Factories\Diagnostics\LogWriters;
+namespace Kibo\Phast\Factories\Logging\LogWriters;
 
 
-use Kibo\Phast\Diagnostics\LogWriters\PHPErrorLogWriter;
+use Kibo\Phast\Logging\LogWriters\PHPErrorLogWriter;
 use Kibo\Phast\Services\ServiceRequest;
 
 class PHPErrorLogWriterFactory {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Diagnostics;
+namespace Kibo\Phast\Logging;
 
 class LogEntry {
 

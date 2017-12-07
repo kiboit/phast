@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast;
 
-use Kibo\Phast\Diagnostics\Log;
+use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Factories\Filters\HTML\CompositeHTMLFilterFactory;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Services\ServiceRequest;

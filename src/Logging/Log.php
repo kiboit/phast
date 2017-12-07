@@ -1,9 +1,9 @@
 <?php
 
-namespace Kibo\Phast\Diagnostics;
+namespace Kibo\Phast\Logging;
 
 
-use Kibo\Phast\Factories\Diagnostics\LogWriters\LogWritersFactory;
+use Kibo\Phast\Factories\Logging\LogWriters\LogWritersFactory;
 use Kibo\Phast\Services\ServiceRequest;
 
 class Log {

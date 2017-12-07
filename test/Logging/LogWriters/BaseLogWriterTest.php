@@ -1,10 +1,10 @@
 <?php
 
-namespace Kibo\Phast\Diagnostics\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters;
 
 
-use Kibo\Phast\Diagnostics\LogEntry;
-use Kibo\Phast\Diagnostics\LogLevel;
+use Kibo\Phast\Logging\LogEntry;
+use Kibo\Phast\Logging\LogLevel;
 use PHPUnit\Framework\TestCase;
 
 class BaseLogWriterTest extends TestCase {

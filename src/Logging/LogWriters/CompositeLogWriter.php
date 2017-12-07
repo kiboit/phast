@@ -1,10 +1,10 @@
 <?php
 
-namespace Kibo\Phast\Diagnostics\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters;
 
 
-use Kibo\Phast\Diagnostics\LogEntry;
-use Kibo\Phast\Diagnostics\LogWriter;
+use Kibo\Phast\Logging\LogEntry;
+use Kibo\Phast\Logging\LogWriter;
 
 class CompositeLogWriter extends BaseLogWriter {
 

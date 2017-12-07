@@ -1,8 +1,8 @@
 <?php
 
-namespace Kibo\Phast\Diagnostics\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters;
 
-use Kibo\Phast\Diagnostics\LogEntry;
+use Kibo\Phast\Logging\LogEntry;
 
 class JSONLFileLogWriter extends BaseLogWriter {
 

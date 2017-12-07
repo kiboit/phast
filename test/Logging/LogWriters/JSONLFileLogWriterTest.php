@@ -1,11 +1,11 @@
 <?php
 
-namespace Kibo\Phast\Diagnostics\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters;
 
 
 use PHPUnit\Framework\TestCase;
-use Kibo\Phast\Diagnostics\LogEntry;
-use Kibo\Phast\Diagnostics\LogLevel;
+use Kibo\Phast\Logging\LogEntry;
+use Kibo\Phast\Logging\LogLevel;
 
 class JSONLFileLogWriterTest extends TestCase {
 

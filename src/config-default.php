@@ -105,20 +105,20 @@ return [
     'diagnostics' => [
 
         'logWriter' => [
-            'class' => \Kibo\Phast\Diagnostics\LogWriters\CompositeLogWriter::class,
+            'class' => \Kibo\Phast\Logging\LogWriters\CompositeLogWriter::class,
             'logWriters' => [
                 [
-                    'class' => \Kibo\Phast\Diagnostics\LogWriters\PHPErrorLogWriter::class,
+                    'class' => \Kibo\Phast\Logging\LogWriters\PHPErrorLogWriter::class,
                     'levelMask' =>
-                          \Kibo\Phast\Diagnostics\LogLevel::EMERGENCY
-                        | \Kibo\Phast\Diagnostics\LogLevel::ALERT
-                        | \Kibo\Phast\Diagnostics\LogLevel::CRITICAL
-                        | \Kibo\Phast\Diagnostics\LogLevel::ERROR
-                        | \Kibo\Phast\Diagnostics\LogLevel::WARNING
+                          \Kibo\Phast\Logging\LogLevel::EMERGENCY
+                        | \Kibo\Phast\Logging\LogLevel::ALERT
+                        | \Kibo\Phast\Logging\LogLevel::CRITICAL
+                        | \Kibo\Phast\Logging\LogLevel::ERROR
+                        | \Kibo\Phast\Logging\LogLevel::WARNING
                 ],
 
                 [
-                    'class' => \Kibo\Phast\Diagnostics\LogWriters\JSONLFileLogWriter::class,
+                    'class' => \Kibo\Phast\Logging\LogWriters\JSONLFileLogWriter::class,
                     'logRoot' => sys_get_temp_dir() . '/phast-logs'
                 ]
             ]
