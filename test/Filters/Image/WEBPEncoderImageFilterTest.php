@@ -24,7 +24,7 @@ class WEBPEncoderImageFilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->config = ['enabled' => true, 'compression' => 80];
+        $this->config = ['compression' => 80];
         $this->request = ['preferredType' => Image::TYPE_WEBP];
         $this->filter = $this->getFilter();
     }
@@ -34,15 +34,9 @@ class WEBPEncoderImageFilterTest extends TestCase {
         $image->setType(Image::TYPE_JPEG);
         $image = $image->compress(10);
 
-        $this->config['enabled'] = false;
-        $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
-
         $this->request['preferredType'] = Image::TYPE_PNG;
         $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
-
-        $this->config['enabled'] = true;
-        $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
-
+        
         unset ($this->request['preferredType']);
         $this->assertSame($image, $this->getFilter()->transformImage($image, $this->request));
 
