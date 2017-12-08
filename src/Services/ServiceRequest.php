@@ -14,6 +14,8 @@ class ServiceRequest {
 
     private static $switches = '';
 
+    private static $requestId;
+
     /**
      * @var Request
      */
@@ -50,6 +52,11 @@ class ServiceRequest {
         if (isset ($params['switches'])) {
             self::$switches = $params['switches'];
         }
+        if (isset ($params['requestId'])) {
+            self::$requestId = $params['requestId'];
+        } else {
+            self::$requestId = (string)mt_rand(0, 999999999);
+        }
         return $instance;
     }
 
@@ -79,15 +86,7 @@ class ServiceRequest {
         if (!isset ($params['switches'])) {
             return [];
         }
-        $switches = [];
-        foreach (explode('.', $params['switches']) as $switch) {
-            if ($switch[0] == '-') {
-                $switches[substr($switch, 1)] = false;
-            } else {
-                $switches[$switch] = true;
-            }
-        }
-        return $switches;
+        return $this->parseSwitches($params['switches']);
     }
 
     /**
@@ -117,8 +116,7 @@ class ServiceRequest {
     }
 
     public function getRequestId() {
-        // TODO: Implement a real service id
-        return 'hardcoded-request-id';
+        return self::$requestId;
     }
 
     public function sign(ServiceSignature $signature) {
@@ -165,6 +163,10 @@ class ServiceRequest {
         $params = array_merge($urlParams, $this->params);
         if (!empty (self::$switches)) {
             $params['switches'] = self::$switches;
+            $switches = $this->parseSwitches(self::$switches);
+            if (isset ($switches['diagnostics']) && $switches['diagnostics']) {
+                $params['requestId'] = self::$requestId;
+            }
         }
         return $params;
     }
@@ -196,6 +198,18 @@ class ServiceRequest {
             return preg_replace(['~\?.*~', '~/$~'], '', $this->url) . $params;
         }
         return $params;
+    }
+
+    private function parseSwitches($switchesString) {
+        $switches = [];
+        foreach (explode('.', $switchesString) as $switch) {
+            if ($switch[0] == '-') {
+                $switches[substr($switch, 1)] = false;
+            } else {
+                $switches[$switch] = true;
+            }
+        }
+        return $switches;
     }
 
 }

@@ -182,6 +182,46 @@ class ServiceRequestTest extends TestCase {
         $this->assertContains('switches=s1.s2.-s3', $url);
     }
 
+    public function testGeneratingRequestId() {
+        $httpRequest = Request::fromArray([], []);
+        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
+        $id2 = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
+
+        $this->assertTrue((bool)preg_match('/^\d{1,9}$/', $id1));
+        $this->assertTrue((bool)preg_match('/^\d{1,9}$/', $id2));
+        $this->assertNotEquals($id1, $id2);
+    }
+
+    public function testPreservingRequestId() {
+        $httpRequest = Request::fromArray([], []);
+        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
+        $id2 = (new ServiceRequest())->getRequestId();
+        $this->assertEquals($id1, $id2);
+    }
+
+    public function testGettingRequestIdFromHTTPRequest() {
+        $httpRequest = Request::fromArray(['requestId' => 'the-id'], []);
+        $id = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
+        $this->assertEquals('the-id', $id);
+    }
+
+    public function testPropagatingRequestId() {
+        $url = URL::fromString('phast.php?service=diagnostics');
+        $url1 = (new ServiceRequest())->withUrl($url)->serialize();
+
+        $this->assertNotContains('requestId=', $url1);
+
+        $httpRequest = Request::fromArray(['switches' => 'diagnostics'], []);
+        $url2 = ServiceRequest::fromHTTPRequest($httpRequest)
+                ->withUrl($url)
+                ->serialize();
+
+        $this->assertContains('requestId=', $url2);
+
+        $url3 = (new ServiceRequest())->withUrl($url)->serialize();
+        $this->assertContains('requestId=', $url3);
+    }
+
     
     private function checkRequest(ServiceRequest $request, $expectedQuery, $expectedPath) {
         $actualQuery = $request->serialize(ServiceRequest::FORMAT_QUERY);
