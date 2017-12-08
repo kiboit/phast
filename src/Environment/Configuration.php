@@ -54,6 +54,9 @@ class Configuration {
                 return $this->switches->isOn($item['enabled']);
             });
         }
+        if (isset ($config['images']['enable-cache']) && is_string($config['images']['enable-cache'])) {
+            $config['images']['enable-cache'] = $this->switches->isOn($config['images']['enable-cache']);
+        }
         $config['switches'] = $this->switches->toArray();
         return $config;
     }

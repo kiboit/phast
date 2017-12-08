@@ -70,7 +70,7 @@ return [
     ],
 
     'images' => [
-        'enable-cache' => true,
+        'enable-cache' => 'imgcache',
 
         'whitelist' => [
             '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',

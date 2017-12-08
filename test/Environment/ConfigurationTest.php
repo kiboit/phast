@@ -17,6 +17,9 @@ class ConfigurationTest extends TestCase {
         ],
 
         'images' => [
+
+            'enable-cache' => true,
+
             'filters' => [
                 'filter1' => [],
                 'filter2' => [],
@@ -105,5 +108,26 @@ class ConfigurationTest extends TestCase {
         $this->assertArrayHasKey('switches', $actual);
         $this->assertArrayHasKey('phast', $actual['switches']);
         $this->assertTrue($actual['switches']['phast']);
+    }
+
+    public function testImageCacheSetting() {
+        $config = $this->configTemplate;
+        $actual = (new Configuration($config))->toArray();
+        $this->assertTrue($actual['images']['enable-cache']);
+
+        $config['images']['enable-cache'] = false;
+        $actual = (new Configuration($config))->toArray();
+        $this->assertFalse($actual['images']['enable-cache']);
+
+        $config['images']['enable-cache'] = 's1';
+        $config['switches']['s1'] = false;
+        $actual = (new Configuration($config))->toArray();
+        $this->assertFalse($actual['images']['enable-cache']);
+
+        $config['switches']['s1'] = true;
+        $actual = (new Configuration($config))->toArray();
+        $this->assertTrue($actual['images']['enable-cache']);
+
+
     }
 }
