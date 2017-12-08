@@ -158,6 +158,18 @@ class ServiceRequestTest extends TestCase {
         $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
     }
 
+    public function testGettingSwitchesFromCookies() {
+        $cookie = ['switches' => 'images.-jpeg.diagnostics'];
+        $get =    ['switches' => '-images.-webp'];
+        $httpRequest = Request::fromArray($get, [], $cookie);
+        $switches = ServiceRequest::fromHTTPRequest($httpRequest)->getSwitches();
+
+        $this->assertFalse($switches->isOn('jpeg'));
+        $this->assertTrue($switches->isOn('diagnostics'));
+        $this->assertFalse($switches->isOn('images'));
+        $this->assertFalse($switches->isOn('webp'));
+    }
+
     public function testGettingSwitchesFromPathInfo() {
         $pathInfo = '/switches=-2Ddiagnostics.phast';
         $httpRequest = Request::fromArray([], ['PATH_INFO' => $pathInfo]);
@@ -226,6 +238,12 @@ class ServiceRequestTest extends TestCase {
 
         $url3 = (new ServiceRequest())->withUrl($url)->serialize();
         $this->assertContains('requestId=', $url3);
+
+        $httpRequest = Request::fromArray(['switches' => ''], [], ['switches' => 'diagnostics']);
+        $url4 = ServiceRequest::fromHTTPRequest($httpRequest)
+            ->withUrl($url)
+            ->serialize();
+        $this->assertContains('requestId=', $url4);
     }
 
     

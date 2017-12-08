@@ -13,8 +13,19 @@ class ServiceRequest {
 
     const FORMAT_PATH  = 2;
 
-    private static $switches = '';
+    /**
+     * @var string
+     */
+    private static $propagatedSwitches = '';
 
+    /**
+     * @var Switches
+     */
+    private static $switches;
+
+    /**
+     * @var string
+     */
     private static $requestId;
 
     /**
@@ -37,6 +48,12 @@ class ServiceRequest {
      */
     private $token;
 
+    public function __construct() {
+        if (!isset (self::$switches)) {
+            self::$switches = new Switches();
+        }
+    }
+
     public static function fromHTTPRequest(Request $request) {
         $params = $request->getGet();
         $pathInfo = $request->getPathInfo();
@@ -44,14 +61,20 @@ class ServiceRequest {
             $params = array_merge($params, self::parsePathInfo($pathInfo));
         }
         $instance = new self();
+        self::$switches = new Switches();
         $instance->httpRequest = $request;
+        if ($request->getCookie('switches')) {
+            self::$switches = Switches::fromString($request->getCookie('switches'));
+        }
         if (isset ($params['token'])) {
             $instance->token = $params['token'];
             unset ($params['token']);
         }
         $instance->params = $params;
         if (isset ($params['switches'])) {
-            self::$switches = $params['switches'];
+            self::$propagatedSwitches = $params['switches'];
+            $paramsSwitches = Switches::fromString($params['switches']);
+            self::$switches = self::$switches->merge($paramsSwitches);
         }
         if (isset ($params['requestId'])) {
             self::$requestId = $params['requestId'];
@@ -65,11 +88,7 @@ class ServiceRequest {
      * @return Switches
      */
     public function getSwitches() {
-        $params = $this->getParams();
-        if (!isset ($params['switches'])) {
-            return Switches::fromArray([]);
-        }
-        return Switches::fromString($params['switches']);
+        return self::$switches;
     }
 
     /**
@@ -173,11 +192,11 @@ class ServiceRequest {
             parse_str($this->url->getQuery(), $urlParams);
         }
         $params = array_merge($urlParams, $this->params);
-        if (!empty (self::$switches)) {
-            $params['switches'] = self::$switches;
-            if (Switches::fromString(self::$switches)->isOn(Switches::SWITCH_DIAGNOSTICS)) {
-                $params['requestId'] = self::$requestId;
-            }
+        if (!empty (self::$propagatedSwitches)) {
+            $params['switches'] = self::$propagatedSwitches;
+        }
+        if (self::$switches->isOn(Switches::SWITCH_DIAGNOSTICS)) {
+            $params['requestId'] = self::$requestId;
         }
         return $params;
     }

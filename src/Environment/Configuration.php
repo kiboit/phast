@@ -23,7 +23,7 @@ class Configuration {
     public function __construct(array $sourceConfig) {
         $this->sourceConfig = $sourceConfig;
         if (!isset ($this->sourceConfig['switches'])) {
-            $this->switches = Switches::fromArray([]);
+            $this->switches = new Switches();
         } else {
             $this->switches = Switches::fromArray($this->sourceConfig['switches']);
         }

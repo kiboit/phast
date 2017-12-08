@@ -8,12 +8,12 @@ class Switches {
 
     const SWITCH_DIAGNOSTICS = 'diagnostics';
 
-    private $switches = [
-        'phast' => true,
-        'diagnostics' => false
+    private static $defaults = [
+        self::SWITCH_PHAST => true,
+        self::SWITCH_DIAGNOSTICS => false
     ];
 
-    private function __construct() {}
+    private $switches = [];
 
     public static function fromArray(array $switches) {
          $instance = new self();
@@ -43,11 +43,17 @@ class Switches {
     }
 
     public function isOn($switch) {
-        return !isset ($this->switches[$switch]) || $this->switches[$switch];
+        if (isset ($this->switches[$switch])) {
+            return (bool)$this->switches[$switch];
+        }
+        if (isset (self::$defaults[$switch])) {
+            return (bool)self::$defaults[$switch];
+        }
+        return true;
     }
 
     public function toArray() {
-        return $this->switches;
+        return array_merge(self::$defaults, $this->switches);
     }
 
 }
