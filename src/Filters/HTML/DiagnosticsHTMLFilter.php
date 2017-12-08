@@ -33,7 +33,7 @@ class DiagnosticsHTMLFilter implements HTMLFilter {
                 });
                 var log = (prefix + entry.message).replace(/\{([a-z0-9_.]*)\}/gi, function (match, group) {
                     if (group === 'timestamp') {
-                        return entry.context.timestamp - startTime;
+                        return (entry.context.timestamp - startTime).toFixed(3);
                     }
                     return entry.context[group];    
                 });
