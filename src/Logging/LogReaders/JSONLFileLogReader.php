@@ -26,9 +26,9 @@ class JSONLFileLogReader implements LogReader {
         }
         $tenMinutesAgo = time() - 600;
         while ($file = @readdir($dir)) {
-            $filname = $this->dir . "/$file";
-            if (preg_match('/\.jsonl$/', $file) && @filemtime($filname) < $tenMinutesAgo) {
-                @unlink($filname);
+            $filename = $this->dir . "/$file";
+            if (preg_match('/\.jsonl$/', $file) && @filemtime($filename) < $tenMinutesAgo) {
+                @unlink($filename);
             }
         }
     }
