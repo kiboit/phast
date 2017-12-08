@@ -61,24 +61,6 @@ class ServiceRequest {
         return $instance;
     }
 
-    private static function parsePathInfo($string) {
-        $values = [];
-        $parts = explode('/', preg_replace('~^/~', '', $string));
-        foreach ($parts as $part) {
-            $pair = explode('=', $part);
-            if (isset ($pair[1])) {
-                $values[$pair[0]] = self::decodeSingleValue($pair[1]);
-            } else {
-                $values['src'] = self::decodeSingleValue($pair[0]);
-            }
-        }
-        return $values;
-    }
-
-    private static function decodeSingleValue($value) {
-        return urldecode(str_replace('-', '%', $value));
-    }
-
     /**
      * @return Switches
      */
@@ -105,6 +87,13 @@ class ServiceRequest {
     }
 
     /**
+     * @return string
+     */
+    public function getRequestId() {
+        return self::$requestId;
+    }
+
+    /**
      * @param array $params
      * @return ServiceRequest
      */
@@ -112,21 +101,47 @@ class ServiceRequest {
         return $this->cloneWithProperty('params', $params);
     }
 
+    /**
+     * @param URL $url
+     * @return ServiceRequest
+     */
     public function withUrl(URL $url) {
         return $this->cloneWithProperty('url', $url);
     }
 
-    public function getRequestId() {
-        return self::$requestId;
-    }
-
+    /**
+     * @param ServiceSignature $signature
+     * @return ServiceRequest
+     */
     public function sign(ServiceSignature $signature) {
         $token = $signature->sign($this->getVerificationString());
         return $this->cloneWithProperty('token', $token);
     }
 
+    /**
+     * @param ServiceSignature $signature
+     * @return bool
+     */
     public function verify(ServiceSignature $signature) {
         return $signature->verify($this->token, $this->getVerificationString());
+    }
+
+    private static function parsePathInfo($string) {
+        $values = [];
+        $parts = explode('/', preg_replace('~^/~', '', $string));
+        foreach ($parts as $part) {
+            $pair = explode('=', $part);
+            if (isset ($pair[1])) {
+                $values[$pair[0]] = self::decodeSingleValue($pair[1]);
+            } else {
+                $values['src'] = self::decodeSingleValue($pair[0]);
+            }
+        }
+        return $values;
+    }
+
+    private static function decodeSingleValue($value) {
+        return urldecode(str_replace('-', '%', $value));
     }
 
     private function getVerificationString() {
