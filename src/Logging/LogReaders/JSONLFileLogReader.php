@@ -20,5 +20,18 @@ class JSONLFileLogReader implements LogReader {
         }
     }
 
+    public function __destruct() {
+        if (!($dir = @opendir($this->dir))) {
+            return;
+        }
+        $tenMinutesAgo = time() - 600;
+        while ($file = @readdir($dir)) {
+            $filname = $this->dir . "/$file";
+            if (preg_match('/\.jsonl$/', $file) && @filemtime($filname) < $tenMinutesAgo) {
+                @unlink($filname);
+            }
+        }
+    }
+
 
 }

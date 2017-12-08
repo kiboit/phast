@@ -33,7 +33,33 @@ class JSONLFileLogReaderTest extends TestCase {
                 'context' => ['k2' => 'v2']
             ]
         ];
+    }
 
+    public function testCleaningOldLogs() {
+        $dir = sys_get_temp_dir();
+        for ($i = 0; $i < 10; $i++) {
+            touch("$dir/i$i.jsonl", time() - 610);
+        }
+        touch("$dir/old.xml", time() - 610);
+        touch("$dir/new.jsonl");
+
+        new JSONLFileLogReader($dir, 'a');
+
+        $this->assertFileExists("$dir/old.xml");
+        $this->assertFileExists("$dir/new.jsonl");
+        for ($i = 0; $i < 10; $i++) {
+            $this->assertFileNotExists("$dir/$i.jsonl");
+        }
+    }
+
+    public static function tearDownAfterClass() {
+        $dir = sys_get_temp_dir();
+        @unlink("$dir/log-json-l-reader-test.jsonl");
+        @unlink("$dir/new.jsonl");
+        @unlink("$dir/old.xml");
+        for ($i = 0; $i < 10; $i++) {
+            @unlink("$dir/i$i.jsonl");
+        }
     }
 
 }
