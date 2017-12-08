@@ -22,7 +22,12 @@ class Request {
     private function __construct() {}
 
     public static function fromGlobals() {
-        return self::fromArray($_GET, $_SERVER, $_COOKIE);
+        $get = [];
+        $parsed = parse_url($_SERVER['REQUEST_URI']);
+        if (isset ($parsed['query'])) {
+            parse_str($parsed['query'], $get);
+        }
+        return self::fromArray($get, $_SERVER, $_COOKIE);
     }
 
     public static function fromArray(array $get = [], array $env = [], array $cookie = []) {
