@@ -142,10 +142,6 @@ class ServiceRequest {
     }
 
     public function serialize($format = self::FORMAT_QUERY) {
-        $urlParams = [];
-        if ($this->url) {
-            parse_str($this->url->getQuery(), $urlParams);
-        }
         $params = $this->getAllParams();
         if ($this->token) {
             $params['token'] = $this->token;
