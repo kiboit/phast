@@ -60,6 +60,10 @@ return [
                 ]
             ],
 
+            \Kibo\Phast\Filters\HTML\DiagnosticsHTMLFilter::class => [
+                'enabled' => 'diagnostics'
+            ],
+
             \Kibo\Phast\Filters\HTML\ScriptsDeferHTMLFilter::class => [],
 
         ]
