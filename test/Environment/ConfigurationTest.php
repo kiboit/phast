@@ -33,7 +33,8 @@ class ConfigurationTest extends TestCase {
         ],
 
         'switches' => [
-            'phast' => true
+            'phast' => true,
+            'diagnostics' => false
         ]
     ];
 
@@ -79,10 +80,10 @@ class ConfigurationTest extends TestCase {
         $config['documents']['filters']['filter2']['enabled'] = 'm1';
         $config['documents']['filters']['filter3']['enabled'] = 'm2';
         $config['images']['filters']['filter1']['enabled'] = 'r';
-        $config['switches'] = ['s' => false, 'm1' => true, 'm2' => false, 'phast' => true];
+        $config['switches'] = ['s' => false, 'm1' => true, 'm2' => false, 'phast' => true, 'diagnostics' => false];
         $request = $this->createMock(ServiceRequest::class);
         $request->method('getSwitches')
-            ->willReturn(['m1' => false, 'm2' => true, 'r' => false]);
+            ->willReturn(Switches::fromArray(['m1' => false, 'm2' => true, 'r' => false]));
 
         $actual = (new Configuration($config))->withServiceRequest($request)->toArray();
         unset ($config['documents']['filters']['filter1']);

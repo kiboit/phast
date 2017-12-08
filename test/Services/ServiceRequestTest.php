@@ -151,8 +151,11 @@ class ServiceRequestTest extends TestCase {
         $expected = [
             'images' => true,
             'webp' => false,
+            'phast' => true,
+            'diagnostics' => false
+
         ];
-        $this->assertEquals($expected, $serviceRequest->getSwitches());
+        $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
     }
 
     public function testGettingSwitchesFromPathInfo() {
@@ -164,13 +167,16 @@ class ServiceRequestTest extends TestCase {
             'diagnostics' => false,
             'phast' => true,
         ];
-        $this->assertEquals($expected, $serviceRequest->getSwitches());
+        $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
     }
 
     public function testGettingDefaultSwitches() {
         $httpRequest = Request::fromArray([], []);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
-        $this->assertEquals([], $serviceRequest->getSwitches());
+        $this->assertEquals(
+            ['phast' => true, 'diagnostics' => false],
+            $serviceRequest->getSwitches()->toArray()
+        );
     }
 
     public function testPropagatingSwitches() {

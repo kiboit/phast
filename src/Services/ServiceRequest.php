@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services;
 
+use Kibo\Phast\Environment\Switches;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
@@ -79,14 +80,14 @@ class ServiceRequest {
     }
 
     /**
-     * @return array
+     * @return Switches
      */
     public function getSwitches() {
         $params = $this->getParams();
         if (!isset ($params['switches'])) {
-            return [];
+            return Switches::fromArray([]);
         }
-        return $this->parseSwitches($params['switches']);
+        return Switches::fromString($params['switches']);
     }
 
     /**
@@ -163,8 +164,7 @@ class ServiceRequest {
         $params = array_merge($urlParams, $this->params);
         if (!empty (self::$switches)) {
             $params['switches'] = self::$switches;
-            $switches = $this->parseSwitches(self::$switches);
-            if (isset ($switches['diagnostics']) && $switches['diagnostics']) {
+            if (Switches::fromString(self::$switches)->isOn(Switches::SWITCH_DIAGNOSTICS)) {
                 $params['requestId'] = self::$requestId;
             }
         }
@@ -199,17 +199,4 @@ class ServiceRequest {
         }
         return $params;
     }
-
-    private function parseSwitches($switchesString) {
-        $switches = [];
-        foreach (explode('.', $switchesString) as $switch) {
-            if ($switch[0] == '-') {
-                $switches[substr($switch, 1)] = false;
-            } else {
-                $switches[$switch] = true;
-            }
-        }
-        return $switches;
-    }
-
 }

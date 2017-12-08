@@ -12,25 +12,26 @@ class Configuration {
     private $sourceConfig;
 
     /**
+     * @var Switches
+     */
+    private $switches;
+
+    /**
      * Configuration constructor.
      * @param array $sourceConfig
      */
     public function __construct(array $sourceConfig) {
         $this->sourceConfig = $sourceConfig;
         if (!isset ($this->sourceConfig['switches'])) {
-            $this->sourceConfig['switches'] = [];
-        }
-        if (!isset ($this->sourceConfig['switches']['phast'])) {
-            $this->sourceConfig['switches']['phast'] = true;
+            $this->switches = Switches::fromArray([]);
+        } else {
+            $this->switches = Switches::fromArray($this->sourceConfig['switches']);
         }
     }
 
     public function withServiceRequest(ServiceRequest $request) {
         $clone = clone $this;
-        $clone->sourceConfig['switches'] = array_merge(
-            $clone->sourceConfig['switches'],
-            $request->getSwitches()
-        );
+        $clone->switches = $this->switches->merge($request->getSwitches());
         return $clone;
     }
 
@@ -42,18 +43,18 @@ class Configuration {
             &$config['images']['filters'],
             &$config['logging']['logWriters']
         ];
-        $switches = $config['switches'];
         foreach ($switchables as &$switchable) {
-            $switchable = array_filter($switchable, function ($item) use ($switches) {
+            $switchable = array_filter($switchable, function ($item) {
                 if (!isset ($item['enabled'])) {
                     return true;
                 }
                 if ($item['enabled'] === false) {
                     return false;
                 }
-                return !isset ($switches[$item['enabled']]) || $switches[$item['enabled']];
+                return $this->switches->isOn($item['enabled']);
             });
         }
+        $config['switches'] = $this->switches->toArray();
         return $config;
     }
 
