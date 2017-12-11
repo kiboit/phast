@@ -80,6 +80,10 @@ class DiagnosticsHTMLFilter implements HTMLFilter {
                 }
             });
             
+            if (logGroupsArr.length === 0) {
+                return;
+            }
+            
             logGroupsArr.sort(function (g1, g2) {
                 return g1.timestamp < g2.timestamp ? -1 : 1;
             });
