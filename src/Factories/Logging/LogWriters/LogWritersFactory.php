@@ -23,6 +23,10 @@ class LogWritersFactory {
         if (isset ($config['levelMask'])) {
             $writer->setLevelMask($config['levelMask']);
         }
+        $params = $request->getParams();
+        if (isset ($params['logLevelMask'])) {
+            $writer->setLevelMask((int)$params['logLevelMask']);
+        }
         return $writer;
     }
 

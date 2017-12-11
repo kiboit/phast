@@ -29,6 +29,11 @@ class ServiceRequest {
     private static $documentRequestId;
 
     /**
+     * @var int
+     */
+    private static $logLevelMask;
+
+    /**
      * @var Request
      */
     private $httpRequest;
@@ -75,6 +80,9 @@ class ServiceRequest {
             self::$propagatedSwitches = $params['phast'];
             $paramsSwitches = Switches::fromString($params['phast']);
             self::$switches = self::$switches->merge($paramsSwitches);
+        }
+        if (isset ($params['logLevelMask'])) {
+            self::$logLevelMask = $params['logLevelMask'];
         }
         if (isset ($params['documentRequestId'])) {
             self::$documentRequestId = $params['documentRequestId'];
@@ -197,6 +205,9 @@ class ServiceRequest {
         }
         if (self::$switches->isOn(Switches::SWITCH_DIAGNOSTICS)) {
             $params['documentRequestId'] = self::$documentRequestId;
+            if (isset (self::$logLevelMask)) {
+                $params['logLevelMask'] = self::$logLevelMask;
+            }
         }
         return $params;
     }
