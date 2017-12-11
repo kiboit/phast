@@ -202,8 +202,8 @@ class ServiceRequestTest extends TestCase {
 
     public function testGeneratingRequestId() {
         $httpRequest = Request::fromArray([], []);
-        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
-        $id2 = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
+        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
+        $id2 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
 
         $this->assertTrue((bool)preg_match('/^\d{1,9}$/', $id1));
         $this->assertTrue((bool)preg_match('/^\d{1,9}$/', $id2));
@@ -212,14 +212,14 @@ class ServiceRequestTest extends TestCase {
 
     public function testPreservingRequestId() {
         $httpRequest = Request::fromArray([], []);
-        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
-        $id2 = (new ServiceRequest())->getRequestId();
+        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
+        $id2 = (new ServiceRequest())->getDocumentRequestId();
         $this->assertEquals($id1, $id2);
     }
 
     public function testGettingRequestIdFromHTTPRequest() {
-        $httpRequest = Request::fromArray(['requestId' => 'the-id'], []);
-        $id = ServiceRequest::fromHTTPRequest($httpRequest)->getRequestId();
+        $httpRequest = Request::fromArray(['documentRequestId' => 'the-id'], []);
+        $id = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
         $this->assertEquals('the-id', $id);
     }
 
@@ -234,16 +234,16 @@ class ServiceRequestTest extends TestCase {
                 ->withUrl($url)
                 ->serialize();
 
-        $this->assertContains('requestId=', $url2);
+        $this->assertContains('documentRequestId=', $url2);
 
         $url3 = (new ServiceRequest())->withUrl($url)->serialize();
-        $this->assertContains('requestId=', $url3);
+        $this->assertContains('documentRequestId=', $url3);
 
         $httpRequest = Request::fromArray(['switches' => ''], [], ['switches' => 'diagnostics']);
         $url4 = ServiceRequest::fromHTTPRequest($httpRequest)
             ->withUrl($url)
             ->serialize();
-        $this->assertContains('requestId=', $url4);
+        $this->assertContains('documentRequestId=', $url4);
     }
 
     

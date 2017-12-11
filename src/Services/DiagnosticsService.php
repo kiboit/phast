@@ -17,7 +17,7 @@ class DiagnosticsService  {
     }
 
     public function serve(ServiceRequest $request) {
-        $requestId = $request->getRequestId();
+        $requestId = $request->getDocumentRequestId();
         if (!$requestId) {
             throw new ItemNotFoundException('Could not find specified request id');
         }

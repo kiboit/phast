@@ -26,7 +26,7 @@ class Log {
         $writer = (new LogWritersFactory())->make($config, $request);
         $logger = new Logger($writer);
         self::$logger = $logger->withContext([
-            'requestId' => $request->getRequestId(),
+            'documentRequestId' => $request->getDocumentRequestId(),
             'service' => $service
         ]);
     }

@@ -26,7 +26,7 @@ class ServiceRequest {
     /**
      * @var string
      */
-    private static $requestId;
+    private static $documentRequestId;
 
     /**
      * @var Request
@@ -76,10 +76,10 @@ class ServiceRequest {
             $paramsSwitches = Switches::fromString($params['switches']);
             self::$switches = self::$switches->merge($paramsSwitches);
         }
-        if (isset ($params['requestId'])) {
-            self::$requestId = $params['requestId'];
+        if (isset ($params['documentRequestId'])) {
+            self::$documentRequestId = $params['documentRequestId'];
         } else {
-            self::$requestId = (string)mt_rand(0, 999999999);
+            self::$documentRequestId = (string)mt_rand(0, 999999999);
         }
         return $instance;
     }
@@ -108,8 +108,8 @@ class ServiceRequest {
     /**
      * @return string
      */
-    public function getRequestId() {
-        return self::$requestId;
+    public function getDocumentRequestId() {
+        return self::$documentRequestId;
     }
 
     /**
@@ -196,7 +196,7 @@ class ServiceRequest {
             $params['switches'] = self::$propagatedSwitches;
         }
         if (self::$switches->isOn(Switches::SWITCH_DIAGNOSTICS)) {
-            $params['requestId'] = self::$requestId;
+            $params['documentRequestId'] = self::$documentRequestId;
         }
         return $params;
     }
