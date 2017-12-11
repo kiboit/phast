@@ -27,6 +27,7 @@ class Log {
         $logger = new Logger($writer);
         self::$logger = $logger->withContext([
             'documentRequestId' => $request->getDocumentRequestId(),
+            'requestId' => mt_rand(0, 99999999),
             'service' => $service
         ]);
     }
