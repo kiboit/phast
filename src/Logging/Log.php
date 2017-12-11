@@ -4,6 +4,7 @@ namespace Kibo\Phast\Logging;
 
 
 use Kibo\Phast\Factories\Logging\LogWriters\LogWritersFactory;
+use Kibo\Phast\Logging\LogWriters\DummyLogWriter;
 use Kibo\Phast\Services\ServiceRequest;
 
 class Log {
@@ -12,6 +13,10 @@ class Log {
      * @var Logger
      */
     private static $logger;
+
+    public static function initWithDummy() {
+        self::$logger = new Logger(new DummyLogWriter());
+    }
 
     public static function init(array $config, ServiceRequest $request, $service) {
         $writer = (new LogWritersFactory())->make($config, $request);
@@ -23,11 +28,21 @@ class Log {
     }
 
     /**
+     * @return Logger
+     */
+    public static function get() {
+        if (!isset (self::$logger)) {
+            self::initWithDummy();
+        }
+        return self::$logger;
+    }
+
+    /**
      * @param array $context
      * @return Logger
      */
     public static function context(array $context) {
-        return self::$logger->withContext($context);
+        return self::get()->withContext($context);
     }
 
     /**
@@ -39,7 +54,7 @@ class Log {
      * @return void
      */
     public static function emergency($message, array $context = []) {
-        self::$logger->emergency($message, $context);
+        self::get()->emergency($message, $context);
     }
 
     /**
@@ -54,7 +69,7 @@ class Log {
      * @return void
      */
     public static function alert($message, array $context = []) {
-        self::$logger->alert($message, $context);
+        self::get()->alert($message, $context);
     }
 
     /**
@@ -68,7 +83,7 @@ class Log {
      * @return void
      */
     public static function critical($message, array $context = []) {
-        self::$logger->critical($message, $context);
+        self::get()->critical($message, $context);
     }
 
     /**
@@ -81,7 +96,7 @@ class Log {
      * @return void
      */
     public static function error($message, array $context = []) {
-        self::$logger->error($message, $context);
+        self::get()->error($message, $context);
     }
 
     /**
@@ -96,7 +111,7 @@ class Log {
      * @return void
      */
     public static function warning($message, array $context = []) {
-        self::$logger->warning($message, $context);
+        self::get()->warning($message, $context);
     }
 
     /**
@@ -108,7 +123,7 @@ class Log {
      * @return void
      */
     public static function notice($message, array $context = []) {
-        self::$logger->notice($message, $context);
+        self::get()->notice($message, $context);
     }
 
     /**
@@ -122,7 +137,7 @@ class Log {
      * @return void
      */
     public static function info($message, array $context = []) {
-        self::$logger->info($message, $context);
+        self::get()->info($message, $context);
     }
 
     /**
@@ -134,7 +149,7 @@ class Log {
      * @return void
      */
     public static function debug($message, array $context = []) {
-        self::$logger->debug($message, $context);
+        self::get()->debug($message, $context);
     }
 
 }
