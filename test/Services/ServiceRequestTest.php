@@ -144,7 +144,7 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testGettingSwitchesFromGet() {
-        $get = ['phast' => 'images.-webp'];
+        $get = ['phast' => 'images,-webp'];
         $httpRequest = Request::fromArray($get, []);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
 
@@ -159,8 +159,8 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testGettingSwitchesFromCookies() {
-        $cookie = ['phast' => 'images.-jpeg.diagnostics'];
-        $get =    ['phast' => '-images.-webp'];
+        $cookie = ['phast' => 'images,-jpeg,diagnostics'];
+        $get =    ['phast' => '-images,-webp'];
         $httpRequest = Request::fromArray($get, [], $cookie);
         $switches = ServiceRequest::fromHTTPRequest($httpRequest)->getSwitches();
 

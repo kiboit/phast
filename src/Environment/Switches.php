@@ -26,7 +26,7 @@ class Switches {
         if (empty ($switches)) {
             return $instance;
         }
-        foreach (explode('.', $switches) as $switch) {
+        foreach (explode(',', $switches) as $switch) {
             if ($switch[0] == '-') {
                 $instance->switches[substr($switch, 1)] = false;
             } else {
