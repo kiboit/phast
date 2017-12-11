@@ -31,15 +31,52 @@ class DiagnosticsHTMLFilter implements HTMLFilter {
                         timestamp: entry.context.timestamp,
                         errorsCnt: 0,
                         warningsCnt: 0,
+                        longestPrefixLength: 0,
                         entries: []
                     };
                     logGroupsArr.push(logGroupsMap[requestId]);
                 }
-                logGroupsMap[requestId].entries.push(entry);
+                
                 if (entry.level > 8) {
                     logGroupsMap[requestId].errorsCnt++;
                 } else if (entry.level === 8) {
                     logGroupsMap[requestId].warningsCnt++;
+                }
+                
+                var prefix = (entry.context.timestamp - logGroupsMap[requestId].timestamp).toFixed(3);
+                if (entry.context.class) {
+                    prefix += ' ' + entry.context.class;
+                }
+                if (entry.context.class && entry.context.method) {
+                    prefix += '::';
+                }
+                if (entry.context.method) {
+                    prefix += entry.context.method + '()';
+                }
+                if (entry.context.line) {
+                    prefix += ' Line: ' + entry.context.line;
+                }
+                var message = entry.message.replace(/\{([a-z0-9_.]*)\}/gi, function (match, matchedGroup) {
+                    return entry.context[matchedGroup];    
+                });
+                
+                var callback;
+                if (entry.level > 8) {
+                    callback = console.error;
+                } else if (entry.level === 8) {
+                    callback = console.warn;
+                } else if (entry.level > 1) {
+                    callback = console.info;
+                } else {
+                    callback = console.log;
+                }
+                logGroupsMap[requestId].entries.push({
+                    prefix: prefix,
+                    message: message,
+                    cb: callback                
+                });
+                if (prefix.length > logGroupsMap[requestId].longestPrefixLength) {
+                    logGroupsMap[requestId].longestPrefixLength = prefix.length;
                 }
             });
             
@@ -61,29 +98,12 @@ class DiagnosticsHTMLFilter implements HTMLFilter {
                 title += ')';
                 console.groupCollapsed(title);
                 group.entries.forEach(function (entry) {
-                    var prefixKeys = ['timestamp', 'class', 'method', 'line'];
-                    var prefix = '';
-                    prefixKeys.forEach(function (key) {
-                        if (entry.context[key]) {
-                            prefix += '{' + key + '}\t';
-                        }
-                    });
-                    var log = (prefix + entry.message).replace(/\{([a-z0-9_.]*)\}/gi, function (match, matchedGroup) {
-                        if (matchedGroup === 'timestamp') {
-                            return (entry.context.timestamp - group.timestamp).toFixed(3);
-                        }
-                        return entry.context[matchedGroup];    
-                    });
-                    
-                    if (entry.level > 8) {
-                        console.error(log);
-                    } else if (entry.level === 8) {
-                        console.warn(log);
-                    } else if (entry.level > 1) {
-                        console.info(log);
-                    } else {
-                        console.log(log);
+                    var prefix = entry.prefix;
+                    var padCount = group.longestPrefixLength - prefix.length;
+                    for (var i = 0; i < padCount; i++) {
+                        prefix += ' ';
                     }
+                    entry.cb(prefix + ' ' + entry.message);
                 });
                 console.groupEnd();
             });
