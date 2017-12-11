@@ -33,6 +33,8 @@ class JSONLFileLogReaderTest extends TestCase {
                 'context' => ['k2' => 'v2']
             ]
         ];
+        $this->assertEquals($expected, $actual);
+        $this->assertFileNotExists("$dir/log-$file.jsonl");
     }
 
     public function testCleaningOldLogs() {

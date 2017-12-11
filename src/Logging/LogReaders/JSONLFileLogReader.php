@@ -18,6 +18,8 @@ class JSONLFileLogReader implements LogReader {
             }
             yield new LogEntry(@$decoded['level'], @$decoded['message'], @$decoded['context']);
         }
+        @fclose($fp);
+        @unlink($this->filename);
     }
 
     public function __destruct() {
