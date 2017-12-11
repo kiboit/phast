@@ -3,9 +3,10 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
+use Kibo\Phast\Logging\LoggingTrait;
 
 class IFrameDelayedLoadingHTMLFilter implements HTMLFilter {
-    use BodyFinderTrait;
+    use BodyFinderTrait, LoggingTrait;
 
     private $script = <<<EOS
 window.addEventListener('load', function() {
@@ -28,6 +29,7 @@ EOS;
             if (!$iframe->hasAttribute('src')) {
                 continue;
             }
+            $this->logger()->info('Delaying iframe {src}', ['src' => $iframe->getAttribute('src')]);
             $iframe->setAttribute('data-phast-src', $iframe->getAttribute('src'));
             $iframe->setAttribute('src', 'about:blank');
             $addScript = true;

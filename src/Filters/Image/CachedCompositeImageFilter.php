@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\Image;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
+use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -70,7 +71,9 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
             $key[] = $request['preferredType'];
         }
         $key = implode("\n", $key);
+        $this->logger()->info('Trying to get {url} from cache', ['url' => $request['src']]);
         $result = $this->cache->get($key, function () use ($image, $request) {
+            $this->logger()->info('Cache missed!');
             try {
                 return $this->serializeImage(parent::apply($image, $request));
             } catch (\Exception $e) {

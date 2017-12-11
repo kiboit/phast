@@ -3,9 +3,10 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
+use Kibo\Phast\Logging\LoggingTrait;
 
 class CSSDeferHTMLFilter implements HTMLFilter {
-    use BodyFinderTrait;
+    use BodyFinderTrait, LoggingTrait;
 
     const LOADER_JS = <<<EOS
 (function() {
@@ -30,6 +31,7 @@ EOS;
                 continue;
             }
 
+            $this->logger()->info('Differing {src}', ['src' => $link->getAttribute('href')]);
             $script = $document->createElement('script', trim($document->saveHTML($link)));
             $script->setAttribute('type', 'phast-link');
 
@@ -40,9 +42,12 @@ EOS;
         }
 
         if ($insert_loader) {
+            $this->logger()->info('Inserting JS loader');
             $loader = $document->createElement('script', self::LOADER_JS);
             $loader->setAttribute('data-phast-no-defer', '');
             $this->getBodyElement($document)->appendChild($loader);
+        } else {
+            $this->logger()->info('No links were deferred. Not inserting JS loader.');
         }
     }
 

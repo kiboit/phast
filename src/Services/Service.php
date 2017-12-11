@@ -5,9 +5,11 @@ namespace Kibo\Phast\Services;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Response;
+use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Security\ServiceSignature;
 
 abstract class Service {
+    use LoggingTrait;
 
     /**
      * @var ServiceSignature
@@ -64,7 +66,7 @@ abstract class Service {
 
     protected function validateToken(ServiceRequest $request) {
         if (!$request->verify($this->signature)) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Invalid token');
         }
     }
 

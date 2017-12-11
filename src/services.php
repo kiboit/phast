@@ -29,7 +29,18 @@ try {
     $response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
         ->make($service, $runtimeConfig)
         ->serve($serviceRequest);
+    \Kibo\Phast\Logging\Log::info('Service completed!');
 } catch (\Kibo\Phast\Exceptions\UnauthorizedException $e) {
+    \Kibo\Phast\Logging\Log::error('Unauthorized exception: {message}!', ['message' => $e->getMessage()]);
+    exit();
+} catch (\Kibo\Phast\Exceptions\ItemNotFoundException $e) {
+    \Kibo\Phast\Logging\Log::error('Item not found: {message}', ['message' => $e->getMessage()]);
+    exit();
+} catch (Exception $e) {
+    \Kibo\Phast\Logging\Log::critical(
+        'Unhandled exception: {type} Message: {message} File: {file} Line: {line}',
+        ['type' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
+    );
     exit();
 }
 

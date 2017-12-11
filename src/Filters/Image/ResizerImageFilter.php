@@ -2,7 +2,11 @@
 
 namespace Kibo\Phast\Filters\Image;
 
+use Kibo\Phast\Logging\Log;
+use Kibo\Phast\Logging\LoggingTrait;
+
 class ResizerImageFilter implements ImageFilter {
+    use LoggingTrait;
 
     /**
      * @var integer
@@ -39,6 +43,7 @@ class ResizerImageFilter implements ImageFilter {
         if (isset ($request['width']) || isset ($request['height'])) {
             $maxWidth  = isset ($request['width'])  ? (int)$request['width']  : 0;
             $maxHeight = isset ($request['height']) ? (int)$request['height'] : 0;
+            $this->logger()->info('Resizing to params set in request');
         } else {
             $maxWidth = $this->maxWidth;
             $maxHeight = $this->maxHeight;
@@ -59,6 +64,10 @@ class ResizerImageFilter implements ImageFilter {
         } else if ($hasBiggerHeight) {
             return $this->setSize($image, $this->getNewSizeByHeight($image, $maxHeight));
         }
+        $this->logger()->info(
+            'Leaving size intact: {width}x{height}',
+            ['width' => $image->getWidth(), 'height' => $image->getHeight()]
+        );
         return $image;
     }
 
@@ -125,6 +134,7 @@ class ResizerImageFilter implements ImageFilter {
      * @return Image
      */
     private function setSize(Image $image, array $size) {
+        $this->logger()->info('Resizing image to {width}x{height}', ['width' => $size[0], 'height' => $size[1]]);
         return $image->resize($size[0], $size[1]);
     }
 

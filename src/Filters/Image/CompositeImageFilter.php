@@ -2,7 +2,11 @@
 
 namespace Kibo\Phast\Filters\Image;
 
+use Kibo\Phast\Logging\Log;
+use Kibo\Phast\Logging\LoggingTrait;
+
 class CompositeImageFilter {
+    use LoggingTrait;
 
     /**
      * @var ImageFilter[]
@@ -21,9 +25,15 @@ class CompositeImageFilter {
     public function apply(Image $image, array $request) {
         $filteredImage = $image;
         foreach ($this->filters as $filter) {
+            $this->logger()->info('Applying {filter}', ['filter' => get_class($filter)]);
             $filteredImage = $filter->transformImage($filteredImage, $request);
         }
-        return $filteredImage->getSizeAsString() < $image->getSizeAsString() ? $filteredImage : $image;
+        if ($filteredImage->getSizeAsString() < $image->getSizeAsString()) {
+            $this->logger()->info('Finished! Returning filtered image!');
+            return $filteredImage;
+        }
+        $this->logger()->info('Finished, but filtered image is bigger than original! Returning original!');
+        return $image;
     }
 
 }

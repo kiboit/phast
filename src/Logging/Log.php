@@ -14,6 +14,10 @@ class Log {
      */
     private static $logger;
 
+    public static function setLogger(Logger $logger) {
+        self::$logger = $logger;
+    }
+
     public static function initWithDummy() {
         self::$logger = new Logger(new DummyLogWriter());
     }

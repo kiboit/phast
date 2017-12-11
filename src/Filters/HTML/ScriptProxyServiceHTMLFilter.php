@@ -4,11 +4,12 @@ namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
+use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class ScriptProxyServiceHTMLFilter implements HTMLFilter {
-    use JSDetectorTrait;
+    use JSDetectorTrait, LoggingTrait;
 
     private $rewriteFunction = <<<EOS
 (function(config) {
@@ -102,8 +103,10 @@ EOS;
     private function rewriteURL($src) {
         $url = URL::fromString($src)->withBase($this->baseUrl);
         if (!$this->shouldRewriteURL($url)) {
+            $this->logger()->info('Not proxying {src}', ['src' => $src]);
             return $src;
         }
+        $this->logger()->info('Proxying {src}', ['src' => $src]);
         $params = [
             'src' => (string) $url,
             'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])

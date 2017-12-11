@@ -2,11 +2,13 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
+    use LoggingTrait;
 
     /**
      * @var ServiceSignature
@@ -107,6 +109,7 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
         if (!$url || substr($url, 0, 5) === 'data:') {
             return;
         }
+        $this->logger()->info('Rewriting img {url}', ['url' => $url]);
         $absolute = URL::fromString($url)->withBase($this->baseUrl)->toString();
         foreach ($this->whitelist as $pattern) {
             if (preg_match($pattern, $absolute)) {

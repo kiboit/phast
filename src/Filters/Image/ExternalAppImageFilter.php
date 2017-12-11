@@ -3,8 +3,10 @@
 namespace Kibo\Phast\Filters\Image;
 
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
+use Kibo\Phast\Logging\LoggingTrait;
 
 abstract class ExternalAppImageFilter implements ImageFilter {
+    use LoggingTrait;
 
     /**
      * @var array
@@ -33,10 +35,12 @@ abstract class ExternalAppImageFilter implements ImageFilter {
 
     public function transformImage(Image $image, array $request) {
         if (!$this->shouldApply($image)) {
+            $this->logger()->info('Will not apply');
             return $image;
         }
 
         $command = $this->getCommand();
+        $this->logger()->info('Applying {command}', ['command' => $command]);
 
         $proc = proc_open($this->getCommand(), [['pipe', 'r'], ['pipe', 'w']], $pipes);
 

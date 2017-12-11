@@ -3,13 +3,14 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
+use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class CSSInliningHTMLFilter implements HTMLFilter {
-    use BodyFinderTrait;
+    use BodyFinderTrait, LoggingTrait;
 
     /**
      * @var string
@@ -186,6 +187,7 @@ EOJS;
         $whitelistEntry = $this->findInWhitelist($url);
 
         if (!$whitelistEntry) {
+            $this->logger()->info('Not inlining {url}. Not in whitelist', ['url' => ($url)]);
             return [$this->makeLink($document, $url, $media)];
         }
 
@@ -206,8 +208,10 @@ EOJS;
 
         $seen[] = $url;
 
+        $this->logger()->info('Inlining {url}.', ['url' => (string)$url]);
         $content = $this->retriever->retrieve($url);
         if ($content === false) {
+            $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
             return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
         }
 
@@ -243,7 +247,7 @@ EOJS;
         return $this->makeLink($document, URL::fromString($url), $media);
     }
 
-    private function addIEFallback(URL $fallbackUrl = null, array $elements) {
+    private function addIEFallback(URL $fallbackUrl = null, array $elements = null) {
         if ($fallbackUrl === null || !$elements) {
             return $elements;
         }
@@ -255,12 +259,15 @@ EOJS;
         $element->setAttribute('data-phast-ie-fallback-url', (string)$fallbackUrl);
         $element->removeAttribute('data-phast-nested-inlined');
 
+        $this->logger()->info('Set {url} as IE fallback URL', ['url' => (string)$fallbackUrl]);
+
         $this->withIEFallback = true;
 
         return $elements;
     }
 
     private function addIEFallbackScript(\Kibo\Phast\Common\DOMDocument $document) {
+        $this->logger()->info('Adding IE fallback script');
         $this->withIEFallback = false;
         $script = $document->createElement('script');
         $script->setAttribute('data-phast-no-defer', 'data-phast-no-defer');
