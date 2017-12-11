@@ -63,17 +63,17 @@ class ServiceRequest {
         $instance = new self();
         self::$switches = new Switches();
         $instance->httpRequest = $request;
-        if ($request->getCookie('switches')) {
-            self::$switches = Switches::fromString($request->getCookie('switches'));
+        if ($request->getCookie('phast')) {
+            self::$switches = Switches::fromString($request->getCookie('phast'));
         }
         if (isset ($params['token'])) {
             $instance->token = $params['token'];
             unset ($params['token']);
         }
         $instance->params = $params;
-        if (isset ($params['switches'])) {
-            self::$propagatedSwitches = $params['switches'];
-            $paramsSwitches = Switches::fromString($params['switches']);
+        if (isset ($params['phast'])) {
+            self::$propagatedSwitches = $params['phast'];
+            $paramsSwitches = Switches::fromString($params['phast']);
             self::$switches = self::$switches->merge($paramsSwitches);
         }
         if (isset ($params['documentRequestId'])) {
@@ -193,7 +193,7 @@ class ServiceRequest {
         }
         $params = array_merge($urlParams, $this->params);
         if (!empty (self::$propagatedSwitches)) {
-            $params['switches'] = self::$propagatedSwitches;
+            $params['phast'] = self::$propagatedSwitches;
         }
         if (self::$switches->isOn(Switches::SWITCH_DIAGNOSTICS)) {
             $params['documentRequestId'] = self::$documentRequestId;

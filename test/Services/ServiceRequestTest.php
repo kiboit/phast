@@ -144,7 +144,7 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testGettingSwitchesFromGet() {
-        $get = ['switches' => 'images.-webp'];
+        $get = ['phast' => 'images.-webp'];
         $httpRequest = Request::fromArray($get, []);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
 
@@ -159,8 +159,8 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testGettingSwitchesFromCookies() {
-        $cookie = ['switches' => 'images.-jpeg.diagnostics'];
-        $get =    ['switches' => '-images.-webp'];
+        $cookie = ['phast' => 'images.-jpeg.diagnostics'];
+        $get =    ['phast' => '-images.-webp'];
         $httpRequest = Request::fromArray($get, [], $cookie);
         $switches = ServiceRequest::fromHTTPRequest($httpRequest)->getSwitches();
 
@@ -192,12 +192,12 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testPropagatingSwitches() {
-        $httpRequest = Request::fromArray(['switches' => 's1.s2.-s3'], []);
+        $httpRequest = Request::fromArray(['phast' => 's1.s2.-s3'], []);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $url = $serviceRequest->withUrl(URL::fromString('phast.php?service=images'))
                 ->withParams(['k' => 'v'])
                 ->serialize();
-        $this->assertContains('switches=s1.s2.-s3', $url);
+        $this->assertContains('phast=s1.s2.-s3', $url);
     }
 
     public function testGeneratingRequestId() {
@@ -229,7 +229,7 @@ class ServiceRequestTest extends TestCase {
 
         $this->assertNotContains('requestId=', $url1);
 
-        $httpRequest = Request::fromArray(['switches' => 'diagnostics'], []);
+        $httpRequest = Request::fromArray(['phast' => 'diagnostics'], []);
         $url2 = ServiceRequest::fromHTTPRequest($httpRequest)
                 ->withUrl($url)
                 ->serialize();
@@ -239,7 +239,7 @@ class ServiceRequestTest extends TestCase {
         $url3 = (new ServiceRequest())->withUrl($url)->serialize();
         $this->assertContains('documentRequestId=', $url3);
 
-        $httpRequest = Request::fromArray(['switches' => ''], [], ['switches' => 'diagnostics']);
+        $httpRequest = Request::fromArray(['phast' => ''], [], ['phast' => 'diagnostics']);
         $url4 = ServiceRequest::fromHTTPRequest($httpRequest)
             ->withUrl($url)
             ->serialize();
