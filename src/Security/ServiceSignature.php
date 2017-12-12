@@ -8,6 +8,8 @@ class ServiceSignature {
 
     const AUTO_TOKEN_SIZE = 128;
 
+    const SIGNATURE_LENGTH = 16;
+
     /**
      * @var Cache
      */
@@ -16,7 +18,7 @@ class ServiceSignature {
     /**
      * @var string
      */
-    private $securityToken;
+    private $identities;
 
     /**
      * ServiceSignature constructor.
@@ -28,27 +30,43 @@ class ServiceSignature {
     }
 
     /**
-     * @param string $securityToken
+     * @param string|array $identities
      */
-    public function setSecurityToken($securityToken) {
-        $this->securityToken = $securityToken;
+    public function setIdentities($identities) {
+        if (is_string($identities)) {
+            $this->identities = ['' => $identities];
+        } else {
+            $this->identities = $identities;
+        }
     }
 
     public function sign($value) {
-        return substr(md5($this->getSecurityToken() . $value), 0, 16);
+        $identities = $this->getIdentities();
+        $users = array_keys($identities);
+        list ($user, $token) = [array_shift($users), array_shift($identities)];
+        return $user . substr(md5($token . $value), 0, self::SIGNATURE_LENGTH);
     }
 
     public function verify($signature, $value) {
-        return $signature === $this->sign($value);
+        $user = substr($signature, 0, -self::SIGNATURE_LENGTH);
+        $identities = $this->getIdentities();
+        if (!isset ($identities[$user])) {
+            return false;
+        }
+        $token = $identities[$user];
+        $signer = new self($this->cache);
+        $signer->setIdentities([$user => $token]);
+        return $signature === $signer->sign($value);
     }
 
-    private function getSecurityToken() {
-        if (!isset ($this->securityToken)) {
-            $this->securityToken = $this->cache->get('security-token', function () {
+    private function getIdentities() {
+        if (!isset ($this->identities)) {
+            $token = $this->cache->get('security-token', function () {
                 return $this->generateToken();
             });
+            $this->identities = ['' => $token];
         }
-        return $this->securityToken;
+        return $this->identities;
     }
 
     private function generateToken() {

@@ -11,7 +11,7 @@ class ServiceSignatureFactory {
         $cache = new FileCache($config['cache'], 'signature');
         $signature = new ServiceSignature($cache);
         if (isset ($config['securityToken'])) {
-            $signature->setSecurityToken($config['securityToken']);
+            $signature->setIdentities($config['securityToken']);
         }
         return $signature;
     }

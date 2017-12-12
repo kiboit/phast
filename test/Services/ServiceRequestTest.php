@@ -107,7 +107,7 @@ class ServiceRequestTest extends TestCase {
 
     public function testSigning() {
         $signature = new ServiceSignature($this->createMock(Cache::class));
-        $signature->setSecurityToken('some-token');
+        $signature->setIdentities('some-token');
         $request = (new ServiceRequest())->withParams(['width' => 10, 'src' => 'url'])->sign($signature);
 
 
@@ -137,7 +137,7 @@ class ServiceRequestTest extends TestCase {
         $this->assertFalse($newRequest->verify($signature));
 
         $signature2 = new ServiceSignature($this->createMock(Cache::class));
-        $signature2->setSecurityToken('something-else');
+        $signature2->setIdentities('something-else');
         $this->assertFalse($request->verify($signature2));
         $this->assertFalse($queryRequest->verify($signature2));
         $this->assertFalse($pathRequest->verify($signature2));

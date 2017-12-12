@@ -17,10 +17,24 @@ class ServiceSignatureTest extends TestCase {
      */
     private $signature;
 
+    private $generatedToken;
+
     public function setUp() {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
+        $this->cache->method('get')
+            ->willReturnCallback(function ($key, callable $cb) {
+                if (!isset ($this->generatedToken)) {
+                    $this->generatedToken = $cb();
+                }
+                return $this->generatedToken;
+            });
         $this->signature = new ServiceSignature($this->cache);
+    }
+
+    public function tearDown() {
+        parent::tearDown();
+        $this->generatedToken = null;
     }
 
     public function testSignAndVerify() {
@@ -33,7 +47,7 @@ class ServiceSignatureTest extends TestCase {
         $autoToken = $this->signature->sign('the-value');
         $this->assertTrue($this->signature->verify($autoToken, 'the-value'));
 
-        $this->signature->setSecurityToken('token');
+        $this->signature->setIdentities('token');
         $setToken = $this->signature->sign('the-value');
 
         $this->assertNotSame($autoToken, $setToken);
@@ -42,20 +56,43 @@ class ServiceSignatureTest extends TestCase {
     }
 
     public function testAutoGenerationOfToken() {
-        $token = null;
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->willReturnCallback(function ($key, callable $cb) use (&$token) {
-                $token = $cb();
-                return $token;
-            });
         $signed = $this->signature->sign('the-value');
         $this->assertTrue($this->signature->verify($signed, 'the-value'));
-        $this->assertEquals(ServiceSignature::AUTO_TOKEN_SIZE, strlen($token));
+        $this->assertEquals(ServiceSignature::AUTO_TOKEN_SIZE, strlen($this->generatedToken));
         for ($i = 0; $i < ServiceSignature::AUTO_TOKEN_SIZE; $i++) {
-            $this->assertGreaterThan(32, ord($token[$i]));
-            $this->assertLessThan(127, ord($token[$i]));
+            $this->assertGreaterThan(32, ord($this->generatedToken[$i]));
+            $this->assertLessThan(127, ord($this->generatedToken[$i]));
         }
     }
+
+    public function testPrependingUserToToken() {
+        $identities = ['the-user' => 'the-token', 'admin' => 'pass'];
+        $this->signature->setIdentities($identities);
+        $signature = $this->signature->sign('some-value');
+        $this->assertStringStartsWith('the-user', $signature);
+    }
+
+    public function testVerificationWithLookup() {
+        $identities = ['admin' => 'adminpass'];
+        $this->signature->setIdentities($identities);
+        $signature = $this->signature->sign('something-to-sign');
+
+        $this->setUp();
+        $identities = array_merge(['user1' => 'pass1'], $identities, ['user2' => 'pass2']);
+        $this->signature->setIdentities($identities);
+        $this->assertTrue($this->signature->verify($signature, 'something-to-sign'));
+
+        $this->setUp();
+        $this->signature->setIdentities(['user3' => 'pass2']);
+        $this->assertFalse($this->signature->verify($signature, 'something-to-sign'));
+    }
+
+    public function testUsingCachedValueForVerificationWhenNonSet() {
+        $signature = $this->signature->sign('something');
+        $this->setUp();
+        $this->assertTrue($this->signature->verify($signature, 'something'));
+    }
+
+
 
 }

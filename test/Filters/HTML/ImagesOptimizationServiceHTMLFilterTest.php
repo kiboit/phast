@@ -19,11 +19,14 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
 
     public function setUp($rewriteFormat = null) {
         parent::setUp();
+        $signature = $this->createMock(ServiceSignature::class);
+        $signature->method('sign')
+            ->willReturn('the-token');
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('getLastModificationTime')
             ->willReturn(12345678);
         $this->filter = new ImagesOptimizationServiceHTMLFilter(
-            new ServiceSignature($this->createMock(Cache::class)),
+            $signature,
             $retriever,
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
