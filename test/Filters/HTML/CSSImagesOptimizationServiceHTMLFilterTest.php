@@ -13,10 +13,6 @@ class CSSImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
      */
     private $filter;
 
-    private $styles;
-
-    private $expected;
-
     public function setUp() {
         parent::setUp();
 
