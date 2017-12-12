@@ -41,10 +41,12 @@ class ImageFilteringService extends Service {
     }
 
     protected function handle(array $request) {
-        $image = $this->imageFactory->getForURL(URL::fromString($request['src']));
+        $srcUrl = URL::fromString($request['src']);
+        $image = $this->imageFactory->getForURL($srcUrl);
         $image = $this->filter->apply($image, $request);
 
         $response = new Response();
+        $response->setHeader('Link', "<$srcUrl>; rel=\"canonical\"");
         $response->setHeader('Content-Type', $image->getType());
         $response->setHeader('Content-Length', $image->getSizeAsString());
         $response->setHeader('Cache-Control', 'max-age=' . (86400 * 365));
