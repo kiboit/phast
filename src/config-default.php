@@ -100,6 +100,10 @@ return [
                 'cmdpath' => '/usr/bin/jpegtran'
             ]
         ]
+    ],
+
+    'scripts' => [
+        'removeLicenseHeaders' => false
     ]
 ];
 

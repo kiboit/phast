@@ -33,7 +33,8 @@ class ScriptsProxyServiceTest extends TestCase {
         $this->service = new ScriptsProxyService(
             $signature,
             ['~http://allowed\.com~'],
-            $this->retriever
+            $this->retriever,
+            false
         );
     }
 

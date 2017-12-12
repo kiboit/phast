@@ -63,7 +63,8 @@ class ServicesFactory {
         return new ScriptsProxyService(
             (new ServiceSignatureFactory())->make($config),
             $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match'],
-            $retriever
+            $retriever,
+            $config['scripts']['removeLicenseHeaders']
         );
     }
 
