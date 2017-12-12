@@ -210,7 +210,7 @@ class ServiceRequestTest extends TestCase {
         $this->assertNotEquals($id1, $id2);
     }
 
-    public function testPreservingDocumentRequestId() {
+    public function testPreservingRequestId() {
         $httpRequest = Request::fromArray([], []);
         $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
         $id2 = (new ServiceRequest())->getDocumentRequestId();
@@ -227,7 +227,7 @@ class ServiceRequestTest extends TestCase {
         $url = URL::fromString('phast.php?service=diagnostics');
         $url1 = (new ServiceRequest())->withUrl($url)->serialize();
 
-        $this->assertNotContains('documentRequestId=', $url1);
+        $this->assertNotContains('requestId=', $url1);
 
         $httpRequest = Request::fromArray(['phast' => 'diagnostics'], []);
         $url2 = ServiceRequest::fromHTTPRequest($httpRequest)
@@ -244,14 +244,6 @@ class ServiceRequestTest extends TestCase {
             ->withUrl($url)
             ->serialize();
         $this->assertContains('documentRequestId=', $url4);
-    }
-
-    public function testPropagatingLogLevelMask() {
-        ServiceRequest::fromHTTPRequest(Request::fromArray(['logLevelMask' => 48, 'phast' => 'diagnostics']));
-        $url = URL::fromString('phast.php?service=diagnostics');
-        $url1 = (new ServiceRequest())->withUrl($url)->serialize();
-
-        $this->assertContains('logLevelMask=', $url1);
     }
 
     
