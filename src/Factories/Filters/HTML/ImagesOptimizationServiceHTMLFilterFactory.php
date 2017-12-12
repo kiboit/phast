@@ -4,6 +4,7 @@ namespace Kibo\Phast\Factories\Filters\HTML;
 
 use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImagesOptimizationServiceHTMLFilterFactory implements HTMLFilterFactory {
@@ -20,6 +21,7 @@ class ImagesOptimizationServiceHTMLFilterFactory implements HTMLFilterFactory {
         $class = $this->class;
         return new $class(
             $signature,
+            new LocalRetriever($config['retrieverMap']),
             URL::fromString($config['documents']['baseUrl']),
             URL::fromString($serviceUrl),
             $config['images']['whitelist'],

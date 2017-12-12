@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
@@ -18,8 +19,12 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
 
     public function setUp($rewriteFormat = null) {
         parent::setUp();
+        $retriever = $this->createMock(Retriever::class);
+        $retriever->method('getLastModificationTime')
+            ->willReturn(12345678);
         $this->filter = new ImagesOptimizationServiceHTMLFilter(
             new ServiceSignature($this->createMock(Cache::class)),
+            $retriever,
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
             ['~' . preg_quote(self::BASE_URL) . '~'],
@@ -127,7 +132,10 @@ class ImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
         $this->assertArrayHasKey('token', $query);
         $this->assertNotEmpty($query['token']);
 
+        $this->assertEquals(12345678, $query['cacheMarker']);
+
         unset ($query['token']);
+        unset ($query['cacheMarker']);
 
         $this->assertEquals($expectedParams, $query);
         

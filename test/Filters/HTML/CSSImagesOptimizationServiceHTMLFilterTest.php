@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -21,9 +22,12 @@ class CSSImagesOptimizationServiceHTMLFilterTest extends HTMLFilterTestCase {
 
         $securityToken = $this->createMock(ServiceSignature::class);
         $securityToken->method('sign')->willReturn('the-token');
+        $retriever = $this->createMock(Retriever::class);
+        $retriever->method('getLastModificationTime')->willReturn(false);
 
         $this->filter = new CSSImagesOptimizationServiceHTMLFilter(
             $securityToken,
+            $retriever,
             URL::fromString(self::BASE_URL . '/css/'),
             URL::fromString(self::BASE_URL . '/images.php'),
             ['~' . preg_quote(self::BASE_URL . '') . '~']

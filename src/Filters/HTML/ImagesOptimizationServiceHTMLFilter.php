@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
@@ -12,6 +13,11 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
      * @var ServiceSignature
      */
     protected $signature;
+
+    /**
+     * @var Retriever
+     */
+    protected $retriever;
 
     /**
      * @var URL
@@ -44,12 +50,14 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
      */
     public function __construct(
         ServiceSignature $signature,
+        Retriever $retriever,
         URL $baseUrl,
         URL $serviceUrl,
         array $whitelist,
         $serviceRequestFormat = null
     ) {
         $this->signature = $signature;
+        $this->retriever = $retriever;
         $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
         $this->whitelist = $whitelist;
@@ -116,6 +124,10 @@ class ImagesOptimizationServiceHTMLFilter implements HTMLFilter {
     }
 
     protected function makeSignedUrl($params) {
+        $modTime = $this->retriever->getLastModificationTime(URL::fromString($params['src']));
+        if ($modTime) {
+            $params['cacheMarker'] = $modTime;
+        }
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
             ->sign($this->signature)
