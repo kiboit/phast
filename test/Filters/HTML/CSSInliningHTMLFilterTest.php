@@ -139,7 +139,7 @@ class CSSInliningHTMLFilterTest extends HTMLFilterTestCase {
     }
 
     public function testRedirectingToProxyServiceOnReadError() {
-        $theLink = $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
+        $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
         unset ($this->files[self::BASE_URL . '/the-css.css']);
 
         $this->filter->transformHTMLDOM($this->dom);

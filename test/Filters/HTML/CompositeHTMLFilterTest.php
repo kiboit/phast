@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\Logger;
 use Kibo\Phast\Logging\LogLevel;
 use Kibo\Phast\Logging\LogWriter;
-use Kibo\Phast\Logging\LogWriters\PHPErrorLogWriter;
 use PHPUnit\Framework\TestCase;
 
 class CompositeHTMLFilterTest extends TestCase {

@@ -2,12 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use Kibo\Phast\Retrievers\Retriever;
-use Kibo\Phast\ValueObjects\URL;
-
 class CSSOptimizingHTMLFilterTest extends HTMLFilterTestCase {
-
-    private $files;
 
     /**
      * @var CSSOptimizingHTMLFilter

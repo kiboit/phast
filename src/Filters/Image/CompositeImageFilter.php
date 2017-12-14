@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\LoggingTrait;
 
 class CompositeImageFilter {

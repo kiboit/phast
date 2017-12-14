@@ -1,11 +1,8 @@
 <?php
 
-
 namespace Kibo\Phast\Factories\Filters\HTML;
 
-
 use Kibo\Phast\Filters\HTML\DiagnosticsHTMLFilter;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
 
 class DiagnosticsHTMLFilterFactory implements HTMLFilterFactory {
 

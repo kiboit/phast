@@ -2,12 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use Kibo\Phast\Retrievers\Retriever;
-use Kibo\Phast\ValueObjects\URL;
-
 class CSSDeferHTMLFilterTest extends HTMLFilterTestCase {
-
-    private $files;
 
     /**
      * @var CSSDeferHTMLFilter

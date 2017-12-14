@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;

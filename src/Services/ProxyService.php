@@ -2,11 +2,9 @@
 
 namespace Kibo\Phast\Services;
 
-use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Response;
-use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;

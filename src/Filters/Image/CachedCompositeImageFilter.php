@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\Image;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
-use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -20,11 +19,6 @@ class CachedCompositeImageFilter extends CompositeImageFilter {
      * @var Retriever
      */
     private $retriever;
-
-    /**
-     * @var array
-     */
-    private $request;
 
     /**
      * @var array
