@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-use Kibo\Phast\Exceptions\ImageException;
+use Kibo\Phast\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\LogEntry;
@@ -110,7 +110,7 @@ class CompositeImageFilterTest extends TestCase {
         $filter = $this->createMock(ImageFilter::class);
         $filter->expects($this->once())
             ->method('transformImage')
-            ->willThrowException(new ImageException());
+            ->willThrowException(new ImageProcessingException());
         $this->filter->addImageFilter($filter);
         return $filter;
     }

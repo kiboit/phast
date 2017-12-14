@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-use Kibo\Phast\Exceptions\ImageException;
+use Kibo\Phast\Exceptions\ImageProcessingException;
 use Kibo\Phast\Logging\LoggingTrait;
 
 class CompositeImageFilter {
@@ -28,7 +28,7 @@ class CompositeImageFilter {
             $this->logger()->info('Applying {filter}', ['filter' => get_class($filter)]);
             try {
                 $filteredImage = $filter->transformImage($filteredImage, $request);
-            } catch (ImageException $e) {
+            } catch (ImageProcessingException $e) {
                 $message = 'Image filter exception: Filter: {filter} Exception: {exceptionClass} Msg: {message} Code: {code} File: {file} Line: {line}';
                 $this->logger()->critical($message, [
                     'filter' => get_class($filter),

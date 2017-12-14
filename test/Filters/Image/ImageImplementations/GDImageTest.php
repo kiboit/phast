@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
-use Kibo\Phast\Exceptions\ImageException;
+use Kibo\Phast\Exceptions\ImageProcessingException;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Retrievers\Retriever;
@@ -68,13 +68,13 @@ class GDImageTest extends TestCase {
 
     public function testExceptionOnBadImageAsString() {
         $image = $this->makeImage('asdasd');
-        $this->expectException(ImageException::class);
+        $this->expectException(ImageProcessingException::class);
         $image->compress(9)->getAsString();
     }
 
     public function testExceptionOnBadImageInfo() {
         $image = $this->makeImage('asdasd');
-        $this->expectException(ImageException::class);
+        $this->expectException(ImageProcessingException::class);
         $image->getWidth();
     }
 
