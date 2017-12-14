@@ -142,6 +142,110 @@ class ServiceRequestTest extends TestCase {
         $this->assertFalse($queryRequest->verify($signature2));
         $this->assertFalse($pathRequest->verify($signature2));
     }
+
+    public function testGettingSwitchesFromGet() {
+        $get = ['phast' => 'images,-webp'];
+        $httpRequest = Request::fromArray($get, []);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+
+        $expected = [
+            'images' => true,
+            'webp' => false,
+            'phast' => true,
+            'diagnostics' => false
+
+        ];
+        $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
+    }
+
+    public function testGettingSwitchesFromCookies() {
+        $cookie = ['phast' => 'images,-jpeg,diagnostics'];
+        $get =    ['phast' => '-images,-webp'];
+        $httpRequest = Request::fromArray($get, [], $cookie);
+        $switches = ServiceRequest::fromHTTPRequest($httpRequest)->getSwitches();
+
+        $this->assertFalse($switches->isOn('jpeg'));
+        $this->assertTrue($switches->isOn('diagnostics'));
+        $this->assertFalse($switches->isOn('images'));
+        $this->assertFalse($switches->isOn('webp'));
+    }
+
+    public function testGettingSwitchesFromPathInfo() {
+        $pathInfo = '/switches=-2Ddiagnostics.phast';
+        $httpRequest = Request::fromArray([], ['PATH_INFO' => $pathInfo]);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+
+        $expected = [
+            'diagnostics' => false,
+            'phast' => true,
+        ];
+        $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
+    }
+
+    public function testGettingDefaultSwitches() {
+        $httpRequest = Request::fromArray([], []);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $this->assertEquals(
+            ['phast' => true, 'diagnostics' => false],
+            $serviceRequest->getSwitches()->toArray()
+        );
+    }
+
+    public function testPropagatingSwitches() {
+        $httpRequest = Request::fromArray(['phast' => 's1.s2.-s3'], []);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $url = $serviceRequest->withUrl(URL::fromString('phast.php?service=images'))
+                ->withParams(['k' => 'v'])
+                ->serialize();
+        $this->assertContains('phast=s1.s2.-s3', $url);
+    }
+
+    public function testGeneratingRequestId() {
+        $httpRequest = Request::fromArray([], []);
+        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
+        $id2 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
+
+        $this->assertTrue((bool)preg_match('/^\d{1,9}$/', $id1));
+        $this->assertTrue((bool)preg_match('/^\d{1,9}$/', $id2));
+        $this->assertNotEquals($id1, $id2);
+    }
+
+    public function testPreservingRequestId() {
+        $httpRequest = Request::fromArray([], []);
+        $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
+        $id2 = (new ServiceRequest())->getDocumentRequestId();
+        $this->assertEquals($id1, $id2);
+    }
+
+    public function testGettingRequestIdFromHTTPRequest() {
+        $httpRequest = Request::fromArray(['documentRequestId' => 'the-id'], []);
+        $id = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
+        $this->assertEquals('the-id', $id);
+    }
+
+    public function testPropagatingRequestId() {
+        $url = URL::fromString('phast.php?service=diagnostics');
+        $url1 = (new ServiceRequest())->withUrl($url)->serialize();
+
+        $this->assertNotContains('requestId=', $url1);
+
+        $httpRequest = Request::fromArray(['phast' => 'diagnostics'], []);
+        $url2 = ServiceRequest::fromHTTPRequest($httpRequest)
+                ->withUrl($url)
+                ->serialize();
+
+        $this->assertContains('documentRequestId=', $url2);
+
+        $url3 = (new ServiceRequest())->withUrl($url)->serialize();
+        $this->assertContains('documentRequestId=', $url3);
+
+        $httpRequest = Request::fromArray(['phast' => ''], [], ['phast' => 'diagnostics']);
+        $url4 = ServiceRequest::fromHTTPRequest($httpRequest)
+            ->withUrl($url)
+            ->serialize();
+        $this->assertContains('documentRequestId=', $url4);
+    }
+
     
     private function checkRequest(ServiceRequest $request, $expectedQuery, $expectedPath) {
         $actualQuery = $request->serialize(ServiceRequest::FORMAT_QUERY);

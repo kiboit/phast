@@ -5,7 +5,7 @@ namespace Kibo\Phast\Filters\Image;
 class JPEGTransEnhancerImageFilter extends ExternalAppImageFilter {
 
     protected function shouldApply(Image $image) {
-        $this->config['enabled'] && $image->getType() == Image::TYPE_JPEG;
+        return $image->getType() == Image::TYPE_JPEG;
     }
 
     protected function getCommand() {

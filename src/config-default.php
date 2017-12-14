@@ -60,13 +60,17 @@ return [
                 ]
             ],
 
+            \Kibo\Phast\Filters\HTML\DiagnosticsHTMLFilter::class => [
+                'enabled' => 'diagnostics'
+            ],
+
             \Kibo\Phast\Filters\HTML\ScriptsDeferHTMLFilter::class => [],
 
         ]
     ],
 
     'images' => [
-        'enable-cache' => true,
+        'enable-cache' => 'imgcache',
 
         'whitelist' => [
             '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
@@ -100,6 +104,30 @@ return [
                 'cmdpath' => '/usr/bin/jpegtran'
             ]
         ]
+    ],
+
+    'logging' => [
+        'logWriters' => [
+            [
+                'class' => \Kibo\Phast\Logging\LogWriters\PHPErrorLogWriter::class,
+                'levelMask' =>
+                    \Kibo\Phast\Logging\LogLevel::EMERGENCY
+                    | \Kibo\Phast\Logging\LogLevel::ALERT
+                    | \Kibo\Phast\Logging\LogLevel::CRITICAL
+                    | \Kibo\Phast\Logging\LogLevel::ERROR
+                    | \Kibo\Phast\Logging\LogLevel::WARNING
+            ],
+            [
+                'enabled' => 'diagnostics',
+                'class' => \Kibo\Phast\Logging\LogWriters\JSONLFileLogWriter::class,
+                'logRoot' => sys_get_temp_dir() . '/phast-logs'
+            ]
+        ]
+    ],
+
+    'switches' => [
+        'phast' => true,
+        'diagnostics' => false
     ],
 
     'scripts' => [

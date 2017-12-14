@@ -14,16 +14,27 @@ class Request {
      */
     private $env;
 
+    /**
+     * @var array
+     */
+    private $cookie;
+
     private function __construct() {}
 
     public static function fromGlobals() {
-        return self::fromArray($_GET, $_SERVER);
+        $get = [];
+        $parsed = parse_url($_SERVER['REQUEST_URI']);
+        if (isset ($parsed['query'])) {
+            parse_str($parsed['query'], $get);
+        }
+        return self::fromArray($get, $_SERVER, $_COOKIE);
     }
 
-    public static function fromArray($get, $env) {
+    public static function fromArray(array $get = [], array $env = [], array $cookie = []) {
         $instance = new self;
         $instance->get = $get;
         $instance->env = $env;
+        $instance->cookie = $cookie;
         return $instance;
     }
 
@@ -46,6 +57,12 @@ class Request {
 
     public function getPathInfo() {
         return $this->getEnvValue('PATH_INFO');
+    }
+
+    public function getCookie($name) {
+        if (isset ($this->cookie[$name])) {
+            return $this->cookie[$name];
+        }
     }
 
     public function getEnvValue($key) {

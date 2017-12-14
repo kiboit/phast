@@ -3,16 +3,17 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Logging\Log;
+use Kibo\Phast\Logging\LogEntry;
+use Kibo\Phast\Logging\Logger;
+use Kibo\Phast\Logging\LogLevel;
+use Kibo\Phast\Logging\LogWriter;
+use Kibo\Phast\Logging\LogWriters\PHPErrorLogWriter;
 use PHPUnit\Framework\TestCase;
 
 class CompositeHTMLFilterTest extends TestCase {
 
     const MAX_BUFFER_SIZE_TO_APPLY = 1024;
-
-    /**
-     * @var ObjectifiedFunctions
-     */
-    private $functions;
 
     /**
      * @var CompositeHTMLFilter
@@ -21,8 +22,7 @@ class CompositeHTMLFilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->functions = new ObjectifiedFunctions();
-        $this->filter = new CompositeHTMLFilter(self::MAX_BUFFER_SIZE_TO_APPLY, $this->functions);
+        $this->filter = new CompositeHTMLFilter(self::MAX_BUFFER_SIZE_TO_APPLY);
     }
 
     public function testShouldApplyOnHTML() {
@@ -167,14 +167,20 @@ class CompositeHTMLFilterTest extends TestCase {
         $this->filter->addHTMLFilter($filter);
         $buffer = '<html><body></body></html>';
 
-        $logMsg = null;
-        $this->functions->error_log = function ($msg) use (&$logMsg) {
-            $logMsg = $msg;
-        };
-
+        $writer = $this->createMock(LogWriter::class);
+        $msg = null;
+        $writer->method('writeEntry')
+            ->willReturnCallback(function (LogEntry $entry) use (&$msg) {
+                if ($entry->getLevel() == LogLevel::CRITICAL) {
+                    $msg = $entry->getMessage();
+                }
+            });
+        Log::setLogger(new Logger($writer));
         $actual = $this->filter->apply($buffer);
+        Log::initWithDummy();
+
+        $this->assertStringStartsWith('Phast: CompositeHTMLFilter: ', $msg);
         $this->assertEquals($buffer, $actual);
-        $this->assertStringStartsWith('Phast: CompositeHTMLFilter: ', $logMsg);
     }
 
     private function setExpectation($expectation) {

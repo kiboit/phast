@@ -6,6 +6,7 @@ use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Response;
+use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
@@ -16,11 +17,6 @@ class ProxyService extends Service {
      * @var Retriever
      */
     private $retriever;
-
-    /**
-     * @var Cache
-     */
-    private $cache;
 
     /**
      * ScriptsProxyService constructor.
@@ -46,6 +42,7 @@ class ProxyService extends Service {
     }
 
     protected function doRequest(array $request) {
+        $this->logger()->info('Retrieving {src}', ['src' => (string)$request['src']]);
         $result = $this->retriever->retrieve(URL::fromString($request['src']));
         if ($result === false) {
             throw new ItemNotFoundException("Could not get {$request['src']}!");
@@ -57,8 +54,11 @@ class ProxyService extends Service {
         $this->validateIntegrity($request);
         try {
             $this->validateToken($request);
+            $this->logger()->info('Token OK');
         } catch (UnauthorizedException $e) {
+            $this->logger()->info('Token not OK. Validating whitelist.');
             $this->validateWhitelisted($request);
+            $this->logger()->info('Whitelisted!');
         }
     }
 

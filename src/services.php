@@ -17,17 +17,30 @@ if (defined('PHAST_SERVICE')) {
 
 if (isset ($serviceParams['src']) && !headers_sent())  {
     header('Location: ' . $serviceParams['src']);
-} else {
-    http_response_code(404);
-    exit;
 }
 
 $config = require_once PHAST_CONFIG_FILE;
 try {
+    $runtimeConfig = (new \Kibo\Phast\Environment\Configuration($config))
+        ->withServiceRequest($serviceRequest)
+        ->toArray();
+    \Kibo\Phast\Logging\Log::init($runtimeConfig['logging'], $serviceRequest, $service);
+    \Kibo\Phast\Logging\Log::info('Starting service');
     $response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
-        ->make($service, $config)
+        ->make($service, $runtimeConfig)
         ->serve($serviceRequest);
+    \Kibo\Phast\Logging\Log::info('Service completed!');
 } catch (\Kibo\Phast\Exceptions\UnauthorizedException $e) {
+    \Kibo\Phast\Logging\Log::error('Unauthorized exception: {message}!', ['message' => $e->getMessage()]);
+    exit();
+} catch (\Kibo\Phast\Exceptions\ItemNotFoundException $e) {
+    \Kibo\Phast\Logging\Log::error('Item not found: {message}', ['message' => $e->getMessage()]);
+    exit();
+} catch (Exception $e) {
+    \Kibo\Phast\Logging\Log::critical(
+        'Unhandled exception: {type} Message: {message} File: {file} Line: {line}',
+        ['type' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
+    );
     exit();
 }
 

@@ -3,8 +3,10 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Logging\LoggingTrait;
 
 class CompositeHTMLFilter {
+    use LoggingTrait;
 
     /**
      * @var ObjectifiedFunctions
@@ -39,6 +41,10 @@ class CompositeHTMLFilter {
         $time_start = microtime(true);
 
         if (strlen($buffer) > $this->maxBufferSizeToApply) {
+            $this->logger()->info(
+                'Buffer exceeds max. size ({buffersize} bytes). Not applying',
+                ['buffersize' => $this->maxBufferSizeToApply]
+            );
             return $buffer;
         }
 
@@ -52,21 +58,23 @@ class CompositeHTMLFilter {
         ~isx';
 
         if (!preg_match($pattern, $buffer)) {
+            $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');
             return $buffer;
         }
 
         try {
             $output = $this->tryToApply($buffer, $time_start);
         } catch (\Exception $e) {
-            $this->functions->error_log(sprintf(
-                'Phast: CompositeHTMLFilter: %s: Msg: %s, Code: %s, File: %s, Line: %s',
-                get_class($e),
-                $e->getMessage(),
-                $e->getCode(),
-                $e->getFile(),
-                $e->getLine()
-
-            ));
+            $this->logger()->critical(
+                'Phast: CompositeHTMLFilter: {exception} Msg: {message}, Code: {code}, File: {file}, Line: {line}',
+                [
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
+            );
             $output = $buffer;
         }
         return $output;
@@ -87,9 +95,14 @@ class CompositeHTMLFilter {
         $timings = [];
 
         foreach ($this->filters as $filter) {
+            $this->logger()->info('Starting {filter}', ['filter' => get_class($filter)]);
             $time_filter_start = microtime(true);
             $filter->transformHTMLDOM($doc);
             $time_filter_delta = microtime(true) - $time_filter_start;
+            $this->logger()->info(
+                'Finished {filter} in {seconds}',
+                ['filter' => get_class($filter), 'seconds' => $time_filter_delta]
+            );
             $timings[get_class($filter)] = $time_filter_delta;
         }
 
@@ -121,7 +134,7 @@ class CompositeHTMLFilter {
         $log .= sprintf("      % 43s % 4dms\n", '(total)', $time_delta*1000);
 
         $output .= '<script>window.console&&console.log(' . json_encode($log) . ')</script>';
-
+        $this->logger()->info($log);
         return $output;
     }
 

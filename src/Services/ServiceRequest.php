@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services;
 
+use Kibo\Phast\Environment\Switches;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
@@ -11,6 +12,21 @@ class ServiceRequest {
     const FORMAT_QUERY = 1;
 
     const FORMAT_PATH  = 2;
+
+    /**
+     * @var string
+     */
+    private static $propagatedSwitches = '';
+
+    /**
+     * @var Switches
+     */
+    private static $switches;
+
+    /**
+     * @var string
+     */
+    private static $documentRequestId;
 
     /**
      * @var Request
@@ -32,6 +48,12 @@ class ServiceRequest {
      */
     private $token;
 
+    public function __construct() {
+        if (!isset (self::$switches)) {
+            self::$switches = new Switches();
+        }
+    }
+
     public static function fromHTTPRequest(Request $request) {
         $params = $request->getGet();
         $pathInfo = $request->getPathInfo();
@@ -39,13 +61,88 @@ class ServiceRequest {
             $params = array_merge($params, self::parsePathInfo($pathInfo));
         }
         $instance = new self();
+        self::$switches = new Switches();
         $instance->httpRequest = $request;
+        if ($request->getCookie('phast')) {
+            self::$switches = Switches::fromString($request->getCookie('phast'));
+        }
         if (isset ($params['token'])) {
             $instance->token = $params['token'];
             unset ($params['token']);
         }
         $instance->params = $params;
+        if (isset ($params['phast'])) {
+            self::$propagatedSwitches = $params['phast'];
+            $paramsSwitches = Switches::fromString($params['phast']);
+            self::$switches = self::$switches->merge($paramsSwitches);
+        }
+        if (isset ($params['documentRequestId'])) {
+            self::$documentRequestId = $params['documentRequestId'];
+        } else {
+            self::$documentRequestId = (string)mt_rand(0, 999999999);
+        }
         return $instance;
+    }
+
+    /**
+     * @return Switches
+     */
+    public function getSwitches() {
+        return self::$switches;
+    }
+
+    /**
+     * @return array
+     */
+    public function getParams() {
+        return $this->params;
+    }
+
+    /**
+     * @return Request
+     */
+    public function getHTTPRequest() {
+        return $this->httpRequest;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDocumentRequestId() {
+        return self::$documentRequestId;
+    }
+
+    /**
+     * @param array $params
+     * @return ServiceRequest
+     */
+    public function withParams(array $params) {
+        return $this->cloneWithProperty('params', $params);
+    }
+
+    /**
+     * @param URL $url
+     * @return ServiceRequest
+     */
+    public function withUrl(URL $url) {
+        return $this->cloneWithProperty('url', $url);
+    }
+
+    /**
+     * @param ServiceSignature $signature
+     * @return ServiceRequest
+     */
+    public function sign(ServiceSignature $signature) {
+        $token = $signature->sign($this->getVerificationString());
+        return $this->cloneWithProperty('token', $token);
+    }
+
+    /**
+     * @param ServiceSignature $signature
+     * @return bool
+     */
+    public function verify(ServiceSignature $signature) {
+        return $signature->verify($this->token, $this->getVerificationString());
     }
 
     private static function parsePathInfo($string) {
@@ -66,39 +163,7 @@ class ServiceRequest {
         return urldecode(str_replace('-', '%', $value));
     }
 
-    /**
-     * @return array
-     */
-    public function getParams() {
-        return $this->params;
-    }
-
-    public function getHTTPRequest() {
-        return $this->httpRequest;
-    }
-
-    /**
-     * @param array $params
-     * @return ServiceRequest
-     */
-    public function withParams(array $params) {
-        return $this->cloneWithProperty('params', $params);
-    }
-
-    public function withUrl(URL $url) {
-        return $this->cloneWithProperty('url', $url);
-    }
-
-    public function sign(ServiceSignature $signature) {
-        $token = $signature->sign($this->getVirificationString());
-        return $this->cloneWithProperty('token', $token);
-    }
-
-    public function verify(ServiceSignature $signature) {
-        return $signature->verify($this->token, $this->getVirificationString());
-    }
-
-    private function getVirificationString() {
+    private function getVerificationString() {
         $params = $this->getAllParams();
         ksort($params);
         return http_build_query($params);
@@ -111,10 +176,6 @@ class ServiceRequest {
     }
 
     public function serialize($format = self::FORMAT_QUERY) {
-        $urlParams = [];
-        if ($this->url) {
-            parse_str($this->url->getQuery(), $urlParams);
-        }
         $params = $this->getAllParams();
         if ($this->token) {
             $params['token'] = $this->token;
@@ -131,6 +192,12 @@ class ServiceRequest {
             parse_str($this->url->getQuery(), $urlParams);
         }
         $params = array_merge($urlParams, $this->params);
+        if (!empty (self::$propagatedSwitches)) {
+            $params['phast'] = self::$propagatedSwitches;
+        }
+        if (self::$switches->isOn(Switches::SWITCH_DIAGNOSTICS)) {
+            $params['documentRequestId'] = self::$documentRequestId;
+        }
         return $params;
     }
 
@@ -162,5 +229,4 @@ class ServiceRequest {
         }
         return $params;
     }
-
 }

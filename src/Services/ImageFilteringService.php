@@ -6,6 +6,7 @@ use Kibo\Phast\Factories\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\CompositeImageFilter;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\HTTP\Response;
+use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -41,6 +42,7 @@ class ImageFilteringService extends Service {
     }
 
     protected function handle(array $request) {
+        Log::info('Requested image is {src}', $request);
         $srcUrl = URL::fromString($request['src']);
         $image = $this->imageFactory->getForURL($srcUrl);
         $image = $this->filter->apply($image, $request);
@@ -63,6 +65,7 @@ class ImageFilteringService extends Service {
         $params = parent::getParams($request);
         if (strpos($request->getHTTPRequest()->getHeader('Accept'), 'image/webp') !== false) {
             $params['preferredType'] = Image::TYPE_WEBP;
+            Log::info('WEBP will be served if possible!');
         }
         return $params;
     }

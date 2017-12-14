@@ -2,30 +2,32 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-class WEBPEncoderImageFilter implements ImageFilter {
+use Kibo\Phast\Logging\LoggingTrait;
 
-    private $enabled;
+class WEBPEncoderImageFilter implements ImageFilter {
+    use LoggingTrait;
 
     private $compression;
 
     public function __construct(array $config) {
-        $this->enabled = $config['enabled'];
         $this->compression = $config['compression'];
     }
 
     public function transformImage(Image $image, array $request) {
-        $encode = $this->enabled
-                  && isset ($request['preferredType'])
+        $encode = isset ($request['preferredType'])
                   && $request['preferredType'] == Image::TYPE_WEBP
                   && $image->getType() != Image::TYPE_PNG;
         if (!$encode) {
+            $this->logger()->info('Not recoding to WEBP');
             return $image;
         }
         $encoded = $image->encodeTo(Image::TYPE_WEBP)
                          ->compress($this->compression);
         if ($encoded->getSizeAsString() <= $image->getSizeAsString()) {
+            $this->logger()->info('Recoded to WEBP');
             return $encoded;
         }
+        $this->logger()->info('Recoded to WEBP but original was smaller, so returning it instead');
         return $image;
     }
 
