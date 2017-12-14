@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ImageProcessingException;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Filters\Image\Image;
@@ -50,14 +51,20 @@ class GDImage extends BaseImage implements Image {
     private $gdImage;
 
     /**
+     * @var ObjectifiedFunctions
+     */
+    private $funcs;
+
+    /**
      * GDImage constructor.
      *
      * @param URL $imageURL
      * @param Retriever $retriever
      */
-    public function __construct(URL $imageURL, Retriever $retriever) {
+    public function __construct(URL $imageURL, Retriever $retriever, ObjectifiedFunctions $funcs = null) {
         $this->imageURL = $imageURL;
         $this->retriever = $retriever;
+        $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
 
     public function getWidth() {
@@ -175,11 +182,14 @@ class GDImage extends BaseImage implements Image {
     }
 
     public function encodeTo($type) {
+        $callback = self::getOutputCallbackForType($type);
+        $this->validateFunctionExists($callback);
         $this->loadGDImage();
         return parent::encodeTo($type);
     }
 
     private function loadGDImage() {
+        $this->validateFunctionExists('imagecreatefromstring');
         if (isset ($this->gdImage) && @getimagesize($this->gdImage)) {
             return;
         }
@@ -194,6 +204,12 @@ class GDImage extends BaseImage implements Image {
         return isset (self::$outputCallbacks[$type])
                ? self::$outputCallbacks[$type]
                : self::$outputCallbacks[self::TYPE_PNG];
+    }
+
+    private function validateFunctionExists($function) {
+        if (!$this->funcs->function_exists($function)) {
+            throw new ImageProcessingException("Function $function() is missing!");
+        }
     }
 
     protected function __clone() {

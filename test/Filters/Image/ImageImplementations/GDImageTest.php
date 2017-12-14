@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ImageProcessingException;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Filters\Image\Image;
@@ -10,6 +11,16 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class GDImageTest extends TestCase {
+
+    /**
+     * @var ObjectifiedFunctions
+     */
+    private $functions;
+
+    public function setUp() {
+        parent::setUp();
+        $this->functions = new ObjectifiedFunctions();
+    }
 
     public function testImageSizeAndTypeForJPEG() {
         $this->checkImageSizeAndType(Image::TYPE_JPEG, IMG_JPEG, 'imagejpeg');
@@ -91,6 +102,28 @@ class GDImageTest extends TestCase {
         $this->assertSame($string, $image->getAsString());
     }
 
+    /**
+     * @dataProvider getExceptionsOnMissingFunctionsData
+     */
+    public function testExceptionsOnMissingFunctions($missing, $method, $params) {
+        $this->functions->function_exists = function ($func) use ($missing) {
+            return $func != $missing;
+        };
+        $image = $this->makeImage($this->getImageString('imagepng'));
+        $this->expectException(ImageProcessingException::class);
+        call_user_func_array([$image, $method], $params);
+    }
+
+    public function getExceptionsOnMissingFunctionsData() {
+        return [
+            ['imagecreatefromstring', 'resize', [20, 30]],
+            ['imagecreatefromstring', 'compress', [1]],
+            ['imagepng', 'encodeTo', [Image::TYPE_PNG]],
+            ['imagejpeg', 'encodeTo', [Image::TYPE_JPEG]],
+            ['imagewebp', 'encodeTo', [Image::TYPE_WEBP]]
+        ];
+    }
+
     private function checkCompressing($imagecb, $inputCompression, $outputCompression) {
         $string = $this->getImageString($imagecb, $inputCompression, 'Hello, World!');
         $image = $this->makeImage($string);
@@ -110,7 +143,7 @@ class GDImageTest extends TestCase {
         $retriever->method('retrieve')
                   ->with($url)
                   ->willReturn($imageString);
-        return new GDImage($url, $retriever);
+        return new GDImage($url, $retriever, $this->functions);
     }
 
     private function getImageString($callback, $compression = 0, $text = null) {
