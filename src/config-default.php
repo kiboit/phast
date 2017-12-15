@@ -89,18 +89,15 @@ return [
             ],
 
             \Kibo\Phast\Filters\Image\WEBPEncoder\Filter::class => [
-                'enabled'     => function_exists('imagewebp'),
                 'compression' => 80
             ],
 
             \Kibo\Phast\Filters\Image\PNGQuantCompression\Filter::class => [
-                'enabled' => @file_exists('/usr/bin/pngquant'),
                 'cmdpath' => '/usr/bin/pngquant',
                 'quality' => '50-85'
             ],
 
             \Kibo\Phast\Filters\Image\JPEGTransEnhancer\Filter::class => [
-                'enabled' => @file_exists('/usr/bin/jpegtran'),
                 'cmdpath' => '/usr/bin/jpegtran'
             ]
         ]
