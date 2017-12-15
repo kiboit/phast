@@ -8,7 +8,7 @@ use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Cache\FileCache;
 use Kibo\Phast\Retrievers\RemoteRetriever;
 use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
-use Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter;
+use Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter;
 use Kibo\Phast\Services\ScriptsProxyService;
 
 class ScriptsServiceFactory {
@@ -25,7 +25,7 @@ class ScriptsServiceFactory {
         );
         return new ScriptsProxyService(
             (new ServiceSignatureFactory())->make($config),
-            $config['documents']['filters'][ScriptProxyServiceHTMLFilter::class]['match'],
+            $config['documents']['filters'][Filter::class]['match'],
             $retriever,
             $config['scripts']['removeLicenseHeaders']
         );

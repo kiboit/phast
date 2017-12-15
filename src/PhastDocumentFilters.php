@@ -4,7 +4,7 @@ namespace Kibo\Phast;
 
 use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\Logging\Log;
-use Kibo\Phast\Factories\Filters\HTML\CompositeHTMLFilterFactory;
+use Kibo\Phast\Filters\HTML\Composite\Factory;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Services\ServiceRequest;
 
@@ -18,7 +18,7 @@ class PhastDocumentFilters {
             Log::info('Phast is off. Skipping document filter deployment!');
             return;
         }
-        $filter = (new CompositeHTMLFilterFactory())->make($runtimeConfig);
+        $filter = (new Factory())->make($runtimeConfig);
         Log::info('Phast deployed!');
         ob_start([$filter, 'apply']);
     }

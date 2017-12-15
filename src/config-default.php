@@ -26,11 +26,11 @@ return [
 
         'filters' => [
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationServiceHTMLFilter::class => [
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\TagsFilter::class => [
                 'rewriteFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH
             ],
 
-            \Kibo\Phast\Filters\HTML\CSSInliningHTMLFilter::class => [
+            \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
                 'urlRefreshTime' => 7200,
                 'whitelist' => [
                     '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
@@ -41,17 +41,17 @@ return [
                 ]
             ],
 
-            \Kibo\Phast\Filters\HTML\CSSImagesOptimizationServiceHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSSFilter::class => [],
 
-            \Kibo\Phast\Filters\HTML\CSSOptimizingHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\CSSOptimization\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\CSSDeferHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\CSSDeferring\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\IFrameDelayedLoadingHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ScriptsRearrangementHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ScriptsRearrangement\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ScriptProxyServiceHTMLFilter::class => [
+            \Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter::class => [
                 'urlRefreshTime' => 7200,
                 'match' => [
                     '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
@@ -60,11 +60,11 @@ return [
                 ]
             ],
 
-            \Kibo\Phast\Filters\HTML\DiagnosticsHTMLFilter::class => [
+            \Kibo\Phast\Filters\HTML\Diagnostics\Filter::class => [
                 'enabled' => 'diagnostics'
             ],
 
-            \Kibo\Phast\Filters\HTML\ScriptsDeferHTMLFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ScriptsDeferring\Filter::class => [],
 
         ]
     ],
