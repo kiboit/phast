@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Factories\Security;
+namespace Kibo\Phast\Security;
 
 use Kibo\Phast\Cache\FileCache;
 use Kibo\Phast\Security\ServiceSignature;

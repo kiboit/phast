@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Factories\Services;
 
 use Kibo\Phast\Services\ImageFilteringService;
-use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
+use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\Composite\Factory;
 

@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
-use Kibo\Phast\Factories\Security\ServiceSignatureFactory;
+use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\ValueObjects\URL;
 
