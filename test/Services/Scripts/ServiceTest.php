@@ -1,16 +1,17 @@
 <?php
 
-namespace Kibo\Phast\Services;
+namespace Kibo\Phast\Services\Scripts;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
-class ScriptsProxyServiceTest extends TestCase {
+class ServiceTest extends TestCase {
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -18,7 +19,7 @@ class ScriptsProxyServiceTest extends TestCase {
     private $retriever;
 
     /**
-     * @var ScriptsProxyService
+     * @var Service
      */
     private $service;
 
@@ -30,7 +31,7 @@ class ScriptsProxyServiceTest extends TestCase {
             ->willReturnCallback(function ($token) {
                 return $token == 'the-token';
             });
-        $this->service = new ScriptsProxyService(
+        $this->service = new Service(
             $signature,
             ['~http://allowed\.com~'],
             $this->retriever,

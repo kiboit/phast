@@ -8,7 +8,7 @@ use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Security\ServiceSignature;
 
-abstract class Service {
+abstract class BaseService {
     use LoggingTrait;
 
     /**

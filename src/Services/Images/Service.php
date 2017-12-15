@@ -1,16 +1,18 @@
 <?php
 
-namespace Kibo\Phast\Services;
+namespace Kibo\Phast\Services\Images;
 
-use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\Composite\Filter;
 use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\BaseService;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
-class ImageFilteringService extends Service {
+class Service extends BaseService {
 
     /**
      * @var \Kibo\Phast\Filters\Image\ImageFactory

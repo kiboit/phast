@@ -1,12 +1,13 @@
 <?php
 
-namespace Kibo\Phast\Services;
+namespace Kibo\Phast\Services\Scripts;
 
 use Kibo\Phast\Common\JSMinifier;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ProxyBaseService;
 
-class ScriptsProxyService extends ProxyService {
+class Service extends ProxyBaseService {
 
     /**
      * @var bool

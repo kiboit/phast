@@ -9,7 +9,7 @@ use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
-class ProxyService extends Service {
+class ProxyBaseService extends BaseService {
 
     /**
      * @var Retriever

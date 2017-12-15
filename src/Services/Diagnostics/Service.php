@@ -1,14 +1,15 @@
 <?php
 
 
-namespace Kibo\Phast\Services;
+namespace Kibo\Phast\Services\Diagnostics;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogReaders\JSONLFile\Reader;
+use Kibo\Phast\Services\ServiceRequest;
 
-class DiagnosticsService  {
+class Service  {
 
     private $logRoot;
 

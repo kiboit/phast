@@ -1,17 +1,16 @@
 <?php
 
-namespace Kibo\Phast\Factories\Services;
+namespace Kibo\Phast\Services\Css;
 
-use Kibo\Phast\Retrievers\UniversalRetriever;
-use Kibo\Phast\Retrievers\LocalRetriever;
-use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Cache\FileCache;
+use Kibo\Phast\Retrievers\CachingRetriever;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
+use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
-use Kibo\Phast\Services\CSSProxyService;
 
 
-class CssServiceFactory {
+class Factory {
 
     public function make(array $config) {
         $retriever = new UniversalRetriever();
@@ -23,7 +22,7 @@ class CssServiceFactory {
                 7200
             )
         );
-        return new CSSProxyService(
+        return new Service(
             (new ServiceSignatureFactory())->make($config),
             $retriever
         );

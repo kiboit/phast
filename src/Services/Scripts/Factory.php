@@ -1,17 +1,16 @@
 <?php
 
-namespace Kibo\Phast\Factories\Services;
+namespace Kibo\Phast\Services\Scripts;
 
-use Kibo\Phast\Retrievers\UniversalRetriever;
-use Kibo\Phast\Retrievers\LocalRetriever;
-use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Cache\FileCache;
-use Kibo\Phast\Retrievers\RemoteRetriever;
-use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter;
-use Kibo\Phast\Services\ScriptsProxyService;
+use Kibo\Phast\Retrievers\CachingRetriever;
+use Kibo\Phast\Retrievers\LocalRetriever;
+use Kibo\Phast\Retrievers\RemoteRetriever;
+use Kibo\Phast\Retrievers\UniversalRetriever;
+use Kibo\Phast\Security\ServiceSignatureFactory;
 
-class ScriptsServiceFactory {
+class Factory {
 
     public function make(array $config) {
         $retriever = new UniversalRetriever();
@@ -23,7 +22,7 @@ class ScriptsServiceFactory {
                 7200
             )
         );
-        return new ScriptsProxyService(
+        return new Service(
             (new ServiceSignatureFactory())->make($config),
             $config['documents']['filters'][Filter::class]['match'],
             $retriever,

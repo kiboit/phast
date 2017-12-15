@@ -26,7 +26,7 @@ try {
         ->toArray();
     \Kibo\Phast\Logging\Log::init($runtimeConfig['logging'], $serviceRequest, $service);
     \Kibo\Phast\Logging\Log::info('Starting service');
-    $response = (new \Kibo\Phast\Factories\Services\ServicesFactory())
+    $response = (new \Kibo\Phast\Services\Factory())
         ->make($service, $runtimeConfig)
         ->serve($serviceRequest);
     \Kibo\Phast\Logging\Log::info('Service completed!');

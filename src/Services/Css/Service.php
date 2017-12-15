@@ -1,11 +1,12 @@
 <?php
 
-namespace Kibo\Phast\Services;
+namespace Kibo\Phast\Services\Css;
 
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ProxyBaseService;
 
-class CSSProxyService extends ProxyService {
+class Service extends ProxyBaseService {
 
     public function __construct(ServiceSignature $signature, Retriever $retriever) {
         parent::__construct($signature, [], $retriever);

@@ -1,13 +1,11 @@
 <?php
 
 
-namespace Kibo\Phast\Factories\Services;
-
+namespace Kibo\Phast\Services\Diagnostics;
 
 use Kibo\Phast\Logging\LogWriters\JSONLFile\Writer;
-use Kibo\Phast\Services\DiagnosticsService;
 
-class DiagnosticsServiceFactory {
+class Factory {
 
     public function make(array $config) {
         $logRoot = null;
@@ -20,7 +18,7 @@ class DiagnosticsServiceFactory {
         if (is_null($logRoot)) {
             throw new \RuntimeException('Could not find logging config');
         }
-        return new DiagnosticsService($logRoot);
+        return new Service($logRoot);
     }
 
 }
