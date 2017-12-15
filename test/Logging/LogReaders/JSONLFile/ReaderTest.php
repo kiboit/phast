@@ -1,21 +1,21 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogReaders;
+namespace Kibo\Phast\Logging\LogReaders\JSONLFile;
 
 use Kibo\Phast\Logging\LogEntry;
-use Kibo\Phast\Logging\LogWriters\JSONLFileLogWriter;
+use Kibo\Phast\Logging\LogWriters\JSONLFile\Writer;
 use PHPUnit\Framework\TestCase;
 
-class JSONLFileLogReaderTest extends TestCase {
+class ReaderTest extends TestCase {
 
     public function testReading() {
         $dir = sys_get_temp_dir();
         $file = 'json-l-reader-test';
-        $writer = new JSONLFileLogWriter($dir, $file);
+        $writer = new Writer($dir, $file);
         $writer->writeEntry(new LogEntry(1, 'm1', ['k1' => 'v1']));
         $writer->writeEntry(new LogEntry(2, 'm2', ['k2' => 'v2']));
 
-        $reader = new JSONLFileLogReader($dir, $file);
+        $reader = new Reader($dir, $file);
         $actual = [];
         foreach ($reader->readEntries() as $entry) {
             $actual[] = $entry->toArray();
@@ -45,7 +45,7 @@ class JSONLFileLogReaderTest extends TestCase {
         touch("$dir/old.xml", time() - 610);
         touch("$dir/new.jsonl");
 
-        new JSONLFileLogReader($dir, 'a');
+        new Reader($dir, 'a');
 
         $this->assertFileExists("$dir/old.xml");
         $this->assertFileExists("$dir/new.jsonl");

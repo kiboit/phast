@@ -1,12 +1,12 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogReaders;
+namespace Kibo\Phast\Logging\LogReaders\JSONLFile;
 
 use Kibo\Phast\Logging\Common\JSONLFileLogTrait;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogReader;
 
-class JSONLFileLogReader implements LogReader {
+class Reader implements LogReader {
     use JSONLFileLogTrait;
 
     public function readEntries() {

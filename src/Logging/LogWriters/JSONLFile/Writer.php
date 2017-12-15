@@ -1,11 +1,12 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters\JSONLFile;
 
 use Kibo\Phast\Logging\Common\JSONLFileLogTrait;
 use Kibo\Phast\Logging\LogEntry;
+use Kibo\Phast\Logging\LogWriters\BaseLogWriter;
 
-class JSONLFileLogWriter extends BaseLogWriter {
+class Writer extends BaseLogWriter {
     use JSONLFileLogTrait;
 
     /**

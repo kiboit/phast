@@ -1,20 +1,19 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogWriters;
-
+namespace Kibo\Phast\Logging\LogWriters\JSONLFile;
 
 use PHPUnit\Framework\TestCase;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogLevel;
 
-class JSONLFileLogWriterTest extends TestCase {
+class WriterTest extends TestCase {
 
     /**
      * @dataProvider getWriteMessageTestData
      */
     public function testWriteMessage($suffix) {
         $dir = sys_get_temp_dir() . '/phast-test';
-        $writer = new JSONLFileLogWriter($dir, $suffix);
+        $writer = new Writer($dir, $suffix);
         $message = new LogEntry(LogLevel::DEBUG, 'The message', ['key' => 'value']);
         $writer->writeEntry($message);
 

@@ -1,16 +1,16 @@
 <?php
 
 
-namespace Kibo\Phast\Factories\Logging\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters\Composite;
 
-use Kibo\Phast\Logging\LogWriters\CompositeLogWriter;
+use Kibo\Phast\Logging\LogWriters\Factory AS WritersFactory;
 use Kibo\Phast\Services\ServiceRequest;
 
-class CompositeLogWriterFactory {
+class Factory {
 
     public function make(array $config, ServiceRequest $request) {
-        $writer = new CompositeLogWriter();
-        $factory = new LogWritersFactory();
+        $writer = new Writer();
+        $factory = new WritersFactory();
         foreach ($config['logWriters'] as $writerConfig) {
             $writer->addWriter($factory->make($writerConfig, $request));
         }

@@ -3,8 +3,8 @@
 namespace Kibo\Phast\Logging;
 
 
-use Kibo\Phast\Factories\Logging\LogWriters\LogWritersFactory;
-use Kibo\Phast\Logging\LogWriters\DummyLogWriter;
+use Kibo\Phast\Logging\LogWriters\Factory;
+use Kibo\Phast\Logging\LogWriters\Dummy\Writer;
 use Kibo\Phast\Services\ServiceRequest;
 
 class Log {
@@ -19,11 +19,11 @@ class Log {
     }
 
     public static function initWithDummy() {
-        self::$logger = new Logger(new DummyLogWriter());
+        self::$logger = new Logger(new Writer());
     }
 
     public static function init(array $config, ServiceRequest $request, $service) {
-        $writer = (new LogWritersFactory())->make($config, $request);
+        $writer = (new Factory())->make($config, $request);
         $logger = new Logger($writer);
         self::$logger = $logger->withContext([
             'documentRequestId' => $request->getDocumentRequestId(),

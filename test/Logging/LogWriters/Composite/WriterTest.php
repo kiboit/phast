@@ -1,20 +1,19 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters\Composite;
 
 
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogLevel;
-use Kibo\Phast\Logging\LogWriter;
 use PHPUnit\Framework\TestCase;
 
-class CompositeLogWriterTest extends TestCase {
+class WriterTest extends TestCase {
 
     public function testCallingOthers() {
         $message = new LogEntry(LogLevel::ERROR, '', []);
-        $writer = new CompositeLogWriter();
+        $writer = new Writer();
         for ($i = 0; $i < 10; $i++) {
-            $otherWriter = $this->createMock(LogWriter::class);
+            $otherWriter = $this->createMock(Writer::class);
             $otherWriter->expects($this->once())
                 ->method('writeEntry')
                 ->with($message);

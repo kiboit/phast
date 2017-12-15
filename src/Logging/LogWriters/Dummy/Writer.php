@@ -1,13 +1,12 @@
 <?php
 
 
-namespace Kibo\Phast\Logging\LogWriters;
-
+namespace Kibo\Phast\Logging\LogWriters\Dummy;
 
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogWriter;
 
-class DummyLogWriter implements LogWriter {
+class  Writer implements LogWriter {
 
     public function setLevelMask($mask) {}
 

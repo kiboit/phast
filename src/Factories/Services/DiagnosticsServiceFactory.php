@@ -4,7 +4,7 @@
 namespace Kibo\Phast\Factories\Services;
 
 
-use Kibo\Phast\Logging\LogWriters\JSONLFileLogWriter;
+use Kibo\Phast\Logging\LogWriters\JSONLFile\Writer;
 use Kibo\Phast\Services\DiagnosticsService;
 
 class DiagnosticsServiceFactory {
@@ -12,7 +12,7 @@ class DiagnosticsServiceFactory {
     public function make(array $config) {
         $logRoot = null;
         foreach ($config['logging']['logWriters'] as $writerConfig) {
-            if ($writerConfig['class'] == JSONLFileLogWriter::class) {
+            if ($writerConfig['class'] == Writer::class) {
                 $logRoot = $writerConfig['logRoot'];
                 break;
             }

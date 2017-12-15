@@ -3,9 +3,11 @@
 namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\FileCache;
+use Kibo\Phast\Common\FactoryTrait;
 use Kibo\Phast\Retrievers\LocalRetriever;
 
 class Factory {
+    use FactoryTrait;
 
     /**
      * @var array
@@ -39,7 +41,7 @@ class Factory {
     }
 
     private function makeFactory($filter) {
-        $factory = preg_replace('/Filter$/', 'Factory', $filter);
+        $factory = $this->getFactoryClass($filter, 'Filter');
         return new $factory();
     }
 

@@ -6,7 +6,7 @@ namespace Kibo\Phast\Services;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\LogEntry;
-use Kibo\Phast\Logging\LogReaders\JSONLFileLogReader;
+use Kibo\Phast\Logging\LogReaders\JSONLFile\Reader;
 
 class DiagnosticsService  {
 
@@ -21,7 +21,7 @@ class DiagnosticsService  {
         if (!$requestId) {
             throw new ItemNotFoundException('Could not find specified request id');
         }
-        $reader = new JSONLFileLogReader($this->logRoot, $requestId);
+        $reader = new Reader($this->logRoot, $requestId);
         $entries = [];
         /** @var LogEntry $entry */
         foreach ($reader->readEntries() as $entry) {

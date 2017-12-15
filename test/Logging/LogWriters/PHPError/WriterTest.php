@@ -1,14 +1,13 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogWriters;
-
+namespace Kibo\Phast\Logging\LogWriters\PHPError;
 
 use PHPUnit\Framework\TestCase;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogLevel;
 
-class PHPErrorLogWriterTest extends TestCase {
+class WriterTest extends TestCase {
 
     public function testParamsFromConfig() {
         $functions = new ObjectifiedFunctions();
@@ -17,7 +16,7 @@ class PHPErrorLogWriterTest extends TestCase {
             $args = func_get_args();
         };
         $config = ['messageType' => 1, 'destination' => 'm@example.com', 'extraHeaders' => 'extra'];
-        $writer = new PHPErrorLogWriter($config, $functions);
+        $writer = new Writer($config, $functions);
         $writer->writeEntry(new LogEntry(LogLevel::DEBUG, 'the-message', []));
         $this->assertCount(4, $args);
         $this->assertEquals('the-message', $args[0]);
@@ -32,7 +31,7 @@ class PHPErrorLogWriterTest extends TestCase {
         $functions->error_log = function ($message) use (&$actualMessage) {
             $actualMessage = $message;
         };
-        $writer = new PHPErrorLogWriter([], $functions);
+        $writer = new Writer([], $functions);
 
         $message = 'The message with {param} here';
         $writer->writeEntry(new LogEntry(LogLevel::DEBUG, $message, ['param' => 'value']));

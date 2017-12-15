@@ -109,7 +109,7 @@ return [
     'logging' => [
         'logWriters' => [
             [
-                'class' => \Kibo\Phast\Logging\LogWriters\PHPErrorLogWriter::class,
+                'class' => \Kibo\Phast\Logging\LogWriters\PHPError\Writer::class,
                 'levelMask' =>
                     \Kibo\Phast\Logging\LogLevel::EMERGENCY
                     | \Kibo\Phast\Logging\LogLevel::ALERT
@@ -119,7 +119,7 @@ return [
             ],
             [
                 'enabled' => 'diagnostics',
-                'class' => \Kibo\Phast\Logging\LogWriters\JSONLFileLogWriter::class,
+                'class' => \Kibo\Phast\Logging\LogWriters\JSONLFile\Writer::class,
                 'logRoot' => sys_get_temp_dir() . '/phast-logs'
             ]
         ]

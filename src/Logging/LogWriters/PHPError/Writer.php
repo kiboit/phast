@@ -1,12 +1,13 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters\PHPError;
 
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Logging\LogEntry;
+use Kibo\Phast\Logging\LogWriters\BaseLogWriter;
 
-class PHPErrorLogWriter extends BaseLogWriter {
+class Writer extends BaseLogWriter {
 
     private $messageType = 0;
 

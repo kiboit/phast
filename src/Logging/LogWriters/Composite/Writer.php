@@ -1,15 +1,16 @@
 <?php
 
-namespace Kibo\Phast\Logging\LogWriters;
+namespace Kibo\Phast\Logging\LogWriters\Composite;
 
 
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogWriter;
+use Kibo\Phast\Logging\LogWriters\BaseLogWriter;
 
-class CompositeLogWriter extends BaseLogWriter {
+class Writer extends BaseLogWriter {
 
     /**
-     * @var LogWriter[]
+     * @var Writer[]
      */
     private $writers = [];
 
