@@ -40,7 +40,11 @@ abstract class ExternalAppImageFilter implements ImageFilter {
             return $image;
         }
 
+        if (!file_exists($this->config['cmdpath'])) {
+            throw new ImageProcessingException("Executable not found: " . $this->config['cmdpath']);
+        }
         $command = $this->getCommand();
+
         $this->logger()->info('Applying {command}', ['command' => $command]);
 
         $proc = proc_open($command, [['pipe', 'r'], ['pipe', 'w']], $pipes);
