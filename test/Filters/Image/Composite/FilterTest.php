@@ -1,8 +1,10 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Exceptions\ImageProcessingException;
+use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\LogEntry;
@@ -11,7 +13,7 @@ use Kibo\Phast\Logging\LogLevel;
 use Kibo\Phast\Logging\LogWriter;
 use PHPUnit\Framework\TestCase;
 
-class CompositeImageFilterTest extends TestCase {
+class FilterTest extends TestCase {
 
     /**
      * @var DummyImage
@@ -19,13 +21,13 @@ class CompositeImageFilterTest extends TestCase {
     private $image;
 
     /**
-     * @var CompositeImageFilter
+     * @var Filter
      */
     private $filter;
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new CompositeImageFilter();
+        $this->filter = new Filter();
         $this->image = new DummyImage();
     }
 

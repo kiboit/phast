@@ -1,10 +1,12 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Compression;
 
+use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 
-class CompressionImageFilter implements ImageFilter {
+class Filter implements ImageFilter {
     use LoggingTrait;
 
     /**

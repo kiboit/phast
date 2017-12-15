@@ -1,10 +1,12 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Resizer;
 
+use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 
-class ResizerImageFilter implements ImageFilter {
+class Filter implements ImageFilter {
     use LoggingTrait;
 
     /**

@@ -1,8 +1,11 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\PNGQuantCompression;
 
-class PNGQuantCompressionImageFilter extends ExternalAppImageFilter {
+use Kibo\Phast\Filters\Image\ExternalAppImageFilter;
+use Kibo\Phast\Filters\Image\Image;
+
+class Filter extends ExternalAppImageFilter {
 
     protected function shouldApply(Image $image) {
         return $image->getType() == Image::TYPE_PNG;

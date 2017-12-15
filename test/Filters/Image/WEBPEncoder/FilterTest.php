@@ -1,11 +1,12 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\WEBPEncoder;
 
+use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use PHPUnit\Framework\TestCase;
 
-class WEBPEncoderImageFilterTest extends TestCase {
+class FilterTest extends TestCase {
 
     /**
      * @var array
@@ -18,7 +19,7 @@ class WEBPEncoderImageFilterTest extends TestCase {
     private $request;
 
     /**
-     * @var WEBPEncoderImageFilter
+     * @var Filter
      */
     private $filter;
 
@@ -72,7 +73,7 @@ class WEBPEncoderImageFilterTest extends TestCase {
     }
 
     private function getFilter() {
-        return new WEBPEncoderImageFilter($this->config);
+        return new Filter($this->config);
     }
 
 }

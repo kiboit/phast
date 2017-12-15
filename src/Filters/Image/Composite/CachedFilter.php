@@ -1,14 +1,16 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
+use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
-class CachedCompositeImageFilter extends CompositeImageFilter {
+class CachedFilter extends Filter {
 
     /**
      * @var Cache

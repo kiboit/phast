@@ -1,18 +1,19 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Compression;
 
+use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use PHPUnit\Framework\TestCase;
 
-class CompressionImageFilterTest extends TestCase {
+class FilterTest extends TestCase {
 
     public function testCompressionSetting() {
         $compressions = [
             Image::TYPE_JPEG => '80',
             Image::TYPE_PNG  => '9'
         ];
-        $filter = new CompressionImageFilter($compressions);
+        $filter = new Filter($compressions);
         $image = new DummyImage();
 
         $image->setType(Image::TYPE_JPEG);

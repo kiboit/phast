@@ -1,16 +1,18 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
+use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 use SebastianBergmann\GlobalState\RuntimeException;
 
-class CachedCompositeImageFilterTest extends TestCase {
+class CachedFilterTest extends TestCase {
 
     const LAST_MODIFICATION_TIME = 123456789;
 
@@ -33,7 +35,7 @@ class CachedCompositeImageFilterTest extends TestCase {
     private $retriever;
 
     /**
-     * @var CachedCompositeImageFilter
+     * @var CachedFilter
      */
     private $filter;
 
@@ -52,7 +54,7 @@ class CachedCompositeImageFilterTest extends TestCase {
                 $this->assertEquals('the-src', $url->getPath());
                 return is_null($modTime) ? self::LAST_MODIFICATION_TIME : $modTime;
             });
-        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever);
+        $this->filter = new CachedFilter($this->cache, $this->retriever);
     }
 
     public function testCorrectTimeToCache() {
@@ -79,7 +81,7 @@ class CachedCompositeImageFilterTest extends TestCase {
      */
     public function testCorrectHash(array $params) {
         $request = array_merge($this->request, $params);
-        $this->filter = new CachedCompositeImageFilter($this->cache, $this->retriever);
+        $this->filter = new CachedFilter($this->cache, $this->retriever);
         $filters = [
             $this->createMock(ImageFilter::class),
             $this->createMock(ImageFilter::class)

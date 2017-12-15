@@ -1,13 +1,11 @@
 <?php
 
-namespace Kibo\Phast\Factories\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\FileCache;
-use Kibo\Phast\Filters\Image\CachedCompositeImageFilter;
-use Kibo\Phast\Filters\Image\CompositeImageFilter;
 use Kibo\Phast\Retrievers\LocalRetriever;
 
-class CompositeImageFilterFactory {
+class Factory {
 
     /**
      * @var array
@@ -26,12 +24,12 @@ class CompositeImageFilterFactory {
     public function make() {
         if ($this->config['images']['enable-cache']) {
             $retriever = new LocalRetriever($this->config['retrieverMap']);
-            $composite = new CachedCompositeImageFilter(
+            $composite = new CachedFilter(
                 new FileCache($this->config['cache'], 'images'),
                 $retriever
             );
         } else {
-            $composite = new CompositeImageFilter();
+            $composite = new Filter();
         }
         foreach (array_keys($this->config['images']['filters']) as $class) {
             $filter = $this->makeFactory($class)->make($this->config);
@@ -41,7 +39,7 @@ class CompositeImageFilterFactory {
     }
 
     private function makeFactory($filter) {
-        $factory = str_replace('\Filters\\', '\Factories\Filters\\', $filter) . 'Factory';
+        $factory = preg_replace('/Filter$/', 'Factory', $filter);
         return new $factory();
     }
 

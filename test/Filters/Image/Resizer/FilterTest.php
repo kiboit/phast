@@ -1,11 +1,11 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Resizer;
 
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use PHPUnit\Framework\TestCase;
 
-class ResizerImageFilterTest extends TestCase {
+class FilterTest extends TestCase {
 
     public function testNoResizeWithNoHeight() {
         $this->checkResizing('75x50', '75x50', '100');
@@ -69,7 +69,7 @@ class ResizerImageFilterTest extends TestCase {
             $request['height'] = $priorityMaxHeight;
         }
         $image = new DummyImage($imageWidth, $imageHeight);
-        $resizer = new ResizerImageFilter($defaultMaxWidth, $defaultMaxHeight);
+        $resizer = new Filter($defaultMaxWidth, $defaultMaxHeight);
         $actual = $resizer->transformImage($image, $request);
         $this->assertEquals($expectedWidth, $actual->getWidth());
         $this->assertEquals($expectedHeight, $actual->getHeight());

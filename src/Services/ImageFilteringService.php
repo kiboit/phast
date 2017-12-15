@@ -2,8 +2,8 @@
 
 namespace Kibo\Phast\Services;
 
-use Kibo\Phast\Factories\Filters\Image\ImageFactory;
-use Kibo\Phast\Filters\Image\CompositeImageFilter;
+use Kibo\Phast\Filters\Image\ImageFactory;
+use Kibo\Phast\Filters\Image\Composite\Filter;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\Log;
@@ -13,12 +13,12 @@ use Kibo\Phast\ValueObjects\URL;
 class ImageFilteringService extends Service {
 
     /**
-     * @var ImageFactory
+     * @var \Kibo\Phast\Filters\Image\ImageFactory
      */
     private $imageFactory;
 
     /**
-     * @var CompositeImageFilter
+     * @var Filter
      */
     private $filter;
 
@@ -28,13 +28,13 @@ class ImageFilteringService extends Service {
      * @param ServiceSignature $signature
      * @param string[] $whitelist
      * @param ImageFactory $imageFactory
-     * @param CompositeImageFilter $filter
+     * @param \Kibo\Phast\Filters\Image\Composite\Filter $filter
      */
     public function __construct(
         ServiceSignature $signature,
         array $whitelist,
         ImageFactory $imageFactory,
-        CompositeImageFilter $filter
+        Filter $filter
     ) {
         parent::__construct($signature, $whitelist);
         $this->imageFactory = $imageFactory;

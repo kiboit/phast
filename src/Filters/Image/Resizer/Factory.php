@@ -1,16 +1,14 @@
 <?php
 
-namespace Kibo\Phast\Factories\Filters\Image;
+namespace Kibo\Phast\Filters\Image\Resizer;
 
-use Kibo\Phast\Filters\Image\ResizerImageFilter;
-
-class ResizerImageFilterFactory {
+class Factory {
 
     public function make(array $config) {
-        $config = $config['images']['filters'][ResizerImageFilter::class];
+        $config = $config['images']['filters'][Filter::class];
         $defaultMaxWidth = $this->getFromConfig($config, 'defaultMaxWidth');
         $defaultMaxHeight = $this->getFromConfig($config, 'defaultMaxHeight');
-        return new ResizerImageFilter($defaultMaxWidth, $defaultMaxHeight);
+        return new Filter($defaultMaxWidth, $defaultMaxHeight);
     }
 
     private function getFromConfig(array $config, $key) {
