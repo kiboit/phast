@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Logging;
 
-class LogEntry {
+class LogEntry implements \JsonSerializable {
 
     /**
      * @var int
@@ -58,6 +58,10 @@ class LogEntry {
             'message' => $this->message,
             'context' => $this->context
         ];
+    }
+
+    public function jsonSerialize() {
+        return $this->toArray();
     }
 
 

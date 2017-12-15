@@ -3,9 +3,8 @@
 
 namespace Kibo\Phast\Services\Diagnostics;
 
-use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\Diagnostics\SystemDiagnostics;
 use Kibo\Phast\HTTP\Response;
-use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogReaders\JSONLFile\Reader;
 use Kibo\Phast\Services\ServiceRequest;
 
@@ -18,20 +17,25 @@ class Service  {
     }
 
     public function serve(ServiceRequest $request) {
-        $requestId = $request->getDocumentRequestId();
-        if (!$requestId) {
-            throw new ItemNotFoundException('Could not find specified request id');
+        $params = $request->getParams();
+        if (isset ($params['documentRequestId'])) {
+            $items = $this->getRequestLog($params['documentRequestId']);
+        } else {
+            $items = $this->getSystemDiagnostics();
         }
-        $reader = new Reader($this->logRoot, $requestId);
-        $entries = [];
-        /** @var LogEntry $entry */
-        foreach ($reader->readEntries() as $entry) {
-            $entries[] = $entry->toArray();
-        }
+
         $response = new Response();
-        $response->setContent(json_encode($entries));
+        $response->setContent(json_encode($items, JSON_PRETTY_PRINT));
         $response->setHeader('Content-Type', 'application/json');
         return $response;
+    }
+
+    private function getRequestLog($requestId) {
+        return iterator_to_array((new Reader($this->logRoot, $requestId))->readEntries());
+    }
+
+    private function getSystemDiagnostics() {
+        return (new SystemDiagnostics())->run(require PHAST_CONFIG_FILE);
     }
 
 

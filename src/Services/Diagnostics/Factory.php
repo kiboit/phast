@@ -15,9 +15,6 @@ class Factory {
                 break;
             }
         }
-        if (is_null($logRoot)) {
-            throw new \RuntimeException('Could not find logging config');
-        }
         return new Service($logRoot);
     }
 
