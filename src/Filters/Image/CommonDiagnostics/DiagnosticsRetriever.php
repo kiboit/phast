@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Kibo\Phast\Diagnostics;
+namespace Kibo\Phast\Filters\Image\CommonDiagnostics;
 
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;

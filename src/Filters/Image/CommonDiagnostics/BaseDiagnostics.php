@@ -4,7 +4,6 @@
 namespace Kibo\Phast\Filters\Image\CommonDiagnostics;
 
 use Kibo\Phast\Diagnostics\Diagnostics;
-use Kibo\Phast\Diagnostics\DiagnosticsRetriever;
 use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Filters\Image\ImageImplementations\GDImage;
