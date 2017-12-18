@@ -4,6 +4,7 @@
 namespace Kibo\Phast\Diagnostics;
 
 
+use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\Environment\Exceptions\PackageHasNoDiagnosticsException;
 use Kibo\Phast\Environment\Package;
@@ -19,7 +20,7 @@ class SystemDiagnostics {
         $results = [];
         foreach ($this->getExaminedItems($config) as $type => $group) {
             foreach ($group['items'] as $name) {
-                $enabled = in_array($name, $group['runtime']);
+                $enabled = call_user_func($group['enabled'], $name);
                 $package = Package::fromPackageClass($name, $type);
                 try {
                     $diagnostic = $package->getDiagnostics();
@@ -52,11 +53,21 @@ class SystemDiagnostics {
         return [
             'HTMLFilter' => [
                 'items' => array_keys($config['documents']['filters']),
-                'runtime' => array_keys($runtimeConfig['documents']['filters'])
+                'enabled' => function ($filter) use ($runtimeConfig) {
+                    return isset ($runtimeConfig['documents']['filters'][$filter]);
+                }
             ],
             'ImageFilter' => [
                 'items' => array_keys($config['images']['filters']),
-                'runtime' => array_keys($runtimeConfig['images']['filters'])
+                'enabled' => function ($filter) use ($runtimeConfig) {
+                    return isset ($runtimeConfig['images']['filters'][$filter]);
+                }
+            ],
+            'Cache' => [
+                'items' => [Cache::class],
+                'enabled' => function () {
+                    return true;
+                }
             ]
         ];
     }
