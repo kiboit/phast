@@ -1,15 +1,15 @@
 <?php
 
-namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
+namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
-use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Retrievers\LocalRetriever;
+use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\ValueObjects\URL;
 
-class TagsFactory implements HTMLFilterFactory {
+class Factory implements HTMLFilterFactory {
 
-    protected $class = TagsFilter::class;
+    protected $class = Filter::class;
 
     public function make(array $config) {
         $signature = (new ServiceSignatureFactory())->make($config);

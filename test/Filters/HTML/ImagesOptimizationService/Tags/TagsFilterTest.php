@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
+namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
@@ -13,7 +13,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
     const SERVICE_URL = 'http://the-service.org/service.php';
 
     /**
-     * @var TagsFilter
+     * @var Filter
      */
     private $filter;
 
@@ -25,7 +25,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('getLastModificationTime')
             ->willReturn(12345678);
-        $this->filter = new TagsFilter(
+        $this->filter = new Filter(
             $signature,
             $retriever,
             URL::fromString(self::BASE_URL),

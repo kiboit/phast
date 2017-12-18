@@ -3,16 +3,14 @@
 
 namespace Kibo\Phast\Filters\Image\CommonDiagnostics;
 
-
-use Kibo\Phast\Common\FactoryTrait;
 use Kibo\Phast\Diagnostics\Diagnostics;
 use Kibo\Phast\Diagnostics\DiagnosticsRetriever;
+use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Filters\Image\ImageImplementations\GDImage;
 use Kibo\Phast\ValueObjects\URL;
 
 abstract class BaseDiagnostics implements Diagnostics {
-    use FactoryTrait;
 
     protected function getTestFileName() {
         return __DIR__ . '/kibo-logo.png';
@@ -23,7 +21,8 @@ abstract class BaseDiagnostics implements Diagnostics {
     }
 
     public function diagnose(array $config) {
-        $factory = $this->getFactoryClass(get_class($this), 'Diagnostics');
+        $package = Package::fromPackageClass(get_class($this));
+        $factory = $package->getFactory();
         /** @var ImageFilter $filter */
         $filter = (new $factory())->make($config);
         $image = new GDImage(

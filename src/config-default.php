@@ -26,7 +26,7 @@ return [
 
         'filters' => [
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\TagsFilter::class => [
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [
                 'rewriteFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH
             ],
 
@@ -41,7 +41,7 @@ return [
                 ]
             ],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSSFilter::class => [],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSOptimization\Filter::class => [],
 

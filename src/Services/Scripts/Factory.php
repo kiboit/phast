@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Services\Scripts;
 
-use Kibo\Phast\Cache\FileCache;
+use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
@@ -17,7 +17,7 @@ class Factory {
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
         $retriever->addRetriever(
             new CachingRetriever(
-                new FileCache($config['cache'], 'scripts'),
+                new Cache($config['cache'], 'scripts'),
                 new RemoteRetriever(),
                 7200
             )

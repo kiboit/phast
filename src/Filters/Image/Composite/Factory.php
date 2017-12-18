@@ -2,12 +2,11 @@
 
 namespace Kibo\Phast\Filters\Image\Composite;
 
-use Kibo\Phast\Cache\FileCache;
-use Kibo\Phast\Common\FactoryTrait;
+use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Retrievers\LocalRetriever;
 
 class Factory {
-    use FactoryTrait;
 
     /**
      * @var array
@@ -27,22 +26,18 @@ class Factory {
         if ($this->config['images']['enable-cache']) {
             $retriever = new LocalRetriever($this->config['retrieverMap']);
             $composite = new CachedFilter(
-                new FileCache($this->config['cache'], 'images'),
+                new Cache($this->config['cache'], 'images'),
                 $retriever
             );
         } else {
             $composite = new Filter();
         }
         foreach (array_keys($this->config['images']['filters']) as $class) {
-            $filter = $this->makeFactory($class)->make($this->config);
+            $package = Package::fromPackageClass($class);
+            $filter = $package->getFactory()->make($this->config);
             $composite->addImageFilter($filter);
         }
         return $composite;
-    }
-
-    private function makeFactory($filter) {
-        $factory = $this->getFactoryClass($filter, 'Filter');
-        return new $factory();
     }
 
 }

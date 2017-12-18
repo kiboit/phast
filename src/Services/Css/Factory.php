@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Services\Css;
 
-use Kibo\Phast\Cache\FileCache;
+use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
@@ -17,7 +17,7 @@ class Factory {
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
         $retriever->addRetriever(
             new CachingRetriever(
-                new FileCache($config['cache'], 'css'),
+                new Cache($config['cache'], 'css'),
                 new RemoteRetriever(),
                 7200
             )

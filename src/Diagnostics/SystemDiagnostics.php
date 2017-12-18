@@ -5,6 +5,7 @@ namespace Kibo\Phast\Diagnostics;
 
 
 use Kibo\Phast\Environment\Configuration;
+use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Exceptions\ImageProcessingException;
 
 class SystemDiagnostics {
@@ -25,11 +26,8 @@ class SystemDiagnostics {
         $results = [];
         foreach (array_keys($config['images']['filters']) as $filter) {
             $enabled = isset ($runtimeConfig['images']['filters'][$filter]);
-            $diagnosticClass = preg_replace('/Filter$/', 'Diagnostics', $filter);
-            if (!class_exists($diagnosticClass)) {
-                continue;
-            }
-            $diagnostic = $this->makeDiagnostic($diagnosticClass);
+            $package = Package::fromPackageClass($filter);
+            $diagnostic = $package->getDiagnostics();
             try {
                 $diagnostic->diagnose($config);
                 $results[] = new Status($filter, true, '', $enabled);
@@ -51,13 +49,4 @@ class SystemDiagnostics {
         }
         return $results;
     }
-
-    /**
-     * @param string $class
-     * @return Diagnostics
-     */
-    private function makeDiagnostic($class) {
-        return new $class();
-    }
-
 }

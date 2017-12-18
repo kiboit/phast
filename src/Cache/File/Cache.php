@@ -1,11 +1,12 @@
 <?php
 
-namespace Kibo\Phast\Cache;
+namespace Kibo\Phast\Cache\File;
 
+use Kibo\Phast\Cache\Cache as CacheInterface;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Logging\LoggingTrait;
 
-class FileCache implements Cache {
+class Cache implements CacheInterface {
     use LoggingTrait;
 
     /**

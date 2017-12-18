@@ -2,12 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-use Kibo\Phast\Cache\FileCache;
+use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
-use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
+use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\ValueObjects\URL;
 
 class Factory implements HTMLFilterFactory {
@@ -17,7 +17,7 @@ class Factory implements HTMLFilterFactory {
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
         $retriever->addRetriever(
             new CachingRetriever(
-                new FileCache($config['cache'], 'css')
+                new Cache($config['cache'], 'css')
             )
         );
 

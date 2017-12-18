@@ -2,13 +2,12 @@
 
 namespace Kibo\Phast\Security;
 
-use Kibo\Phast\Cache\FileCache;
-use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Cache\File\Cache;
 
 class ServiceSignatureFactory {
 
     public function make(array $config) {
-        $cache = new FileCache($config['cache'], 'signature');
+        $cache = new Cache($config['cache'], 'signature');
         $signature = new ServiceSignature($cache);
         if (isset ($config['securityToken'])) {
             $signature->setIdentities($config['securityToken']);

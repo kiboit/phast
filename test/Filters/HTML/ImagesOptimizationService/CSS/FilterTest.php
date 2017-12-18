@@ -1,16 +1,16 @@
 <?php
 
-namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
+namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
-class CSSFilterTest extends HTMLFilterTestCase {
+class FilterTest extends HTMLFilterTestCase {
 
     /**
-     * @var CSSFilter
+     * @var Filter
      */
     private $filter;
 
@@ -22,7 +22,7 @@ class CSSFilterTest extends HTMLFilterTestCase {
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('getLastModificationTime')->willReturn(false);
 
-        $this->filter = new CSSFilter(
+        $this->filter = new Filter(
             $securityToken,
             $retriever,
             URL::fromString(self::BASE_URL . '/css/'),

@@ -1,10 +1,11 @@
 <?php
 
-namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
+namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter as TagsFilter;
 use Kibo\Phast\ValueObjects\URL;
 
-class CSSFilter extends TagsFilter {
+class Filter extends TagsFilter {
 
     public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
         $styleTags = $document->query('//style');

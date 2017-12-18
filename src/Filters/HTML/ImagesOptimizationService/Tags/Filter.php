@@ -1,15 +1,15 @@
 <?php
 
-namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
+namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
 use Kibo\Phast\Filters\HTML\HTMLFilter;
-use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
-class TagsFilter implements HTMLFilter {
+class Filter implements HTMLFilter {
     use LoggingTrait;
 
     /**

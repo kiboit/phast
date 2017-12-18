@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Cache;
+namespace Kibo\Phast\Cache\File;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use PHPUnit\Framework\TestCase;
@@ -20,7 +20,7 @@ class FileCacheTest extends TestCase {
     private $nameSpace = 'test';
 
     /**
-     * @var FileCache
+     * @var Cache
      */
     private $cache;
 
@@ -271,7 +271,7 @@ class FileCacheTest extends TestCase {
     }
 
     private function rebuildCache() {
-        $this->cache = new FileCache(
+        $this->cache = new Cache(
             $this->config,
             $this->nameSpace,
             $this->functions
