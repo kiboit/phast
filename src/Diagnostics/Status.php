@@ -2,12 +2,14 @@
 
 namespace Kibo\Phast\Diagnostics;
 
+use Kibo\Phast\Environment\Package;
+
 class Status implements \JsonSerializable {
 
     /**
-     * @var string
+     * @var Package
      */
-    private $featureName;
+    private $package;
 
     /**
      * @var bool
@@ -26,23 +28,23 @@ class Status implements \JsonSerializable {
 
     /**
      * Status constructor.
-     * @param string $feature
+     * @param Package $package
      * @param bool $available
      * @param string $reason
      * @param bool $enabled
      */
-    public function __construct($feature, $available, $reason, $enabled) {
-        $this->featureName = $feature;
+    public function __construct(Package $package, $available, $reason, $enabled) {
+        $this->package = $package;
         $this->available = $available;
         $this->reason = $reason;
         $this->enabled = $enabled;
     }
 
     /**
-     * @return string
+     * @return Package
      */
-    public function getFeatureName() {
-        return $this->featureName;
+    public function getPackage() {
+        return $this->package;
     }
 
     /**
@@ -71,7 +73,10 @@ class Status implements \JsonSerializable {
      */
     public function toArray() {
         return [
-            'featureName' => $this->featureName,
+            'package' => [
+                'type' => $this->package->getType(),
+                'name' => $this->package->getNamespace()
+            ],
             'available' => $this->available,
             'reason' => $this->reason,
             'enabled' => $this->enabled

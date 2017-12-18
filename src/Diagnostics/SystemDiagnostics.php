@@ -15,12 +15,7 @@ class SystemDiagnostics {
      * @return Status[]
      */
     public function run(array $config) {
-        if (!isset ($config['images'])) {
-            return [new Status('Filters\Image', false, '"images" section not found in config!', false)];
-        }
-        if (!isset ($config['images']['filters'])) {
-            return [new Status('Filters\Image', false, '"images.filters" section not found in config!', false)];
-        }
+
         $runtimeConfig = (new Configuration($config))->toArray();
 
         $results = [];
@@ -30,12 +25,12 @@ class SystemDiagnostics {
             $diagnostic = $package->getDiagnostics();
             try {
                 $diagnostic->diagnose($config);
-                $results[] = new Status($filter, true, '', $enabled);
+                $results[] = new Status($package, true, '', $enabled);
             } catch (ImageProcessingException $e) {
-                $results[] = new Status($filter, false, $e->getMessage(), $enabled);
+                $results[] = new Status($package, false, $e->getMessage(), $enabled);
             } catch (\Exception $e) {
                 $results[] = new Status(
-                    $filter,
+                    $package,
                     false,
                     sprintf(
                         'Unknown error: Exception: %s, Message: %s, Code: %s',
