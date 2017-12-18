@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-use Kibo\Phast\Exceptions\ImageProcessingException;
+use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Logging\LoggingTrait;
 

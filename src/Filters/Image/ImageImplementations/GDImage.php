@@ -3,8 +3,8 @@
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
-use Kibo\Phast\Exceptions\ImageProcessingException;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;

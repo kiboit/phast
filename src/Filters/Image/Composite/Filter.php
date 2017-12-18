@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\Composite;
 
-use Kibo\Phast\Exceptions\ImageProcessingException;
+use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Logging\LoggingTrait;

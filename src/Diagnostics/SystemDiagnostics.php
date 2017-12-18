@@ -6,7 +6,7 @@ namespace Kibo\Phast\Diagnostics;
 
 use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\Environment\Package;
-use Kibo\Phast\Exceptions\ImageProcessingException;
+use Kibo\Phast\Exceptions\RuntimeException;
 
 class SystemDiagnostics {
 
@@ -26,7 +26,7 @@ class SystemDiagnostics {
             try {
                 $diagnostic->diagnose($config);
                 $results[] = new Status($package, true, '', $enabled);
-            } catch (ImageProcessingException $e) {
+            } catch (RuntimeException $e) {
                 $results[] = new Status($package, false, $e->getMessage(), $enabled);
             } catch (\Exception $e) {
                 $results[] = new Status(
