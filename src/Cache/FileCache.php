@@ -3,8 +3,10 @@
 namespace Kibo\Phast\Cache;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Logging\LoggingTrait;
 
 class FileCache implements Cache {
+    use LoggingTrait;
 
     /**
      * @var string
@@ -86,13 +88,13 @@ class FileCache implements Cache {
             @mkdir($dir, 0700, true);
         }
         if ($this->functions->posix_geteuid() !== $this->functions->fileowner($this->cacheRoot)) {
-            $this->functions->error_log(
-                sprintf(
-                    'Phast: FileCache: Cache root %s owned by %s process user is %s!',
-                    $this->cacheRoot,
-                    fileowner($this->cacheRoot),
-                    posix_geteuid()
-                )
+            $this->logger()->critical(
+                'Phast: FileCache: Cache root {cacheRoot} owned by {fileOwner}, but process user is {userId}!',
+                [
+                    'cacheRoot' => $this->cacheRoot,
+                    'fileOwner' => fileowner($this->cacheRoot),
+                    'userId' => posix_getuid()
+                ]
             );
             return;
         }
@@ -102,13 +104,13 @@ class FileCache implements Cache {
         $serialized = $expirationTime . ' ' . json_encode($contents);
         $result = @$this->functions->file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
-            $this->functions->error_log(
-                sprintf(
-                    'Phast: FileCache: Error writing to file %s. %s of %s bytes written!',
-                    $tmpFile,
-                    (int)$result,
-                    strlen($serialized)
-                )
+            $this->logger()->critical(
+                'Phast: FileCache: Error writing to file {filename}. {written} of {total} bytes written!',
+                [
+                    'filename' => $tmpFile,
+                    'written' => (int)$result,
+                    'total' => strlen($serialized)
+                ]
             );
             return;
         }
@@ -123,7 +125,7 @@ class FileCache implements Cache {
         }
         $contents = @file_get_contents($file);
         if ($contents === false) {
-            $this->functions->error_log("Phast: FileCache: Could not read file $file");
+            $this->logger()->critical("Phast: FileCache: Could not read file {file}", ['file' => $file]);
             return null;
         }
         list ($expirationTime, $data) = explode(" ", $contents, 2);
