@@ -13,18 +13,21 @@ use Kibo\Phast\Exceptions\RuntimeException;
 class SystemDiagnostics {
 
     /**
-     * @param array $config
+     * @param array $userConfigArr
      * @return Status[]
      */
-    public function run(array $config) {
+    public function run(array $userConfigArr) {
         $results = [];
+        $userConfig = new Configuration($userConfigArr);
+        $config = Configuration::fromDefaults()
+            ->withUserConfiguration($userConfig);
         foreach ($this->getExaminedItems($config) as $type => $group) {
             foreach ($group['items'] as $name) {
                 $enabled = call_user_func($group['enabled'], $name);
                 $package = Package::fromPackageClass($name, $type);
                 try {
                     $diagnostic = $package->getDiagnostics();
-                    $diagnostic->diagnose($config);
+                    $diagnostic->diagnose($config->toArray());
                     $results[] = new Status($package, true, '', $enabled);
                 } catch (PackageHasNoDiagnosticsException $e) {
                     $results[] = new Status($package, true, '', $enabled);
@@ -48,17 +51,18 @@ class SystemDiagnostics {
         return $results;
     }
 
-    private function getExaminedItems(array $config) {
-        $runtimeConfig = (new Configuration($config))->toArray();
+    private function getExaminedItems(Configuration $config) {
+        $runtimeConfig = $config->getRuntimeConfig()->toArray();
+        $configArr = $config->toArray();
         return [
             'HTMLFilter' => [
-                'items' => array_keys($config['documents']['filters']),
+                'items' => array_keys($configArr['documents']['filters']),
                 'enabled' => function ($filter) use ($runtimeConfig) {
                     return isset ($runtimeConfig['documents']['filters'][$filter]);
                 }
             ],
             'ImageFilter' => [
-                'items' => array_keys($config['images']['filters']),
+                'items' => array_keys($configArr['images']['filters']),
                 'enabled' => function ($filter) use ($runtimeConfig) {
                     return isset ($runtimeConfig['images']['filters'][$filter]);
                 }
