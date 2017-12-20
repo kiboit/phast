@@ -126,7 +126,7 @@ class Filter {
         $log = "Page automatically optimized by Phast\n\n";
         arsort($timings);
         foreach ($timings as $cls => $time) {
-            $cls = preg_replace('~^.*\\\\~', '', $cls);
+            $cls = str_replace('Kibo\Phast\Filters\HTML\\', '', $cls);
             $log .= sprintf("      % -43s % 4dms\n", $cls, $time*1000);
             $time_accounted += $time;
         }
