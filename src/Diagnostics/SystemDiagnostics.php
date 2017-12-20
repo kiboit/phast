@@ -19,8 +19,7 @@ class SystemDiagnostics {
     public function run(array $userConfigArr) {
         $results = [];
         $userConfig = new Configuration($userConfigArr);
-        $config = Configuration::fromDefaults()
-            ->withUserConfiguration($userConfig);
+        $config = Configuration::fromDefaults()->withUserConfiguration($userConfig);
         foreach ($this->getExaminedItems($config) as $type => $group) {
             foreach ($group['items'] as $name) {
                 $enabled = call_user_func($group['enabled'], $name);
