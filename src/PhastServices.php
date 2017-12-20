@@ -32,9 +32,11 @@ class PhastServices {
         }
 
         try {
+            $userConfig = new Configuration($getConfig());
             $runtimeConfig = Configuration::fromDefaults()
-                ->withUserConfiguration(new Configuration($getConfig()))
+                ->withUserConfiguration($userConfig)
                 ->withServiceRequest($serviceRequest)
+                ->getRuntimeConfig()
                 ->toArray();
             Log::init($runtimeConfig['logging'], $serviceRequest, $service);
             Log::info('Starting service');

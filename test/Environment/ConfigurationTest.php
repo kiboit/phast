@@ -44,6 +44,13 @@ class ConfigurationTest extends TestCase {
         ]
     ];
 
+    public function testToArray() {
+        $config = $this->configTemplate;
+        $config['images']['filters']['filter2']['enabled'] = 'diagnostics';
+        $actual = (new Configuration($config))->toArray();
+        $this->assertEquals($config, $actual);
+    }
+
     public function testMergingDefaultConfigWithUserConfig() {
         $userConfig = [
             'documents' => [
@@ -88,7 +95,7 @@ class ConfigurationTest extends TestCase {
         $config['images']['filters']['filter3']['enabled'] = false;
         $config['logging']['logWriters']['writer1']['enabled'] = false;
 
-        $actual = (new Configuration($config))->toArray();
+        $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
         unset ($config['documents']['filters']['filter2']);
         unset ($config['images']['filters']['filter1']);
         unset ($config['images']['filters']['filter3']);
@@ -108,7 +115,7 @@ class ConfigurationTest extends TestCase {
         $config['switches']['s1'] = false;
         $config['switches']['s2'] = true;
 
-        $actual = (new Configuration($config))->toArray();
+        $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
         unset ($config['documents']['filters']['filter1']);
         unset ($config['images']['filters']['filter3']);
         unset ($config['logging']['logWriters']['writer1']);
@@ -127,7 +134,10 @@ class ConfigurationTest extends TestCase {
         $request->method('getSwitches')
             ->willReturn(Switches::fromArray(['m1' => false, 'm2' => true, 'r' => false]));
 
-        $actual = (new Configuration($config))->withServiceRequest($request)->toArray();
+        $actual = (new Configuration($config))
+            ->withServiceRequest($request)
+            ->getRuntimeConfig()
+            ->toArray();
         unset ($config['documents']['filters']['filter1']);
         unset ($config['documents']['filters']['filter2']);
         unset ($config['images']['filters']['filter1']);
@@ -143,7 +153,7 @@ class ConfigurationTest extends TestCase {
     public function testDefaultPhastSwitch() {
         $config = $this->configTemplate;
         unset ($config['switches']);
-        $actual = (new Configuration($config))->toArray();
+        $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
         $this->assertArrayHasKey('switches', $actual);
         $this->assertArrayHasKey('phast', $actual['switches']);
         $this->assertTrue($actual['switches']['phast']);
@@ -160,11 +170,11 @@ class ConfigurationTest extends TestCase {
 
         $config['images']['enable-cache'] = 's1';
         $config['switches']['s1'] = false;
-        $actual = (new Configuration($config))->toArray();
+        $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
         $this->assertFalse($actual['images']['enable-cache']);
 
         $config['switches']['s1'] = true;
-        $actual = (new Configuration($config))->toArray();
+        $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
         $this->assertTrue($actual['images']['enable-cache']);
     }
 }

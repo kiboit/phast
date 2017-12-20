@@ -15,6 +15,7 @@ class PhastDocumentFilters {
         $runtimeConfig = Configuration::fromDefaults()
             ->withUserConfiguration(new Configuration($userConfig))
             ->withServiceRequest($request)
+            ->getRuntimeConfig()
             ->toArray();
         Log::init($runtimeConfig['logging'], $request, 'dom-filters');
         if (!$runtimeConfig['switches']['phast']) {

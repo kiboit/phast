@@ -52,8 +52,7 @@ class Configuration {
         return $clone;
     }
 
-
-    public function toArray() {
+    public function getRuntimeConfig() {
         $config = $this->sourceConfig;
         $switchables = [
             &$config['documents']['filters'],
@@ -75,7 +74,11 @@ class Configuration {
             $config['images']['enable-cache'] = $this->switches->isOn($config['images']['enable-cache']);
         }
         $config['switches'] = $this->switches->toArray();
-        return $config;
+        return new Configuration($config);
+    }
+
+    public function toArray() {
+        return $this->sourceConfig;
     }
 
     private function recursiveMerge(array $a1, array $a2) {
