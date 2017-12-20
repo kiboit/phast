@@ -19,9 +19,10 @@ if (isset ($serviceParams['src']) && !headers_sent())  {
     header('Location: ' . $serviceParams['src']);
 }
 
-$config = require_once PHAST_CONFIG_FILE;
+$userConfig = require_once PHAST_CONFIG_FILE;
 try {
-    $runtimeConfig = (new \Kibo\Phast\Environment\Configuration($config))
+    $runtimeConfig = \Kibo\Phast\Environment\Configuration::fromDefaults()
+        ->withUserConfiguration(new \Kibo\Phast\Environment\Configuration($userConfig))
         ->withServiceRequest($serviceRequest)
         ->toArray();
     \Kibo\Phast\Logging\Log::init($runtimeConfig['logging'], $serviceRequest, $service);

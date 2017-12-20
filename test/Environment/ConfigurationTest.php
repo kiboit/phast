@@ -21,7 +21,10 @@ class ConfigurationTest extends TestCase {
             'enable-cache' => true,
 
             'filters' => [
-                'filter1' => [],
+                'filter1' => [
+                    'item1',
+                    'item2'
+                ],
                 'filter2' => [],
                 'filter3' => []
             ]
@@ -40,6 +43,42 @@ class ConfigurationTest extends TestCase {
             'diagnostics' => false
         ]
     ];
+
+    public function testMergingDefaultConfigWithUserConfig() {
+        $userConfig = [
+            'documents' => [
+                'filters' => [
+                    'filter1' => [
+                        'setting' => 'value'
+                    ]
+                ]
+            ],
+            'images' => [
+                'enable-cache' => false,
+                'filters' => [
+                    'filter1' => [
+                        'item3'
+                    ]
+                ]
+            ],
+            'switches' => [
+                'diagnostics' => true,
+                'aux' => true
+            ]
+        ];
+        $expected = $this->configTemplate;
+        $expected['documents']['filters']['filter1']['setting'] = 'value';
+        $expected['images']['filters']['filter1'][] = 'item3';
+        $expected['images']['enable-cache'] = false;
+        $expected['switches']['diagnostics'] = true;
+        $expected['switches']['aux'] = true;
+
+        $default = new Configuration($this->configTemplate);
+        $user = new Configuration($userConfig);
+        $actual = $default->withUserConfiguration($user)->toArray();
+
+        $this->assertEquals($expected, $actual);
+    }
 
     public function testRemovingDisabledItems() {
         $config = $this->configTemplate;
@@ -127,7 +166,5 @@ class ConfigurationTest extends TestCase {
         $config['switches']['s1'] = true;
         $actual = (new Configuration($config))->toArray();
         $this->assertTrue($actual['images']['enable-cache']);
-
-
     }
 }

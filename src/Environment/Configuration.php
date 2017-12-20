@@ -16,6 +16,14 @@ class Configuration {
      */
     private $switches;
 
+
+    /**
+     * @return Configuration
+     */
+    public static function fromDefaults() {
+        return new self(require __DIR__ . '/config-default.php');
+    }
+
     /**
      * Configuration constructor.
      * @param array $sourceConfig
@@ -27,6 +35,15 @@ class Configuration {
         } else {
             $this->switches = Switches::fromArray($this->sourceConfig['switches']);
         }
+    }
+
+    /**
+     * @param Configuration $config
+     * @return $this
+     */
+    public function withUserConfiguration(Configuration $config) {
+        $result = $this->recursiveMerge($this->sourceConfig, $config->sourceConfig);
+        return new self($result);
     }
 
     public function withServiceRequest(ServiceRequest $request) {
@@ -59,6 +76,19 @@ class Configuration {
         }
         $config['switches'] = $this->switches->toArray();
         return $config;
+    }
+
+    private function recursiveMerge(array $a1, array $a2) {
+        foreach ($a2 as $key => $value) {
+            if (isset ($a1[$key]) && is_array($a1[$key]) && is_array($value)) {
+                $a1[$key] = $this->recursiveMerge($a1[$key], $value);
+            } else if (is_string($key)) {
+                $a1[$key] = $value;
+            } else {
+                $a1[] = $value;
+            }
+        }
+        return $a1;
     }
 
 }
