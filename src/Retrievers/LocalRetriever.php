@@ -32,7 +32,14 @@ class LocalRetriever implements Retriever {
         }
     }
 
+    public static function getAllowedExtensions() {
+        return ['css', 'js', 'bmp', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'ico', 'svg', 'txt'];
+    }
+
     public function retrieve(URL $url) {
+        if (!in_array($this->getExtensionForURL($url), self::getAllowedExtensions())) {
+            return false;
+        }
         $file = $this->getFileForURL($url);
         if ($file === false) {
             return false;
@@ -46,6 +53,14 @@ class LocalRetriever implements Retriever {
             return false;
         }
         return @$this->funcs->filemtime($file);
+    }
+
+    private function getExtensionForURL(URL $url) {
+        $dotPosition = strrpos($url->getPath(), '.');
+        if ($dotPosition === false) {
+            return '';
+        }
+        return strtolower(substr($url->getPath(), $dotPosition + 1));
     }
 
     private function getFileForURL(URL $url) {

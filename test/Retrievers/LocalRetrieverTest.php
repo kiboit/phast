@@ -35,9 +35,9 @@ class LocalRetrieverTest extends TestCase {
     }
 
     public function testMapping() {
-        $this->assertEquals('returned', $this->retriever->retrieve(URL::fromString('http://kibo.test/local.file')));
-        $this->assertEquals('local-test/local.file', $this->retrievedFile);
-        $this->assertFalse($this->retriever->retrieve(URL::fromString('http://test.com/make.me')));
+        $this->assertEquals('returned', $this->retriever->retrieve(URL::fromString('http://kibo.test/local.css')));
+        $this->assertEquals('local-test/local.css', $this->retrievedFile);
+        $this->assertFalse($this->retriever->retrieve(URL::fromString('http://test.com/make.css')));
     }
 
     public function testDirectoryPrefixing() {
@@ -51,23 +51,53 @@ class LocalRetrieverTest extends TestCase {
         $retriever = new LocalRetriever($map, $this->funcs);
 
         $this->retrievedFile = null;
-        $retriever->retrieve(URL::fromString('http://kibo.test/dir1/dir1-file'));
-        $this->assertEquals('/the-dir-1/dir1-file', $this->retrievedFile);
+        $retriever->retrieve(URL::fromString('http://kibo.test/dir1/dir1-file.css'));
+        $this->assertEquals('/the-dir-1/dir1-file.css', $this->retrievedFile);
 
         $this->retrievedFile = null;
-        $retriever->retrieve(URL::fromString('http://kibo.test/dir2/dir2-file'));
-        $this->assertEquals('/the-dir-2/dir2-file', $this->retrievedFile);
+        $retriever->retrieve(URL::fromString('http://kibo.test/dir2/dir2-file.css'));
+        $this->assertEquals('/the-dir-2/dir2-file.css', $this->retrievedFile);
 
         $this->retrievedFile = null;
-        $retriever->retrieve(URL::fromString('http://kibo.test/dir1/subdir/subdir-file'));
-        $this->assertEquals('/the-sub-dir/subdir-file', $this->retrievedFile);
+        $retriever->retrieve(URL::fromString('http://kibo.test/dir1/subdir/subdir-file.css'));
+        $this->assertEquals('/the-sub-dir/subdir-file.css', $this->retrievedFile);
     }
 
-    public function testForbiddenPaths() {
+    public function testNotGettingForbiddenPaths() {
         $this->funcs->file_get_contents = function ($file) {
             $this->fail("file_get_contents() must not be called! File: $file");
         };
         $this->assertFalse($this->retriever->retrieve(URL::fromString('http://kibo.test/../forbidden')));
+    }
+
+
+    public function testNotGettingNotAllowed() {
+        $this->funcs->file_get_contents = function () {
+            $this->fail('file_get_content() must not be called');
+        };
+        $this->retriever->retrieve(URL::fromString('http://kibo.test/local.php'));
+    }
+
+    /**
+     * @dataProvider gettingAllowedExtensionsData
+     */
+    public function testGettingOnlyAllowedExtensions($extension) {
+        $this->funcs->file_get_contents = function ($file) {
+            return $file;
+        };
+        $file = 'file.' . $extension;
+        $actual = $this->retriever->retrieve(URL::fromString("http://kibo.test/$file"));
+        $this->assertEquals("local-test/$file", $actual);
+    }
+
+    public function gettingAllowedExtensionsData() {
+        $extensions = LocalRetriever::getAllowedExtensions();
+        $upper = array_map('strtoupper', $extensions);
+        $dataSet = [];
+        foreach (array_merge($extensions, $upper) as $ext) {
+            $dataSet[] = [$ext];
+        }
+        return $dataSet;
     }
 
     public function testGetLastModificationTime() {
