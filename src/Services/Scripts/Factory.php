@@ -26,7 +26,8 @@ class Factory {
             (new ServiceSignatureFactory())->make($config),
             $config['documents']['filters'][Filter::class]['match'],
             $retriever,
-            $config['scripts']['removeLicenseHeaders']
+            $config['scripts']['removeLicenseHeaders'],
+            new Cache($config['cache'], 'scripts-minified')
         );
     }
 

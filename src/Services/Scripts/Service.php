@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services\Scripts;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\JSMinifier;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -14,9 +15,21 @@ class Service extends ProxyBaseService {
      */
     private $removeLicenseHeaders = true;
 
-    public function __construct(ServiceSignature $signature, $whitelist, Retriever $retriever, $removeLicenseHeaders) {
+    /**
+     * @var Cache
+     */
+    private $cache;
+
+    public function __construct(
+        ServiceSignature $signature,
+        $whitelist,
+        Retriever $retriever,
+        $removeLicenseHeaders,
+        Cache $cache
+    ) {
         parent::__construct($signature, $whitelist, $retriever);
         $this->removeLicenseHeaders = $removeLicenseHeaders;
+        $this->cache = $cache;
     }
 
     protected function handle(array $request) {
@@ -27,7 +40,10 @@ class Service extends ProxyBaseService {
 
     protected function doRequest(array $request) {
         $result = parent::doRequest($request);
-        return (new JSMinifier($result, $this->removeLicenseHeaders))->min();
+        $cacheKey = md5($result);
+        return $this->cache->get($cacheKey, function () use ($result) {
+            return (new JSMinifier($result, $this->removeLicenseHeaders))->min();
+        });
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services\Scripts;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
@@ -26,6 +27,11 @@ class ServiceTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->retriever = $this->createMock(Retriever::class);
+        $cache = $this->createMock(Cache::class);
+        $cache->method('get')
+            ->willReturnCallback(function ($key, callable $cb){
+                return $cb();
+            });
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('verify')
             ->willReturnCallback(function ($token) {
@@ -35,7 +41,8 @@ class ServiceTest extends TestCase {
             $signature,
             ['~http://allowed\.com~'],
             $this->retriever,
-            false
+            false,
+            $cache
         );
     }
 
