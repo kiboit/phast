@@ -103,6 +103,20 @@ class CompositeHTMLFilterTest extends TestCase {
         $this->assertEquals($buffer, $filtered);
     }
 
+    public function testShouldNotApplyToAmpWithAsciiDeclaration() {
+        $this->shouldNotTransform();
+        $buffer = '<!doctype html><html amp><body></body></html>';
+        $filtered = $this->filter->apply($buffer);
+        $this->assertEquals($buffer, $filtered);
+    }
+
+    public function testShouldNotApplyToAmpWithUnicodeDeclaration() {
+        $this->shouldNotTransform();
+        $buffer = '<!doctype html><html ⚡><body></body></html>';
+        $filtered = $this->filter->apply($buffer);
+        $this->assertEquals($buffer, $filtered);
+    }
+
     public function testShouldOutputUTF8WithDeclaration() {
         $this->shouldTransform();
         $buffer = '<html><head><meta charset=utf8></head><body>ü</body></html>';
