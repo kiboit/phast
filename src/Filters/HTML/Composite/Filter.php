@@ -53,7 +53,7 @@ class Filter {
             ^
             \s* (<\?xml.*>)?
             \s* (<!doctype\s+html.*>)?
-            \s* <html
+            \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
             .*
             ( </body> | </html> )
         ~isx';
