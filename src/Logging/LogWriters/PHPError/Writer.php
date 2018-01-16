@@ -60,13 +60,9 @@ class Writer extends BaseLogWriter {
                 $prefix .= '{' . $key . "}\t";
             }
         }
-        $search = [];
-        $replace = [];
-        foreach ($context as $key => $value) {
-            $search[] = '{' . $key . '}';
-            $replace[] = $value;
-        }
-        return str_replace($search, $replace, $prefix . $message);
+        return preg_replace_callback('/{(.+?)}/', function ($match) use ($context) {
+            return array_key_exists($match[1], $context) ? $context[$match[1]] : $match[0];
+        }, $prefix . $message);
     }
 
 

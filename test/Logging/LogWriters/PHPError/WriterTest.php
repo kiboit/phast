@@ -33,9 +33,9 @@ class WriterTest extends TestCase {
         };
         $writer = new Writer([], $functions);
 
-        $message = 'The message with {param} here';
-        $writer->writeEntry(new LogEntry(LogLevel::DEBUG, $message, ['param' => 'value']));
-        $this->assertEquals('The message with value here', $actualMessage);
+        $message = 'The message with {param} here {nothing}';
+        $writer->writeEntry(new LogEntry(LogLevel::DEBUG, $message, ['param' => 'value {test}', 'test' => 'nope']));
+        $this->assertEquals('The message with value {test} here {nothing}', $actualMessage);
 
 
         $context = [
@@ -49,7 +49,7 @@ class WriterTest extends TestCase {
         ];
         $writer->writeEntry(new LogEntry(LogLevel::DEBUG, $message, $context));
         $this->assertEquals(
-            "ID\tthe-service\tthe-class\tthe-method\t20\tThe message with v2 here",
+            "ID\tthe-service\tthe-class\tthe-method\t20\tThe message with v2 here {nothing}",
             $actualMessage
         );
 
