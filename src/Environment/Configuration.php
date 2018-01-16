@@ -16,6 +16,14 @@ class Configuration {
      */
     private $switches;
 
+
+    /**
+     * @return Configuration
+     */
+    public static function fromDefaults() {
+        return new self(require __DIR__ . '/config-default.php');
+    }
+
     /**
      * Configuration constructor.
      * @param array $sourceConfig
@@ -29,14 +37,22 @@ class Configuration {
         }
     }
 
+    /**
+     * @param Configuration $config
+     * @return $this
+     */
+    public function withUserConfiguration(Configuration $config) {
+        $result = $this->recursiveMerge($this->sourceConfig, $config->sourceConfig);
+        return new self($result);
+    }
+
     public function withServiceRequest(ServiceRequest $request) {
         $clone = clone $this;
         $clone->switches = $this->switches->merge($request->getSwitches());
         return $clone;
     }
 
-
-    public function toArray() {
+    public function getRuntimeConfig() {
         $config = $this->sourceConfig;
         $switchables = [
             &$config['documents']['filters'],
@@ -58,7 +74,24 @@ class Configuration {
             $config['images']['enable-cache'] = $this->switches->isOn($config['images']['enable-cache']);
         }
         $config['switches'] = $this->switches->toArray();
-        return $config;
+        return new Configuration($config);
+    }
+
+    public function toArray() {
+        return $this->sourceConfig;
+    }
+
+    private function recursiveMerge(array $a1, array $a2) {
+        foreach ($a2 as $key => $value) {
+            if (isset ($a1[$key]) && is_array($a1[$key]) && is_array($value)) {
+                $a1[$key] = $this->recursiveMerge($a1[$key], $value);
+            } else if (is_string($key)) {
+                $a1[$key] = $value;
+            } else {
+                $a1[] = $value;
+            }
+        }
+        return $a1;
     }
 
 }

@@ -62,14 +62,14 @@ class ServiceSignature {
     private function getIdentities() {
         if (!isset ($this->identities)) {
             $token = $this->cache->get('security-token', function () {
-                return $this->generateToken();
+                return self::generateToken();
             });
             $this->identities = ['' => $token];
         }
         return $this->identities;
     }
 
-    private function generateToken() {
+    public static function generateToken() {
         $token = '';
         for ($i = 0; $i < self::AUTO_TOKEN_SIZE; $i++) {
             $token .= chr(mt_rand(33, 126));

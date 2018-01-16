@@ -2,13 +2,23 @@
 
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
-use Kibo\Phast\Exceptions\ImageException;
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class GDImage extends BaseImage implements Image {
+
+    /**
+     * @var array
+     */
+    private static $outputCallbacks = [
+        Image::TYPE_JPEG => 'imagejpeg',
+        Image::TYPE_PNG  => 'imagepng',
+        Image::TYPE_WEBP => 'imagewebp'
+    ];
 
     /**
      * @var URL
@@ -36,14 +46,25 @@ class GDImage extends BaseImage implements Image {
     private $imageInfo;
 
     /**
+     * @var resource
+     */
+    private $gdImage;
+
+    /**
+     * @var ObjectifiedFunctions
+     */
+    private $funcs;
+
+    /**
      * GDImage constructor.
      *
      * @param URL $imageURL
      * @param Retriever $retriever
      */
-    public function __construct(URL $imageURL, Retriever $retriever) {
+    public function __construct(URL $imageURL, Retriever $retriever, ObjectifiedFunctions $funcs = null) {
         $this->imageURL = $imageURL;
         $this->retriever = $retriever;
+        $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
 
     public function getWidth() {
@@ -60,69 +81,59 @@ class GDImage extends BaseImage implements Image {
         }
         $type = @image_type_to_mime_type($this->getImageInfo()[2]);
         if (!$type) {
-            throw new ImageException('Could not determine image type');
+            throw new ImageProcessingException('Could not determine image type');
         }
         return $type;
     }
 
     private function process() {
         try {
-            $gdImage = @imagecreatefromstring($this->getImageString());
-            if ($gdImage === false) {
-                throw new ImageException('Could not load GD image');
-            }
             if (isset ($this->width) && isset ($this->height)) {
                 $gdCopy = @imagecreatetruecolor($this->width, $this->height);
                 if (!$gdCopy) {
-                    throw new ImageException('Failed to create new GD image for resizing');
+                    throw new ImageProcessingException('Failed to create new GD image for resizing');
                 }
                 @imagealphablending($gdCopy, false);
-                if (!@imagecopyresampled($gdCopy, $gdImage, 0, 0, 0, 0,
+                if (!@imagecopyresampled($gdCopy, $this->gdImage, 0, 0, 0, 0,
                                          $this->width, $this->height,
-                                         imagesx($gdImage), imagesy($gdImage))
+                                         imagesx($this->gdImage), imagesy($this->gdImage))
                 ) {
-                    throw new ImageException('Failed to resample GD image');
+                    throw new ImageProcessingException('Failed to resample GD image');
                 }
-                @imagedestroy($gdImage);
-                $gdImage = $gdCopy;
+                @imagedestroy($this->gdImage);
+                $this->gdImage = $gdCopy;
             }
-            @imagesavealpha($gdImage, true);
-            $imageType = $this->getType();
-            if ($imageType == Image::TYPE_JPEG) {
-                $callback = 'imagejpeg';
-            } else if ($imageType == Image::TYPE_WEBP) {
-                $callback = 'imagewebp';
-            } else {
-                $callback = 'imagepng';
-            }
+            @imagesavealpha($this->gdImage, true);
+            $callback = self::getOutputCallbackForType($this->getType());
             $tmpFile = @tempnam(sys_get_temp_dir(), 'Phast');
             if (!$tmpFile) {
-                throw new ImageException('Could not create temporary file');
+                throw new ImageProcessingException('Could not create temporary file');
             }
             $tmpFh = @fopen($tmpFile, 'w');
             if (!$tmpFh) {
-                throw new ImageException('Could not open temporary file');
+                throw new ImageProcessingException('Could not open temporary file');
             }
             if (isset ($this->compression)) {
-                $ok = $callback($gdImage, $tmpFh, $this->compression);
+                $ok = $callback($this->gdImage, $tmpFh, $this->compression);
             } else {
-                $ok = $callback($gdImage, $tmpFh);
+                $ok = $callback($this->gdImage, $tmpFh);
             }
             if (!$ok) {
-                throw new ImageException('Could not write image to temporary file');
+                throw new ImageProcessingException('Could not write image to temporary file');
             }
             $string = file_get_contents($tmpFile);
             if ($string === false) {
-                throw new ImageException('Could not read image from temporary file');
+                throw new ImageProcessingException('Could not read image from temporary file');
             }
             if ($callback == 'imagewebp' && strlen($string) % 2 == 1) {
                 $string .= "\0";
             }
             return $string;
         } finally {
-            if (isset ($gdImage) && $gdImage) {
-                @imagedestroy($gdImage);
+            if (isset ($this->gdImage) && $this->gdImage) {
+                @imagedestroy($this->gdImage);
             }
+            unset ($this->gdImage);
             if (isset ($tmpFh) && $tmpFh) {
                 @fclose($tmpFh);
             }
@@ -144,7 +155,7 @@ class GDImage extends BaseImage implements Image {
         if (!isset ($this->imageInfo)) {
             $this->imageInfo = @getimagesizefromstring($this->getImageString());
             if ($this->imageInfo === false) {
-                throw new ImageException('Could not read GD image info');
+                throw new ImageProcessingException('Could not read GD image info');
             }
         }
         return $this->imageInfo;
@@ -158,6 +169,47 @@ class GDImage extends BaseImage implements Image {
             }
         }
         return $this->imageString;
+    }
+
+    public function resize($width, $height) {
+        $this->loadGDImage();
+        return parent::resize($width, $height);
+    }
+
+    public function compress($compression) {
+        $this->loadGDImage();
+        return parent::compress($compression);
+    }
+
+    public function encodeTo($type) {
+        $callback = self::getOutputCallbackForType($type);
+        $this->validateFunctionExists($callback);
+        $this->loadGDImage();
+        return parent::encodeTo($type);
+    }
+
+    private function loadGDImage() {
+        $this->validateFunctionExists('imagecreatefromstring');
+        if (isset ($this->gdImage) && @getimagesize($this->gdImage)) {
+            return;
+        }
+        $gdImage = @imagecreatefromstring($this->getImageString());
+        if ($gdImage === false) {
+            throw new ImageProcessingException('Could not load GD image');
+        }
+        $this->gdImage = $gdImage;
+    }
+
+    private static function getOutputCallbackForType($type) {
+        return isset (self::$outputCallbacks[$type])
+               ? self::$outputCallbacks[$type]
+               : self::$outputCallbacks[self::TYPE_PNG];
+    }
+
+    private function validateFunctionExists($function) {
+        if (!$this->funcs->function_exists($function)) {
+            throw new ImageProcessingException("Function $function() is missing!");
+        }
     }
 
     protected function __clone() {

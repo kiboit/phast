@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image;
 
+use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
 use Kibo\Phast\Logging\LoggingTrait;
 
@@ -39,13 +40,17 @@ abstract class ExternalAppImageFilter implements ImageFilter {
             return $image;
         }
 
+        if (!file_exists($this->config['cmdpath'])) {
+            throw new ImageProcessingException("Executable not found: " . $this->config['cmdpath']);
+        }
         $command = $this->getCommand();
+
         $this->logger()->info('Applying {command}', ['command' => $command]);
 
-        $proc = proc_open($this->getCommand(), [['pipe', 'r'], ['pipe', 'w']], $pipes);
+        $proc = proc_open($command, [['pipe', 'r'], ['pipe', 'w']], $pipes);
 
         if (!is_resource($proc)) {
-            return $image;
+            throw new ImageProcessingException("Could open process for $command");
         }
 
         fwrite($pipes[0], $image->getAsString());
@@ -57,11 +62,15 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         $status = proc_close($proc);
 
         if ($status != 0) {
-            throw new \RuntimeException("External image processing command failed with status {$status}: {$command}");
+            throw new ImageProcessingException(
+                "External image processing command failed with status {$status}: {$command}"
+            );
         }
 
         if ($compressed == '') {
-            throw new \RuntimeException("External image processing command did not output anything: {$command}");
+            throw new ImageProcessingException(
+                "External image processing command did not output anything: {$command}"
+            );
         }
 
         $newImage = new DummyImage();
