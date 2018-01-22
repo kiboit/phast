@@ -34,6 +34,7 @@ class Optimizer {
         );
 
         if ($css === null) {
+            // This is an error condition
             return;
         }
 
