@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
@@ -69,7 +70,7 @@ class Filter implements HTMLFilter {
                                     : ServiceRequest::FORMAT_QUERY;
     }
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         /** @var \DOMElement $img */
         foreach ($document->query('//img') as $img) {
             $this->rewriteSrc($img);

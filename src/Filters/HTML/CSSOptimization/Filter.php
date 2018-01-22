@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSOptimization;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 
@@ -30,7 +31,7 @@ class Filter implements HTMLFilter {
 })();
 EOS;
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         $body = $this->getBodyElement($document);
         $styles = iterator_to_array($document->query('//style'));
 
@@ -69,7 +70,7 @@ EOS;
         }
     }
 
-    private function getUsedSelectorPattern(\Kibo\Phast\Common\DOMDocument $document) {
+    private function getUsedSelectorPattern(DOMDocument $document) {
         $classes = $this->getUsedClasses($document);
 
         $re_class = $classes ? '(?!' . implode('|', $classes) . ')' : '';
@@ -78,7 +79,7 @@ EOS;
         return $re_selector;
     }
 
-    private function getUsedClasses(\Kibo\Phast\Common\DOMDocument $document) {
+    private function getUsedClasses(DOMDocument $document) {
         $classes = [];
 
         foreach ($document->query('//@class') as $class) {

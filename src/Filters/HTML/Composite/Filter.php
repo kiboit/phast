@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -90,7 +91,7 @@ class Filter {
         $fixedBuffer = $this->escapeCloseTagInScript($fixedBuffer);
 
         $xmlErrors = libxml_use_internal_errors(true);
-        $doc = new \Kibo\Phast\Common\DOMDocument();
+        $doc = new DOMDocument();
         $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
 
         $timings = [];
@@ -113,7 +114,7 @@ class Filter {
         // This gets us UTF-8 instead of entities
         $output = '<!doctype html>';
         foreach ($doc->childNodes as $node) {
-            if (!$node instanceof \Kibo\Phast\Common\DOMDocumentType
+            if (!$node instanceof DOMDocumentType
                 && !$node instanceof \DOMProcessingInstruction
             ) {
                 $output .= $doc->saveHTML($node);

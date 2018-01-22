@@ -2,12 +2,13 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter as TagsFilter;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter extends TagsFilter {
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         $styleTags = $document->query('//style');
         /** @var \DOMElement $styleTag */
         foreach ($styleTags as $styleTag) {

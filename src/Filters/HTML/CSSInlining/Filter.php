@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -119,7 +120,7 @@ EOJS;
         }
     }
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         $links = iterator_to_array($document->query('//link'));
         $styles = iterator_to_array($document->query('//style'));
         foreach ($links as $link) {
@@ -176,7 +177,7 @@ EOJS;
     }
 
     /**
-     * @param \Kibo\Phast\Common\DOMDocument $document
+     * @param DOMDocument $document
      * @param URL $url
      * @param string $media
      * @param boolean $ieCompatible
@@ -184,7 +185,7 @@ EOJS;
      * @param string[] $seen
      * @return \DOMElement[]
      */
-    private function inlineURL(\Kibo\Phast\Common\DOMDocument $document, URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
+    private function inlineURL(DOMDocument $document, URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
         $whitelistEntry = $this->findInWhitelist($url);
 
         if (!$whitelistEntry) {
@@ -221,7 +222,7 @@ EOJS;
         return $elements;
     }
 
-    private function inlineCSS(\Kibo\Phast\Common\DOMDocument $document, URL $url, $content, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
+    private function inlineCSS(DOMDocument $document, URL $url, $content, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
         $content = $this->minify($content);
 
         $urlMatches = $this->getImportedURLs($content);
@@ -239,7 +240,7 @@ EOJS;
         return $elements;
     }
 
-    private function makeServiceLink(\Kibo\Phast\Common\DOMDocument $document, URL $location, $media) {
+    private function makeServiceLink(DOMDocument $document, URL $location, $media) {
         $params = [
             'src' => (string) $location,
             'cacheMarker' => floor(time() / $this->urlRefreshTime)
@@ -267,7 +268,7 @@ EOJS;
         return $elements;
     }
 
-    private function addIEFallbackScript(\Kibo\Phast\Common\DOMDocument $document) {
+    private function addIEFallbackScript(DOMDocument $document) {
         $this->logger()->info('Adding IE fallback script');
         $this->withIEFallback = false;
         $script = $document->createElement('script');
@@ -294,7 +295,7 @@ EOJS;
         return $matches;
     }
 
-    private function makeStyle(\Kibo\Phast\Common\DOMDocument $document, $content, $media) {
+    private function makeStyle(DOMDocument $document, $content, $media) {
         $style = $document->createElement('style');
         if ($media !== '') {
             $style->setAttribute('media', $media);
@@ -303,7 +304,7 @@ EOJS;
         return $style;
     }
 
-    private function makeLink(\Kibo\Phast\Common\DOMDocument $document, URL $url, $media) {
+    private function makeLink(DOMDocument $document, URL $url, $media) {
         $link = $document->createElement('link');
         $link->setAttribute('rel', 'stylesheet');
         $link->setAttribute('href', (string)$url);

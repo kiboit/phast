@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsDeferring;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
@@ -82,7 +83,7 @@ class Filter implements HTMLFilter {
 EOS;
 
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         $body = $this->getBodyElement($document);
         foreach ($document->query('//script') as $script) {
             if ($script->hasAttribute('data-phast-no-defer')) {

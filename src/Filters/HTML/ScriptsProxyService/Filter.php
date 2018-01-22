@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
@@ -79,7 +80,7 @@ EOS;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         $scripts = iterator_to_array($document->query('//script'));
         $didInject = false;
         foreach ($scripts as $script) {
