@@ -57,8 +57,8 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function testInliningCSS() {
 
-        $this->makeLink($this->head, 'the-file-contents');
-        $this->makeLink($this->body, 'the-file-2-contents');
+        $this->makeLink($this->head, 'the-file-contents', '/the-file-1.css');
+        $this->makeLink($this->body, 'the-file-2-contents', '/the-file-2.css');
 
         $this->body->appendChild(
             $this->dom->createElement('div')
@@ -70,11 +70,20 @@ class FilterTest extends HTMLFilterTestCase {
         $styles = $this->getTheStyles();
 
         $this->assertCount(2, $styles);
+
         $this->assertEquals('the-file-contents', $styles[0]->textContent);
         $this->assertEquals('the-file-2-contents', $styles[1]->textContent);
+
         $this->assertSame($this->head, $styles[0]->parentNode);
         $this->assertSame($this->body, $styles[1]->parentNode);
         $this->assertSame($this->body->childNodes[0], $styles[1]);
+
+        $this->assertTrue($styles[0]->hasAttribute('data-phast-href'));
+        $this->assertTrue($styles[1]->hasAttribute('data-phast-href'));
+        $this->assertEquals(self::BASE_URL . '/the-file-1.css', $styles[0]->getAttribute('data-phast-href'));
+        $this->assertEquals(self::BASE_URL . '/the-file-2.css', $styles[1]->getAttribute('data-phast-href'));
+
+        $this->assertEquals(1, $this->dom->getElementsByTagName('script')->length);
     }
 
     public function testInliningWithCorrectRel() {

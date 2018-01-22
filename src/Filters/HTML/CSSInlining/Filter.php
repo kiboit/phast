@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\Filters\HTML\CSSOptimization\Optimizer;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -18,7 +19,7 @@ class Filter implements HTMLFilter {
      * @var string
      */
     private $ieFallbackScript = <<<EOJS
-(function() {
+(function () {
     
     var ua = window.navigator.userAgent;
     if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident/') === -1) {
@@ -60,6 +61,27 @@ class Filter implements HTMLFilter {
 })();
 EOJS;
 
+    private $inlinedCSSRetriever = <<<EOJS
+(function () {
+    Array.prototype.forEach.call(
+        document.querySelectorAll('style[data-phast-href]'),
+        function (style) {
+            var link = document.createElement('link');
+            link.setAttribute('href', style.getAttribute('data-phast-href'));
+            link.setAttribute('rel', 'stylesheet');
+            if (style.hasAttribute('media')) {
+                link.setAttribute('media', style.getAttribute('media'));
+            }
+            style.parentNode.insertBefore(link, style.nextSibling);
+            link.addEventListener('load', function () {
+                style.parentNode.removeChild(style);
+            });
+        }
+    );
+})();
+EOJS;
+
+
     /**
      * @var ServiceSignature
      */
@@ -69,6 +91,11 @@ EOJS;
      * @var bool
      */
     private $withIEFallback = false;
+
+    /**
+     * @var bool
+     */
+    private $hasDoneInlining = false;
 
     /**
      * @var int
@@ -100,6 +127,11 @@ EOJS;
      */
     private $retriever;
 
+    /**
+     * @var Optimizer
+     */
+    private $optimizer;
+
     public function __construct(ServiceSignature $signature, URL $baseURL, array $config, Retriever $retriever) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
@@ -121,6 +153,7 @@ EOJS;
     }
 
     public function transformHTMLDOM(DOMDocument $document) {
+        $this->optimizer = new Optimizer($document);
         $links = iterator_to_array($document->query('//link'));
         $styles = iterator_to_array($document->query('//style'));
         foreach ($links as $link) {
@@ -131,6 +164,9 @@ EOJS;
         }
         if ($this->withIEFallback) {
             $this->addIEFallbackScript($document);
+        }
+        if ($this->hasDoneInlining) {
+            $this->addInlinedRetrieverScript($document);
         }
     }
 
@@ -221,7 +257,8 @@ EOJS;
             $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
             return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
         }
-
+        $content = $this->optimizer->optimizeCSS($content);
+        $this->hasDoneInlining = true;
         $elements = $this->inlineCSS($document, $url, $content, $media, $ieCompatible, $currentLevel, $seen);
         $this->addIEFallback($ieFallbackUrl, $elements);
         return $elements;
@@ -248,7 +285,7 @@ EOJS;
         }
 
         $content = $this->rewriteRelativeURLs($content, $url);
-        $elements[] = $this->makeStyle($document, $content, $media);
+        $elements[] = $this->makeStyle($document, $url, $content, $media);
 
         return $elements;
     }
@@ -284,9 +321,19 @@ EOJS;
     private function addIEFallbackScript(DOMDocument $document) {
         $this->logger()->info('Adding IE fallback script');
         $this->withIEFallback = false;
+        $this->addScript($document, $this->ieFallbackScript);
+    }
+
+    private function addInlinedRetrieverScript(DOMDocument $document) {
+        $this->logger()->info('Adding inlined retriever script');
+        $this->hasDoneInlining = false;
+        $this->addScript($document, $this->inlinedCSSRetriever);
+    }
+
+    private function addScript(DOMDocument $document, $content) {
         $script = $document->createElement('script');
         $script->setAttribute('data-phast-no-defer', 'data-phast-no-defer');
-        $script->textContent = $this->ieFallbackScript;
+        $script->textContent = $content;
         $this->getBodyElement($document)->appendChild($script);
     }
 
@@ -308,11 +355,12 @@ EOJS;
         return $matches;
     }
 
-    private function makeStyle(DOMDocument $document, $content, $media) {
+    private function makeStyle(DOMDocument $document, URL $url, $content, $media) {
         $style = $document->createElement('style');
         if ($media !== '') {
             $style->setAttribute('media', $media);
         }
+        $style->setAttribute('data-phast-href', (string)$url);
         $style->textContent = $content;
         return $style;
     }

@@ -43,8 +43,6 @@ return [
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\CSSOptimization\Filter::class => [],
-
             \Kibo\Phast\Filters\HTML\CSSDeferring\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
