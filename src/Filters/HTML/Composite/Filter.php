@@ -114,7 +114,7 @@ class Filter {
         // This gets us UTF-8 instead of entities
         $output = '<!doctype html>';
         foreach ($doc->childNodes as $node) {
-            if (!$node instanceof DOMDocumentType
+            if (!$node instanceof \DOMDocumentType
                 && !$node instanceof \DOMProcessingInstruction
             ) {
                 $output .= $doc->saveHTML($node);
