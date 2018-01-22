@@ -9,10 +9,6 @@ use Kibo\Phast\Filters\HTML\HTMLFilter;
 class Filter implements HTMLFilter {
     use BodyFinderTrait;
 
-    private $classNamePattern = '-?[_a-zA-Z]++[_a-zA-Z0-9-]*+';
-
-    private $usedSelectorPattern;
-
     private $loaderScript = <<<EOS
 (function() {
     Array.prototype.forEach.call(
@@ -35,7 +31,7 @@ EOS;
         $body = $this->getBodyElement($document);
         $styles = iterator_to_array($document->query('//style'));
 
-        $this->usedSelectorPattern = $this->getUsedSelectorPattern($document);
+        $optimizer = new Optimizer($document);
 
         $i = 0;
 
@@ -44,7 +40,7 @@ EOS;
                 continue;
             }
 
-            $optimized_css = $this->optimizeCSS($style->textContent);
+            $optimized_css = $optimizer->optimizeCSS($style->textContent);
 
             if ($optimized_css === null) {
                 continue;
@@ -70,32 +66,6 @@ EOS;
         }
     }
 
-    private function getUsedSelectorPattern(DOMDocument $document) {
-        $classes = $this->getUsedClasses($document);
-
-        $re_class = $classes ? '(?!' . implode('|', $classes) . ')' : '';
-        $re_selector = "~\.$re_class{$this->classNamePattern}~";
-
-        return $re_selector;
-    }
-
-    private function getUsedClasses(DOMDocument $document) {
-        $classes = [];
-
-        foreach ($document->query('//@class') as $class) {
-            foreach (preg_split('/\s+/', $class->value) as $cls) {
-                if ($cls != ''
-                    && !isset($classes[$cls])
-                    && preg_match("/^{$this->classNamePattern}$/", $cls)
-                ) {
-                    $classes[$cls] = true;
-                }
-            }
-        }
-
-        return array_keys($classes);
-    }
-
     private function isStyle(\DOMElement $style) {
         $type = $style->getAttribute('type');
 
@@ -105,49 +75,4 @@ EOS;
 
         return true;
     }
-
-    private function optimizeCSS($css) {
-        $re_simple_selector_chars = "[A-Z0-9_.#*:()>+\~\s-]";
-        $re_selector = "(?: $re_simple_selector_chars | \[[a-z]++\] )++";
-        $re_rule = "~
-            (?<= ^ | [;}] ) \s*+
-            ( (?: $re_selector , )*+ $re_selector )
-            ( { [^}]*+ } )
-        ~xi";
-
-        $css = preg_replace_callback(
-            $re_rule,
-            function ($match) {
-                return $this->optimizeRule($match[1], $match[2]);
-            },
-            $css
-        );
-
-        if ($css === null) {
-            return;
-        }
-
-        return trim($css);
-    }
-
-    private function optimizeRule($selectors, $body) {
-        $new_selectors = [];
-
-        foreach (explode(',', $selectors) as $selector) {
-            if ($this->selectorCouldMatch($selector)) {
-                $new_selectors[] = $selector;
-            }
-        }
-
-        if ($new_selectors) {
-            return implode(',', $new_selectors) . $body;
-        }
-
-        return '';
-    }
-
-    private function selectorCouldMatch($selector) {
-        return !preg_match($this->usedSelectorPattern, $selector);
-    }
-
 }
