@@ -155,7 +155,12 @@ EOJS;
     }
 
     private function inlineStyle(\DOMElement $style) {
-        $elements = $this->inlineCSS($style->ownerDocument, $this->baseURL, $style->textContent, $style->getAttribute('media'));
+        $elements = $this->inlineCSS(
+            $style->ownerDocument,
+            $this->baseURL,
+            $style->textContent,
+            $style->getAttribute('media')
+        );
         $this->replaceElement($elements, $style);
     }
 
@@ -222,7 +227,15 @@ EOJS;
         return $elements;
     }
 
-    private function inlineCSS(DOMDocument $document, URL $url, $content, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
+    private function inlineCSS(
+        DOMDocument $document,
+        URL $url,
+        $content,
+        $media,
+        $ieCompatible = true,
+        $currentLevel = 0,
+        $seen = []
+    ) {
         $content = $this->minify($content);
 
         $urlMatches = $this->getImportedURLs($content);
