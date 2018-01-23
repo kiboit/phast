@@ -3,6 +3,8 @@
 namespace Kibo\Phast\Services\Css;
 
 use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriterFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
@@ -24,7 +26,8 @@ class Factory {
         );
         return new Service(
             (new ServiceSignatureFactory())->make($config),
-            $retriever
+            $retriever,
+            (new ImageURLRewriterFactory())->make($config, Filter::class)
         );
     }
 

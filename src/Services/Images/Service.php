@@ -29,17 +29,17 @@ class Service extends BaseService {
      *
      * @param ServiceSignature $signature
      * @param string[] $whitelist
-     * @param ImageFactory $imageFactory
+     * @param ImageFactory $imageURLFactory
      * @param \Kibo\Phast\Filters\Image\Composite\Filter $filter
      */
     public function __construct(
         ServiceSignature $signature,
         array $whitelist,
-        ImageFactory $imageFactory,
+        ImageFactory $imageURLFactory,
         Filter $filter
     ) {
         parent::__construct($signature, $whitelist);
-        $this->imageFactory = $imageFactory;
+        $this->imageFactory = $imageURLFactory;
         $this->filter = $filter;
     }
 
