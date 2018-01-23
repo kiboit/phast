@@ -1,8 +1,7 @@
 <?php
 
 
-namespace Kibo\Phast\Filters\HTML\CSSOptimization;
-
+namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Common\DOMDocument;
 
