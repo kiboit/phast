@@ -211,10 +211,11 @@ EOJS;
     }
 
     private function inlineStyle(\DOMElement $style) {
+        $minified = $this->minifier->minify($style->textContent);
         $elements = $this->inlineCSS(
             $style->ownerDocument,
             $this->baseURL,
-            $style->textContent,
+            $minified,
             $style->getAttribute('media')
         );
         $this->replaceElement($elements, $style);
@@ -278,6 +279,7 @@ EOJS;
             return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
         }
 
+        $content = $this->minifier->minify($content);
         $content = $this->optimizer->optimizeCSS($content);
         if (is_null($content)) {
             return null;
@@ -297,7 +299,6 @@ EOJS;
         $currentLevel = 0,
         $seen = []
     ) {
-        $content = $this->minifier->minify($content);
 
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];

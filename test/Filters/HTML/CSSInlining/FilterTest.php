@@ -18,9 +18,14 @@ class FilterTest extends HTMLFilterTestCase {
     private $files;
 
     /**
-     * @var Optimizer
+     * @var \PHPUnit_Framework_MockObject_MockObject
      */
     private $optimizerMock;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $minifierMock;
 
     /**
      * @var Filter
@@ -32,6 +37,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->files = [];
         $this->optimizerMock = null;
+        $this->minifierMock = null;
 
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
@@ -59,6 +65,14 @@ class FilterTest extends HTMLFilterTestCase {
                        : $this->optimizerMock;
             });
 
+        $minifier = $this->createMock(CSSMinifier::class);
+        $minifier->method('minify')
+            ->willReturnCallback(function ($css) {
+                return is_null($this->minifierMock)
+                       ? (new CSSMinifier())->minify($css)
+                       : $this->minifierMock->minify($css);
+            });
+
         $this->filter = new Filter(
             $signature,
             URL::fromString(self::BASE_URL),
@@ -74,7 +88,7 @@ class FilterTest extends HTMLFilterTestCase {
             ],
             $retriever,
             $optimizerFactory,
-            new CSSMinifier()
+            $minifier
         );
     }
 
@@ -215,11 +229,27 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals($expectedUrl, $newLink->getAttribute('href'));
     }
 
-    public function testMinifying() {
-        $this->makeLink($this->head, 'a-tag { prop: 12% }');
+    public function testMinifyingBeforeOptimizing() {
+        $optimizerCalled = false;
+
+        $this->optimizerMock = $this->createMock(Optimizer::class);
+        $this->optimizerMock->expects($this->once())
+            ->method('optimizeCSS')
+            ->willReturnCallback(function ($css) use (&$optimizerCalled) {
+                $optimizerCalled = true;
+                return $css;
+            });
+
+        $this->minifierMock = $this->createMock(CSSMinifier::class);
+        $this->minifierMock->expects($this->once())
+            ->method('minify')
+            ->willReturnCallback(function ($css) use (&$optimizerCalled) {
+                $this->assertFalse($optimizerCalled);
+            });
+
+        $this->makeLink($this->head, 'some-css');
         $this->filter->transformHTMLDOM($this->dom);
-        $styles = $this->getTheStyles();
-        $this->assertEquals('a-tag{prop:12%}', $styles[0]->textContent);
+
     }
 
     public function testInliiningImports() {
