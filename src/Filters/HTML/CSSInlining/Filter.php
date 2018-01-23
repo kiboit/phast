@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\CSSOptimization\Optimizer;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -128,16 +127,28 @@ EOJS;
     private $retriever;
 
     /**
+     * @var OptimizerFactory
+     */
+    private $optimizerFactory;
+
+    /**
      * @var Optimizer
      */
     private $optimizer;
 
-    public function __construct(ServiceSignature $signature, URL $baseURL, array $config, Retriever $retriever) {
+    public function __construct(
+        ServiceSignature $signature,
+        URL $baseURL,
+        array $config,
+        Retriever $retriever,
+        OptimizerFactory $optimizerFactory
+    ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
         $this->serviceUrl = URL::fromString((string)$config['serviceUrl']);
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->retriever = $retriever;
+        $this->optimizerFactory = $optimizerFactory;
 
         foreach ($config['whitelist'] as $key => $value) {
             if (!is_array($value)) {
@@ -153,7 +164,7 @@ EOJS;
     }
 
     public function transformHTMLDOM(DOMDocument $document) {
-        $this->optimizer = new Optimizer($document);
+        $this->optimizer = $this->optimizerFactory->makeForDocument($document);
         $links = iterator_to_array($document->query('//link'));
         $styles = iterator_to_array($document->query('//style'));
         foreach ($links as $link) {
@@ -186,8 +197,9 @@ EOJS;
 
         $media = $link->getAttribute('media');
         $elements = $this->inlineURL($link->ownerDocument, $location, $media);
-
-        $this->replaceElement($elements, $link);
+        if (!is_null($elements)) {
+            $this->replaceElement($elements, $link);
+        }
     }
 
     private function inlineStyle(\DOMElement $style) {
@@ -257,7 +269,11 @@ EOJS;
             $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
             return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
         }
+
         $content = $this->optimizer->optimizeCSS($content);
+        if (is_null($content)) {
+            return null;
+        }
         $this->hasDoneInlining = true;
         $elements = $this->inlineCSS($document, $url, $content, $media, $ieCompatible, $currentLevel, $seen);
         $this->addIEFallback($ieFallbackUrl, $elements);

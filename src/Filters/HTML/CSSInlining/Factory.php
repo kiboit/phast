@@ -31,7 +31,8 @@ class Factory implements HTMLFilterFactory {
             (new ServiceSignatureFactory())->make($config),
             URL::fromString($config['documents']['baseUrl']),
             $config['documents']['filters'][Filter::class],
-            $retriever
+            $retriever,
+            new OptimizerFactory()
         );
     }
 

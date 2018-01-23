@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -16,6 +17,11 @@ class FilterTest extends HTMLFilterTestCase {
     private $files;
 
     /**
+     * @var Optimizer
+     */
+    private $optimizerMock;
+
+    /**
      * @var Filter
      */
     private $filter;
@@ -24,6 +30,12 @@ class FilterTest extends HTMLFilterTestCase {
         parent::setUp();
 
         $this->files = [];
+        $this->optimizerMock = null;
+
+        $signature = $this->createMock(ServiceSignature::class);
+        $signature->method('sign')
+            ->willReturn('the-token');
+
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('retrieve')
             ->willReturnCallback(function (URL $url) {
@@ -35,9 +47,17 @@ class FilterTest extends HTMLFilterTestCase {
                 }
                 return false;
             });
-        $signature = $this->createMock(ServiceSignature::class);
-        $signature->method('sign')
-            ->willReturn('the-token');
+
+        $optimizerFactory = $this->createMock(OptimizerFactory::class);
+        $optimizerFactory->expects($this->once())
+            ->method('makeForDocument')
+            ->with($this->dom)
+            ->willReturnCallback(function (DOMDocument $document) {
+                return is_null($this->optimizerMock)
+                       ? (new OptimizerFactory())->makeForDocument($document)
+                       : $this->optimizerMock;
+            });
+
         $this->filter = new Filter(
             $signature,
             URL::fromString(self::BASE_URL),
@@ -51,7 +71,8 @@ class FilterTest extends HTMLFilterTestCase {
                 'serviceUrl' => self::SERVICE_URL,
                 'urlRefreshTime' => self::URL_REFRESH_TIME
             ],
-            $retriever
+            $retriever,
+            $optimizerFactory
         );
     }
 
@@ -63,6 +84,12 @@ class FilterTest extends HTMLFilterTestCase {
         $this->body->appendChild(
             $this->dom->createElement('div')
         );
+
+        $this->optimizerMock = $this->createMock(Optimizer::class);
+        $this->optimizerMock->expects($this->exactly(2))
+            ->method('optimizeCSS')
+            ->withConsecutive(['the-file-contents'], ['the-file-2-contents'])
+            ->willReturnArgument(0);
 
         $this->filter->transformHTMLDOM($this->dom);
 
@@ -84,6 +111,23 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals(self::BASE_URL . '/the-file-2.css', $styles[1]->getAttribute('data-phast-href'));
 
         $this->assertEquals(1, $this->dom->getElementsByTagName('script')->length);
+    }
+
+    public function testNotInliningOnOptimizationError() {
+        $link = $this->makeLink($this->head, 'the-file-contents', '/the-path');
+        $this->optimizerMock = $this->createMock(Optimizer::class);
+        $this->optimizerMock->expects($this->once())
+            ->method('optimizeCSS')
+            ->willReturn(null);
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $this->assertEquals(0, $this->dom->getElementsByTagName('script')->length);
+        $theLinks = $this->dom->getElementsByTagName('link');
+        $this->assertEquals(1, $theLinks->length);
+        $this->assertSame($link, $theLinks[0]);
+        $this->assertEquals('/the-path', $link->getAttribute('href'));
+        $this->assertEquals('stylesheet', $link->getAttribute('rel'));
+
     }
 
     public function testInliningWithCorrectRel() {
