@@ -4,7 +4,6 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter as TagsFilter;
-use Kibo\Phast\ValueObjects\URL;
 
 class Filter extends TagsFilter {
 
@@ -35,8 +34,9 @@ class Filter extends TagsFilter {
                 )
             ~xiS',
             function ($matches) {
-                if ($this->shouldRewriteUrl($matches[2])) {
-                    $params = ['src' => (string) URL::fromString($matches[2])->withBase($this->baseUrl)];
+                $url = $this->makeURLAbsoluteToBase($matches[2]);
+                if ($this->shouldRewriteUrl($url)) {
+                    $params = ['src' => $url];
                     return $matches[1] . $this->makeSignedUrl($params);
                 }
                 return $matches[1] . $matches[2];

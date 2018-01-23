@@ -47,6 +47,7 @@ class Filter implements HTMLFilter {
      * ImagesOptimizationServiceHTMLFilter constructor.
      *
      * @param ServiceSignature $signature
+     * @param Retriever $retriever
      * @param URL $baseUrl
      * @param URL $serviceUrl
      * @param string[] $whitelist
@@ -79,7 +80,8 @@ class Filter implements HTMLFilter {
     }
 
     private function rewriteSrc(\DOMElement $img) {
-        if (!($url = $this->shouldRewriteUrl($img->getAttribute('src')))) {
+        $url = $this->makeURLAbsoluteToBase($img->getAttribute('src'));
+        if (!$this->shouldRewriteUrl($url)) {
             return;
         }
         $params = ['src' => $url];
@@ -101,7 +103,8 @@ class Filter implements HTMLFilter {
             return;
         }
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) {
-            if ($url = $this->shouldRewriteUrl($match[1])) {
+            $url = $this->makeURLAbsoluteToBase($match[1]);
+            if ($this->shouldRewriteUrl($url)) {
                 $params = ['src' => $url];
                 $url = $this->makeSignedUrl($params);
             } else {
@@ -115,17 +118,24 @@ class Filter implements HTMLFilter {
         $img->setAttribute('srcset', $rewritten);
     }
 
-    protected function shouldRewriteUrl($url) {
+    protected function makeURLAbsoluteToBase($url) {
         if (!$url || substr($url, 0, 5) === 'data:') {
-            return;
+            return null;
         }
         $this->logger()->info('Rewriting img {url}', ['url' => $url]);
-        $absolute = URL::fromString($url)->withBase($this->baseUrl)->toString();
+        return URL::fromString($url)->withBase($this->baseUrl)->toString();
+    }
+
+    protected function shouldRewriteUrl($url) {
+        if (!$url) {
+            return false;
+        }
         foreach ($this->whitelist as $pattern) {
-            if (preg_match($pattern, $absolute)) {
-                return $absolute;
+            if (preg_match($pattern, $url)) {
+                return true;
             }
         }
+        return false;
     }
 
     protected function makeSignedUrl($params) {
