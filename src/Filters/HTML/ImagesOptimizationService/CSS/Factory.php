@@ -2,11 +2,15 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
+use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriterFactory;
 
-use Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Factory as TagsFactory;
+class Factory implements HTMLFilterFactory {
 
-class Factory extends TagsFactory {
-
-    protected $class = Filter::class;
+    public function make(array $config) {
+        return new Filter(
+            (new ImageURLRewriterFactory())->make($config, Filter::class)
+        );
+    }
 
 }
