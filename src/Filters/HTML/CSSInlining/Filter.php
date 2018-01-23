@@ -316,11 +316,7 @@ EOJS;
     }
 
     private function makeServiceLink(DOMDocument $document, URL $location, $media) {
-        $params = [
-            'src' => (string) $location,
-            'cacheMarker' => floor(time() / $this->urlRefreshTime)
-        ];
-        $url = $this->makeSignedUrl($params);
+        $url = $this->makeServiceURL($location);
         return $this->makeLink($document, URL::fromString($url), $media);
     }
 
@@ -385,7 +381,7 @@ EOJS;
         if ($media !== '') {
             $style->setAttribute('media', $media);
         }
-        $style->setAttribute('data-phast-href', (string)$url);
+        $style->setAttribute('data-phast-href', $this->makeServiceURL($url));
         $style->textContent = $content;
         return $style;
     }
@@ -432,7 +428,11 @@ EOJS;
         return $cssContent;
     }
 
-    protected function makeSignedUrl($params) {
+    protected function makeServiceURL(URL $originalLocation) {
+        $params = [
+            'src' => (string) $originalLocation,
+            'cacheMarker' => floor(time() / $this->urlRefreshTime)
+        ];
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
             ->sign($this->signature)

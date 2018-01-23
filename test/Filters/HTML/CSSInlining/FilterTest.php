@@ -123,8 +123,11 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertTrue($styles[0]->hasAttribute('data-phast-href'));
         $this->assertTrue($styles[1]->hasAttribute('data-phast-href'));
-        $this->assertEquals(self::BASE_URL . '/the-file-1.css', $styles[0]->getAttribute('data-phast-href'));
-        $this->assertEquals(self::BASE_URL . '/the-file-2.css', $styles[1]->getAttribute('data-phast-href'));
+
+        $expectedUrl1 = self::SERVICE_URL . '?src=' . urlencode(self::BASE_URL . '/the-file-1.css');
+        $expectedUrl2 = self::SERVICE_URL . '?src=' . urlencode(self::BASE_URL . '/the-file-2.css');
+        $this->assertStringStartsWith($expectedUrl1, $styles[0]->getAttribute('data-phast-href'));
+        $this->assertStringStartsWith($expectedUrl2, $styles[1]->getAttribute('data-phast-href'));
 
         $this->assertEquals(1, $this->dom->getElementsByTagName('script')->length);
     }
