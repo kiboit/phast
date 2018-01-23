@@ -100,4 +100,28 @@ class ImageURLRewriter {
             ->sign($this->signature)
             ->serialize($this->serviceRequestFormat);
     }
+
+    public function rewriteStyle($styleContent) {
+        return preg_replace_callback(
+            '~
+                (
+                    \b (?: image | background ):
+                    [^;}]*
+                    \b url \( [\'"]?
+                )
+                (
+                    [^\'")] ++
+                )
+            ~xiS',
+            function ($matches) {
+                $url = $this->makeURLAbsoluteToBase($matches[2]);
+                if ($this->shouldRewriteUrl($url)) {
+                    $params = ['src' => $url];
+                    return $matches[1] . $this->makeSignedUrl($params);
+                }
+                return $matches[1] . $matches[2];
+            },
+            $styleContent
+        );
+    }
 }

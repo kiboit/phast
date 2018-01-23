@@ -25,38 +25,13 @@ class Filter implements HTMLFilter {
         $styleTags = $document->query('//style');
         /** @var \DOMElement $styleTag */
         foreach ($styleTags as $styleTag) {
-            $styleTag->textContent = $this->rewriteStyle($styleTag->textContent);
+            $styleTag->textContent = $this->rewriter->rewriteStyle($styleTag->textContent);
         }
 
         $styleAttrs = $document->query('//@style');
         /** @var \DOMAttr $styleAttr */
         foreach ($styleAttrs as $styleAttr) {
-            $styleAttr->value = htmlspecialchars($this->rewriteStyle($styleAttr->value));
+            $styleAttr->value = htmlspecialchars($this->rewriter->rewriteStyle($styleAttr->value));
         }
     }
-
-    private function rewriteStyle($styleContent) {
-        return preg_replace_callback(
-            '~
-                (
-                    \b (?: image | background ):
-                    [^;}]*
-                    \b url \( [\'"]?
-                )
-                (
-                    [^\'")] ++
-                )
-            ~xiS',
-            function ($matches) {
-                $url = $this->rewriter->makeURLAbsoluteToBase($matches[2]);
-                if ($this->rewriter->shouldRewriteUrl($url)) {
-                    $params = ['src' => $url];
-                    return $matches[1] . $this->rewriter->makeSignedUrl($params);
-                }
-                return $matches[1] . $matches[2];
-            },
-            $styleContent
-        );
-    }
-
 }
