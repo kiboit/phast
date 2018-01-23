@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\ValueObjects\URL;
@@ -18,8 +19,7 @@ class Factory implements HTMLFilterFactory {
         } else {
             $serviceUrl = $config['servicesUrl'] . '?service=images';
         }
-        $class = $this->class;
-        return new $class(
+        $rewriter = new ImageURLRewriter(
             $signature,
             new LocalRetriever($config['retrieverMap']),
             URL::fromString($config['documents']['baseUrl']),
@@ -27,6 +27,8 @@ class Factory implements HTMLFilterFactory {
             $config['images']['whitelist'],
             @$config['documents']['filters'][$this->class]['rewriteFormat']
         );
+        $class = $this->class;
+        return new $class($rewriter);
     }
 
 }

@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
@@ -22,13 +23,13 @@ class FilterTest extends HTMLFilterTestCase {
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('getLastModificationTime')->willReturn(false);
 
-        $this->filter = new Filter(
+        $this->filter = new Filter(new ImageURLRewriter(
             $securityToken,
             $retriever,
             URL::fromString(self::BASE_URL . '/css/'),
             URL::fromString(self::BASE_URL . '/images.php'),
             ['~' . preg_quote(self::BASE_URL . '') . '~']
-        );
+        ));
     }
 
     /**
