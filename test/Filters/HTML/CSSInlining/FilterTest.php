@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Common\CSSMinifier;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
@@ -72,7 +73,8 @@ class FilterTest extends HTMLFilterTestCase {
                 'urlRefreshTime' => self::URL_REFRESH_TIME
             ],
             $retriever,
-            $optimizerFactory
+            $optimizerFactory,
+            new CSSMinifier()
         );
     }
 

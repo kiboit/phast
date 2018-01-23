@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Common\CSSMinifier;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
@@ -132,6 +133,11 @@ EOJS;
     private $optimizerFactory;
 
     /**
+     * @var CSSMinifier
+     */
+    private $minifier;
+
+    /**
      * @var Optimizer
      */
     private $optimizer;
@@ -141,7 +147,8 @@ EOJS;
         URL $baseURL,
         array $config,
         Retriever $retriever,
-        OptimizerFactory $optimizerFactory
+        OptimizerFactory $optimizerFactory,
+        CSSMinifier $minifier
     ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
@@ -149,6 +156,7 @@ EOJS;
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;
+        $this->minifier = $minifier;
 
         foreach ($config['whitelist'] as $key => $value) {
             if (!is_array($value)) {
@@ -289,7 +297,7 @@ EOJS;
         $currentLevel = 0,
         $seen = []
     ) {
-        $content = $this->minify($content);
+        $content = $this->minifier->minify($content);
 
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
@@ -389,26 +397,6 @@ EOJS;
             $link->setAttribute('media', $media);
         }
         return $link;
-    }
-
-    private function minify($content) {
-        // Remove comments
-        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $content);
-
-        // Normalize whitespace
-        $content = preg_replace('~\s+~', ' ', $content);
-
-        // Remove whitespace before and after operators
-        $chars = [',', '{', '}', ';'];
-        foreach ($chars as $char) {
-            $content = str_replace("$char ", $char, $content);
-            $content = str_replace(" $char", $char, $content);
-        }
-
-        // Remove whitespace after colons
-        $content = str_replace(': ', ':', $content);
-
-        return trim($content);
     }
 
     private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
