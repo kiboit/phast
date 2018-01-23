@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Common\CSSMinifier;
+use Kibo\Phast\Common\CSSURLRewriter;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
@@ -309,7 +310,7 @@ EOJS;
             $elements = array_merge($elements, $replacement);
         }
 
-        $content = $this->rewriteRelativeURLs($content, $url);
+        $content = (new CSSURLRewriter())->rewriteRelativeURLs($content, $url);
         $elements[] = $this->makeStyle($document, $url, $content, $media);
 
         return $elements;
@@ -394,38 +395,6 @@ EOJS;
             $link->setAttribute('media', $media);
         }
         return $link;
-    }
-
-    private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
-        $callback = function($match) use ($cssUrl) {
-            if (preg_match('~^[a-z]+:~i', $match[3])) {
-                return $match[0];
-            }
-            return $match[1] . URL::fromString($match[3])->withBase($cssUrl) . $match[4];
-        };
-
-        $cssContent = preg_replace_callback(
-            '~
-                \b
-                ( url\( ([\'"]?) )
-                ([A-Za-z0-9_/.:?&=+%,#-]+)
-                ( \2 \) )
-            ~x',
-            $callback,
-            $cssContent
-        );
-
-        $cssContent = preg_replace_callback(
-            '~
-                ( @import \s+ ([\'"]) )
-                ([A-Za-z0-9_/.:?&=+%,#-]+)
-                ( \2 )
-            ~x',
-            $callback,
-            $cssContent
-        );
-
-        return $cssContent;
     }
 
     protected function makeServiceURL(URL $originalLocation) {
