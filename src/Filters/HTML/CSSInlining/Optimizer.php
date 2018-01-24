@@ -24,12 +24,16 @@ class Optimizer {
         }
 
         $output = '';
+        $selectors = [];
 
-        foreach ($stylesheet as $rule) {
-            if (isset($rule[1])) {
-                $output .= $this->optimizeRule($rule[0], $rule[1]);
+        foreach ($stylesheet as $element) {
+            if (is_array($element)) {
+                $selectors[] = $element;
+            } elseif ($selectors) {
+                $output .= $this->optimizeRule($selectors, $element);
+                $selectors = [];
             } else {
-                $output .= $rule[0];
+                $output .= $element;
             }
         }
 
@@ -59,13 +63,8 @@ class Optimizer {
     /**
      * Parse a stylesheet into an array of segments
      *
-     * A segment with one element is a unprocessed piece of CSS that will always
-     * be output. Offset 0 will contain the contents of this piece.
-     *
-     * A segment with two elements is a processed selector with a
-     * body that can potentially be optimized. Offset 0 will contain the pre-
-     * processed selectors (see parseSelectors), and offset 1 will contain the
-     * body of this rule.
+     * Each string segment is preceded by zero or more arrays encoding selectors
+     * parsed by parseSelector (see below).
      *
      * @param $css
      * @return array|void
@@ -93,14 +92,17 @@ class Optimizer {
                 continue;
             }
             if ($match[0][1] > $offset) {
-                $stylesheet[] = [substr($css, $offset, $match[0][1] - $offset)];
+                $stylesheet[] = substr($css, $offset, $match[0][1] - $offset);
             }
-            $stylesheet[] = [$selectors, $match[2][0]];
+            foreach ($selectors as $selector) {
+                $stylesheet[] = $selector;
+            }
+            $stylesheet[] = $match[2][0];
             $offset = $match[0][1] + strlen($match[0][0]);
         }
 
         if ($offset < strlen($css)) {
-            $stylesheet[] = [substr($css, $offset)];
+            $stylesheet[] = substr($css, $offset);
         }
 
         return $stylesheet;
