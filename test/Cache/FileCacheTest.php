@@ -71,6 +71,13 @@ class FileCacheTest extends TestCase {
         $this->assertEquals(1, $callsCount);
     }
 
+    public function testCachingBinaryData() {
+        $this->assertEquals("\xff", $this->cache->get('bin', function () {
+            return "\xff";
+        }));
+        $this->assertEquals("\xff", $this->cache->get('bin', function () {}));
+    }
+
     public function testCorrectStorage() {
         $value = 'the-pirate-cache';
         $key = 'the-key-we-have';
