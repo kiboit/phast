@@ -88,10 +88,14 @@ class Optimizer {
         $stylesheet = [];
 
         foreach ($matches as $match) {
+            $selectors = $this->parseSelectors($match[1][0]);
+            if ($selectors === null) {
+                continue;
+            }
             if ($match[0][1] > $offset) {
                 $stylesheet[] = [substr($css, $offset, $match[0][1] - $offset)];
             }
-            $stylesheet[] = [$this->parseSelectors($match[1][0]), $match[2][0]];
+            $stylesheet[] = [$selectors, $match[2][0]];
             $offset = $match[0][1] + strlen($match[0][0]);
         }
 
@@ -109,23 +113,32 @@ class Optimizer {
      * the selector. The rest of the array will be the class names (if any) that
      * must be present in the document for this selector to match.
      *
+     * Null is returned if none of the selectors use classes, and can therefore
+     * not be optimized.
+     *
      * @param string $selectors
-     * @return array
+     * @return array|void
      */
     private function parseSelectors($selectors) {
-        $new_selectors = [];
+        $newSelectors = [];
+        $anyClasses = false;
 
         foreach (explode(',', $selectors) as $selector) {
             $classes = [$selector];
             if (preg_match_all("~\.({$this->classNamePattern})~", $selector, $matches)) {
                 foreach ($matches[1] as $class) {
                     $classes[] = $class;
+                    $anyClasses = true;
                 }
             }
-            $new_selectors[] = $classes;
+            $newSelectors[] = $classes;
         }
 
-        return $new_selectors;
+        if (!$anyClasses) {
+            return;
+        }
+
+        return $newSelectors;
     }
 
     private function getUsedClasses(DOMDocument $document) {
