@@ -101,6 +101,8 @@ class ImageURLRewriter {
             ->serialize($this->serviceRequestFormat);
     }
 
+    // TODO: extract this method in TextResourceFilter
+    // TODO: use the derived class into TextResource filtering
     public function rewriteStyle($styleContent) {
         return preg_replace_callback(
             '~

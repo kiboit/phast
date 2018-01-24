@@ -7,6 +7,7 @@ use Kibo\Phast\Filters\TextResources\TextResource;
 use Kibo\Phast\Filters\TextResources\TextResourceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 
+// TODO: create a cached version of this one
 class Filter implements TextResourceFilter {
     use LoggingTrait;
 

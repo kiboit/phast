@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\TextResources;
 
-
 class CSSMinifier implements TextResourceFilter {
 
 
@@ -11,6 +10,8 @@ class CSSMinifier implements TextResourceFilter {
      * @return TextResource
      */
     public function transform(TextResource $resource) {
+        // TODO: Extract the comments removal in separate filter
+        // TODO: Ensure comments removal on all css processing (somehow)
         // Remove comments
         $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $resource->getContent());
 
