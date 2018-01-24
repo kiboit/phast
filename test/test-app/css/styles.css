@@ -4,7 +4,7 @@ body {
     background: black;
     color: navajowhite;
     font-family: 'VT323', monospace;
-    background: url(../images/batman.jpg);
+    background-image: url(../images/batman.jpg);
 }
 .my-class {
     background: red;

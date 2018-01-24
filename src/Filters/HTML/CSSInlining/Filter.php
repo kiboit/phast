@@ -382,7 +382,9 @@ EOJS;
         if ($media !== '') {
             $style->setAttribute('media', $media);
         }
-        $style->setAttribute('data-phast-href', $this->makeServiceURL($url));
+        if ($url->toString() != $this->baseURL->toString()) {
+            $style->setAttribute('data-phast-href', $this->makeServiceURL($url));
+        }
         $style->textContent = $content;
         return $style;
     }

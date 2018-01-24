@@ -132,6 +132,15 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals(1, $this->dom->getElementsByTagName('script')->length);
     }
 
+    public function testNotAddingPhastHrefToExistingStyleTags() {
+        $style = $this->dom->createElement('style');
+        $this->head->appendChild($style);
+        $this->filter->transformHTMLDOM($this->dom);
+        $styles = $this->dom->getElementsByTagName('style');
+        $this->assertFalse($styles[0]->hasAttribute('data-phast-href'));
+        $this->assertEquals(0, $this->dom->getElementsByTagName('script')->length);
+    }
+
     public function testNotInliningOnOptimizationError() {
         $link = $this->makeLink($this->head, 'the-file-contents', '/the-path');
         $this->optimizerMock = $this->createMock(Optimizer::class);
