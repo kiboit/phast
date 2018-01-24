@@ -40,15 +40,13 @@ class Optimizer {
         $new_selectors = [];
 
         foreach ($selectors as $classes) {
-            $selector = array_shift($classes);
-
-            foreach ($classes as $class) {
-                if (!isset($this->usedClasses[$class])) {
+            foreach ($classes as $i => $class) {
+                if ($i != 0 && !isset($this->usedClasses[$class])) {
                     break 2;
                 }
             }
 
-            $new_selectors[] = $selector;
+            $new_selectors[] = $classes[0];
         }
 
         if ($new_selectors) {
@@ -120,13 +118,11 @@ class Optimizer {
 
         foreach (explode(',', $selectors) as $selector) {
             $classes = [$selector];
-            preg_replace_callback(
-                "~\.({$this->classNamePattern})~",
-                function ($match) use (&$classes) {
-                    $classes[] = $match[1];
-                },
-                $selector
-            );
+            if (preg_match_all("~\.({$this->classNamePattern})~", $selector, $matches)) {
+                foreach ($matches[1] as $class) {
+                    $classes[] = $class;
+                }
+            }
             $new_selectors[] = $classes;
         }
 
