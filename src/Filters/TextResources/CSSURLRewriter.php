@@ -1,18 +1,15 @@
 <?php
 
 
-namespace Kibo\Phast\Common;
+namespace Kibo\Phast\Filters\TextResources;
 
 use Kibo\Phast\ValueObjects\URL;
 
-class CSSURLRewriter {
+class CSSURLRewriter implements TextResourceFilter {
 
-    /**
-     * @param string $cssContent
-     * @param URL $baseUrl
-     * @return string
-     */
-    public function rewriteRelativeURLs($cssContent, URL $baseUrl) {
+
+    public function transform(TextResource $resource) {
+        $baseUrl = $resource->getLocation();
         $callback = function($match) use ($baseUrl) {
             if (preg_match('~^[a-z]+:~i', $match[3])) {
                 return $match[0];
@@ -28,7 +25,7 @@ class CSSURLRewriter {
                 ( \2 \) )
             ~x',
             $callback,
-            $cssContent
+            $resource->getContent()
         );
 
         $cssContent = preg_replace_callback(
@@ -41,7 +38,7 @@ class CSSURLRewriter {
             $cssContent
         );
 
-        return $cssContent;
+        return $resource->modifyContent($cssContent);
     }
 
 }

@@ -2,11 +2,11 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-use Kibo\Phast\Common\CSSMinifier;
-use Kibo\Phast\Common\CSSURLRewriter;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Filters\TextResources\TextResource;
+use Kibo\Phast\Filters\TextResources\TextResourceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -134,9 +134,9 @@ EOJS;
     private $optimizerFactory;
 
     /**
-     * @var CSSMinifier
+     * @var TextResourceFilter
      */
-    private $minifier;
+    private $cssFilter;
 
     /**
      * @var Optimizer
@@ -149,7 +149,7 @@ EOJS;
         array $config,
         Retriever $retriever,
         OptimizerFactory $optimizerFactory,
-        CSSMinifier $minifier
+        TextResourceFilter $cssFilter
     ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
@@ -157,7 +157,7 @@ EOJS;
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;
-        $this->minifier = $minifier;
+        $this->cssFilter = $cssFilter;
 
         foreach ($config['whitelist'] as $key => $value) {
             if (!is_array($value)) {
@@ -212,11 +212,13 @@ EOJS;
     }
 
     private function inlineStyle(\DOMElement $style) {
-        $minified = $this->minifier->minify($style->textContent);
+        $processed = $this->cssFilter
+            ->transform(new TextResource($this->baseURL, $style->textContent))
+            ->getContent();
         $elements = $this->inlineCSS(
             $style->ownerDocument,
             $this->baseURL,
-            $minified,
+            $processed,
             $style->getAttribute('media')
         );
         $this->replaceElement($elements, $style);
@@ -280,7 +282,9 @@ EOJS;
             return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
         }
 
-        $content = $this->minifier->minify($content);
+
+        $content = $this->cssFilter->transform(new TextResource($url, $content))
+            ->getContent();
         $content = $this->optimizer->optimizeCSS($content);
         if (is_null($content)) {
             return null;
@@ -310,7 +314,6 @@ EOJS;
             $elements = array_merge($elements, $replacement);
         }
 
-        $content = (new CSSURLRewriter())->rewriteRelativeURLs($content, $url);
         $elements[] = $this->makeStyle($document, $url, $content, $media);
 
         return $elements;

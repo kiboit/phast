@@ -3,8 +3,8 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\File\Cache;
-use Kibo\Phast\Common\CSSMinifier;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
+use Kibo\Phast\Filters\TextResources\Composite\Factory as CSSCompositeFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
@@ -34,7 +34,7 @@ class Factory implements HTMLFilterFactory {
             $config['documents']['filters'][Filter::class],
             $retriever,
             new OptimizerFactory(),
-            new CSSMinifier()
+            (new CSSCompositeFactory())->make($config)
         );
     }
 

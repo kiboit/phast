@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Common;
+namespace Kibo\Phast\Filters\TextResources;
 
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
@@ -21,10 +21,12 @@ class CSSURLRewriterTest extends TestCase {
 
         $base = URL::fromString(self::BASE_URL);
         $outputs = array_map(function ($input) use ($base) {
-            return (new CSSURLRewriter())->rewriteRelativeURLs(
-                $input['css'],
-                URL::fromString($input['path'])->withBase($base)
-            );
+            return (new CSSURLRewriter())->transform(
+                new TextResource(
+                    URL::fromString($input['path'])->withBase($base),
+                    $input['css']
+                )
+            )->getContent();
         }, $inputs);
 
 

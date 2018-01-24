@@ -1,17 +1,18 @@
 <?php
 
-namespace Kibo\Phast\Common;
+namespace Kibo\Phast\Filters\TextResources;
 
 
-class CSSMinifier {
+class CSSMinifier implements TextResourceFilter {
+
 
     /**
-     * @param string $content
-     * @return string
+     * @param TextResource $resource
+     * @return TextResource
      */
-    public function minify($content) {
+    public function transform(TextResource $resource) {
         // Remove comments
-        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $content);
+        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $resource->getContent());
 
         // Normalize whitespace
         $content = preg_replace('~\s+~', ' ', $content);
@@ -26,7 +27,7 @@ class CSSMinifier {
         // Remove whitespace after colons
         $content = str_replace(': ', ':', $content);
 
-        return trim($content);
+        return $resource->modifyContent(trim($content));
     }
 
 }
