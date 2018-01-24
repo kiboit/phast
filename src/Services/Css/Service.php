@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services\Css;
 
+use Kibo\Phast\Common\CSSMinifier;
 use Kibo\Phast\Common\CSSURLRewriter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Retrievers\Retriever;
@@ -31,6 +32,7 @@ class Service extends ProxyBaseService {
     protected function doRequest(array $request) {
         $content = parent::doRequest($request);
         $base = URL::fromString($request['src']);
+        $content = (new CSSMinifier())->minify($content);
         $content = (new CSSURLRewriter())->rewriteRelativeURLs($content, $base);
         return $this->imageUrlRewriter->rewriteStyle($content);
     }
