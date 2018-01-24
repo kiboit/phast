@@ -87,7 +87,8 @@ class FileCacheTest extends TestCase {
         $this->cache->get($key, function () use ($value) { return $value; }, 20);
         $expectedFilename = $this->getCacheFileName($key);
         $this->assertFileExists($expectedFilename);
-        $this->assertEquals('50 ' . json_encode($value), file_get_contents($expectedFilename));
+        $this->assertStringStartsWith('50 ', file_get_contents($expectedFilename));
+        $this->assertContains($value, file_get_contents($expectedFilename));
     }
 
     public function testExpiration() {
