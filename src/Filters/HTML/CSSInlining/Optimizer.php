@@ -26,10 +26,10 @@ class Optimizer {
         $output = '';
 
         foreach ($stylesheet as $rule) {
-            if ($rule[0] == 0) {
-                $output .= $rule[1];
-            } elseif ($rule[0] == 1) {
-                $output .= $this->optimizeRule($rule[1], $rule[2]);
+            if (isset($rule[1])) {
+                $output .= $this->optimizeRule($rule[0], $rule[1]);
+            } else {
+                $output .= $rule[0];
             }
         }
 
@@ -59,13 +59,12 @@ class Optimizer {
     /**
      * Parse a stylesheet into an array of segments
      *
-     * A segment with offset 0 with a value of 0 is a unprocessed piece of CSS
-     * that will always be output. Offset 1 will contain the contents of this
-     * piece.
+     * A segment with one element is a unprocessed piece of CSS that will always
+     * be output. Offset 0 will contain the contents of this piece.
      *
-     * A segement with offset 1 with a value of 1 is a processed selector with
-     * body that can potentially be optimized. Offset 1 will contain the pre-
-     * processed selectors (see parseSelectors), and offset 2 will contain the
+     * A segment with two elements is a processed selector with a
+     * body that can potentially be optimized. Offset 0 will contain the pre-
+     * processed selectors (see parseSelectors), and offset 1 will contain the
      * body of this rule.
      *
      * @param $css
@@ -90,14 +89,14 @@ class Optimizer {
 
         foreach ($matches as $match) {
             if ($match[0][1] > $offset) {
-                $stylesheet[] = [0, substr($css, $offset, $match[0][1] - $offset)];
+                $stylesheet[] = [substr($css, $offset, $match[0][1] - $offset)];
             }
-            $stylesheet[] = [1, $this->parseSelectors($match[1][0]), $match[2][0]];
+            $stylesheet[] = [$this->parseSelectors($match[1][0]), $match[2][0]];
             $offset = $match[0][1] + strlen($match[0][0]);
         }
 
         if ($offset < strlen($css)) {
-            $stylesheet[] = [0, substr($css, $offset)];
+            $stylesheet[] = [substr($css, $offset)];
         }
 
         return $stylesheet;
