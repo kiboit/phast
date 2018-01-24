@@ -1,4 +1,5 @@
 <?php
+// TODO: extract common configs outside of filter configs in proper sections
 return [
 
     'securityToken' => null,
@@ -26,6 +27,7 @@ return [
 
         'filters' => [
 
+            // TODO: Fix the Filter/Factory naming mess (do not rely on NS only - it's terrible for autocompletion)
             \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [
                 'rewriteFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH
             ],

@@ -9,6 +9,7 @@ use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
+// TODO: Refactor this test case to reflect current codebase
 class TagsFilterTest extends HTMLFilterTestCase {
 
     const SERVICE_URL = 'http://the-service.org/service.php';
