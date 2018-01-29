@@ -6,7 +6,10 @@ use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\ValueObjects\Resource;
+use Kibo\Phast\ValueObjects\URL;
 
 abstract class BaseService {
     use LoggingTrait;
@@ -22,24 +25,32 @@ abstract class BaseService {
     protected $whitelist = [];
 
     /**
-     * @param array $request
-     * @return Response
+     * @var Retriever
      */
-    abstract protected function handle(array $request);
-
-    protected function getParams(ServiceRequest $request) {
-        return $request->getParams();
-    }
+    protected $retriever;
 
     /**
-     * Service constructor.
-     *
+     * @var ServiceFilter
+     */
+    protected $filter;
+
+    /**
+     * BaseService constructor.
      * @param ServiceSignature $signature
      * @param string[] $whitelist
+     * @param Retriever $retriever
+     * @param ServiceFilter $filter
      */
-    public function __construct(ServiceSignature $signature, array $whitelist) {
+    public function __construct(
+        ServiceSignature $signature,
+        array $whitelist,
+        Retriever $retriever,
+        ServiceFilter $filter
+    ) {
         $this->signature = $signature;
         $this->whitelist = $whitelist;
+        $this->retriever = $retriever;
+        $this->filter = $filter;
     }
 
     /**
@@ -48,7 +59,34 @@ abstract class BaseService {
      */
     public function serve(ServiceRequest $request) {
         $this->validateRequest($request);
-        return $this->handle($this->getParams($request));
+        $request = $this->getParams($request);
+        $resource = Resource::makeWithRetriever(
+            URL::fromString($request['src']),
+            $this->retriever
+        );
+        $filtered = $this->filter->apply($resource, $request);
+        return $this->makeResponse($filtered, $request);
+    }
+
+    /**
+     * @param ServiceRequest $request
+     * @return array
+     */
+    protected function getParams(ServiceRequest $request) {
+        return $request->getParams();
+    }
+
+    /**
+     * @param Resource $resource
+     * @param array $request
+     * @return Response
+     */
+    protected function makeResponse(Resource $resource, array $request) {
+        $response = new Response();
+        $response->setContent($resource->getContent());
+        $response->setHeader('Content-Length', strlen($resource->getContent()));
+        $response->setHeader('Cache-Control', 'max-age=' . (86400 * 365));
+        return $response;
     }
 
     protected  function validateRequest(ServiceRequest $request) {
