@@ -46,7 +46,7 @@ class Filter {
             $this->logger()->info('Finished! Returning filtered image!');
             return $filteredImage;
         }
-        $this->logger()->info('Finished, but filtered image is bigger than original! Returning original!');
+        $this->logger()->info('Finished, but filtered image is not smaller than original! Returning original!');
         return $image;
     }
 
