@@ -9,7 +9,7 @@ use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class CachedFilter  implements ServiceFilter {
+class CachingServiceFilter  implements ServiceFilter {
     use LoggingTrait;
 
     /**

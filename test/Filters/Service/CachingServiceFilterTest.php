@@ -8,7 +8,7 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
-class CachedFilterTest extends TestCase {
+class CachingServiceFilterTest extends TestCase {
 
     const LAST_MODIFICATION_TIME = 123456789;
 
@@ -23,7 +23,7 @@ class CachedFilterTest extends TestCase {
     private $cache;
 
     /**
-     * @var CachedFilter
+     * @var CachingServiceFilter
      */
     private $filter;
 
@@ -51,7 +51,7 @@ class CachedFilterTest extends TestCase {
             ->method('getLastModificationTime')
             ->willReturn(is_null($modTime) ? self::LAST_MODIFICATION_TIME : $modTime);
         $this->cachedServiceFilter = $this->createMock(CachedResultServiceFilter::class);
-        $this->filter = new CachedFilter($this->cache, $this->cachedServiceFilter);
+        $this->filter = new CachingServiceFilter($this->cache, $this->cachedServiceFilter);
     }
 
     public function testCorrectTimeToCache() {
