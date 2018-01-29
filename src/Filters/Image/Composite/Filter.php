@@ -5,11 +5,11 @@ namespace Kibo\Phast\Filters\Image\Composite;
 use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\ImageFilter;
+use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
-use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
-class Filter implements ServiceFilter {
+class Filter implements CachedResultServiceFilter {
     use LoggingTrait;
 
     /**
