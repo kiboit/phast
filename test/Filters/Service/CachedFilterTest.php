@@ -1,10 +1,9 @@
 <?php
 
-namespace Kibo\Phast\Filters\Image\Composite;
+namespace Kibo\Phast\Filters\Service;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
-use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;

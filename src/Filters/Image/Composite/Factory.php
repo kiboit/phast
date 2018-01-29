@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Package;
+use Kibo\Phast\Filters\Service\CachedFilter;
 use Kibo\Phast\Retrievers\LocalRetriever;
 
 class Factory {
