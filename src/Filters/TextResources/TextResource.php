@@ -6,6 +6,7 @@ namespace Kibo\Phast\Filters\TextResources;
 
 use Kibo\Phast\ValueObjects\URL;
 
+// TODO: Subclass for css and js
 class TextResource {
 
     /**

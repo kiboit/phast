@@ -8,6 +8,7 @@ use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ProxyBaseService;
 
+// TODO: Refactor to use common base with css service
 class Service extends ProxyBaseService {
 
     /**
