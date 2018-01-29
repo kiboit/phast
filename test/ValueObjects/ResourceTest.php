@@ -22,19 +22,19 @@ class ResourceTest extends TestCase {
     }
 
     public function testMakeWithContent() {
-        $resource = Resource::makeWithContent($this->url, $this->mimeType, $this->content);
+        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
         $this->checkResource($resource);
     }
 
     public function testMakeWithRetriever() {
         $retriever = $this->makeContentRetriever();
-        $resource = Resource::makeWithRetriever($this->url, $this->mimeType, $retriever);
+        $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType);
         $this->checkResource($resource);
     }
 
     public function testRetrievingOnlyOnce() {
         $retriever = $this->makeContentRetriever();
-        $resource = Resource::makeWithRetriever($this->url, $this->mimeType, $retriever);
+        $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType);
         $resource->getContent();
         $resource->getContent();
     }
@@ -45,18 +45,18 @@ class ResourceTest extends TestCase {
             ->method('getLastModificationTime')
             ->with($this->url)
             ->willReturn(123);
-        $resource = Resource::makeWithRetriever($this->url, $this->mimeType, $retriever);
+        $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType);
 
         $this->assertEquals(123, $resource->getLastModificationTime());
     }
 
     public function testGetLastModificationTimeWithoutRetriever() {
-        $resource = Resource::makeWithContent($this->url, $this->mimeType, $this->content);
+        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
         $this->assertSame(0, $resource->getLastModificationTime());
     }
 
     public function testContentModification() {
-        $resource = Resource::makeWithContent($this->url, $this->mimeType, $this->content);
+        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
         $newResource = $resource->withContent('new-content');
         $this->assertNotSame($newResource, $resource);
         $this->assertSame('new-content', $newResource->getContent());
@@ -64,7 +64,7 @@ class ResourceTest extends TestCase {
     }
 
     public function testContentAndMimeTypeModification() {
-        $resource = Resource::makeWithContent($this->url, $this->mimeType, $this->content);
+        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
         $newResource = $resource->withContent('new-content', 'new-mime-type');
         $this->assertSame('new-content', $newResource->getContent());
         $this->assertSame('new-mime-type', $newResource->getMimeType());

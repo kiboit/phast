@@ -69,8 +69,8 @@ class CachingServiceFilter  implements ServiceFilter {
     private function deserializeResource(array $data) {
         return Resource::makeWithContent(
             URL::fromString($data['url']),
-            $data['mimeType'],
-            base64_decode($data['blob'])
+            base64_decode($data['blob']),
+            $data['mimeType']
         );
     }
 

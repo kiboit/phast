@@ -29,7 +29,7 @@ class Resource {
 
     private function __construct() {}
 
-    public static function makeWithContent(URL $url, $mimeType, $content) {
+    public static function makeWithContent(URL $url, $content, $mimeType = null) {
         $instance = new self();
         $instance->url = $url;
         $instance->mimeType = $mimeType;
@@ -37,7 +37,7 @@ class Resource {
         return $instance;
     }
 
-    public static function makeWithRetriever(URL $url, $mimeType, Retriever $retriever) {
+    public static function makeWithRetriever(URL $url, Retriever $retriever, $mimeType = null) {
         $instance = new self();
         $instance->url = $url;
         $instance->mimeType = $mimeType;

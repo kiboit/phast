@@ -41,7 +41,7 @@ class CachingServiceFilterTest extends TestCase {
         parent::setUp();
         $this->resourceArr = [
             'url' => 'http://cache.phast.test',
-            'mimeType' => 'asd',
+            'mimeType' => 'the-mime-type',
             'blob' => base64_encode('the-blob'),
             'dataType' => 'resource'
         ];
@@ -88,7 +88,7 @@ class CachingServiceFilterTest extends TestCase {
     }
 
     public function testReturningResourceFromCache() {
-        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'mime1', 'the-content');
+        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content');
         $this->cache->expects($this->once())
             ->method('get')
             ->willReturn($this->resourceArr);
@@ -99,7 +99,7 @@ class CachingServiceFilterTest extends TestCase {
     }
 
     public function testReturningFromFilter() {
-        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'mime1', 'the-content');
+        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content');
         $this->cachedServiceFilter->expects($this->once())
             ->method('apply')
             ->with($originalResource, [])

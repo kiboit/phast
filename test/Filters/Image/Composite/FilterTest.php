@@ -39,7 +39,7 @@ class FilterTest extends TestCase {
         $this->image = new DummyImage();
         $this->image->setImageString('The test image');
 
-        $this->resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'mime', 'the-content');
+        $this->resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content');
         $factory = $this->createMock(ImageFactory::class);
         $factory->method('getForResource')
             ->with($this->resource)
@@ -125,7 +125,7 @@ class FilterTest extends TestCase {
             ->method('getLastModificationTime')
             ->with($url)
             ->willReturn($modTime);
-        $resource = Resource::makeWithRetriever($url, 'mime', $retriever);
+        $resource = Resource::makeWithRetriever($url, $retriever, 'mime');
         $filters = [
             $this->createMock(ImageFilter::class),
             $this->createMock(ImageFilter::class)
