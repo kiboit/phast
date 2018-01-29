@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\ValueObjects;
 
-
 use Kibo\Phast\Retrievers\Retriever;
 
 class Resource {

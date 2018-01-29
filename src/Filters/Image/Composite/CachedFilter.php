@@ -4,14 +4,13 @@ namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
-use Kibo\Phast\Filters\Image\Image;
-use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
+use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
-use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class CachedFilter  {
+class CachedFilter  implements ServiceFilter {
     use LoggingTrait;
 
     /**
@@ -20,41 +19,35 @@ class CachedFilter  {
     private $cache;
 
     /**
-     * @var Retriever
+     * @var CachedResultServiceFilter
      */
-    private $retriever;
+    private $cachedFilter;
 
     /**
-     * @var array
-     */
-    private $filtersNames = [];
-
-    /**
-     * CachedCompositeImageFilter constructor.
-     *
+     * CachedFilter constructor.
      * @param Cache $cache
-     * @param Retriever $retriever
+     * @param CachedResultServiceFilter $cachedFilter
      */
-    public function __construct(Cache $cache, Retriever $retriever) {
+    public function __construct(Cache $cache, CachedResultServiceFilter $cachedFilter) {
         $this->cache = $cache;
-        $this->retriever = $retriever;
+        $this->cachedFilter = $cachedFilter;
     }
 
+
     /**
-     * @param Image $image
+     * @param Resource $resource
      * @param array $request
-     * @return Image
+     * @return Resource
      * @throws CachedExceptionException
      */
-    public function apply(Image $image, array $request) {
-        $resource = Resource::makeWithRetriever(URL::fromString($request['src']), 'image/jpeg', $this->retriever);
-        $key = ''; //parent::getCacheHash($resource, $request);
-        $this->logger()->info('Trying to get {url} from cache', ['url' => $request['src']]);
-        $result = $this->cache->get($key, function () use ($image, $request) {
+    public function apply(Resource $resource, array $request) {
+        $key = $this->cachedFilter->getCacheHash($resource, $request);
+        $this->logger()->info('Trying to get {url} from cache', ['url' => (string)$resource->getUrl()]);
+        $result = $this->cache->get($key, function () use ($resource, $request) {
             $this->logger()->info('Cache missed!');
             try {
-                return 'test';
-                //return $this->serializeImage(parent::apply($image, $request));
+                $resource = $this->cachedFilter->apply($resource, $request);
+                return $this->serializeResource($resource);
             } catch (\Exception $e) {
                 return $this->serializeException($e);
             }
@@ -62,24 +55,24 @@ class CachedFilter  {
         if ($result['dataType'] == 'exception') {
             throw $this->deserializeException($result);
         }
-        return $this->deserializeImage($result);
+        return $this->deserializeResource($result);
     }
 
-    private function serializeImage(Image $image) {
+    private function serializeResource(Resource $resource) {
         return [
-            'dataType' => 'image',
-            'width' => $image->getWidth(),
-            'height' => $image->getHeight(),
-            'type' => $image->getType(),
-            'blob' => base64_encode($image->getAsString())
+            'dataType' => 'resource',
+            'url' => $resource->getUrl()->toString(),
+            'mimeType' => $resource->getMimeType(),
+            'blob' => base64_encode($resource->getContent())
         ];
     }
 
-    private function deserializeImage(array $data) {
-        $image = new DummyImage($data['width'], $data['height']);
-        $image->setType($data['type']);
-        $image->setImageString(base64_decode($data['blob']));
-        return $image;
+    private function deserializeResource(array $data) {
+        return Resource::makeWithContent(
+            URL::fromString($data['url']),
+            $data['mimeType'],
+            base64_decode($data['blob'])
+        );
     }
 
     private function serializeException(\Exception $e) {

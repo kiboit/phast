@@ -4,25 +4,19 @@ namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
-use Kibo\Phast\Filters\Image\Image;
-use Kibo\Phast\Filters\Image\ImageFilter;
-use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
-use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
-use SebastianBergmann\GlobalState\RuntimeException;
 
 class CachedFilterTest extends TestCase {
 
     const LAST_MODIFICATION_TIME = 123456789;
 
-    private $imageArr = [
-        'width' => 100,
-        'height' => 100,
-        'type' => 'asd',
-        'blob' => 'the-blob',
-        'dataType' => 'image'
-    ];
+    /**
+     * @var array
+     */
+    private $resourceArr;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -30,32 +24,35 @@ class CachedFilterTest extends TestCase {
     private $cache;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    private $retriever;
-
-    /**
      * @var CachedFilter
      */
     private $filter;
 
     /**
-     * @var array
+     * @var Resource
      */
-    private $request;
+    private $resource;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $cachedServiceFilter;
 
     public function setUp($modTime = null) {
-        $this->markTestSkipped();
         parent::setUp();
+        $this->resourceArr = [
+            'url' => 'http://cache.phast.test',
+            'mimeType' => 'asd',
+            'blob' => base64_encode('the-blob'),
+            'dataType' => 'resource'
+        ];
         $this->cache = $this->createMock(Cache::class);
-        $this->request = ['src' => 'the-src'];
-        $this->retriever = $this->createMock(Retriever::class);
-        $this->retriever->method('getLastModificationTime')
-            ->willReturnCallback(function (URL $url) use ($modTime) {
-                $this->assertEquals('the-src', $url->getPath());
-                return is_null($modTime) ? self::LAST_MODIFICATION_TIME : $modTime;
-            });
-        $this->filter = new CachedFilter($this->cache, $this->retriever);
+        $this->resource = $this->createMock(Resource::class);
+        $this->resource
+            ->method('getLastModificationTime')
+            ->willReturn(is_null($modTime) ? self::LAST_MODIFICATION_TIME : $modTime);
+        $this->cachedServiceFilter = $this->createMock(CachedResultServiceFilter::class);
+        $this->filter = new CachedFilter($this->cache, $this->cachedServiceFilter);
     }
 
     public function testCorrectTimeToCache() {
@@ -63,99 +60,66 @@ class CachedFilterTest extends TestCase {
             ->method('get')
             ->willReturnCallback(function ($key, callable $cb, $ttl) {
                 $this->assertEquals(0, $ttl);
-                return $this->imageArr;
+                return $this->resourceArr;
             });
-        $this->filter->apply(new DummyImage(), $this->request);
+        $this->filter->apply($this->resource, []);
 
         $this->setUp(0);
         $this->cache->expects($this->once())
             ->method('get')
             ->willReturnCallback(function ($key, callable $cb, $ttl) {
                 $this->assertEquals(86400, $ttl);
-                return $this->imageArr;
+                return $this->resourceArr;
             });
-        $this->filter->apply(new DummyImage(), $this->request);
+        $this->filter->apply($this->resource, []);
     }
 
-    /**
-     * @dataProvider correctHashData
-     */
-    public function testCorrectHash(array $params) {
-        $request = array_merge($this->request, $params);
-        $this->filter = new CachedFilter($this->cache, $this->retriever);
-        $filters = [
-            $this->createMock(ImageFilter::class),
-            $this->createMock(ImageFilter::class)
-        ];
-        $this->filter->addImageFilter($filters[1]);
-        $this->filter->addImageFilter($filters[0]);
-
+    public function testCorrectHash() {
+        $this->cachedServiceFilter->expects($this->once())
+            ->method('getCacheHash')
+            ->with($this->resource, [])
+            ->willReturn('the-hash');
         $this->cache->expects($this->once())
             ->method('get')
             ->willReturnCallback(function ($key) {
-                $this->checkHashKey($key);
-                return $this->imageArr;
+                $this->assertEquals('the-hash', $key);
+                return $this->resourceArr;
             });
-        $this->filter->apply(new DummyImage(), $request);
+        $this->filter->apply($this->resource, []);
     }
 
-    public function correctHashData() {
-        return [
-            [['height' => 'the-height']],
-            [['height' => 'the-height', 'width' => 'the-width']],
-            [['height' => 'the-height', 'width' => 'the-width', 'preferredType' => 'the-type']],
-            [['height' => 'the-height-1', 'width' => 'the-width-1', 'preferredType' => 'the-type-1']]
-        ];
+    public function testReturningResourceFromCache() {
+        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'mime1', 'the-content');
+        $this->cache->expects($this->once())
+            ->method('get')
+            ->willReturn($this->resourceArr);
+        $actual = $this->filter->apply($originalResource, []);
+        $this->assertEquals($this->resourceArr['url'], $actual->getUrl());
+        $this->assertEquals($this->resourceArr['mimeType'], $actual->getMimeType());
+        $this->assertEquals(base64_decode($this->resourceArr['blob']), $actual->getContent());
     }
 
-    private function checkHashKey($key) {
-        static $lastKey = null;
-        $this->assertNotEquals($lastKey, $key);
-        $lastKey = $key;
-    }
-
-    public function testReturningImageFromCache() {
-        $originalImage = new DummyImage(200, 200);
-        $originalImage->setImageString('non-filtered');
-        $originalImage->setTransformationString('filtered');
-        $originalImage->setType('the-type');
-
-        $filter = $this->createMock(ImageFilter::class);
-        $filter->expects($this->once())
-            ->method('transformImage')
-            ->with($originalImage)
-            ->willReturn($originalImage->resize(100, 200));
-        $this->filter->addImageFilter($filter);
-
-        $cache = [];
-        $this->cache->method('get')
-            ->willReturnCallback(function ($key, $cb) use (&$cache) {
-                if (isset ($cache[$key])) {
-                    return json_decode($cache[$key], true);
-                }
-                $content = $cb();
-                $cache[$key] = json_encode($content);
-                return $content;
+    public function testReturningFromFilter() {
+        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'mime1', 'the-content');
+        $this->cachedServiceFilter->expects($this->once())
+            ->method('apply')
+            ->with($originalResource, [])
+            ->willReturn($originalResource);
+        $this->cache->expects($this->once())
+            ->method('get')
+            ->willReturnCallback(function ($hash, callable $cb) {
+                return $cb();
             });
-        $notCached = $this->filter->apply($originalImage, $this->request);
-        $cached = $this->filter->apply($originalImage, $this->request);
-
-        $this->assertNotSame($notCached, $originalImage);
-        $this->assertNotSame($cached, $originalImage);
-        $this->assertNotSame($cached, $notCached);
-
-        foreach ([$notCached, $cached] as $output) {
-            $this->assertEquals('the-type', $output->getType());
-            $this->assertEquals(100, $output->getWidth());
-            $this->assertEquals(200, $output->getHeight());
-            $this->assertEquals('filtered', $output->getAsString());
-        }
-
+        $actual = $this->filter->apply($originalResource, []);
+        $this->assertSame($originalResource->getUrl()->toString(), $actual->getUrl()->toString());
+        $this->assertSame($originalResource->getMimeType(), $actual->getMimeType());
+        $this->assertSame($originalResource->getContent(), $actual->getContent());
     }
 
     public function testCachingExceptions() {
-        $image = $this->createMock(Image::class);
-        $image->method('getAsString')->willThrowException(new RuntimeException());
+        $this->cachedServiceFilter->expects($this->once())
+            ->method('apply')
+            ->willThrowException(new \RuntimeException());
         $cache = [];
         $this->cache->expects($this->exactly(2))
             ->method('get')
@@ -168,12 +132,12 @@ class CachedFilterTest extends TestCase {
 
         $thrown = 0;
         try {
-            $this->filter->apply($image, $this->request);
+            $this->filter->apply($this->resource, []);
         } catch (CachedExceptionException $e) {
             $thrown++;
         }
         try {
-            $this->filter->apply($image, $this->request);
+            $this->filter->apply($this->resource, []);
         } catch (CachedExceptionException $e) {
             $thrown++;
         }
