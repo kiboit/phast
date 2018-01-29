@@ -45,6 +45,7 @@ class CachedFilterTest extends TestCase {
     private $request;
 
     public function setUp($modTime = null) {
+        $this->markTestSkipped();
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
         $this->request = ['src' => 'the-src'];

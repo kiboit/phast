@@ -3,28 +3,63 @@
 namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
-use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Services\ServiceFilter;
+use Kibo\Phast\ValueObjects\Resource;
 
-class Filter {
+class Filter implements ServiceFilter {
     use LoggingTrait;
+
+    /**
+     * @var ImageFactory
+     */
+    private $imageFactory;
 
     /**
      * @var ImageFilter[]
      */
     private $filters = [];
 
+    /**
+     * Filter constructor.
+     * @param ImageFactory $imageFactory
+     */
+    public function __construct(ImageFactory $imageFactory) {
+        $this->imageFactory = $imageFactory;
+    }
+
     public function addImageFilter(ImageFilter $filter) {
         $this->filters[] = $filter;
     }
 
+    public function getCacheHash(Resource $resource, array $request) {
+        $lastModTime = $resource->getLastModificationTime();
+        $filtersNames = array_map('get_class', $this->filters);
+        sort($filtersNames);
+        $key = array_merge([$lastModTime, (string)$resource->getUrl()], $filtersNames);
+        if (isset ($request['width'])) {
+            $key[] = $request['width'];
+        }
+        if (isset ($request['height'])) {
+            $key[] = $request['height'];
+        }
+        if (isset ($request['preferredType'])) {
+            $key[] = $request['preferredType'];
+        }
+        $key = implode("\n", $key);
+        return $key;
+    }
+
+
     /**
-     * @param Image $image
+     * @param Resource $resource
      * @param array $request
-     * @return Image
+     * @return Resource
      */
-    public function apply(Image $image, array $request) {
+    public function apply(Resource $resource, array $request) {
+        $image = $this->imageFactory->getForResource($resource);
         $filteredImage = $image;
         foreach ($this->filters as $filter) {
             $this->logger()->info('Applying {filter}', ['filter' => get_class($filter)]);
@@ -44,10 +79,10 @@ class Filter {
         }
         if ($filteredImage->getSizeAsString() < $image->getSizeAsString()) {
             $this->logger()->info('Finished! Returning filtered image!');
-            return $filteredImage;
+            $image = $filteredImage;
         }
         $this->logger()->info('Finished, but filtered image is not smaller than original! Returning original!');
-        return $image;
+        return $resource->withContent($image->getAsString(), $image->getType());
     }
 
 }

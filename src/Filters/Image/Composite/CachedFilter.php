@@ -5,12 +5,14 @@ namespace Kibo\Phast\Filters\Image\Composite;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
 use Kibo\Phast\Filters\Image\Image;
-use Kibo\Phast\Filters\Image\ImageFilter;
 use Kibo\Phast\Filters\Image\ImageImplementations\DummyImage;
+use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class CachedFilter extends Filter {
+class CachedFilter  {
+    use LoggingTrait;
 
     /**
      * @var Cache
@@ -39,43 +41,24 @@ class CachedFilter extends Filter {
     }
 
     /**
-     * @param ImageFilter $filter
-     */
-    public function addImageFilter(ImageFilter $filter) {
-        parent::addImageFilter($filter);
-        $this->filtersNames[] = get_class($filter);
-    }
-
-    /**
      * @param Image $image
      * @param array $request
      * @return Image
      * @throws CachedExceptionException
      */
     public function apply(Image $image, array $request) {
-        $url = URL::fromString($request['src']);
-        $lastModTime = $this->retriever->getLastModificationTime($url);
-        sort($this->filtersNames);
-        $key = array_merge([$lastModTime, $request['src']], $this->filtersNames);
-        if (isset ($request['width'])) {
-            $key[] = $request['width'];
-        }
-        if (isset ($request['height'])) {
-            $key[] = $request['height'];
-        }
-        if (isset ($request['preferredType'])) {
-            $key[] = $request['preferredType'];
-        }
-        $key = implode("\n", $key);
+        $resource = Resource::makeWithRetriever(URL::fromString($request['src']), 'image/jpeg', $this->retriever);
+        $key = ''; //parent::getCacheHash($resource, $request);
         $this->logger()->info('Trying to get {url} from cache', ['url' => $request['src']]);
         $result = $this->cache->get($key, function () use ($image, $request) {
             $this->logger()->info('Cache missed!');
             try {
-                return $this->serializeImage(parent::apply($image, $request));
+                return 'test';
+                //return $this->serializeImage(parent::apply($image, $request));
             } catch (\Exception $e) {
                 return $this->serializeException($e);
             }
-        }, $lastModTime ? 0 : 86400);
+        }, $resource->getLastModificationTime() ? 0 : 86400);
         if ($result['dataType'] == 'exception') {
             throw $this->deserializeException($result);
         }

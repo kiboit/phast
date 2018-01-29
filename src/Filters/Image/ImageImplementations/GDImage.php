@@ -61,6 +61,7 @@ class GDImage extends BaseImage implements Image {
      * @param URL $imageURL
      * @param Retriever $retriever
      */
+    // TODO: Make it work with an Resource instead of URL and Retriever
     public function __construct(URL $imageURL, Retriever $retriever, ObjectifiedFunctions $funcs = null) {
         $this->imageURL = $imageURL;
         $this->retriever = $retriever;
