@@ -30,7 +30,6 @@ class Resource {
 
     private function __construct() {}
 
-    // TODO: Figure out if we really need this
     public static function makeWithContent(URL $url, $content, $mimeType = null) {
         $instance = new self();
         $instance->url = $url;
