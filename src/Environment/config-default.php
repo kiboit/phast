@@ -48,8 +48,6 @@ return [
 
             \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ScriptsRearrangement\Filter::class => [],
-
             \Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter::class => [
                 'urlRefreshTime' => 7200,
                 'match' => [
