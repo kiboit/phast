@@ -153,20 +153,22 @@ class GDImage extends BaseImage implements Image {
 
     private function getImageInfo() {
         if (!isset ($this->imageInfo)) {
-            $this->imageInfo = @getimagesizefromstring($this->getImageString());
-            if ($this->imageInfo === false) {
+            $imageInfo = @getimagesizefromstring($this->getImageString());
+            if ($imageInfo === false) {
                 throw new ImageProcessingException('Could not read GD image info');
             }
+            $this->imageInfo = $imageInfo;
         }
         return $this->imageInfo;
     }
 
     private function getImageString() {
         if (!isset ($this->imageString)) {
-            $this->imageString = $this->retriever->retrieve($this->imageURL);
-            if ($this->imageString === false) {
+            $imageString = $this->retriever->retrieve($this->imageURL);
+            if ($imageString === false) {
                 throw new ItemNotFoundException('Could not find image: ' . $this->imageURL, 0, null, $this->imageURL);
             }
+            $this->imageString = $imageString;
         }
         return $this->imageString;
     }
