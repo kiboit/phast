@@ -1,6 +1,5 @@
 <?php
 
-// TODO: Capitalize the css ns
 namespace Kibo\Phast\Services\Css;
 
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
