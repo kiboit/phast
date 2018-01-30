@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Kibo\Phast\Filters\TextResources;
+namespace Kibo\Phast\Filters\CSS;
 
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;

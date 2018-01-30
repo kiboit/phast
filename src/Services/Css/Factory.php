@@ -6,7 +6,7 @@ use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriterFactory;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
-use Kibo\Phast\Filters\TextResources\Composite\Factory as CSSCompositeFilterFactory;
+use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFilterFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;

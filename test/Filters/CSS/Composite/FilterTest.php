@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Filters\TextResources\Composite;
+namespace Kibo\Phast\Filters\CSS\Composite;
 
 
 use Kibo\Phast\Services\ServiceFilter;

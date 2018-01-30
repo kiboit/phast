@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Kibo\Phast\Filters\TextResources\Composite;
+namespace Kibo\Phast\Filters\CSS\Composite;
 
 class Factory {
 

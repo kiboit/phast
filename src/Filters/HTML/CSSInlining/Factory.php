@@ -4,7 +4,7 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
-use Kibo\Phast\Filters\TextResources\Composite\Factory as CSSCompositeFactory;
+use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
