@@ -35,40 +35,30 @@ class Optimizer {
         }
 
         $output = '';
-        $selectors = [];
+        $selectors = null;
 
         foreach ($stylesheet as $element) {
             if (is_array($element)) {
-                $selectors[] = $element;
-            } elseif ($selectors) {
-                $output .= $this->optimizeRule($selectors, $element);
-                $selectors = [];
+                if ($selectors === null) {
+                    $selectors = [];
+                }
+                foreach ($element as $i => $class) {
+                    if ($i !== 0 && !isset($this->usedClasses[$class])) {
+                        continue 2;
+                    }
+                }
+                $selectors[] = $element[0];
+            } elseif ($selectors !== null) {
+                if (isset($selectors[0])) {
+                    $output .= implode(',', $selectors) . $element;
+                }
+                $selectors = null;
             } else {
                 $output .= $element;
             }
         }
 
         return trim($output);
-    }
-
-    private function optimizeRule(array $selectors, $body) {
-        $new_selectors = [];
-
-        foreach ($selectors as $classes) {
-            foreach ($classes as $i => $class) {
-                if ($i != 0 && !isset($this->usedClasses[$class])) {
-                    continue 2;
-                }
-            }
-
-            $new_selectors[] = $classes[0];
-        }
-
-        if ($new_selectors) {
-            return implode(',', $new_selectors) . $body;
-        }
-
-        return '';
     }
 
     /**
