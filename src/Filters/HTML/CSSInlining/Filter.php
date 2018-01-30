@@ -5,12 +5,12 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
-use Kibo\Phast\Filters\TextResources\TextResource;
-use Kibo\Phast\Filters\TextResources\TextResourceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements HTMLFilter {
@@ -134,7 +134,7 @@ EOJS;
     private $optimizerFactory;
 
     /**
-     * @var TextResourceFilter
+     * @var ServiceFilter
      */
     private $cssFilter;
 
@@ -149,7 +149,7 @@ EOJS;
         array $config,
         Retriever $retriever,
         OptimizerFactory $optimizerFactory,
-        TextResourceFilter $cssFilter
+        ServiceFilter $cssFilter
     ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
@@ -213,7 +213,7 @@ EOJS;
 
     private function inlineStyle(\DOMElement $style) {
         $processed = $this->cssFilter
-            ->transform(new TextResource($this->baseURL, $style->textContent))
+            ->apply(Resource::makeWithContent($this->baseURL, $style->textContent), [])
             ->getContent();
         $elements = $this->inlineCSS(
             $style->ownerDocument,
@@ -283,7 +283,7 @@ EOJS;
         }
 
 
-        $content = $this->cssFilter->transform(new TextResource($url, $content))
+        $content = $this->cssFilter->apply(Resource::makeWithContent($url, $content), [])
             ->getContent();
         $content = $this->optimizer->optimizeCSS($content);
         if (is_null($content)) {

@@ -4,9 +4,9 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
-use Kibo\Phast\Filters\TextResources\TextResourceFilter;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
@@ -65,8 +65,8 @@ class FilterTest extends HTMLFilterTestCase {
                        : $this->optimizerMock;
             });
 
-        $cssFilter = $this->createMock(TextResourceFilter::class);
-        $cssFilter->method('transform')
+        $cssFilter = $this->createMock(ServiceFilter::class);
+        $cssFilter->method('apply')
             ->willReturnCallback(function ($css) {
                 $this->cssFilterCalledTimes++;
                 return $css;
@@ -372,6 +372,8 @@ EOS;
 
     /**
      * @dataProvider whitelistedImportProvider
+     * @param $importFormat
+     * @param $importUrl
      */
     public function testWhitelistedImport($importFormat, $importUrl) {
         $css = '

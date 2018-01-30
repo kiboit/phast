@@ -5,6 +5,7 @@ namespace Kibo\Phast\Services\Css;
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriterFactory;
+use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Filters\TextResources\Composite\Factory as CSSCompositeFilterFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
@@ -25,11 +26,19 @@ class Factory {
                 7200
             )
         );
+
+        $composite = (new CSSCompositeFilterFactory())->make($config);
+        $caching = new CachingServiceFilter(
+            new Cache($config['cache'], 'css-processing'),
+            $composite
+        );
+
         return new Service(
             (new ServiceSignatureFactory())->make($config),
+            [],
             $retriever,
-            (new ImageURLRewriterFactory())->make($config, Filter::class),
-            (new CSSCompositeFilterFactory())->make($config)
+            $caching,
+            (new ImageURLRewriterFactory())->make($config, Filter::class)
         );
     }
 

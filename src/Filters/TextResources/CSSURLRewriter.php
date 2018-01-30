@@ -3,13 +3,20 @@
 
 namespace Kibo\Phast\Filters\TextResources;
 
+use Kibo\Phast\Services\ServiceFilter;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class CSSURLRewriter implements TextResourceFilter {
+class CSSURLRewriter implements ServiceFilter {
 
 
-    public function transform(TextResource $resource) {
-        $baseUrl = $resource->getLocation();
+    /**
+     * @param Resource $resource
+     * @param array $request
+     * @return Resource
+     */
+    public function apply(Resource $resource, array $request) {
+        $baseUrl = $resource->getUrl();
         $callback = function($match) use ($baseUrl) {
             if (preg_match('~^[a-z]+:~i', $match[3])) {
                 return $match[0];
@@ -38,7 +45,7 @@ class CSSURLRewriter implements TextResourceFilter {
             $cssContent
         );
 
-        return $resource->modifyContent($cssContent);
+        return $resource->withContent($cssContent);
     }
 
 }

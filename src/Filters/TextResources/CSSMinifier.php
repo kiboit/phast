@@ -2,14 +2,17 @@
 
 namespace Kibo\Phast\Filters\TextResources;
 
-class CSSMinifier implements TextResourceFilter {
+use Kibo\Phast\Services\ServiceFilter;
+use Kibo\Phast\ValueObjects\Resource;
 
+class CSSMinifier implements ServiceFilter {
 
     /**
-     * @param TextResource $resource
-     * @return TextResource
+     * @param Resource $resource
+     * @param array $request
+     * @return Resource
      */
-    public function transform(TextResource $resource) {
+    public function apply(Resource $resource, array $request) {
         // TODO: Extract the comments removal in separate filter
         // TODO: Ensure comments removal on all css processing (somehow)
         // Remove comments
@@ -28,7 +31,7 @@ class CSSMinifier implements TextResourceFilter {
         // Remove whitespace after colons
         $content = str_replace(': ', ':', $content);
 
-        return $resource->modifyContent(trim($content));
+        return $resource->withContent(trim($content));
     }
 
 }

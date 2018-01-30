@@ -3,31 +3,37 @@
 
 namespace Kibo\Phast\Filters\TextResources\Composite;
 
-use Kibo\Phast\Filters\TextResources\TextResource;
-use Kibo\Phast\Filters\TextResources\TextResourceFilter;
+use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Services\ServiceFilter;
+use Kibo\Phast\ValueObjects\Resource;
 
-// TODO: create a cached version of this one
-class Filter implements TextResourceFilter {
+class Filter implements CachedResultServiceFilter {
     use LoggingTrait;
 
     protected $filters = [];
 
-    public function addFilter(TextResourceFilter $filter) {
+    public function addFilter(ServiceFilter $filter) {
         $this->filters[] = $filter;
     }
 
-    public function transform(TextResource $resource) {
-        $this->logger()->info('Starting filtering for resource {url}', ['url' => $resource->getLocation()]);
+    public function getCacheHash(Resource $resource, array $request) {
+        $parts = array_map('get_class', $this->filters);
+        $parts[] = md5($resource->getContent());
+        return join("\n", $parts);
+    }
+
+    public function apply(Resource $resource, array $request) {
+        $this->logger()->info('Starting filtering for resource {url}', ['url' => $resource->getUrl()]);
         $result = array_reduce(
             $this->filters,
-            function (TextResource $resource, TextResourceFilter $filter) {
+            function (Resource $resource, ServiceFilter $filter) use ($request) {
                 $this->logger()->info('Starting {filter}', ['filter' => get_class($filter)]);
-                return $filter->transform($resource);
+                return $filter->apply($resource, $request);
             },
             $resource
         );
-        $this->logger()->info('Done filtering for resource {url}', ['url' => $resource->getLocation()]);
+        $this->logger()->info('Done filtering for resource {url}', ['url' => $resource->getUrl()]);
         return $result;
     }
 
