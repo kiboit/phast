@@ -6,7 +6,7 @@ interface Cache {
 
     /**
      * @param $hashedKey
-     * @param callable $cached
+     * @param callable|null $cached
      * @param int $expiresIn
      * @return mixed
      */
