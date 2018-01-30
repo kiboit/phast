@@ -61,6 +61,19 @@ class ServiceTest extends TestCase {
         $this->assertEquals('the-content', $result->getContent());
     }
 
+    public function testFetchingInjectedScript() {
+        $httpRequest = Request::fromArray(['src' => 'http://allowed.com/the-script', 'id' => '1'], []);
+        $this->retriever->expects($this->once())
+                        ->method('retrieve')
+                        ->willReturnCallback(function (URL $url) {
+                            $this->assertEquals('http://allowed.com/the-script', (string)$url);
+                            return 'the-content';
+                        });
+        $result = $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
+        $this->assertContains('data-phast-proxied-script', $result->getContent());
+        $this->assertContains('the-content', $result->getContent());
+    }
+
     public function testExceptionOnNotAllowedURL() {
         $this->expectException(UnauthorizedException::class);
         $request = ['src' => 'http://not-allowed.com/the-script', 'cacheMarker' => 123456789];
