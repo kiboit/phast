@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\LogEntry;
@@ -21,7 +22,7 @@ class FilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new Filter(self::MAX_BUFFER_SIZE_TO_APPLY);
+        $this->filter = new Filter(self::MAX_BUFFER_SIZE_TO_APPLY, new DOMDocument());
     }
 
     public function testShouldApplyOnHTML() {

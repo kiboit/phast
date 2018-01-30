@@ -2,15 +2,44 @@
 
 namespace Kibo\Phast\Common;
 
+use Kibo\Phast\ValueObjects\URL;
+
 class DOMDocument extends \DOMDocument {
 
     private $xpath;
+
+    /**
+     * @var URL
+     */
+    private $documentLocation;
+
+    /**
+     * @param URL $documentLocation
+     * @return DOMDocument
+     */
+    public static function makeForLocation(URL $documentLocation) {
+        $instance = new self();
+        $instance->documentLocation = $documentLocation;
+        return $instance;
+    }
 
     public function query($query) {
         if (!isset($this->xpath)) {
             $this->xpath = new \DOMXPath($this);
         }
         return $this->xpath->query($query);
+    }
+
+    /**
+     * @return URL
+     */
+    public function getBaseURL() {
+        $bases = $this->query('//base');
+        if ($bases->length > 0) {
+            $baseHref = URL::fromString($bases->item(0)->getAttribute('href'));
+            return $baseHref->withBase($this->documentLocation);
+        }
+        return $this->documentLocation;
     }
 
 }

@@ -111,6 +111,21 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->assertEquals('http://other.place/img.png, http://place3.place/img.png', $img->getAttribute('srcset'));
     }
 
+    public function testRespectingBaseTagInSrc() {
+        $this->addBaseTag('/new-root/');
+        $img = $this->makeImage('the-image.jpg');
+        $this->filter->transformHTMLDOM($this->dom);
+        $this->checkSrc($img->getAttribute('src'), ['src' => self::BASE_URL . '/new-root/the-image.jpg']);
+    }
+
+    public function testRespectingBaseTagInSrcset() {
+        $this->addBaseTag('/new-root/');
+        $img = $this->makeImage('the-image.jpg');
+        $img->setAttribute('srcset', 'the-image.jpg');
+        $this->filter->transformHTMLDOM($this->dom);
+        $this->checkSrc($img->getAttribute('srcset'), ['src' => self::BASE_URL . '/new-root/the-image.jpg']);
+    }
+
     private function makeImage($src, $width = null, $height = null) {
         $img = $this->dom->createElement('img');
         $img->setAttribute('src', $src);

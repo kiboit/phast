@@ -2,13 +2,17 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
-use Kibo\Phast\Common\FactoryTrait;
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Environment\Package;
+use Kibo\Phast\ValueObjects\URL;
 
 class Factory {
 
     public function make(array $config) {
-        $composite = new Filter($config['documents']['maxBufferSizeToApply']);
+        $composite = new Filter(
+            $config['documents']['maxBufferSizeToApply'],
+            DOMDocument::makeForLocation(URL::fromString($config['documents']['baseUrl']))
+        );
         foreach (array_keys($config['documents']['filters']) as $class) {
             $package = Package::fromPackageClass($class);
             if ($package->hasFactory()) {

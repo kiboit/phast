@@ -11,6 +11,11 @@ class Filter {
     use LoggingTrait;
 
     /**
+     * @var DOMDocument
+     */
+    private $dom;
+
+    /**
      * @var ObjectifiedFunctions
      */
     private $functions;
@@ -30,8 +35,9 @@ class Filter {
      *
      * @param int $maxBufferSizeToApply
      */
-    public function __construct($maxBufferSizeToApply, ObjectifiedFunctions $functions = null) {
+    public function __construct($maxBufferSizeToApply, DOMDocument $dom, ObjectifiedFunctions $functions = null) {
         $this->maxBufferSizeToApply = $maxBufferSizeToApply;
+        $this->dom = $dom;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
@@ -94,7 +100,7 @@ class Filter {
         $fixedBuffer = $this->fixIllegalSelfClosingTags($fixedBuffer);
 
         $xmlErrors = libxml_use_internal_errors(true);
-        $doc = new DOMDocument();
+        $doc = $this->dom;
         $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
 
         $timings = [];

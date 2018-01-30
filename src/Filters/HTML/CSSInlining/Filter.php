@@ -177,7 +177,7 @@ EOJS;
         $links = iterator_to_array($document->query('//link'));
         $styles = iterator_to_array($document->query('//style'));
         foreach ($links as $link) {
-            $this->inlineLink($link);
+            $this->inlineLink($link, $document->getBaseURL());
         }
         foreach ($styles as $style) {
             $this->inlineStyle($style);
@@ -190,7 +190,7 @@ EOJS;
         }
     }
 
-    private function inlineLink(\DOMElement $link) {
+    private function inlineLink(\DOMElement $link, URL $baseUrl) {
         if (!$link->hasAttribute('rel')
             || $link->getAttribute('rel') != 'stylesheet'
             || !$link->hasAttribute('href')
@@ -198,7 +198,7 @@ EOJS;
             return;
         }
 
-        $location = URL::fromString($link->getAttribute('href'))->withBase($this->baseURL);
+        $location = URL::fromString($link->getAttribute('href'))->withBase($baseUrl);
 
         if (!$this->findInWhitelist($location)) {
             return;

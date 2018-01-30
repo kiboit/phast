@@ -465,6 +465,22 @@ EOS;
         $this->assertContains('ü', $this->dom->saveHTML($this->dom->firstChild));
     }
 
+    public function testRespectingBaseTag() {
+        $this->addBaseTag('/new-root/');
+        $link = $this->dom->createElement('link');
+        $link->setAttribute('rel', 'stylesheet');
+        $link->setAttribute('href', 'the-css-file.css');
+        $this->head->appendChild($link);
+
+        $this->files['/new-root/the-css-file.css'] = 'the-css-content';
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $styles = $this->dom->getElementsByTagName('style');
+        $this->assertEquals(1, $styles->length);
+        $this->assertEquals('the-css-content', $styles->item(0)->textContent);
+
+    }
+
     /**
      * @param \DOMElement $parent
      * @param string $content

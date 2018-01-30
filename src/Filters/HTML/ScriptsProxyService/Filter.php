@@ -66,21 +66,19 @@ EOS;
     /**
      * ScriptProxyServiceHTMLFilter constructor.
      *
-     * @param URL $baseUrl
      * @param array $config
      * @param ObjectifiedFunctions|null $functions
      */
     public function __construct(
-        URL $baseUrl,
         array $config,
         ObjectifiedFunctions $functions = null
     ) {
-        $this->baseUrl = $baseUrl;
         $this->config = $config;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
     public function transformHTMLDOM(DOMDocument $document) {
+        $this->baseUrl = $document->getBaseURL();
         $scripts = iterator_to_array($document->query('//script'));
         $didInject = false;
         foreach ($scripts as $script) {

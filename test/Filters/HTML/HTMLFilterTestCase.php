@@ -2,6 +2,8 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class HTMLFilterTestCase extends TestCase {
@@ -31,13 +33,20 @@ class HTMLFilterTestCase extends TestCase {
     public function setUp() {
         parent::setUp();
 
-        $this->dom = new \Kibo\Phast\Common\DOMDocument();
+        $this->dom = DOMDocument::makeForLocation(URL::fromString(self::BASE_URL));
         $this->html = $this->dom->createElement('html');
         $this->dom->appendChild($this->html);
         $this->head = $this->dom->createElement('head');
         $this->html->appendChild($this->head);
         $this->body = $this->dom->createElement('body');
         $this->html->appendChild($this->body);
+    }
+
+    public function addBaseTag($href) {
+        $base = $this->dom->createElement('base');
+        $base->setAttribute('href', $href);
+        $this->head->appendChild($base);
+        return $base;
     }
 
 }

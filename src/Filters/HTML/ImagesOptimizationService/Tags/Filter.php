@@ -5,13 +5,19 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
+use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements HTMLFilter {
 
     /**
      * @var ImageURLRewriter
      */
-    protected $rewriter;
+    private $rewriter;
+
+    /**
+     * @var URL
+     */
+    private $baseUrl;
 
     /**
      * Filter constructor.
@@ -22,6 +28,7 @@ class Filter implements HTMLFilter {
     }
 
     public function transformHTMLDOM(DOMDocument $document) {
+        $this->baseUrl = $document->getBaseURL();
         /** @var \DOMElement $img */
         foreach ($document->query('//img') as $img) {
             $this->rewriteSrc($img);
@@ -30,7 +37,7 @@ class Filter implements HTMLFilter {
     }
 
     private function rewriteSrc(\DOMElement $img) {
-        $url = $this->rewriter->makeURLAbsoluteToBase($img->getAttribute('src'));
+        $url = $this->rewriter->makeURLAbsoluteToBase($img->getAttribute('src'), $this->baseUrl);
         if (!$this->rewriter->shouldRewriteUrl($url)) {
             return;
         }
@@ -53,7 +60,7 @@ class Filter implements HTMLFilter {
             return;
         }
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) {
-            $url = $this->rewriter->makeURLAbsoluteToBase($match[1]);
+            $url = $this->rewriter->makeURLAbsoluteToBase($match[1], $this->baseUrl);
             if ($this->rewriter->shouldRewriteUrl($url)) {
                 $params = ['src' => $url];
                 $url = $this->rewriter->makeSignedUrl($params);

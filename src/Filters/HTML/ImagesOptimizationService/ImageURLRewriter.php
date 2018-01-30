@@ -70,12 +70,13 @@ class ImageURLRewriter {
             : ServiceRequest::FORMAT_QUERY;
     }
 
-    public function makeURLAbsoluteToBase($url) {
+    public function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
         if (!$url || substr($url, 0, 5) === 'data:') {
             return null;
         }
         $this->logger()->info('Rewriting img {url}', ['url' => $url]);
-        return URL::fromString($url)->withBase($this->baseUrl)->toString();
+        $baseUrl = is_null($baseUrl) ? $this->baseUrl : $baseUrl;
+        return URL::fromString($url)->withBase($baseUrl)->toString();
     }
 
     public function shouldRewriteUrl($url) {

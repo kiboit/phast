@@ -13,7 +13,6 @@ class Factory implements HTMLFilterFactory {
             = $config['servicesUrl'] . '?service=scripts';
         }
         return new Filter(
-            URL::fromString($config['documents']['baseUrl']),
             $config['documents']['filters'][Filter::class]
         );
     }

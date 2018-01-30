@@ -12,7 +12,7 @@ class FilterTest extends HTMLFilterTestCase {
         $urls = [
             'http://example.com/script.js',
             'http://test.com/script.js',
-            'http://local.domain/rewrite.js',
+            self::BASE_URL . '/rewrite.js',
             'http://example.com/script1.cs',
             'http://norewrite.com/script.js',
         ];
@@ -51,6 +51,23 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
         $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
+    }
+
+    public function testRespectingBaseTag() {
+        $this->addBaseTag('/new-root/');
+        $script = $this->dom->createElement('script');
+        $script->setAttribute('src', 'the-script.js');
+        $this->head->appendChild($script);
+        $this->runFilter();
+
+        $url = parse_url($script->getAttribute('src'));
+        $this->assertEquals('script-proxy.php', $url['path']);
+        $query = [];
+        parse_str($url['query'], $query);
+        $this->assertArrayHasKey('src', $query);
+        $this->assertArrayHasKey('cacheMarker', $query);
+        $this->assertEquals(self::BASE_URL . '/new-root/the-script.js', $query['src']);
+        $this->assertEquals(2, $query['cacheMarker']);
     }
 
     public function testInjectScript() {
@@ -98,7 +115,6 @@ class FilterTest extends HTMLFilterTestCase {
             return $config['urlRefreshTime'] * 2.5;
         };
         $filter = new Filter(
-            URL::fromString('http://local.domain/index.php'),
             $config,
             $functions
         );
