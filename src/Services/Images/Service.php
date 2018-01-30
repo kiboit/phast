@@ -14,7 +14,7 @@ class Service extends BaseService {
         $params = parent::getParams($request);
         if (strpos($request->getHTTPRequest()->getHeader('Accept'), 'image/webp') !== false) {
             $params['preferredType'] = Image::TYPE_WEBP;
-            Log::info('WEBP will be served if possible!');
+            Log::info('WebP will be served if possible!');
         }
         return $params;
     }
