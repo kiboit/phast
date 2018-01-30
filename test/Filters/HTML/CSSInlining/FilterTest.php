@@ -320,17 +320,6 @@ EOS;
         $this->assertFalse($elements->item(0)->hasAttribute('media'));
     }
 
-    public function testNotInliningImportsInComments() {
-        $this->markTestSkipped('We are relying on comments being removed! Figure out weather we need this test');
-        $css = '/* @import "stuff" ; */ the-css';
-        $this->makeLink($this->head, $css);
-        $this->filter->transformHTMLDOM($this->dom);
-
-        $elements = $this->head->childNodes;
-        $this->assertEquals(1, $elements->length);
-        $this->assertEquals('the-css', $elements->item(0)->textContent);
-    }
-
     public function testHandlingIEIncompatibilities() {
         $this->makeLink(
             $this->head,
