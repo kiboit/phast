@@ -13,10 +13,7 @@ class Filter implements ServiceFilter {
      * @return Resource
      */
     public function apply(Resource $resource, array $request) {
-        // TODO: Extract the comments removal in separate filter
-        // TODO: Ensure comments removal on all css processing (somehow)
-        // Remove comments
-        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $resource->getContent());
+        $content = $resource->getContent();
 
         // Normalize whitespace
         $content = preg_replace('~\s+~', ' ', $content);

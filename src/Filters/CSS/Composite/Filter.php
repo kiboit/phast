@@ -7,11 +7,16 @@ use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
+use Kibo\Phast\Filters\CSS\CommentsRemoval;
 
 class Filter implements CachedResultServiceFilter {
     use LoggingTrait;
 
     protected $filters = [];
+
+    public function __construct() {
+        $this->filters[] = new CommentsRemoval\Filter();
+    }
 
     public function addFilter(ServiceFilter $filter) {
         $this->filters[] = $filter;

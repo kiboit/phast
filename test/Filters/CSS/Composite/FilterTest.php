@@ -23,7 +23,7 @@ class FilterTest extends TestCase {
     public function testReturnSameResourceWhenEmpty() {
         $resource = $this->makeResource();
         $returned = $this->filter->apply($resource, []);
-        $this->assertSame($resource, $returned);
+        $this->assertEquals($resource->getContent(), $returned->getContent());
     }
 
     public function testApplyingFilters() {
@@ -45,7 +45,7 @@ class FilterTest extends TestCase {
         $this->filter->addFilter($filter2);
         $returned = $this->filter->apply($resource0, []);
 
-        $this->assertSame($resource2, $returned);
+        $this->assertEquals($resource2->getContent(), $returned->getContent());
     }
 
     public function testGetCacheHash() {
@@ -64,6 +64,13 @@ class FilterTest extends TestCase {
             $this->assertNotEmpty($hash, "Hash $idx is an empty string");
         }
         $this->assertEquals($hashes, array_unique($hashes), "Hashed has duplicates");
+    }
+
+    public function testRemoveComments() {
+        $css = '/* a comment here */ selector {rule: /* comment in a weird place*/ value}';
+        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), $css);
+        $filtered = $this->filter->apply($resource, []);
+        $this->assertEquals(' selector {rule:  value}', $filtered->getContent());
     }
 
     private function makeResource() {
