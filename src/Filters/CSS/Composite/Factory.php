@@ -3,6 +3,8 @@
 
 namespace Kibo\Phast\Filters\CSS\Composite;
 
+use Kibo\Phast\Environment\Package;
+
 class Factory {
 
     /**
@@ -12,7 +14,11 @@ class Factory {
     public function make(array $config) {
         $filter = new Filter();
         foreach (array_keys($config['textResources']['filters']) as $filterClass) {
-            $filter->addFilter(new $filterClass);
+            $filter->addFilter(
+                Package::fromPackageClass($filterClass)
+                    ->getFactory()
+                    ->make($config)
+            );
         }
         return $filter;
     }

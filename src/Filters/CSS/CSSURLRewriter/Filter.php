@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Kibo\Phast\Filters\CSS;
+namespace Kibo\Phast\Filters\CSS\CSSURLRewriter;
 
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class CSSURLRewriter implements ServiceFilter {
+class Filter implements ServiceFilter {
 
 
     /**

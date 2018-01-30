@@ -106,8 +106,8 @@ return [
     'textResources' => [
 
         'filters' => [
-            \Kibo\Phast\Filters\CSS\CSSMinifier::class => [],
-            \Kibo\Phast\Filters\CSS\CSSURLRewriter::class => []
+            \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
+            \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => []
         ]
     ],
 

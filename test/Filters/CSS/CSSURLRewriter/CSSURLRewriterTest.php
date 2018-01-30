@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Filters\CSS;
+namespace Kibo\Phast\Filters\CSS\CSSURLRewriter;
 
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
@@ -24,7 +24,7 @@ class CSSURLRewriterTest extends TestCase {
 
         $base = URL::fromString(self::BASE_URL);
         $outputs = array_map(function ($input) use ($base) {
-            return (new CSSURLRewriter())->apply(
+            return (new Filter())->apply(
                 Resource::makeWithContent(
                     URL::fromString($input['path'])->withBase($base),
                     $input['css']
