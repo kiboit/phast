@@ -128,7 +128,7 @@ class OptimizerTest extends HTMLFilterTestCase {
 
         $this->body->appendChild($div);
 
-        $cssOptimized = (new Optimizer($this->dom))->optimizeCSS($css);
+        $cssOptimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
 
         $this->assertNotContains('.no', $cssOptimized);
         $this->assertContains('.yes', $cssOptimized);
