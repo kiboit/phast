@@ -18,9 +18,37 @@ class Filter implements HTMLFilter {
     var urlPattern = /^(https?:)?\/\//;
     var cacheMarker = Math.floor((new Date).getTime() / 1000 / config.urlRefreshTime);
     var id = 0;
+    var whitelist = compileWhitelistPatterns(config.whitelist);
 
     overrideDOMMethod('appendChild');
     overrideDOMMethod('insertBefore');
+    
+    function compileWhitelistPatterns(patterns) {
+        var re = /^(.)(.*)\\1([a-z]*)$/i;
+        var compiled = [];
+        patterns.forEach(function (pattern) {
+            var match = re.exec(pattern);
+            if (!match) {
+                window.console && window.console.log("Phast: Not a pattern:", pattern);
+                return;
+            }
+            try {
+                compiled.push(new RegExp(match[2], match[3]));
+            } catch (e) {
+                window.console && window.console.log("Phast: Failed to compile pattern:", pattern);
+            }
+        });
+        return compiled;
+    }
+    
+    function checkWhitelist(value) {
+        for (var i = 0; i < whitelist.length; i++) {
+            if (whitelist[i].exec(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     function overrideDOMMethod(name) {
         var original = Element.prototype[name];
@@ -44,6 +72,9 @@ class Filter implements HTMLFilter {
             return;
         }
         if (el.src.substr(0, config.serviceUrl.length) == config.serviceUrl) {
+            return;
+        }
+        if (!checkWhitelist(el.src)) {
             return;
         }
         id++;
@@ -140,7 +171,8 @@ EOS;
     private function injectScriptBefore($beforeScript) {
         $config = [
             'serviceUrl' => $this->config['serviceUrl'],
-            'urlRefreshTime' => $this->config['urlRefreshTime']
+            'urlRefreshTime' => $this->config['urlRefreshTime'],
+            'whitelist' => $this->config['match']
         ];
         $script = $beforeScript->ownerDocument->createElement('script');
         $script->textContent = $this->rewriteFunction . '(' . json_encode($config) . ')';
