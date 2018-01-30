@@ -18,6 +18,7 @@ class Filter implements HTMLFilter {
         original.parentNode.removeChild(original);
     };
     var lastScript;
+    var scriptIndex = 0;
     Object.defineProperty(document, 'readyState', {
         configurable: true,
         get: function() {
@@ -29,6 +30,7 @@ class Filter implements HTMLFilter {
         Array.prototype.forEach.call(el.attributes, function (attr) {
             script.setAttribute(attr.nodeName, attr.nodeValue);
         });
+        script.setAttribute('data-phast-script', ++scriptIndex);
         if (!el.hasAttribute('async')) {
             script.async = false;
         }
@@ -40,6 +42,9 @@ class Filter implements HTMLFilter {
         }
         if (!el.hasAttribute('src')) {
             script.setAttribute('src', 'data:text/javascript;base64,' + utoa(el.textContent));
+        }
+        if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
+            fakeDocumentWrite(el, script);
         }
         if (el.hasAttribute('defer')) {
             deferreds.push({original: el, rewritten: script});
@@ -68,6 +73,29 @@ class Filter implements HTMLFilter {
         try {
             func.call(opt_scopeObject || window);
         } catch (err) {}
+    }
+    function fakeDocumentWrite(originalScript, newScript) {
+        var scriptId = newScript.getAttribute('data-phast-script');
+        var beforeScript = buildScript(
+            '(function () {' +
+                'delete document["write"];' +
+                'var script = document.querySelector("[data-phast-script=\\\\"' + scriptId + '\\\\"]");' +
+                'if (!script) return;' +
+                'var beforeScript = document.querySelector("[data-phast-before-script=\\\\"' + scriptId + '\\\\"]");' +
+                'if (beforeScript) beforeScript.parentNode.removeChild(beforeScript);' +
+                'document.write = function (markup) {' +
+                    'script.insertAdjacentHTML("afterend", "" + markup);' +
+                '};' +
+            '})();'
+        );
+        beforeScript.setAttribute('data-phast-before-script', scriptId);
+        originalScript.parentNode.insertBefore(beforeScript, originalScript);
+    }
+    function buildScript(body) {
+        var script = document.createElement('script');
+        script.async = false;
+        script.setAttribute('src', 'data:text/javascript;base64,' + utoa(body));
+        return script;
     }
     function utoa(str) {
         return btoa(

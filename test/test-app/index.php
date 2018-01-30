@@ -25,11 +25,18 @@ require_once __DIR__ . '/../../src/html-filters.php';
         </script>
 
         <div class="my-class">This should have a red background</div>
-        <div id="addClass">This should have a yellow background</div>
 
+        <div id="addClass">This should have a yellow background</div>
         <script>
         document.getElementById('addClass').className = 'some-other-class';
         </script>
+
+        <div style="background:blue;color:white;">
+            <script>
+            document.write("This should have a blue background");
+            </script>
+        </div>
+
 
         <div style="width: 200px; height: 200px; background: url(images/python.png)"></div>
 
