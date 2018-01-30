@@ -46,7 +46,7 @@ class Optimizer {
         foreach ($selectors as $classes) {
             foreach ($classes as $i => $class) {
                 if ($i != 0 && !isset($this->usedClasses[$class])) {
-                    break 2;
+                    continue 2;
                 }
             }
 

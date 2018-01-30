@@ -87,7 +87,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $this->assertContains('span', $cssOptimized);
     }
 
-    /*
+    /**
      * This is a regression test
      */
     public function testLargeCSS() {
@@ -96,6 +96,27 @@ class OptimizerTest extends HTMLFilterTestCase {
 
         $optimized = (new Optimizer($this->dom))->optimizeCSS($css);
         $this->assertNotEmpty($optimized);
+    }
+
+    /**
+     * This is a regression test for a bug that caused selectors to get removed
+     * if they followed an optimizable selector. (Eg, .non-existent, .existent)
+     */
+    public function testMixedSelectors() {
+        $css = '
+            .no, .yes { background: red; }
+        ';
+
+        $div = $this->makeElement('div', 'Hello, World!');
+        $div->setAttribute('class', 'yes');
+
+        $this->body->appendChild($div);
+
+        $cssOptimized = (new Optimizer($this->dom))->optimizeCSS($css);
+
+        $this->assertNotContains('.no', $cssOptimized);
+        $this->assertContains('.yes', $cssOptimized);
+        $this->assertContains('red', $cssOptimized);
     }
 
     private function makeElement($tag, $content) {
