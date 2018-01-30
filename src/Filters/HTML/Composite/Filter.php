@@ -52,8 +52,8 @@ class Filter {
 
         $pattern = '~
             ^
-            \s* (<\?xml.*>)?
-            \s* (<!doctype\s+html.*>)?
+            \s* (<\?xml[^>]*>)?
+            \s* (<!doctype\s+html[^>]*>)?
             \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
             .*
             ( </body> | </html> )
