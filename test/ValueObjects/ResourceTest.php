@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\ValueObjects;
 
+use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Retrievers\Retriever;
 use PHPUnit\Framework\TestCase;
 
@@ -70,12 +71,27 @@ class ResourceTest extends TestCase {
         $this->assertSame('new-mime-type', $newResource->getMimeType());
     }
 
-    private function makeContentRetriever() {
+    public function testExceptionOnNotFoundResource() {
+        $retriever = $this->makeContentRetriever(false);
+        $resource = Resource::makeWithRetriever($this->url, $retriever);
+        $this->expectException(ItemNotFoundException::class);
+        $resource->getContent();
+    }
+
+    public function testNoExceptionOnEmptyContent() {
+        $retriever = $this->makeContentRetriever('');
+        $resource = Resource::makeWithRetriever($this->url, $retriever);
+        $this->assertEmpty($resource->getContent());
+
+    }
+
+    private function makeContentRetriever($content = null) {
+        $content = is_null($content) ? $this->content : $content;
         $retriever = $this->createMock(Retriever::class);
         $retriever->expects($this->once())
             ->method('retrieve')
             ->with($this->url)
-            ->willReturn($this->content);
+            ->willReturn($content);
         return $retriever;
     }
 

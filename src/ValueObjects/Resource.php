@@ -3,6 +3,7 @@
 
 namespace Kibo\Phast\ValueObjects;
 
+use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Retrievers\Retriever;
 
 class Resource {
@@ -62,10 +63,14 @@ class Resource {
 
     /**
      * @return string
+     * @throws ItemNotFoundException
      */
     public function getContent() {
         if (!isset ($this->content)) {
             $this->content = $this->retriever->retrieve($this->url);
+            if ($this->content === false) {
+                throw new ItemNotFoundException("Could not get {$this->url}");
+            }
         }
         return $this->content;
     }
