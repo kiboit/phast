@@ -37,8 +37,7 @@ class Factory {
             (new ServiceSignatureFactory())->make($config),
             [],
             $retriever,
-            $caching,
-            (new ImageURLRewriterFactory())->make($config, Filter::class)
+            $caching
         );
     }
 

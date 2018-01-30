@@ -11,27 +11,9 @@ use Kibo\Phast\ValueObjects\Resource;
 
 class Service extends ProxyBaseService {
 
-    /**
-     * @var ImageURLRewriter
-     */
-    private $imageUrlRewriter;
-
-    public function __construct(
-        ServiceSignature $signature,
-        $whitelist,
-        Retriever $retriever,
-        ServiceFilter $filter,
-        ImageURLRewriter $imageURLRewriter
-    ) {
-        parent::__construct($signature, $whitelist, $retriever, $filter);
-        $this->imageUrlRewriter = $imageURLRewriter;
-    }
-
-
     protected function makeResponse(Resource $resource, array $request) {
         $response = parent::makeResponse($resource, $request);
         $response->setHeader('Content-Type', 'text/css');
-        $response->setContent($this->imageUrlRewriter->rewriteStyle($response->getContent()));
         return $response;
     }
 }
