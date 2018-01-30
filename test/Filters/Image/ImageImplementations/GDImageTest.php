@@ -57,24 +57,39 @@ class GDImageTest extends TestCase {
         $this->checkCompressing('imagejpeg', 80, 20);
     }
 
-    public function testRecoding() {
+    /**
+     * @dataProvider recodingData
+     */
+    public function testRecoding($needFunction, $type, $expectedType, $expectedPattern) {
+        if ($needFunction !== null && !function_exists($needFunction)) {
+            $this->markTestSkipped("{$needFunction} is missing");
+        }
+
         $jpeg = $this->getImageString('imagejpeg', 80, 'Hello, World');
         $image = $this->makeImage($jpeg);
-        $recodedPng = $image->encodeTo(Image::TYPE_PNG);
-        $recodedWebp = $image->encodeTo(Image::TYPE_WEBP);
+        $recodedImage = $image->encodeTo($type);
 
         $this->assertEquals(Image::TYPE_JPEG, $image->getType());
-        $this->assertEquals(Image::TYPE_PNG, $recodedPng->getType());
-        $this->assertEquals(Image::TYPE_WEBP, $recodedWebp->getType());
+        $this->assertEquals($type, $recodedImage->getType());
 
-        $actualPng = getimagesizefromstring($recodedPng->getAsString())[2];
-        $actualJpg = getimagesizefromstring($image->getAsString())[2];
+        $inputType = getimagesizefromstring($image->getAsString())[2];
+        $this->assertEquals(IMAGETYPE_JPEG, $inputType);
 
-        $this->assertEquals(IMAGETYPE_PNG, $actualPng);
-        $this->assertEquals(IMAGETYPE_JPEG, $actualJpg);
+        if ($expectedType !== null) {
+            $outputType = getimagesizefromstring($recodedImage->getAsString())[2];
+            $this->assertEquals($expectedType, $outputType);
+        }
 
-        // getimagesizefromstring returns false for webp
-        $this->assertStringStartsWith('RIFF', $recodedWebp->getAsString());
+        if ($expectedPattern !== null) {
+            $this->assertRegExp($expectedPattern, $recodedImage->getAsString());
+        }
+    }
+
+    public function recodingData() {
+        return [
+            [null,        Image::TYPE_PNG,  IMAGETYPE_PNG, null],
+            ['imagewebp', Image::TYPE_WEBP, null,          '/^RIFF/'],
+        ];
     }
 
     public function testExceptionOnBadImageAsString() {
