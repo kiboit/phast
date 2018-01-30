@@ -103,7 +103,7 @@ return [
         ]
     ],
 
-    'textResources' => [
+    'styles' => [
 
         'filters' => [
             \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
