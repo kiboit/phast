@@ -17,6 +17,7 @@ class Filter implements HTMLFilter {
 (function(config) {
     var urlPattern = /^(https?:)?\/\//;
     var cacheMarker = Math.floor((new Date).getTime() / 1000 / config.urlRefreshTime);
+    var id = 0;
 
     overrideDOMMethod('appendChild');
     overrideDOMMethod('insertBefore');
@@ -42,8 +43,14 @@ class Filter implements HTMLFilter {
         if (!urlPattern.test(el.src)) {
             return;
         }
+        if (el.src.substr(0, config.serviceUrl.length) == config.serviceUrl) {
+            return;
+        }
+        id++;
+        el.setAttribute('data-phast-proxied-script', id);
         el.src = config.serviceUrl + '&src=' + escape(el.src) +
-                                     '&cacheMarker=' + escape(cacheMarker);
+                                     '&cacheMarker=' + escape(cacheMarker) +
+                                     '&id=' + id;
     }
 })
 EOS;
