@@ -164,7 +164,6 @@ class FilterTest extends TestCase {
     }
 
     public function testShouldAllowSelfClosingDiv() {
-        $this->markTestIncomplete('No fix yet');
         $this->shouldTransform();
         $div = "<div /><span></span></div>";
         $buffer = "<html><body>$div</body></html>";

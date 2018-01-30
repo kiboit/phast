@@ -88,6 +88,7 @@ class Filter {
     private function tryToApply($buffer, $time_start) {
         $fixedBuffer = $this->cleanUTF8($buffer);
         $fixedBuffer = $this->escapeCloseTagInScript($fixedBuffer);
+        $fixedBuffer = $this->fixIllegalSelfClosingTags($fixedBuffer);
 
         $xmlErrors = libxml_use_internal_errors(true);
         $doc = new \Kibo\Phast\Common\DOMDocument();
@@ -175,6 +176,30 @@ class Filter {
             function ($match) {
                 return $match[1] . str_replace('</', '<\\/', $match[2]) . $match[3];
             },
+            $buffer
+        );
+    }
+
+    private function fixIllegalSelfClosingTags($buffer) {
+        // The tags are those HTML elements[1] that are not void[2].
+        // 1: https://w3c.github.io/html-reference/elements.html
+        // 2: https://w3c.github.io/html-reference/syntax.html#syntax-elements
+        return preg_replace(
+            '~
+                (
+                    <
+                    (?:a|abbr|address|article|aside|audio|b|bdi|bdo|blockquote|body|button|canvas|caption|cite|code|colgroup|datalist|dd|del|details|dfn|div|dl|dt|em|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|head|header|hgroup|html|i|iframe|ins|kbd|label|legend|li|map|mark|menu|meter|nav|noscript|object|ol|optgroup|option|output|p|pre|progress|q|rp|rt|ruby|s|samp|script|section|select|small|span|strong|style|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|title|tr|u|ul|var|video)
+                    \b
+                    (?:
+                          [^"\'`/>]*+
+                        | "[^"]*+"
+                        | \'[^\']*+\'
+                        | `[^`]*+`
+                    )*
+                )
+                />
+            ~xi',
+            '\1>',
             $buffer
         );
     }
