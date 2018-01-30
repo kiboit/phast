@@ -98,10 +98,28 @@ class GDImageTest extends TestCase {
         $image->compress(9)->getAsString();
     }
 
-    public function testExceptionOnBadImageInfo() {
+    /**
+     * @dataProvider imageInfoMethods
+     */
+    public function testExceptionOnBadImageInfo($method) {
         $image = $this->makeImage('asdasd');
-        $this->expectException(ImageProcessingException::class);
-        $image->getWidth();
+        $caught = 0;
+        for ($i = 0; $i < 2; $i++) {
+            try {
+                $image->$method();
+            } catch (\Exception $e) {
+                $caught++;
+            }
+        }
+        $this->assertEquals(2, $caught, "Expected two exceptions when calling $method twice on a bad image");
+    }
+
+    public function imageInfoMethods() {
+        return [
+            ['getWidth'],
+            ['getHeight'],
+            ['getType']
+        ];
     }
 
     public function testExceptionOnUnretrievableImage() {
