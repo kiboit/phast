@@ -90,22 +90,20 @@ class LocalRetriever implements Retriever {
         $appended = explode("\0", $appended)[0];
         $appended = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $appended);
 
-        $parts = array_filter(explode(DIRECTORY_SEPARATOR, $appended), function ($part) {
-            return !empty ($part) && $part != '.';
-        });
-        $absolutes = array();
-        foreach ($parts as $part) {
-            if ($part == '..' && empty ($absolutes)) {
-                return false;
-            }
-            if ($part == '..') {
-                array_pop($absolutes);
+        $absolutes = [];
+
+        foreach (explode(DIRECTORY_SEPARATOR, $appended) as $part) {
+            if ($part == '' || $part == '.') {
+            } elseif ($part == '..') {
+                if (array_pop($absolutes) === null) {
+                    return false;
+                }
             } else {
                 $absolutes[] = $part;
             }
         }
-        array_unshift($absolutes, $target);
-        return implode(DIRECTORY_SEPARATOR, $absolutes);
+
+        return $target . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $absolutes);
     }
 
 }
