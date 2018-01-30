@@ -2,9 +2,25 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class OptimizerTest extends HTMLFilterTestCase {
+
+    /**
+     * @var Cache
+     */
+    private $cache;
+
+    public function setUp() {
+        parent::setUp();
+        $this->cache = $this->createMock(Cache::class);
+        $this->cache->expects($this->atLeast(1))
+            ->method('get')
+            ->willReturnCallback(function ($key, callable $cb) {
+                return $cb();
+            });
+    }
 
     public function testOptimizingCSS() {
         $firstCSS = '
@@ -21,7 +37,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $div->setAttribute('class', 'some-class class1 another-class');
         $this->body->appendChild($div);
 
-        $optimizer = new Optimizer($this->dom);
+        $optimizer = new Optimizer($this->dom, $this->cache);
         $firstCSSOptimized = $optimizer->optimizeCSS($firstCSS);
         $secondCSSOptimized = $optimizer->optimizeCSS($secondCSS);
 
@@ -48,7 +64,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $div->setAttribute('class', 'some-class class1 another-class');
         $this->body->appendChild($div);
 
-        $cssOptimized = (new Optimizer($this->dom))->optimizeCSS($css);
+        $cssOptimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
 
         $this->assertContains('.class1', $cssOptimized);
         $this->assertContains('red', $cssOptimized);
@@ -81,7 +97,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $div = $this->makeElement('div', 'Hello, World!');
         $this->body->appendChild($div);
 
-        $cssOptimized = (new Optimizer($this->dom))->optimizeCSS($css);
+        $cssOptimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
 
         $this->assertNotContains('.class1', $cssOptimized);
         $this->assertContains('span', $cssOptimized);
@@ -94,7 +110,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $css = file_get_contents(__DIR__ . '/../../../resources/large.css');
         $this->assertNotFalse($css);
 
-        $optimized = (new Optimizer($this->dom))->optimizeCSS($css);
+        $optimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
         $this->assertNotEmpty($optimized);
     }
 

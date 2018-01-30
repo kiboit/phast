@@ -3,21 +3,32 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\DOMDocument;
 
 class Optimizer {
 
     private $classNamePattern = '-?[_a-zA-Z]++[_a-zA-Z0-9-]*+';
 
+    /**
+     * @var array
+     */
     private $usedClasses;
 
-    public function __construct(DOMDocument $document) {
+    /**
+     * @var Cache
+     */
+    private $cache;
+
+    public function __construct(DOMDocument $document, Cache $cache) {
         $this->usedClasses = $this->getUsedClasses($document);
+        $this->cache = $cache;
     }
 
     public function optimizeCSS($css) {
-        // TODO: This operation may be cached.
-        $stylesheet = $this->parseCSS($css);
+        $stylesheet = $this->cache->get(md5($css), function () use ($css) {
+            return $this->parseCSS($css);
+        });
 
         if ($stylesheet === null) {
             return;

@@ -33,7 +33,7 @@ class Factory implements HTMLFilterFactory {
             URL::fromString($config['documents']['baseUrl']),
             $config['documents']['filters'][Filter::class],
             $retriever,
-            new OptimizerFactory(),
+            new OptimizerFactory($config),
             (new CSSCompositeFactory())->make($config)
         );
     }

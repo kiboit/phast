@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
@@ -55,13 +56,19 @@ class FilterTest extends HTMLFilterTestCase {
                 return false;
             });
 
+        $cache = $this->createMock(Cache::class);
+        $cache->method('get')
+            ->willReturnCallback(function ($key, callable  $cb) {
+                return $cb();
+            });
+
         $optimizerFactory = $this->createMock(OptimizerFactory::class);
         $optimizerFactory->expects($this->once())
             ->method('makeForDocument')
             ->with($this->dom)
-            ->willReturnCallback(function (DOMDocument $document) {
+            ->willReturnCallback(function (DOMDocument $document) use ($cache) {
                 return is_null($this->optimizerMock)
-                       ? (new OptimizerFactory())->makeForDocument($document)
+                       ? new Optimizer($document, $cache)
                        : $this->optimizerMock;
             });
 
