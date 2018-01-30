@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\DelayedIFrameLoading;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -23,7 +24,7 @@ window.addEventListener('load', function() {
 });
 EOS;
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         $addScript = false;
         foreach ($document->query('//iframe') as $iframe) {
             /** @var \DOMElement $iframe */

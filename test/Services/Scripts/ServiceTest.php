@@ -8,6 +8,7 @@ use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
@@ -20,6 +21,11 @@ class ServiceTest extends TestCase {
     private $retriever;
 
     /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $filter;
+
+    /**
      * @var Service
      */
     private $service;
@@ -27,11 +33,9 @@ class ServiceTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->retriever = $this->createMock(Retriever::class);
-        $cache = $this->createMock(Cache::class);
-        $cache->method('get')
-            ->willReturnCallback(function ($key, callable $cb){
-                return $cb();
-            });
+        $this->filter = $this->createMock(ServiceFilter::class);
+        $this->filter->method('apply')
+            ->willReturnArgument(0);
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('verify')
             ->willReturnCallback(function ($token) {
@@ -41,8 +45,7 @@ class ServiceTest extends TestCase {
             $signature,
             ['~http://allowed\.com~'],
             $this->retriever,
-            false,
-            $cache
+            $this->filter
         );
     }
 

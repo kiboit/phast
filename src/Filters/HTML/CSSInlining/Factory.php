@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
+use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
@@ -31,7 +32,9 @@ class Factory implements HTMLFilterFactory {
             (new ServiceSignatureFactory())->make($config),
             URL::fromString($config['documents']['baseUrl']),
             $config['documents']['filters'][Filter::class],
-            $retriever
+            $retriever,
+            new OptimizerFactory($config),
+            (new CSSCompositeFactory())->make($config)
         );
     }
 

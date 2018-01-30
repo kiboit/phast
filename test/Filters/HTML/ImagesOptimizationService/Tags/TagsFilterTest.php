@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
@@ -25,14 +26,14 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('getLastModificationTime')
             ->willReturn(12345678);
-        $this->filter = new Filter(
+        $this->filter = new Filter(new ImageURLRewriter(
             $signature,
             $retriever,
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
             ['~' . preg_quote(self::BASE_URL) . '~'],
             $rewriteFormat
-        );
+        ));
     }
 
     public function testImagesSrcRewriting() {

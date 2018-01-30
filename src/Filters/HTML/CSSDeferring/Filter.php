@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSDeferring;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -24,7 +25,7 @@ class Filter implements HTMLFilter {
 })();
 EOS;
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
         $insert_loader = false;
 
         foreach (iterator_to_array($document->query('//link')) as $link) {

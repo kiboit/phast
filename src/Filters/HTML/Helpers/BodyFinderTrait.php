@@ -2,14 +2,16 @@
 
 namespace Kibo\Phast\Filters\HTML\Helpers;
 
+use Kibo\Phast\Common\DOMDocument;
+
 trait BodyFinderTrait {
 
     /**
-     * @param \Kibo\Phast\Common\DOMDocument $document
+     * @param DOMDocument $document
      * @return \DOMElement
      * @throws \Exception
      */
-    private function getBodyElement(\Kibo\Phast\Common\DOMDocument $document) {
+    private function getBodyElement(DOMDocument $document) {
         $bodies = iterator_to_array($document->query('//body'));
         if (count($bodies) == 0) {
             throw new \Exception('No body tag found in document');

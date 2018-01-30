@@ -6,6 +6,7 @@ use Kibo\Phast\Filters\Image\ImageImplementations\GDImage;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageFactory {
@@ -25,6 +26,14 @@ class ImageFactory {
         $retriever->addRetriever(new LocalRetriever($this->config['retrieverMap']));
         $retriever->addRetriever(new RemoteRetriever());
         return new GDImage($url, $retriever);
+    }
+
+    /**
+     * @param Resource $resource
+     * @return GDImage
+     */
+    public function getForResource(Resource $resource) {
+        return $this->getForURL($resource->getUrl());
     }
 
 }

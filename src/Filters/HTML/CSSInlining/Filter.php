@@ -2,12 +2,15 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements HTMLFilter {
@@ -17,7 +20,7 @@ class Filter implements HTMLFilter {
      * @var string
      */
     private $ieFallbackScript = <<<EOJS
-(function() {
+(function () {
     
     var ua = window.navigator.userAgent;
     if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident/') === -1) {
@@ -59,6 +62,27 @@ class Filter implements HTMLFilter {
 })();
 EOJS;
 
+    private $inlinedCSSRetriever = <<<EOJS
+(function () {
+    Array.prototype.forEach.call(
+        document.querySelectorAll('style[data-phast-href]'),
+        function (style) {
+            var link = document.createElement('link');
+            link.setAttribute('href', style.getAttribute('data-phast-href'));
+            link.setAttribute('rel', 'stylesheet');
+            if (style.hasAttribute('media')) {
+                link.setAttribute('media', style.getAttribute('media'));
+            }
+            style.parentNode.insertBefore(link, style.nextSibling);
+            link.addEventListener('load', function () {
+                style.parentNode.removeChild(style);
+            });
+        }
+    );
+})();
+EOJS;
+
+
     /**
      * @var ServiceSignature
      */
@@ -68,6 +92,11 @@ EOJS;
      * @var bool
      */
     private $withIEFallback = false;
+
+    /**
+     * @var bool
+     */
+    private $hasDoneInlining = false;
 
     /**
      * @var int
@@ -99,12 +128,36 @@ EOJS;
      */
     private $retriever;
 
-    public function __construct(ServiceSignature $signature, URL $baseURL, array $config, Retriever $retriever) {
+    /**
+     * @var OptimizerFactory
+     */
+    private $optimizerFactory;
+
+    /**
+     * @var ServiceFilter
+     */
+    private $cssFilter;
+
+    /**
+     * @var Optimizer
+     */
+    private $optimizer;
+
+    public function __construct(
+        ServiceSignature $signature,
+        URL $baseURL,
+        array $config,
+        Retriever $retriever,
+        OptimizerFactory $optimizerFactory,
+        ServiceFilter $cssFilter
+    ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
         $this->serviceUrl = URL::fromString((string)$config['serviceUrl']);
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->retriever = $retriever;
+        $this->optimizerFactory = $optimizerFactory;
+        $this->cssFilter = $cssFilter;
 
         foreach ($config['whitelist'] as $key => $value) {
             if (!is_array($value)) {
@@ -119,7 +172,8 @@ EOJS;
         }
     }
 
-    public function transformHTMLDOM(\Kibo\Phast\Common\DOMDocument $document) {
+    public function transformHTMLDOM(DOMDocument $document) {
+        $this->optimizer = $this->optimizerFactory->makeForDocument($document);
         $links = iterator_to_array($document->query('//link'));
         $styles = iterator_to_array($document->query('//style'));
         foreach ($links as $link) {
@@ -130,6 +184,9 @@ EOJS;
         }
         if ($this->withIEFallback) {
             $this->addIEFallbackScript($document);
+        }
+        if ($this->hasDoneInlining) {
+            $this->addInlinedRetrieverScript($document);
         }
     }
 
@@ -149,12 +206,21 @@ EOJS;
 
         $media = $link->getAttribute('media');
         $elements = $this->inlineURL($link->ownerDocument, $location, $media);
-
-        $this->replaceElement($elements, $link);
+        if (!is_null($elements)) {
+            $this->replaceElement($elements, $link);
+        }
     }
 
     private function inlineStyle(\DOMElement $style) {
-        $elements = $this->inlineCSS($style->ownerDocument, $this->baseURL, $style->textContent, $style->getAttribute('media'));
+        $processed = $this->cssFilter
+            ->apply(Resource::makeWithContent($this->baseURL, $style->textContent), [])
+            ->getContent();
+        $elements = $this->inlineCSS(
+            $style->ownerDocument,
+            $this->baseURL,
+            $processed,
+            $style->getAttribute('media')
+        );
         $this->replaceElement($elements, $style);
     }
 
@@ -176,7 +242,7 @@ EOJS;
     }
 
     /**
-     * @param \Kibo\Phast\Common\DOMDocument $document
+     * @param DOMDocument $document
      * @param URL $url
      * @param string $media
      * @param boolean $ieCompatible
@@ -184,7 +250,7 @@ EOJS;
      * @param string[] $seen
      * @return \DOMElement[]
      */
-    private function inlineURL(\Kibo\Phast\Common\DOMDocument $document, URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
+    private function inlineURL(DOMDocument $document, URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
         $whitelistEntry = $this->findInWhitelist($url);
 
         if (!$whitelistEntry) {
@@ -216,13 +282,28 @@ EOJS;
             return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
         }
 
+
+        $content = $this->cssFilter->apply(Resource::makeWithContent($url, $content), [])
+            ->getContent();
+        $content = $this->optimizer->optimizeCSS($content);
+        if (is_null($content)) {
+            return null;
+        }
+        $this->hasDoneInlining = true;
         $elements = $this->inlineCSS($document, $url, $content, $media, $ieCompatible, $currentLevel, $seen);
         $this->addIEFallback($ieFallbackUrl, $elements);
         return $elements;
     }
 
-    private function inlineCSS(\Kibo\Phast\Common\DOMDocument $document, URL $url, $content, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
-        $content = $this->minify($content);
+    private function inlineCSS(
+        DOMDocument $document,
+        URL $url,
+        $content,
+        $media,
+        $ieCompatible = true,
+        $currentLevel = 0,
+        $seen = []
+    ) {
 
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
@@ -233,18 +314,13 @@ EOJS;
             $elements = array_merge($elements, $replacement);
         }
 
-        $content = $this->rewriteRelativeURLs($content, $url);
-        $elements[] = $this->makeStyle($document, $content, $media);
+        $elements[] = $this->makeStyle($document, $url, $content, $media);
 
         return $elements;
     }
 
-    private function makeServiceLink(\Kibo\Phast\Common\DOMDocument $document, URL $location, $media) {
-        $params = [
-            'src' => (string) $location,
-            'cacheMarker' => floor(time() / $this->urlRefreshTime)
-        ];
-        $url = $this->makeSignedUrl($params);
+    private function makeServiceLink(DOMDocument $document, URL $location, $media) {
+        $url = $this->makeServiceURL($location);
         return $this->makeLink($document, URL::fromString($url), $media);
     }
 
@@ -267,12 +343,22 @@ EOJS;
         return $elements;
     }
 
-    private function addIEFallbackScript(\Kibo\Phast\Common\DOMDocument $document) {
+    private function addIEFallbackScript(DOMDocument $document) {
         $this->logger()->info('Adding IE fallback script');
         $this->withIEFallback = false;
+        $this->addScript($document, $this->ieFallbackScript);
+    }
+
+    private function addInlinedRetrieverScript(DOMDocument $document) {
+        $this->logger()->info('Adding inlined retriever script');
+        $this->hasDoneInlining = false;
+        $this->addScript($document, $this->inlinedCSSRetriever);
+    }
+
+    private function addScript(DOMDocument $document, $content) {
         $script = $document->createElement('script');
         $script->setAttribute('data-phast-no-defer', 'data-phast-no-defer');
-        $script->textContent = $this->ieFallbackScript;
+        $script->textContent = $content;
         $this->getBodyElement($document)->appendChild($script);
     }
 
@@ -294,16 +380,19 @@ EOJS;
         return $matches;
     }
 
-    private function makeStyle(\Kibo\Phast\Common\DOMDocument $document, $content, $media) {
+    private function makeStyle(DOMDocument $document, URL $url, $content, $media) {
         $style = $document->createElement('style');
         if ($media !== '') {
             $style->setAttribute('media', $media);
+        }
+        if ($url->toString() != $this->baseURL->toString()) {
+            $style->setAttribute('data-phast-href', $this->makeServiceURL($url));
         }
         $style->textContent = $content;
         return $style;
     }
 
-    private function makeLink(\Kibo\Phast\Common\DOMDocument $document, URL $url, $media) {
+    private function makeLink(DOMDocument $document, URL $url, $media) {
         $link = $document->createElement('link');
         $link->setAttribute('rel', 'stylesheet');
         $link->setAttribute('href', (string)$url);
@@ -313,59 +402,11 @@ EOJS;
         return $link;
     }
 
-    private function minify($content) {
-        // Remove comments
-        $content = preg_replace('~/\*[^*]*\*+([^/*][^*]*\*+)*/~', '', $content);
-
-        // Normalize whitespace
-        $content = preg_replace('~\s+~', ' ', $content);
-
-        // Remove whitespace before and after operators
-        $chars = [',', '{', '}', ';'];
-        foreach ($chars as $char) {
-            $content = str_replace("$char ", $char, $content);
-            $content = str_replace(" $char", $char, $content);
-        }
-
-        // Remove whitespace after colons
-        $content = str_replace(': ', ':', $content);
-
-        return trim($content);
-    }
-
-    private function rewriteRelativeURLs($cssContent, URL $cssUrl) {
-        $callback = function($match) use ($cssUrl) {
-            if (preg_match('~^[a-z]+:~i', $match[3])) {
-                return $match[0];
-            }
-            return $match[1] . URL::fromString($match[3])->withBase($cssUrl) . $match[4];
-        };
-
-        $cssContent = preg_replace_callback(
-            '~
-                \b
-                ( url\( ([\'"]?) )
-                ([A-Za-z0-9_/.:?&=+%,#-]+)
-                ( \2 \) )
-            ~x',
-            $callback,
-            $cssContent
-        );
-
-        $cssContent = preg_replace_callback(
-            '~
-                ( @import \s+ ([\'"]) )
-                ([A-Za-z0-9_/.:?&=+%,#-]+)
-                ( \2 )
-            ~x',
-            $callback,
-            $cssContent
-        );
-
-        return $cssContent;
-    }
-
-    protected function makeSignedUrl($params) {
+    protected function makeServiceURL(URL $originalLocation) {
+        $params = [
+            'src' => (string) $originalLocation,
+            'cacheMarker' => floor(time() / $this->urlRefreshTime)
+        ];
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
             ->sign($this->signature)

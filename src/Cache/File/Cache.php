@@ -9,6 +9,8 @@ use Kibo\Phast\Logging\LoggingTrait;
 class Cache implements CacheInterface {
     use LoggingTrait;
 
+    const VERSION = "2";
+
     /**
      * @var string
      */
@@ -38,7 +40,6 @@ class Cache implements CacheInterface {
      * @var ObjectifiedFunctions
      */
     private $functions;
-
 
     public function __construct(array $config, $cacheNamespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = $config['cacheRoot'];
@@ -102,7 +103,7 @@ class Cache implements CacheInterface {
         $file = $this->getCacheFilename($key);
         $tmpFile = $file . '.' . uniqid('', true);
         $expirationTime = $expiresIn > 0 ? $this->functions->time() + $expiresIn : 0;
-        $serialized = $expirationTime . ' ' . json_encode($contents);
+        $serialized = $expirationTime . ' ' . self::VERSION . ' ' . serialize($contents);
         $result = @$this->functions->file_put_contents($tmpFile, $serialized);
         if ($result !== strlen($serialized)) {
             $this->logger()->critical(
@@ -129,12 +130,16 @@ class Cache implements CacheInterface {
             $this->logger()->critical("Phast: FileCache: Could not read file {file}", ['file' => $file]);
             return null;
         }
-        list ($expirationTime, $data) = explode(" ", $contents, 2);
+        list ($expirationTime, $version, $data) = explode(" ", $contents, 3);
+        if ($version !== self::VERSION) {
+            $this->logger()->debug("Phast: FileCache: Refusing to read old cache file {file}", ['file' => $file]);
+            return null;
+        }
         if ($expirationTime > $this->functions->time() || $expirationTime == 0) {
             if (time() - @$this->functions->filemtime($file) >= round($this->gcMaxAge / 10)) {
                 $this->functions->touch($file);
             }
-            return json_decode($data, true);
+            return unserialize($data);
         }
         return null;
     }
@@ -187,7 +192,6 @@ class Cache implements CacheInterface {
             yield $full;
         }
     }
-
 
     private function getOldFiles($files) {
         $maxModificationTime = $this->functions->time() - $this->gcMaxAge;

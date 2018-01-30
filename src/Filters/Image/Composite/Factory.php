@@ -4,7 +4,8 @@ namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Package;
-use Kibo\Phast\Retrievers\LocalRetriever;
+use Kibo\Phast\Filters\Image\ImageFactory;
+use Kibo\Phast\Filters\Service\CachingServiceFilter;
 
 class Factory {
 
@@ -23,19 +24,17 @@ class Factory {
     }
 
     public function make() {
-        if ($this->config['images']['enable-cache']) {
-            $retriever = new LocalRetriever($this->config['retrieverMap']);
-            $composite = new CachedFilter(
-                new Cache($this->config['cache'], 'images'),
-                $retriever
-            );
-        } else {
-            $composite = new Filter();
-        }
+        $composite = new Filter(new ImageFactory($this->config));
         foreach (array_keys($this->config['images']['filters']) as $class) {
             $package = Package::fromPackageClass($class);
             $filter = $package->getFactory()->make($this->config);
             $composite->addImageFilter($filter);
+        }
+        if ($this->config['images']['enable-cache']) {
+            return new CachingServiceFilter(
+                new Cache($this->config['cache'], 'images'),
+                $composite
+            );
         }
         return $composite;
     }

@@ -1,4 +1,5 @@
 <?php
+
 return [
 
     'securityToken' => null,
@@ -42,8 +43,6 @@ return [
             ],
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
-
-            \Kibo\Phast\Filters\HTML\CSSOptimization\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSDeferring\Filter::class => [],
 
@@ -100,6 +99,15 @@ return [
             \Kibo\Phast\Filters\Image\JPEGTransEnhancer\Filter::class => [
                 'cmdpath' => '/usr/bin/jpegtran'
             ]
+        ]
+    ],
+
+    'styles' => [
+
+        'filters' => [
+            \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
+            \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => [],
+            \Kibo\Phast\Filters\CSS\ImageURLRewriter\Filter::class => []
         ]
     ],
 
