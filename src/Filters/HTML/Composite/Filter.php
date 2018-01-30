@@ -50,14 +50,16 @@ class Filter {
             return $buffer;
         }
 
-        $pattern = '~
+
+        $pattern = "~
             ^
             \s* (<\?xml[^>]*>)?
             \s* (<!doctype\s+html[^>]*>)?
+            (\s* <!--(.*?)-->)*
             \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
             .*
             ( </body> | </html> )
-        ~isx';
+        ~isx";
 
         if (!preg_match($pattern, $buffer)) {
             $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');

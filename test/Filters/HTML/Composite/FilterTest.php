@@ -55,6 +55,12 @@ class FilterTest extends TestCase {
         $this->filter->apply($buffer);
     }
 
+    public function testShouldApplyWithComments() {
+        $this->shouldTransform();
+        $buffer = "<!doctype html>\n<!-- hello -->\n<html>\n<body></body>\n</html>";
+        $this->filter->apply($buffer);
+    }
+
     public function testShouldNotApplyWithNoBodyEndTag() {
         $this->shouldNotTransform();
         $buffer = "<html>\n<body>";
