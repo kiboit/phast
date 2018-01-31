@@ -29,6 +29,7 @@ class PhastServices {
 
         if (isset ($serviceParams['src']) && !headers_sent())  {
             header('Location: ' . $serviceParams['src']);
+            header('Cache-Control: max-age=86400');
         }
 
         try {
@@ -64,6 +65,7 @@ class PhastServices {
         }
 
         header_remove('Location');
+        header_remove('Cache-Control');
         http_response_code($response->getCode());
         foreach ($response->getHeaders() as $name => $value) {
             header($name . ': ' . $value);
