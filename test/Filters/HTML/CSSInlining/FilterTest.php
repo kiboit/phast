@@ -228,29 +228,36 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testInliningImports() {
-        $css = <<<EOS
-@import 'file1';
-@import "file2";
-@import url("file3");
-@import url('file4');
-the-style-itself{directive: true;}
-EOS;
-        $this->files['/file1'] = 'the-file-1';
-        $this->files['/file2'] = 'the-file-2';
-        $this->files['/file3'] = 'the-file-3';
-        $this->files['/file4'] = 'the-file-4';
+        $formats = [
+            "'%s'",
+            '"%s"',
+            'url(%s)',
+            "url('%s')",
+            'url("%s")',
+            '" %s "',
+            'url( %s )',
+            "url(' %s ')",
+        ];
+
+        $css = [];
+        foreach ($formats as $i => $fmt) {
+            $css[] = sprintf("@import %s;", sprintf($fmt, "file$i"));
+            $this->files["/file$i"] = "the-file-$i";
+        }
+        $css[] = 'the-style-itself{directive: true;}';
+        $css = implode("\n", $css);
 
         $this->makeLink($this->head, $css);
         $this->filter->transformHTMLDOM($this->dom);
         $styles = $this->getTheStyles();
 
-        $this->assertCount(5, $styles);
+        $this->assertCount(sizeof($formats) + 1, $styles);
 
-        $this->assertEquals('the-file-1', $styles[0]->textContent);
-        $this->assertEquals('the-file-2', $styles[1]->textContent);
-        $this->assertEquals('the-file-3', $styles[2]->textContent);
-        $this->assertEquals('the-file-4', $styles[3]->textContent);
-        $this->assertEquals("\n\n\n\nthe-style-itself{directive: true;}", $styles[4]->textContent);
+        foreach ($formats as $i => $fmt) {
+            $this->assertEquals("the-file-$i", $styles[$i]->textContent);
+        }
+
+        $this->assertEquals("the-style-itself{directive: true;}", trim($styles[sizeof($formats)]->textContent));
     }
 
     public function testInliningNestedStyles() {
