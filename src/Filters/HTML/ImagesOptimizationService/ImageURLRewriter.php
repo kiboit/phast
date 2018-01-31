@@ -71,6 +71,7 @@ class ImageURLRewriter {
     }
 
     public function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
+        $url = trim($url);
         if (!$url || substr($url, 0, 5) === 'data:') {
             return null;
         }

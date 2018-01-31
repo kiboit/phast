@@ -135,7 +135,7 @@ EOS;
         if (!$element->hasAttribute('src')) {
             return;
         }
-        $element->setAttribute('src', $this->rewriteURL($element->getAttribute('src')));
+        $element->setAttribute('src', $this->rewriteURL(trim($element->getAttribute('src'))));
     }
 
     private function rewriteURL($src) {

@@ -56,6 +56,13 @@ class TagsFilterTest extends HTMLFilterTestCase {
         );
     }
 
+    public function testRewriteSrcWithSpace() {
+        $this->makeImage(' /img ');
+        $this->filter->transformHTMLDOM($this->dom);
+        $this->checkSrc($this->dom->getElementsByTagName('img')->item(0)->getAttribute('src'),
+                        ['src' => self::BASE_URL . '/img']);
+    }
+
     public function testUsingCorrectRewriteFormat() {
         $this->makeImage('/img');
         $this->filter->transformHTMLDOM($this->dom);

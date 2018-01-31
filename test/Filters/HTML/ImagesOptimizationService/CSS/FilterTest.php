@@ -65,6 +65,14 @@ class FilterTest extends HTMLFilterTestCase {
                 . '")'
             ],
             [
+                'background: url(" images/image1 ")',
+                'background: url("'
+                . self::BASE_URL . '/images.php?src='
+                . urlencode(self::BASE_URL . '/css/images/image1')
+                . '&token=the-token'
+                . '")'
+            ],
+            [
                 "border-image: url('/images/image2')",
                 'border-image: url(\''
                 . self::BASE_URL . '/images.php?src='

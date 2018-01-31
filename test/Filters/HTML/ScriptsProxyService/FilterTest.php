@@ -53,6 +53,19 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
     }
 
+    public function testRewriteSrcWithSpaces() {
+        $script = $this->dom->createElement('script');
+        $script->setAttribute('src', ' /hello/ ');
+
+        $this->head->appendChild($script);
+
+        $this->runFilter();
+
+        $this->assertContains('%2Fhello%2F', $script->getAttribute('src'));
+        $this->assertNotContains('+', $script->getAttribute('src'));
+        $this->assertNotContains('%20', $script->getAttribute('src'));
+    }
+
     public function testRespectingBaseTag() {
         $this->addBaseTag('/new-root/');
         $script = $this->dom->createElement('script');
