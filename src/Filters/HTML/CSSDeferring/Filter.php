@@ -33,7 +33,7 @@ EOS;
                 continue;
             }
 
-            $this->logger()->info('Differing {src}', ['src' => $link->getAttribute('href')]);
+            $this->logger()->info('Deferring {src}', ['src' => $link->getAttribute('href')]);
             $script = $document->createElement('script', trim($document->saveHTML($link)));
             $script->setAttribute('type', 'phast-link');
 
