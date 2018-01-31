@@ -28,7 +28,7 @@ class Filter implements ServiceFilter {
             '~
                 \b
                 ( url\( ([\'"]?) )
-                ([A-Za-z0-9_/.:?&=+%,#-]+)
+                ([A-Za-z0-9_/.:?&=+%,#-@]+)
                 ( \2 \) )
             ~x',
             $callback,
@@ -38,7 +38,7 @@ class Filter implements ServiceFilter {
         $cssContent = preg_replace_callback(
             '~
                 ( @import \s+ ([\'"]) )
-                ([A-Za-z0-9_/.:?&=+%,#-]+)
+                ([A-Za-z0-9_/.:?&=+%,#-@]+)
                 ( \2 )
             ~x',
             $callback,
