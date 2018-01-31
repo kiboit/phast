@@ -57,7 +57,8 @@ return [
                     '~^https?://www\.googleadservices\.com/~',
                     '~^https?://pixel\.adcrowd\.com/~',
                     '~^https?://connect\.facebook\.net/~',
-                    '~^https?://static\.hotjar\.com/~'
+                    '~^https?://static\.hotjar\.com/~',
+                    '~^https?://v2\.zopim\.com/~'
                 ]
             ],
 
