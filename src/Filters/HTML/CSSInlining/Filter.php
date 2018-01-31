@@ -198,7 +198,7 @@ EOJS;
             return;
         }
 
-        $location = URL::fromString($link->getAttribute('href'))->withBase($baseUrl);
+        $location = URL::fromString(trim($link->getAttribute('href')))->withBase($baseUrl);
 
         if (!$this->findInWhitelist($location)) {
             return;
