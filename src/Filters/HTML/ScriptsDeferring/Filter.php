@@ -59,6 +59,8 @@ class Filter implements HTMLFilter {
     lastScript.onload  = restoreReadyState;
     lastScript.onerror = restoreReadyState;
     function restoreReadyState() {
+        delete document['write'];
+
         delete document['readyState'];
 
         if (document.onreadystatechange) {
