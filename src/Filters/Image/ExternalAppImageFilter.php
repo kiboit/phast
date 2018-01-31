@@ -75,7 +75,7 @@ abstract class ExternalAppImageFilter implements ImageFilter {
 
         $newImage = new DummyImage();
         $newImage->setImageString($compressed);
-        $newImage->setType(Image::TYPE_PNG);
+        $newImage->setType($image->getType());
 
         return $newImage;
     }

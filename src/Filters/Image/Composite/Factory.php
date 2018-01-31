@@ -32,7 +32,7 @@ class Factory {
         }
         if ($this->config['images']['enable-cache']) {
             return new CachingServiceFilter(
-                new Cache($this->config['cache'], 'images'),
+                new Cache($this->config['cache'], 'images-1'),
                 $composite
             );
         }
