@@ -63,7 +63,7 @@ class Filter implements HTMLFilter {
 EOJS;
 
     private $inlinedCSSRetriever = <<<EOJS
-document.addEventListener('DOMContentLoaded', function () {
+(function() {
     Array.prototype.forEach.call(
         document.querySelectorAll('style[data-phast-href]'),
         function (style) {
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     );
-});
+})();
 EOJS;
 
 
@@ -357,7 +357,7 @@ EOJS;
 
     private function addScript(DOMDocument $document, $content) {
         $script = $document->createElement('script');
-        $script->setAttribute('data-phast-no-defer', 'data-phast-no-defer');
+        $script->setAttribute('data-phast-prioritize', '');
         $script->textContent = $content;
         $this->getBodyElement($document)->appendChild($script);
     }

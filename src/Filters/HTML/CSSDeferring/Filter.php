@@ -46,7 +46,7 @@ EOS;
         if ($insert_loader) {
             $this->logger()->info('Inserting JS loader');
             $loader = $document->createElement('script', self::LOADER_JS);
-            $loader->setAttribute('data-phast-no-defer', '');
+            $loader->setAttribute('data-phast-prioritize', '');
             $this->getBodyElement($document)->appendChild($loader);
         } else {
             $this->logger()->info('No links were deferred. Not inserting JS loader.');

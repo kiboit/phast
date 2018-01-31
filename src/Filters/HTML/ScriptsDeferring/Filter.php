@@ -10,6 +10,30 @@ use Kibo\Phast\Filters\HTML\HTMLFilter;
 class Filter implements HTMLFilter {
     use JSDetectorTrait, BodyFinderTrait;
 
+    private $loadScript = <<<EOS
+(function() {
+    var done = false;
+    document.addEventListener('DOMContentLoaded', function() {
+        if (done) {
+            return;
+        }
+        done = true;
+        var requestAnimationFrame = window.requestAnimationFrame ||
+                                    function (fn) { window.setTimeout(fn, 0); };
+        requestAnimationFrame(start);
+    });
+    function start() {
+        var script = document.querySelector('script[data-phast-loader]');
+        var parentNode = script.parentNode;
+        var newScript = document.createElement('script');
+        newScript.textContent = script.textContent;
+        parentNode.removeChild(script);
+        parentNode.appendChild(newScript);
+    }
+})();
+EOS;
+
+
     private $rewriteScript = <<<EOS
 (function () {
     var deferreds = [];
@@ -25,7 +49,9 @@ class Filter implements HTMLFilter {
             return 'loading';
         }
     });
-    Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"]'), function (el) {
+    Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"][data-phast-prioritize]'), loadScript);
+    Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"]'), loadScript);
+    function loadScript (el) {
         var script = document.createElement('script');
         Array.prototype.forEach.call(el.attributes, function (attr) {
             script.setAttribute(attr.nodeName, attr.nodeValue);
@@ -52,7 +78,7 @@ class Filter implements HTMLFilter {
             replace(el, script);
             lastScript = script;
         }
-    });
+    }
     deferreds.forEach(function (deferred) {
         replace(deferred.original, deferred.rewritten);
     });
@@ -115,6 +141,7 @@ EOS;
 
     public function transformHTMLDOM(DOMDocument $document) {
         $body = $this->getBodyElement($document);
+
         foreach ($document->query('//script') as $script) {
             if ($script->hasAttribute('data-phast-no-defer')) {
                 $script->removeAttribute('data-phast-no-defer');
@@ -122,9 +149,16 @@ EOS;
                 $this->rewrite($script);
             }
         }
+
         $rewriteScript = $document->createElement('script');
+        $rewriteScript->setAttribute('type', 'phast-script');
+        $rewriteScript->setAttribute('data-phast-loader', '');
         $rewriteScript->textContent = $this->rewriteScript;
         $body->appendChild($rewriteScript);
+
+        $loadScript = $document->createElement('script');
+        $loadScript->textContent = $this->loadScript;
+        $body->appendChild($loadScript);
     }
 
     private function rewrite(\DOMElement $script) {
