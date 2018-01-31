@@ -227,7 +227,7 @@ class FilterTest extends HTMLFilterTestCase {
 
     }
 
-    public function testInliiningImports() {
+    public function testInliningImports() {
         $css = <<<EOS
 @import 'file1';
 @import "file2";
@@ -311,7 +311,7 @@ EOS;
 
     }
 
-    public function testNotAddingNonSenceMedia() {
+    public function testNotAddingNonsenseMedia() {
         $css = '@import "something"; the-css';
         $this->makeLink($this->head, $css);
         $this->filter->transformHTMLDOM($this->dom);
@@ -478,7 +478,20 @@ EOS;
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertEquals(1, $styles->length);
         $this->assertEquals('the-css-content', $styles->item(0)->textContent);
+    }
 
+    public function testSpaceInLinkHref() {
+        $link = $this->dom->createElement('link');
+        $link->setAttribute('rel', 'stylesheet');
+        $link->setAttribute('href', ' the-css-file.css ');
+        $this->head->appendChild($link);
+
+        $this->files['/the-css-file.css'] = 'the-css-content';
+        $this->filter->transformHTMLDOM($this->dom);
+
+        $styles = $this->dom->getElementsByTagName('style');
+        $this->assertEquals(1, $styles->length);
+        $this->assertEquals('the-css-content', $styles->item(0)->textContent);
     }
 
     /**
