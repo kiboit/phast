@@ -103,6 +103,8 @@ class Filter {
         $doc = $this->dom;
         $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
 
+        $this->restoreCloseTagInScript($doc);
+
         $timings = [];
 
         foreach ($this->filters as $filter) {
@@ -183,10 +185,16 @@ class Filter {
                 (</script)
             ~xsi',
             function ($match) {
-                return $match[1] . str_replace('</', '<\\/', $match[2]) . $match[3];
+                return $match[1] . preg_replace('~(<@*)(/)~', '$1@$2', $match[2]) . $match[3];
             },
             $buffer
         );
+    }
+
+    private function restoreCloseTagInScript(DOMDocument $dom) {
+        foreach ($dom->query('//script') as $script) {
+            $script->textContent = preg_replace('~(<@*)@(/)~', '$1$2', $script->textContent);
+        }
     }
 
     private function fixIllegalSelfClosingTags($buffer) {

@@ -160,13 +160,15 @@ class FilterTest extends TestCase {
         $this->shouldTransform();
         $buffer = "<html><body>$script</body></html>";
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains($script, str_replace('\\', '', $filtered));
+        $this->assertContains($script, $filtered);
     }
 
     public function shouldHandleTagCloseInScriptDataProvider() {
         return [
             ["<script>document.write('<div></div>');</script>"],
-            ["<script type=\"text/javascript\">document.write('<div></div>');</script>"]
+            ["<script type=\"text/javascript\">document.write('<div></div>');</script>"],
+            ["<script>document.write('<script><\\/script>');</script>"],
+            ["<script>document.write('<script><@/script>');</script>"]
         ];
     }
 
