@@ -63,7 +63,7 @@ class Filter implements HTMLFilter {
 EOJS;
 
     private $inlinedCSSRetriever = <<<EOJS
-(function () {
+(window.requestAnimationFrame || (function(f) { window.setTimeout(f, 0); }))(function () {
     Array.prototype.forEach.call(
         document.querySelectorAll('style[data-phast-href]'),
         function (style) {
@@ -79,7 +79,7 @@ EOJS;
             });
         }
     );
-})();
+});
 EOJS;
 
 
