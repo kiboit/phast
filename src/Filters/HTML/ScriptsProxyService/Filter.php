@@ -81,7 +81,7 @@ class Filter implements HTMLFilter {
         el.setAttribute('data-phast-proxied-script', id);
         el.src = config.serviceUrl + '&src=' + escape(el.src) +
                                      '&cacheMarker=' + escape(cacheMarker) +
-                                     '&id=' + id;
+                                     '&id=d' + id;
     }
 })
 EOS;
@@ -100,6 +100,8 @@ EOS;
      * @var ObjectifiedFunctions
      */
     private $functions;
+
+    private $id = 0;
 
     /**
      * ScriptProxyServiceHTMLFilter constructor.
@@ -135,10 +137,13 @@ EOS;
         if (!$element->hasAttribute('src')) {
             return;
         }
-        $element->setAttribute('src', $this->rewriteURL(trim($element->getAttribute('src'))));
+        $id = "s" . ++$this->id;
+        $url = $this->rewriteURL(trim($element->getAttribute('src')), $id);
+        $element->setAttribute('src', $url);
+        $element->setAttribute('data-phast-proxied-script', $id);
     }
 
-    private function rewriteURL($src) {
+    private function rewriteURL($src, $id) {
         $url = URL::fromString($src)->withBase($this->baseUrl);
         if (!$this->shouldRewriteURL($url)) {
             $this->logger()->info('Not proxying {src}', ['src' => $src]);
@@ -147,6 +152,7 @@ EOS;
         $this->logger()->info('Proxying {src}', ['src' => $src]);
         $params = [
             'src' => (string) $url,
+            'id' => $id,
             'cacheMarker' => floor($this->functions->time() / $this->config['urlRefreshTime'])
         ];
         return (new ServiceRequest())

@@ -28,7 +28,7 @@ EOF;
     private function addCleanupScript(Resource $resource, $request) {
         if (empty($request['src'])
             || empty($request['id'])
-            || !ctype_digit($request['id'])
+            || !preg_match('/^[a-z]?[0-9]+$/', $request['id'])
         ) {
             return $resource;
         }
