@@ -56,7 +56,6 @@ EOS;
         Array.prototype.forEach.call(el.attributes, function (attr) {
             script.setAttribute(attr.nodeName, attr.nodeValue);
         });
-        script.setAttribute('data-phast-script', ++scriptIndex);
         if (!el.hasAttribute('async')) {
             script.async = false;
         }
@@ -112,12 +111,14 @@ EOS;
         } catch (err) {}
     }
     function fakeDocumentWrite(originalScript, newScript) {
-        var scriptId = newScript.getAttribute('data-phast-script');
+        var scriptId = ++scriptIndex;
+        newScript.setAttribute('data-phast-script', scriptId);
         var beforeScript = buildScript(
             '(function () {' +
                 'delete document["write"];' +
                 'var script = document.querySelector("[data-phast-script=\\\\"' + scriptId + '\\\\"]");' +
                 'if (!script) return;' +
+                'script.removeAttribute("data-phast-script");' +
                 'var beforeScript = document.querySelector("[data-phast-before-script=\\\\"' + scriptId + '\\\\"]");' +
                 'if (beforeScript) beforeScript.parentNode.removeChild(beforeScript);' +
                 'document.write = function (markup) {' +
