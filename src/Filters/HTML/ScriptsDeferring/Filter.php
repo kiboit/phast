@@ -68,6 +68,15 @@ EOS;
         }
         if (!el.hasAttribute('src')) {
             script.setAttribute('src', 'data:text/javascript;base64,' + utoa(el.textContent));
+            Object.defineProperty(script, 'src', {
+                configurable: true,
+                get: function() { return ''; }
+            });
+            script.addEventListener('load', function () {
+                delete script['src'];
+                script.removeAttribute('src');
+                script.textContent = el.textContent;
+            });
         }
         if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
             fakeDocumentWrite(el, script);
@@ -82,7 +91,7 @@ EOS;
     deferreds.forEach(function (deferred) {
         replace(deferred.original, deferred.rewritten);
     });
-    lastScript.onload  = restoreReadyState;
+    lastScript.addEventListener('load', restoreReadyState);
     lastScript.onerror = restoreReadyState;
     function restoreReadyState() {
         delete document['write'];
