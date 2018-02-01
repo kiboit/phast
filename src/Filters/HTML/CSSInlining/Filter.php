@@ -67,18 +67,22 @@ EOJS;
     Array.prototype.forEach.call(
         document.querySelectorAll('style[data-phast-href]'),
         function (style) {
-            var link = document.createElement('link');
-            link.setAttribute('href', style.getAttribute('data-phast-href'));
-            link.setAttribute('rel', 'stylesheet');
-            if (style.hasAttribute('media')) {
-                link.setAttribute('media', style.getAttribute('media'));
-            }
-            style.parentNode.insertBefore(link, style.nextSibling);
-            link.addEventListener('load', function () {
-                style.parentNode.removeChild(style);
+            retrieve(style.getAttribute('data-phast-href'), function (css) {
+                style.textContent = css;
+                style.removeAttribute('data-phast-href');
             });
         }
     );
+
+    function retrieve(url, fn) {
+        var req = new XMLHttpRequest();
+        req.addEventListener('load', load);
+        req.open('GET', url);
+        req.send();
+        function load() {
+            fn(this.responseText);
+        }
+    }
 })();
 EOJS;
 
