@@ -19,12 +19,16 @@ class Filter implements HTMLFilter {
     };
     var lastScript;
     var scriptIndex = 0;
-    Object.defineProperty(document, 'readyState', {
-        configurable: true,
-        get: function() {
-            return 'loading';
-        }
-    });
+    try {
+        Object.defineProperty(document, 'readyState', {
+            configurable: true,
+            get: function() {
+                return 'loading';
+            }
+        });
+    } catch (e) {
+        window.console && console.error("Phast: Unable to override document.readyState on this browser: ", e);
+    }
     Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"]'), function (el) {
         var script = document.createElement('script');
         Array.prototype.forEach.call(el.attributes, function (attr) {
@@ -41,10 +45,14 @@ class Filter implements HTMLFilter {
         }
         if (!el.hasAttribute('src')) {
             script.setAttribute('src', 'data:text/javascript;base64,' + utoa(el.textContent));
-            Object.defineProperty(script, 'src', {
-                configurable: true,
-                get: function() { return ''; }
-            });
+            try {
+                Object.defineProperty(script, 'src', {
+                    configurable: true,
+                    get: function() { return ''; }
+                });
+            } catch (e) {
+                window.console && console.error("Phast: Unable to override script.src on this browser: ", e);
+            }
             script.addEventListener('load', function () {
                 delete script['src'];
                 script.removeAttribute('src');
