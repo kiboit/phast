@@ -34,3 +34,18 @@ function test(file, fn) {
         }
     });
 }
+
+function async(assert, fn) {
+    return fn(assert.async());
+}
+
+function retrieve(url, fn) {
+    var req = new XMLHttpRequest();
+    req.addEventListener('load', load);
+    req.open('GET', url);
+    req.overrideMimeType('text/plain; charset=x-user-defined');
+    req.send();
+    function load() {
+        fn(this.responseText);
+    }
+}
