@@ -63,7 +63,7 @@ class Filter implements HTMLFilter {
 EOJS;
 
     private $inlinedCSSRetriever = <<<EOJS
-document.addEventListener('DOMContentLoaded', function () {
+(function() {
     Array.prototype.forEach.call(
         document.querySelectorAll('style[data-phast-href]'),
         function (style) {
