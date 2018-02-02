@@ -1,3 +1,4 @@
 test('inline_js.php', function (assert, document) {
-    assert.equal(document.defaultView.didLoad, true, "didLoad was set to true by inline script");
+    assert.equal(document.defaultView.didLoad, true, "didLoad should be set to true by inline script");
+    assert.equal(document.defaultView.shouldBeGlobal, true, "shouldBeGlobal should be defined in global scope");
 });

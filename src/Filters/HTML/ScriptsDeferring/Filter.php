@@ -57,7 +57,8 @@ class Filter implements HTMLFilter {
                 delete script['src'];
                 script.removeAttribute('src');
                 script.textContent = el.textContent;
-                eval(el.textContent);
+                // See: http://perfectionkills.com/global-eval-what-are-the-options/
+                (1,eval)(el.textContent);
             });
         }
         if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {

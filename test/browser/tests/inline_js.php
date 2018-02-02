@@ -2,10 +2,10 @@
 <!doctype html>
 <html>
 <head></head>
-<body onload="console.log('load');">
+<body>
 <script>
-    console.log('hey');
     didLoad = true;
+    var shouldBeGlobal = true;
 </script>
 </body>
 </html>
