@@ -31,12 +31,10 @@ require_once __DIR__ . '/../../src/html-filters.php';
         document.getElementById('addClass').className = 'some-other-class';
         </script>
 
-        <div style="background:blue;color:white;">
-            <script>
-            document.write("This should have a blue background");
-            </script>
-        </div>
-
+        <div class="documentWrite">This should have a blue background</div>
+        <script>
+            document.write("<style>.documentWrite{background:blue;}</style>");
+        </script>
 
         <div style="width: 200px; height: 200px; background: url(images/python.png)"></div>
 
