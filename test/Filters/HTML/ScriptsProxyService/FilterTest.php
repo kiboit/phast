@@ -7,6 +7,31 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
 
+    /**
+     * @var Filter
+     */
+    private $filter;
+
+    public function setUp() {
+        parent::setUp();
+        $config = [
+            'match' => [
+                '/example\.com/',
+                '/test\.com/'
+            ],
+            'serviceUrl' => 'script-proxy.php',
+            'urlRefreshTime' => 7200
+        ];
+        $functions = new ObjectifiedFunctions();
+        $functions->time = function () use ($config) {
+            return $config['urlRefreshTime'] * 2.5;
+        };
+        $this->filter = new Filter(
+            $config,
+            $functions
+        );
+    }
+
     public function testRewrite() {
         $urls = [
             'http://example.com/script.js',
@@ -35,7 +60,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->head->appendChild($noRewrite1);
         $this->head->appendChild($noRewrite2);
 
-        $this->runFilter();
+        $this->filter->transformHTMLDOM($this->dom);
 
         foreach ([$rewrite1, $rewrite2, $rewrite3] as $i => $script) {
             $url = parse_url($script->getAttribute('src'));
@@ -58,7 +83,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->head->appendChild($script);
 
-        $this->runFilter();
+        $this->filter->transformHTMLDOM($this->dom);
 
         $this->assertContains('%2Fhello%2F', $script->getAttribute('src'));
         $this->assertNotContains('+', $script->getAttribute('src'));
@@ -70,7 +95,7 @@ class FilterTest extends HTMLFilterTestCase {
         $script = $this->dom->createElement('script');
         $script->setAttribute('src', 'the-script.js');
         $this->head->appendChild($script);
-        $this->runFilter();
+        $this->filter->transformHTMLDOM($this->dom);
 
         $url = parse_url($script->getAttribute('src'));
         $this->assertEquals('script-proxy.php', $url['path']);
@@ -86,7 +111,7 @@ class FilterTest extends HTMLFilterTestCase {
         $script = $this->dom->createElement('script');
         $this->head->appendChild($script);
 
-        $this->runFilter();
+        $this->filter->transformHTMLDOM($this->dom);
 
         $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
         $this->assertEquals(2, sizeof($scripts));
@@ -95,7 +120,7 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testDontInjectScriptForNothing() {
-        $this->runFilter();
+        $this->filter->transformHTMLDOM($this->dom);
 
         $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
         $this->assertEquals(0, sizeof($scripts));
@@ -106,31 +131,12 @@ class FilterTest extends HTMLFilterTestCase {
         $script->setAttribute('type', 'nonsense');
         $this->head->appendChild($script);
 
-        $this->runFilter();
+        $this->filter->transformHTMLDOM($this->dom);
 
         $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
         $this->assertEquals(1, sizeof($scripts));
         $this->assertSame($script, $scripts[0]);
     }
 
-    private function runFilter() {
-        $config = [
-            'match' => [
-                '/example\.com/',
-                '/test\.com/'
-            ],
-            'serviceUrl' => 'script-proxy.php',
-            'urlRefreshTime' => 7200
-        ];
-        $functions = new ObjectifiedFunctions();
-        $functions->time = function () use ($config) {
-            return $config['urlRefreshTime'] * 2.5;
-        };
-        $filter = new Filter(
-            $config,
-            $functions
-        );
-        $filter->transformHTMLDOM($this->dom);
-    }
 
 }
