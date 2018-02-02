@@ -44,7 +44,7 @@ class Filter implements HTMLFilter {
             script.removeAttribute('type');
         }
         if (!el.hasAttribute('src')) {
-            script.setAttribute('src', 'data:,');
+            script.setAttribute('src', 'data:,;');
             try {
                 Object.defineProperty(script, 'src', {
                     configurable: true,
