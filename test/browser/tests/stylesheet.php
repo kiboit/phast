@@ -2,7 +2,7 @@
 <!doctype html>
 <html>
 <head>
-<link rel="stylesheet" href="stylesheet.css">
+<link rel="stylesheet" href="../res/stylesheet.css">
 </head>
 <body>
 <h1 class="my-class">Hello, World!</h1>
