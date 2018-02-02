@@ -2,6 +2,8 @@ function test(file, fn) {
     var name = file.replace(/\.php$/, '');
 
     QUnit.test(name, function (assert) {
+        assert.timeout(5000);
+
         var fixture = document.getElementById('qunit-fixture');
 
         var done = assert.async();
