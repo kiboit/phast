@@ -12,6 +12,11 @@ function test(file, fn) {
 
         fixture.appendChild(iframe);
 
+        var error = 0;
+        iframe.contentWindow.addEventListener('error', function () {
+            error++;
+        });
+
         function onFrameLoad() {
             done();
             iframe.removeEventListener('load', onFrameLoad);
@@ -29,6 +34,8 @@ function test(file, fn) {
             });
 
             assert.equal(logCount, 1, "Exactly one script should contain Phast's log message");
+
+            assert.equal(error, 0, "No errors should be thrown");
 
             fn(assert, doc);
         }
