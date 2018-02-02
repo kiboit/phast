@@ -64,8 +64,10 @@ class Filter implements HTMLFilter {
     deferreds.forEach(function (deferred) {
         replace(deferred.original, deferred.rewritten);
     });
-    lastScript.addEventListener('load', restoreReadyState);
-    lastScript.onerror = restoreReadyState;
+    if (lastScript) {
+        lastScript.addEventListener('load', restoreReadyState);
+        lastScript.onerror = restoreReadyState;
+    }
     function restoreReadyState() {
         delete document['write'];
 
