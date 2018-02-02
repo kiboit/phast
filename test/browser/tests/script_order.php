@@ -8,6 +8,10 @@
     order = window.order || [];
     order.push('inline');
 </script>
+<script defer>
+    order = window.order || [];
+    order.push('deferred inline');
+</script>
 <script src="script_order.script.php?name=synchronous+external"></script>
 <script>
     order = window.order || [];

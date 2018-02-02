@@ -63,7 +63,7 @@ class Filter implements HTMLFilter {
         if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
             fakeDocumentWrite(el, script);
         }
-        if (el.hasAttribute('defer')) {
+        if (el.hasAttribute('src') && el.hasAttribute('defer')) {
             deferreds.push({original: el, rewritten: script});
         } else {
             replace(el, script);

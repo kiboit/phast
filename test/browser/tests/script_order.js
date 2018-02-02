@@ -1,6 +1,7 @@
 test('script_order.php', function (assert, document) {
     var expected = [
         'inline',
+        'deferred inline',
         'synchronous external',
         'second inline',
         'deferred external'
