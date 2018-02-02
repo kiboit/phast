@@ -4,7 +4,6 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
-use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
 
@@ -38,8 +37,8 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->runFilter();
 
-        foreach ([$rewrite1->getAttribute('src'), $rewrite2->getAttribute('src'), $rewrite3->getAttribute('src')] as $i => $src) {
-            $url = parse_url($src);
+        foreach ([$rewrite1, $rewrite2, $rewrite3] as $i => $script) {
+            $url = parse_url($script->getAttribute('src'));
             $this->assertEquals('script-proxy.php', $url['path']);
             $query = [];
             parse_str($url['query'], $query);
