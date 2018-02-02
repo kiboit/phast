@@ -44,7 +44,7 @@ class Filter implements HTMLFilter {
             script.removeAttribute('type');
         }
         if (!el.hasAttribute('src')) {
-            script.setAttribute('src', 'data:text/javascript;base64,' + utoa(el.textContent));
+            script.setAttribute('src', 'data:,');
             try {
                 Object.defineProperty(script, 'src', {
                     configurable: true,
@@ -57,6 +57,7 @@ class Filter implements HTMLFilter {
                 delete script['src'];
                 script.removeAttribute('src');
                 script.textContent = el.textContent;
+                eval(el.textContent);
             });
         }
         if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
