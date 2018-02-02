@@ -16,7 +16,7 @@ class ServiceSignature {
     private $cache;
 
     /**
-     * @var string
+     * @var array
      */
     private $identities;
 
