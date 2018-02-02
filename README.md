@@ -9,10 +9,10 @@ improve load times besides.
 
 © 2017, [Kibo IT EOOD](https://kiboit.com/)
 
-## Thanks, Browserstack!
+## Thanks, BrowserStack!
 
-[![Browserstack](https://peschar.net/files/browserstack.png)](https://www.browserstack.com)
+[![BrowserStack](https://peschar.net/files/browserstack.png)](https://www.browserstack.com)
 
-[Browerstack](https://www.browserstack.com) generously provides us with free
+[BrowserStack](https://www.browserstack.com) generously provides us with free
 access to their browser testing platform, so we can make sure Phast works on all
 supported browsers.
