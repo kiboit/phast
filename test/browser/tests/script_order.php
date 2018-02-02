@@ -2,7 +2,7 @@
 <!doctype html>
 <html>
 <body>
-<script async src="script_order.script.php?name=async+external&sleep=200"></script>
+<script async src="script_order.script.php?name=async+external&sleep=200&<?= uniqid(); ?>"></script>
 <script defer src="script_order.script.php?name=deferred+external"></script>
 <script>
     order = window.order || [];
