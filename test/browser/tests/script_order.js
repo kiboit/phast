@@ -1,0 +1,17 @@
+test('script_order.php', function (assert, document) {
+    var expected = [
+        'inline',
+        'synchronous external',
+        'second inline',
+        'deferred external'
+    ];
+    assert.ok(document.defaultView.order, "window.order is defined");
+    var order = document.defaultView.order;
+    assert.ok(order.indexOf('async external') != -1, "async script was loaded");
+    assert.ok(order.indexOf('async external') != 0, "async script was not loaded first");
+    order.splice(order.indexOf('async external'), 1);
+    assert.equal(order.length, expected.length, "" + expected.length + " scripts were loaded");
+    var strOrder = order.join(', ');
+    var strExpected = expected.join(', ');
+    assert.equal(strOrder, strExpected, "Scripts were loaded in the expected order");
+});

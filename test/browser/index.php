@@ -11,7 +11,7 @@
 <div id="qunit-fixture"></div>
 <script src="qunit.js"></script>
 <script src="tests.js"></script>
-<?php foreach (glob('tests/*.js') as $test): ?>
+<?php foreach (preg_grep('/\..*\./', glob('tests/*.js'), PREG_GREP_INVERT) as $test): ?>
 <script src="<?= $test; ?>"></script>
 <?php endforeach; ?>
 </body>
