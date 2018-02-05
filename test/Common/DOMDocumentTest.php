@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Common;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
@@ -15,7 +16,10 @@ class DOMDocumentTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->dom = DOMDocument::makeForLocation(URL::fromString('http://phast.test'));
+        $jsCompiler = $this->createMock(PhastJavaScriptCompiler::class);
+        $jsCompiler->method('compileScripts')
+            ->willReturn('compiled-js');
+        $this->dom = DOMDocument::makeForLocation(URL::fromString('http://phast.test'), $jsCompiler);
     }
 
     public function testGetBaseURLNoBaseTag() {
@@ -52,9 +56,18 @@ class DOMDocumentTest extends TestCase {
         $original .= '<html><head></head><body>the-body</body></html><div>some-div</div>';
         $this->dom->loadHTML($original);
         $serialized = $this->dom->serializeToHTML5();
-        $expected = "<!doctype html><html>\n<head></head>\n<body>the-body</body>\n</html>";
+        $expected = "<!doctype html><html><head></head><body>the-body</body></html>";
         $expected .= "<html><div>some-div</div></html>";
-        $this->assertEquals($expected, $serialized);
+        $this->assertEquals($expected, str_replace("\n", '', $serialized));
+    }
+
+    public function testAddingPhastJavaScripts() {
+        $html = '<html><head></head><body></body></html>';
+        $this->dom->loadHTML($html);
+        $this->dom->addPhastJavaScript(new PhastJavaScript('f1'));
+        $serialized = $this->dom->serializeToHTML5();
+        $expected = '<!doctype html><html><head></head><body><script>compiled-js</script></body></html>';
+        $this->assertEquals($expected, str_replace("\n", '', $serialized));
     }
 
 }

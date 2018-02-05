@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\Common\PhastJavaScriptCompiler;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +34,11 @@ class HTMLFilterTestCase extends TestCase {
     public function setUp() {
         parent::setUp();
 
-        $this->dom = DOMDocument::makeForLocation(URL::fromString(self::BASE_URL));
+        $jsCompiler = $this->createMock(PhastJavaScriptCompiler::class);
+        $this->dom = DOMDocument::makeForLocation(
+            URL::fromString(self::BASE_URL),
+            $jsCompiler
+        );
         $this->html = $this->dom->createElement('html');
         $this->dom->appendChild($this->html);
         $this->head = $this->dom->createElement('head');
