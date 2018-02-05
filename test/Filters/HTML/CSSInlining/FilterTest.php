@@ -30,11 +30,6 @@ class FilterTest extends HTMLFilterTestCase {
      */
     private $cssFilterCalledTimes;
 
-    /**
-     * @var Filter
-     */
-    private $filter;
-
     public function setUp() {
         parent::setUp();
 
@@ -42,67 +37,6 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files = [];
         $this->optimizerMock = null;
         $this->cssFilterCalledTimes = 0;
-
-        $signature = $this->createMock(ServiceSignature::class);
-        $signature->method('sign')
-            ->willReturn('the-token');
-
-        $retriever = $this->createMock(Retriever::class);
-        $retriever->method('getLastModificationTime')
-            ->willReturnCallback(function () {
-                return $this->retrieverLastModificationTime;
-            });
-        $retriever->method('retrieve')
-            ->willReturnCallback(function (URL $url) {
-                if (isset ($this->files[$url->getPath()])) {
-                    return $this->files[$url->getPath()];
-                }
-                if (isset ($this->files[(string)$url])) {
-                    return $this->files[(string)$url];
-                }
-                return false;
-            });
-
-        $cache = $this->createMock(Cache::class);
-        $cache->method('get')
-            ->willReturnCallback(function ($key, callable  $cb) {
-                return $cb();
-            });
-
-        $optimizerFactory = $this->createMock(OptimizerFactory::class);
-        $optimizerFactory->expects($this->once())
-            ->method('makeForDocument')
-            ->with($this->dom)
-            ->willReturnCallback(function (DOMDocument $document) use ($cache) {
-                return is_null($this->optimizerMock)
-                       ? new Optimizer($document, $cache)
-                       : $this->optimizerMock;
-            });
-
-        $cssFilter = $this->createMock(ServiceFilter::class);
-        $cssFilter->method('apply')
-            ->willReturnCallback(function ($css) {
-                $this->cssFilterCalledTimes++;
-                return $css;
-            });
-
-        $this->filter = new Filter(
-            $signature,
-            URL::fromString(self::BASE_URL),
-            [
-                'whitelist' => [
-                    '~' . preg_quote(self::BASE_URL) . '~',
-                    '~https?://fonts\.googleapis\.com~' => [
-                        'ieCompatible' => false
-                    ]
-                ],
-                'serviceUrl' => self::SERVICE_URL,
-                'urlRefreshTime' => self::URL_REFRESH_TIME
-            ],
-            $retriever,
-            $optimizerFactory,
-            $cssFilter
-        );
     }
 
     public function testInliningCSS() {
@@ -120,7 +54,7 @@ class FilterTest extends HTMLFilterTestCase {
             ->withConsecutive(['the-file-contents'], ['the-file-2-contents'])
             ->willReturnArgument(0);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
 
         $styles = $this->getTheStyles();
@@ -148,14 +82,14 @@ class FilterTest extends HTMLFilterTestCase {
     public function testCallingTheFilterOnBothStylesAndLinks() {
         $this->makeLink($this->head, 'the-file-contents');
         $this->head->appendChild($this->dom->createElement('style'));
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
         $this->assertEquals(2, $this->cssFilterCalledTimes);
     }
 
     public function testNotAddingPhastHrefToExistingStyleTags() {
         $style = $this->dom->createElement('style');
         $this->head->appendChild($style);
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertFalse($styles[0]->hasAttribute('data-phast-href'));
         $this->assertEquals(0, $this->dom->getElementsByTagName('script')->length);
@@ -167,7 +101,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->optimizerMock->expects($this->once())
             ->method('optimizeCSS')
             ->willReturn(null);
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEquals(0, $this->dom->getElementsByTagName('script')->length);
         $theLinks = $this->dom->getElementsByTagName('link');
@@ -189,7 +123,7 @@ class FilterTest extends HTMLFilterTestCase {
         $noHref->removeAttribute('href');
         $crossSite->setAttribute('href', 'http://www.example.com/some-file.css');
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEmpty($this->getTheStyles());
         $this->assertSame($badRel, $this->head->childNodes[0]);
@@ -202,7 +136,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
         unset ($this->files[self::BASE_URL . '/the-css.css']);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEmpty($this->getTheStyles());
         $this->assertEquals(1, $this->head->childNodes->length);
@@ -222,7 +156,7 @@ class FilterTest extends HTMLFilterTestCase {
     public function testSettingRightCacheMarkerOnLocalScripts() {
         $this->retrieverLastModificationTime = 123;
         $this->makeLink($this->head, 'css');
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
         $style = $this->head->getElementsByTagName('style')->item(0);
 
         $url = parse_url($style->getAttribute('data-phast-href'));
@@ -242,7 +176,7 @@ class FilterTest extends HTMLFilterTestCase {
             });
 
         $this->makeLink($this->head, 'some-css');
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
     }
 
@@ -267,7 +201,7 @@ class FilterTest extends HTMLFilterTestCase {
         $css = implode("\n", $css);
 
         $this->makeLink($this->head, $css);
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
         $styles = $this->getTheStyles();
 
         $this->assertCount(sizeof($formats) + 1, $styles);
@@ -286,7 +220,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files['/file3'] = 'we-should-not-see-this';
         $this->makeLink($this->head, $css);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $children = $this->head->childNodes;
         $this->assertEquals(4, $children->length);
@@ -313,7 +247,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files['/file2'] = '@import "file1"; sub2';
         $this->makeLink($this->head, $css);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $children = $this->head->childNodes;
         $this->assertEquals(3, $children->length);
@@ -327,7 +261,7 @@ class FilterTest extends HTMLFilterTestCase {
         $css = '@import "something" projection, print; @import "something-else" media and non-media;';
         $link = $this->makeLink($this->head, $css);
         $link->setAttribute('media', 'some, other, screen');
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEquals(1, $this->head->childNodes->length);
         $style = $this->head->childNodes->item(0);
@@ -340,7 +274,7 @@ class FilterTest extends HTMLFilterTestCase {
     public function testNotAddingNonsenseMedia() {
         $css = '@import "something"; the-css';
         $this->makeLink($this->head, $css);
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $elements = $this->head->childNodes;
         $this->assertFalse($elements->item(0)->hasAttribute('media'));
@@ -357,7 +291,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->makeLink($this->head, 'css4', 'https://fonts.googleapis.com/missing');
         unset ($this->files['https://fonts.googleapis.com/missing']);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $notAllowedLink = $this->head->childNodes->item(0);
         $this->assertEquals('link', $notAllowedLink->tagName);
@@ -403,7 +337,7 @@ class FilterTest extends HTMLFilterTestCase {
             body { color: red; }
         ';
         $this->makeLink($this->head, $css);
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEquals(2, $this->head->childNodes->length);
 
@@ -449,7 +383,7 @@ class FilterTest extends HTMLFilterTestCase {
         ';
         $this->makeLink($this->head, $css);
         $this->files['https://fonts.googleapis.com/css1'] = 'hello-world;';
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEquals(2, $this->head->childNodes->length);
         $this->assertEquals('style', $this->head->childNodes->item(0)->tagName);
@@ -463,7 +397,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->files['/test'] = 'hello';
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEquals(2, $this->head->childNodes->length);
         $this->assertEquals('hello', $this->head->childNodes->item(0)->textContent);
@@ -472,7 +406,7 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function testNotRewritingNotWhitelisted() {
         $this->makeLink($this->head, 'css', 'http://not-allowed.com');
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $this->assertEquals(1, $this->head->childNodes->length);
         $link = $this->head->childNodes->item(0);
@@ -483,7 +417,7 @@ class FilterTest extends HTMLFilterTestCase {
     public function testInlineUTF8() {
         $css = 'body { content: "ü"; }';
         $this->makeLink($this->head, $css);
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $elements = $this->head->childNodes;
         $this->assertEquals(1, $elements->length);
@@ -499,7 +433,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->head->appendChild($link);
 
         $this->files['/new-root/the-css-file.css'] = 'the-css-content';
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertEquals(1, $styles->length);
@@ -513,11 +447,75 @@ class FilterTest extends HTMLFilterTestCase {
         $this->head->appendChild($link);
 
         $this->files['/the-css-file.css'] = 'the-css-content';
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->runTheFilter();
 
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertEquals(1, $styles->length);
         $this->assertEquals('the-css-content', $styles->item(0)->textContent);
+    }
+
+    private function runTheFilter() {
+        $signature = $this->createMock(ServiceSignature::class);
+        $signature->method('sign')
+            ->willReturn('the-token');
+
+        $retriever = $this->createMock(Retriever::class);
+        $retriever->method('getLastModificationTime')
+            ->willReturnCallback(function () {
+                return $this->retrieverLastModificationTime;
+            });
+        $retriever->method('retrieve')
+            ->willReturnCallback(function (URL $url) {
+                if (isset ($this->files[$url->getPath()])) {
+                    return $this->files[$url->getPath()];
+                }
+                if (isset ($this->files[(string)$url])) {
+                    return $this->files[(string)$url];
+                }
+                return false;
+            });
+
+        $cache = $this->createMock(Cache::class);
+        $cache->method('get')
+            ->willReturnCallback(function ($key, callable  $cb) {
+                return $cb();
+            });
+
+        $optimizerFactory = $this->createMock(OptimizerFactory::class);
+        $optimizerFactory->expects($this->once())
+            ->method('makeForDocument')
+            ->with($this->dom)
+            ->willReturnCallback(function (DOMDocument $document) use ($cache) {
+                return is_null($this->optimizerMock)
+                    ? new Optimizer($document, $cache)
+                    : $this->optimizerMock;
+            });
+
+        $cssFilter = $this->createMock(ServiceFilter::class);
+        $cssFilter->method('apply')
+            ->willReturnCallback(function ($css) {
+                $this->cssFilterCalledTimes++;
+                return $css;
+            });
+
+        $filter = new Filter(
+            $signature,
+            URL::fromString(self::BASE_URL),
+            [
+                'whitelist' => [
+                    '~' . preg_quote(self::BASE_URL) . '~',
+                    '~https?://fonts\.googleapis\.com~' => [
+                        'ieCompatible' => false
+                    ]
+                ],
+                'serviceUrl' => self::SERVICE_URL,
+                'urlRefreshTime' => self::URL_REFRESH_TIME
+            ],
+            $retriever,
+            $optimizerFactory,
+            $cssFilter
+        );
+        $filter->transformHTMLDOM($this->dom);
     }
 
     /**
