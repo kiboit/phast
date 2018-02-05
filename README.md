@@ -9,6 +9,16 @@ improve load times besides.
 
 © 2017, [Kibo IT EOOD](https://kiboit.com/)
 
+## Browser compatibility
+
+We support at least the following (and later) versions of the major browsers:
+
+* Chrome 58
+* Edge
+* Firefox 52
+* IE 11
+* Safari 5.1 (on Snow Leopard)
+
 ## Thanks, BrowserStack!
 
 [![BrowserStack](https://peschar.net/files/browserstack.png)](https://www.browserstack.com)
