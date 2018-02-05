@@ -51,7 +51,7 @@ class FilterTest extends HTMLFilterTestCase {
             ],
             'serviceUrl' => self::SERVICE_URL,
             'urlRefreshTime' => self::URL_REFRESH_TIME,
-            'optimizerSizeDiffThreshold' => 1
+            'optimizerSizeDiffThreshold' => -1
         ];
     }
 
@@ -138,8 +138,9 @@ class FilterTest extends HTMLFilterTestCase {
             ->with($originalContent)
             ->willReturn($optimizedContent);
         $this->runTheFilter();
-        $content = $this->head->getElementsByTagName('style')->item(0)->textContent;
-        $this->assertEquals($originalContent, $content);
+        $style = $this->head->getElementsByTagName('style')->item(0);
+        $this->assertEquals($originalContent, $style->textContent);
+        $this->assertFalse($style->hasAttribute('data-phast-href'));
     }
 
     public function testInliningWithCorrectRel() {

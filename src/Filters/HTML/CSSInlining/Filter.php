@@ -231,7 +231,8 @@ EOJS;
             $style->ownerDocument,
             $this->baseURL,
             $processed,
-            $style->getAttribute('media')
+            $style->getAttribute('media'),
+            false
         );
         $this->replaceElement($elements, $style);
     }
@@ -301,11 +302,22 @@ EOJS;
         if (is_null($optimized)) {
             return null;
         }
+        $isOptimized = false;
         if (strlen($content) - strlen($optimized) > $this->optimizerSizeDiffThreshold) {
             $content = $optimized;
+            $isOptimized = true;
         }
         $this->hasDoneInlining = true;
-        $elements = $this->inlineCSS($document, $url, $content, $media, $ieCompatible, $currentLevel, $seen);
+        $elements = $this->inlineCSS(
+            $document,
+            $url,
+            $content,
+            $media,
+            $isOptimized,
+            $ieCompatible,
+            $currentLevel,
+            $seen
+        );
         $this->addIEFallback($ieFallbackUrl, $elements);
         return $elements;
     }
@@ -315,6 +327,7 @@ EOJS;
         URL $url,
         $content,
         $media,
+        $optimized,
         $ieCompatible = true,
         $currentLevel = 0,
         $seen = []
@@ -329,7 +342,7 @@ EOJS;
             $elements = array_merge($elements, $replacement);
         }
 
-        $elements[] = $this->makeStyle($document, $url, $content, $media);
+        $elements[] = $this->makeStyle($document, $url, $content, $media, $optimized);
 
         return $elements;
     }
@@ -395,12 +408,12 @@ EOJS;
         return $matches;
     }
 
-    private function makeStyle(DOMDocument $document, URL $url, $content, $media) {
+    private function makeStyle(DOMDocument $document, URL $url, $content, $media, $optimized) {
         $style = $document->createElement('style');
         if ($media !== '') {
             $style->setAttribute('media', $media);
         }
-        if ($url->toString() != $this->baseURL->toString()) {
+        if ($optimized) {
             $style->setAttribute('data-phast-href', $this->makeServiceURL($url));
         }
         $style->textContent = $content;
