@@ -16,6 +16,8 @@ class FilterTest extends HTMLFilterTestCase {
 
     const URL_REFRESH_TIME = 7200;
 
+    private $retrieverLastModificationTime;
+
     private $files;
 
     /**
@@ -36,6 +38,7 @@ class FilterTest extends HTMLFilterTestCase {
     public function setUp() {
         parent::setUp();
 
+        $this->retrieverLastModificationTime = false;
         $this->files = [];
         $this->optimizerMock = null;
         $this->cssFilterCalledTimes = 0;
@@ -45,6 +48,10 @@ class FilterTest extends HTMLFilterTestCase {
             ->willReturn('the-token');
 
         $retriever = $this->createMock(Retriever::class);
+        $retriever->method('getLastModificationTime')
+            ->willReturnCallback(function () {
+                return $this->retrieverLastModificationTime;
+            });
         $retriever->method('retrieve')
             ->willReturnCallback(function (URL $url) {
                 if (isset ($this->files[$url->getPath()])) {
@@ -210,6 +217,18 @@ class FilterTest extends HTMLFilterTestCase {
         ];
         $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);
         $this->assertEquals($expectedUrl, $newLink->getAttribute('href'));
+    }
+
+    public function testSettingRightCacheMarkerOnLocalScripts() {
+        $this->retrieverLastModificationTime = 123;
+        $this->makeLink($this->head, 'css');
+        $this->filter->transformHTMLDOM($this->dom);
+        $style = $this->head->getElementsByTagName('style')->item(0);
+
+        $url = parse_url($style->getAttribute('data-phast-href'));
+        $query = [];
+        parse_str($url['query'], $query);
+        $this->assertEquals(123, $query['cacheMarker']);
     }
 
     public function testMinifyingBeforeOptimizing() {

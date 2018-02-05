@@ -407,9 +407,10 @@ EOJS;
     }
 
     protected function makeServiceURL(URL $originalLocation) {
+        $lastModTime = $this->retriever->getLastModificationTime($originalLocation);
         $params = [
             'src' => (string) $originalLocation,
-            'cacheMarker' => floor(time() / $this->urlRefreshTime)
+            'cacheMarker' => $lastModTime ? $lastModTime : floor(time() / $this->urlRefreshTime)
         ];
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
