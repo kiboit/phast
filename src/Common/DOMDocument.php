@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Common;
 
+use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
 class DOMDocument extends \DOMDocument {
@@ -12,6 +13,11 @@ class DOMDocument extends \DOMDocument {
      * @var URL
      */
     private $documentLocation;
+
+    /**
+     * @var PhastJavaScript[]
+     */
+    private $phastJavaScripts = [];
 
     /**
      * @param URL $documentLocation
@@ -42,6 +48,20 @@ class DOMDocument extends \DOMDocument {
         return $this->documentLocation;
     }
 
+    /**
+     * @param PhastJavaScript $script
+     */
+    public function addPhastJavaScript(PhastJavaScript $script) {
+        $this->phastJavaScripts[] = $script;
+    }
+
+    /**
+     * @return PhastJavaScript[]
+     */
+    public function getPhastJavaScripts() {
+        return $this->phastJavaScripts;
+    }
+
     public function serializeToHTML5() {
         // This gets us UTF-8 instead of entities
         $output = '<!doctype html>';
@@ -54,4 +74,5 @@ class DOMDocument extends \DOMDocument {
         }
         return $output;
     }
+
 }

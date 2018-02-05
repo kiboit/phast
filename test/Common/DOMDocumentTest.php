@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Common;
 
+use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
@@ -35,6 +36,15 @@ class DOMDocumentTest extends TestCase {
         $this->assertEquals('http://phast.test', $this->dom->getBaseURL()->toString());
     }
 
+    public function testAddGetJavaScripts() {
+        $script1 = new PhastJavaScript('file1');
+        $script2 = new PhastJavaScript('file2');
+        $this->dom->addPhastJavaScript($script1);
+        $this->dom->addPhastJavaScript($script2);
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertSame($script1, $scripts[0]);
+        $this->assertSame($script2, $scripts[1]);
+    }
 
     public function testSerializeToHTML5() {
         $original = '<?ins v>';
