@@ -80,7 +80,9 @@ EOJS;
         req.open('GET', url);
         req.send();
         function load() {
-            fn(this.responseText);
+            if (req.status >= 200 && req.status < 300) {
+                fn(req.responseText);
+            }
         }
     }
 })();
