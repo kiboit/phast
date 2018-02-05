@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
-use Kibo\Phast\ValueObjects\URL;
+use Kibo\Phast\Retrievers\LocalRetriever;
 
 class Factory implements HTMLFilterFactory {
 
@@ -13,7 +13,8 @@ class Factory implements HTMLFilterFactory {
             = $config['servicesUrl'] . '?service=scripts';
         }
         return new Filter(
-            $config['documents']['filters'][Filter::class]
+            $config['documents']['filters'][Filter::class],
+            new LocalRetriever($config['retrieverMap'])
         );
     }
 

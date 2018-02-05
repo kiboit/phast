@@ -4,16 +4,25 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
+use Kibo\Phast\Retrievers\Retriever;
 
 class FilterTest extends HTMLFilterTestCase {
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $retriever;
 
     /**
      * @var Filter
      */
     private $filter;
 
-    public function setUp() {
+    private $modTime;
+
+    public function setUp($modTime = false) {
         parent::setUp();
+        $this->modTime = false;
         $config = [
             'match' => [
                 '/example\.com/',
@@ -22,12 +31,20 @@ class FilterTest extends HTMLFilterTestCase {
             'serviceUrl' => 'script-proxy.php',
             'urlRefreshTime' => 7200
         ];
+
+        $this->retriever = $this->createMock(Retriever::class);
+        $this->retriever->method('getLastModificationTime')
+            ->willReturnCallback(function () {
+                return $this->modTime;
+            });
+
         $functions = new ObjectifiedFunctions();
         $functions->time = function () use ($config) {
             return $config['urlRefreshTime'] * 2.5;
         };
         $this->filter = new Filter(
             $config,
+            $this->retriever,
             $functions
         );
     }
@@ -75,6 +92,20 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
         $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
+    }
+
+    public function testSettingLastModifiedTimeForCacheMarker() {
+        $script = $this->dom->createElement('script');
+        $script->setAttribute('src', self::BASE_URL . '/rewrite.js');
+        $this->head->appendChild($script);
+        $this->modTime = 123;
+        $this->filter->transformHTMLDOM($this->dom);
+
+
+        $url = parse_url($script->getAttribute('src'));
+        $query = [];
+        parse_str($url['query'], $query);
+        $this->assertEquals(123, $query['cacheMarker']);
     }
 
     public function testRewriteSrcWithSpaces() {
