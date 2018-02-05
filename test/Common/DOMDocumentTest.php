@@ -36,5 +36,15 @@ class DOMDocumentTest extends TestCase {
     }
 
 
+    public function testSerializeToHTML5() {
+        $original = '<?ins v>';
+        $original .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
+        $original .= '<html><head></head><body>the-body</body></html><div>some-div</div>';
+        $this->dom->loadHTML($original);
+        $serialized = $this->dom->serializeToHTML5();
+        $expected = "<!doctype html><html>\n<head></head>\n<body>the-body</body>\n</html>";
+        $expected .= "<html><div>some-div</div></html>";
+        $this->assertEquals($expected, $serialized);
+    }
 
 }

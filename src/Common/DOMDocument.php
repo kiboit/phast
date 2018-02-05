@@ -42,4 +42,16 @@ class DOMDocument extends \DOMDocument {
         return $this->documentLocation;
     }
 
+    public function serializeToHTML5() {
+        // This gets us UTF-8 instead of entities
+        $output = '<!doctype html>';
+        foreach ($this->childNodes as $node) {
+            if (!$node instanceof \DOMDocumentType
+                && !$node instanceof \DOMProcessingInstruction
+            ) {
+                $output .= $this->saveHTML($node);
+            }
+        }
+        return $output;
+    }
 }
