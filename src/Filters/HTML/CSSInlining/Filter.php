@@ -128,6 +128,11 @@ EOJS;
     private $urlRefreshTime;
 
     /**
+     * @var int
+     */
+    private $optimizerSizeDiffThreshold;
+
+    /**
      * @var Retriever
      */
     private $retriever;
@@ -159,6 +164,7 @@ EOJS;
         $this->baseURL = $baseURL;
         $this->serviceUrl = URL::fromString((string)$config['serviceUrl']);
         $this->urlRefreshTime = (int)$config['urlRefreshTime'];
+        $this->optimizerSizeDiffThreshold = (int)$config['optimizerSizeDiffThreshold'];
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;
         $this->cssFilter = $cssFilter;
@@ -289,9 +295,12 @@ EOJS;
 
         $content = $this->cssFilter->apply(Resource::makeWithContent($url, $content), [])
             ->getContent();
-        $content = $this->optimizer->optimizeCSS($content);
-        if (is_null($content)) {
+        $optimized = $this->optimizer->optimizeCSS($content);
+        if (is_null($optimized)) {
             return null;
+        }
+        if (strlen($content) - strlen($optimized) > $this->optimizerSizeDiffThreshold) {
+            $content = $optimized;
         }
         $this->hasDoneInlining = true;
         $elements = $this->inlineCSS($document, $url, $content, $media, $ieCompatible, $currentLevel, $seen);

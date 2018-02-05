@@ -33,6 +33,7 @@ return [
 
             \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
                 'urlRefreshTime' => 7200,
+                'optimizerSizeDiffThreshold' => 1024,
                 'whitelist' => [
                     '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
                     '~^https?://fonts\.googleapis\.com/css~' => [

@@ -30,6 +30,11 @@ class FilterTest extends HTMLFilterTestCase {
      */
     private $cssFilterCalledTimes;
 
+    /**
+     * @var array
+     */
+    private $config;
+
     public function setUp() {
         parent::setUp();
 
@@ -37,6 +42,17 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files = [];
         $this->optimizerMock = null;
         $this->cssFilterCalledTimes = 0;
+        $this->config = [
+            'whitelist' => [
+                '~' . preg_quote(self::BASE_URL) . '~',
+                '~https?://fonts\.googleapis\.com~' => [
+                    'ieCompatible' => false
+                ]
+            ],
+            'serviceUrl' => self::SERVICE_URL,
+            'urlRefreshTime' => self::URL_REFRESH_TIME,
+            'optimizerSizeDiffThreshold' => 1
+        ];
     }
 
     public function testInliningCSS() {
@@ -109,7 +125,21 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertSame($link, $theLinks[0]);
         $this->assertEquals('/the-path', $link->getAttribute('href'));
         $this->assertEquals('stylesheet', $link->getAttribute('rel'));
+    }
 
+    public function testInliningOriginalIfBellowThreshold() {
+        $this->config['optimizerSizeDiffThreshold'] = 100;
+        $originalContent = str_repeat('a', 200);
+        $optimizedContent = str_repeat('b', 150);
+        $this->makeLink($this->head, $originalContent);
+        $this->optimizerMock = $this->createMock(Optimizer::class);
+        $this->optimizerMock->expects($this->once())
+            ->method('optimizeCSS')
+            ->with($originalContent)
+            ->willReturn($optimizedContent);
+        $this->runTheFilter();
+        $content = $this->head->getElementsByTagName('style')->item(0)->textContent;
+        $this->assertEquals($originalContent, $content);
     }
 
     public function testInliningWithCorrectRel() {
@@ -501,16 +531,7 @@ class FilterTest extends HTMLFilterTestCase {
         $filter = new Filter(
             $signature,
             URL::fromString(self::BASE_URL),
-            [
-                'whitelist' => [
-                    '~' . preg_quote(self::BASE_URL) . '~',
-                    '~https?://fonts\.googleapis\.com~' => [
-                        'ieCompatible' => false
-                    ]
-                ],
-                'serviceUrl' => self::SERVICE_URL,
-                'urlRefreshTime' => self::URL_REFRESH_TIME
-            ],
+            $this->config,
             $retriever,
             $optimizerFactory,
             $cssFilter
