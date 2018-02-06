@@ -9,6 +9,7 @@ use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements HTMLFilter {
@@ -118,8 +119,8 @@ class Filter implements HTMLFilter {
             'urlRefreshTime' => $this->config['urlRefreshTime'],
             'whitelist' => $this->config['match']
         ];
-        $script = new RewriteFunctionPhastJavaScript(__DIR__ . '/rewrite-function.js');
-        $script->setConfig($config);
+        $script = new PhastJavaScript(__DIR__ . '/rewrite-function.js');
+        $script->setConfig('script-proxy-service', $config);
         $document->addPhastJavaScript($script);
     }
 

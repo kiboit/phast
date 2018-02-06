@@ -14,6 +14,16 @@ class PhastJavaScript {
     private $filename;
 
     /**
+     * @var string
+     */
+    private $configKey;
+
+    /**
+     * @var mixed
+     */
+    private $config;
+
+    /**
      * @var ObjectifiedFunctions
      */
     private $funcs;
@@ -49,5 +59,38 @@ class PhastJavaScript {
     public function getLastModificationTime() {
         return $this->funcs->filemtime($this->filename);
     }
+
+    /**
+     * @param string $configKey
+     * @param mixed $config
+     */
+    public function setConfig($configKey, $config) {
+        $this->configKey = $configKey;
+        $this->config = $config;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasConfig() {
+        return isset ($this->configKey);
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfigKey() {
+        return $this->configKey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig() {
+        return $this->config;
+    }
+
+
+
 
 }

@@ -7,6 +7,7 @@ namespace Kibo\Phast\Filters\HTML\Diagnostics;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements HTMLFilter {
@@ -19,8 +20,8 @@ class Filter implements HTMLFilter {
 
     public function transformHTMLDOM(DOMDocument $document) {
         $url = (new ServiceRequest())->withUrl(URL::fromString($this->serviceUrl))->serialize();
-        $script = new DiagnosticsPhastJavaScript(__DIR__ . '/diagnostics.js');
-        $script->setServiceUrl($url);
+        $script = new PhastJavaScript(__DIR__ . '/diagnostics.js');
+        $script->setConfig('diagnostics', ['serviceUrl' => $url]);
         $document->addPhastJavaScript($script);
     }
 

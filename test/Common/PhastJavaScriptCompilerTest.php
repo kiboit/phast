@@ -38,8 +38,23 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $scripts = [new PhastJavaScript('f1', $funcs1), new PhastJavaScript('f2', $funcs2)];
         $compiled = $this->runCompiler($scripts);
 
-        $expected = '(function(){(function(){var a;})();(function(){var b;})();})();';
+        $expected = '(function(){var phast={"config":{}};(function(){var a;})();(function(){var b;})();})();';
         $this->assertEquals($expected, $compiled);
+    }
+
+    public function testCompilingWithConfig() {
+        $funcs1 = new ObjectifiedFunctions();
+        $funcs1->file_get_contents = function () {
+            return 'var a;';
+        };
+        $funcs1->filemtime = function () {
+            return 123;
+        };
+        $script = new PhastJavaScript('f1', $funcs1);
+        $script->setConfig('configKey1', ['item' => 'value']);
+        $compiled = $this->runCompiler([$script]);
+
+        $this->assertContains('var phast={"config":{"configKey1":{"item":"value"}}};', $compiled);
     }
 
     public function testCaching() {

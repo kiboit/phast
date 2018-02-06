@@ -1,4 +1,5 @@
-(function(config) {
+(function() {
+    var config = phast.config['script-proxy-service'];
     var urlPattern = /^(https?:)?\/\//;
     var cacheMarker = Math.floor((new Date).getTime() / 1000 / config.urlRefreshTime);
     var id = 0;

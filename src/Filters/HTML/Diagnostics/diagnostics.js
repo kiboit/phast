@@ -1,5 +1,5 @@
 window.addEventListener('load', function () {
-    var url = '%s';
+    var url = phast.config.diagnostics.serviceUrl;
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url);
     xhr.responseType = 'json';
