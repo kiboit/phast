@@ -43,4 +43,11 @@ class PhastJavaScript {
         return $this->funcs->file_get_contents($this->filename);
     }
 
+    /**
+     * @return int
+     */
+    public function getLastModificationTime() {
+        return $this->funcs->filemtime($this->filename);
+    }
+
 }
