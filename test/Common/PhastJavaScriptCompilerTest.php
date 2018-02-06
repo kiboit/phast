@@ -38,8 +38,15 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $scripts = [new PhastJavaScript('f1', $funcs1), new PhastJavaScript('f2', $funcs2)];
         $compiled = (new PhastJavaScriptCompiler($this->cache))->compileScripts($scripts);
 
-        $expected = 'function phastScripts(phast){(function(){var a;})();(function(){var b;})();}';
-        $this->assertEquals($expected, $compiled);
+        $phastEnvFuncStart = '(function(){';
+        $phastEnvFuncEnd = '})();';
+        $phastStart = 'function phastScripts(phast){' . $phastEnvFuncStart;
+        $expectedScript1 = '(function(){var a;})();';
+        $expectedScript2 = '(function(){var b;})();';
+        $phastEnd = $phastEnvFuncEnd . $expectedScript1 . $expectedScript2 . '}';
+
+        $this->assertStringStartsWith($phastStart, $compiled);
+        $this->assertStringEndsWith($phastEnd, $compiled);
     }
 
     public function testCompilingWithConfig() {
