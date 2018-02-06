@@ -33,6 +33,10 @@ class PhastJavaScriptCompiler {
         });
     }
 
+    /**
+     * @param PhastJavaScript[] $scripts
+     * @return string
+     */
     public function compileScriptsWithConfig(array $scripts) {
         $compiled = $this->compileScripts($scripts);
         return '(' . $compiled . ')(' . $this->compileConfig($scripts) . ');';
