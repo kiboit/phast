@@ -145,16 +145,18 @@ class FilterTest extends HTMLFilterTestCase {
         $this->filter->transformHTMLDOM($this->dom);
 
         $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
-        $this->assertEquals(2, sizeof($scripts));
-        $this->assertSame($script, $scripts[1]);
-        $this->assertContains('script-proxy.php', $scripts[0]->textContent);
+        $this->assertEquals(1, sizeof($scripts));
+        $this->assertSame($script, $scripts[0]);
+
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertCount(1, $scripts);
+        $this->assertStringEndsWith('ScriptsProxyService/rewrite-function.js', $scripts[0]->getFilename());
+        $this->assertContains('script-proxy.php', $scripts[0]->getContents());
     }
 
     public function testDontInjectScriptForNothing() {
         $this->filter->transformHTMLDOM($this->dom);
-
-        $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
-        $this->assertEquals(0, sizeof($scripts));
+        $this->assertEmpty($this->dom->getPhastJavaScripts());
     }
 
     public function testDontInjectScriptForNonJS() {
@@ -167,6 +169,8 @@ class FilterTest extends HTMLFilterTestCase {
         $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
         $this->assertEquals(1, sizeof($scripts));
         $this->assertSame($script, $scripts[0]);
+
+        $this->assertEmpty($this->dom->getPhastJavaScripts());
     }
 
 

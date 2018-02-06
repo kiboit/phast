@@ -3,31 +3,17 @@
 namespace Kibo\Phast\Filters\HTML\CSSDeferring;
 
 use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\ValueObjects\PhastJavaScript;
 
 class Filter implements HTMLFilter {
-    use BodyFinderTrait, LoggingTrait;
-
-    const LOADER_JS = <<<EOS
-(function() {
-    var scripts = document.querySelectorAll('script[type="phast-link"]');
-
-    Array.prototype.forEach.call(scripts, function(script) {
-        var replacement = document.createElement('div');
-        replacement.innerHTML = script.textContent;
-        while (replacement.firstChild) {
-            script.parentNode.insertBefore(replacement.firstChild, script);
-        }
-        script.parentNode.removeChild(script);
-    });
-})();
-EOS;
+    use LoggingTrait;
 
     public function transformHTMLDOM(DOMDocument $document) {
         $insert_loader = false;
 
+        /** @var \DOMElement $link */
         foreach (iterator_to_array($document->query('//link')) as $link) {
             if ($link->getAttribute('rel') != 'stylesheet') {
                 continue;
@@ -45,9 +31,7 @@ EOS;
 
         if ($insert_loader) {
             $this->logger()->info('Inserting JS loader');
-            $loader = $document->createElement('script', self::LOADER_JS);
-            $loader->setAttribute('data-phast-no-defer', '');
-            $this->getBodyElement($document)->appendChild($loader);
+            $document->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/styles-loader.js'));
         } else {
             $this->logger()->info('No links were deferred. Not inserting JS loader.');
         }

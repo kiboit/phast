@@ -92,7 +92,9 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertStringStartsWith($expectedUrl1, $styles[0]->getAttribute('data-phast-href'));
         $this->assertStringStartsWith($expectedUrl2, $styles[1]->getAttribute('data-phast-href'));
 
-        $this->assertEquals(1, $this->dom->getElementsByTagName('script')->length);
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertCount(1, $scripts);
+        $this->assertStringEndsWith('CSSInlining/inlined-css-retriever.js', $scripts[0]->getFilename());
     }
 
     public function testCallingTheFilterOnBothStylesAndLinks() {
@@ -108,7 +110,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->runTheFilter();
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertFalse($styles[0]->hasAttribute('data-phast-href'));
-        $this->assertEquals(0, $this->dom->getElementsByTagName('script')->length);
+        $this->assertCount(0, $this->dom->getPhastJavaScripts());
     }
 
     public function testNotInliningOnOptimizationError() {
@@ -119,7 +121,7 @@ class FilterTest extends HTMLFilterTestCase {
             ->willReturn(null);
         $this->runTheFilter();
 
-        $this->assertEquals(0, $this->dom->getElementsByTagName('script')->length);
+        $this->assertCount(0, $this->dom->getPhastJavaScripts());
         $theLinks = $this->dom->getElementsByTagName('link');
         $this->assertEquals(1, $theLinks->length);
         $this->assertSame($link, $theLinks[0]);
@@ -171,7 +173,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEmpty($this->getTheStyles());
         $this->assertEquals(1, $this->head->childNodes->length);
 
-        $newLink = $this->head->childNodes[0];
+        $newLink = $this->head->childNodes->item(0);
         $this->assertEquals('link', $newLink->tagName);
 
         $expectedQuery = [
@@ -351,9 +353,10 @@ class FilterTest extends HTMLFilterTestCase {
             $ieLink->getAttribute('data-phast-ie-fallback-url')
         );
 
-        $script = $this->body->childNodes->item(0);
-        $this->assertEquals('script', $script->tagName);
-        $this->assertTrue($script->hasAttribute('data-phast-no-defer'));
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertCount(2, $scripts);
+        $this->assertStringEndsWith('CSSInlining/ie-fallback.js', $scripts[0]->getFilename());
+        $this->assertStringEndsWith('CSSInlining/inlined-css-retriever.js', $scripts[1]->getFilename());
     }
 
     /**

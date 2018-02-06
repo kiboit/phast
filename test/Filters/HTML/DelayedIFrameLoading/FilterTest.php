@@ -23,16 +23,16 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals('about:blank', $rewrittenFrame->getAttribute('src'));
         $this->assertEquals('http://kibo.test/index.php', $rewrittenFrame->getAttribute('data-phast-src'));
 
-        $script = $this->body->getElementsByTagName('script');
-        $this->assertEquals(1, $script->length);
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertCount(1, $scripts);
+        $this->assertStringEndsWith('DelayedIFrameLoading/iframe-loader.js', $scripts[0]->getFilename());
     }
 
     public function testNotAppendingScript() {
         $frame = $this->dom->createElement('iframe');
         $this->body->appendChild($frame);
         (new Filter())->transformHTMLDOM($this->dom);
-        $scripts = $this->body->getElementsByTagName('script');
-        $this->assertEquals(0, $scripts->length);
+        $this->assertCount(0, $this->dom->getPhastJavaScripts());
     }
 
 }
