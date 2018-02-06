@@ -90,7 +90,7 @@ class DOMDocument extends \DOMDocument {
             return;
         }
         $script = $this->createElement('script');
-        $script->textContent = $this->jsCompiler->compileScripts($this->phastJavaScripts);
+        $script->textContent = $this->jsCompiler->compileScriptsWithConfig($this->phastJavaScripts);
         $this->getBodyElement($this)->appendChild($script);
     }
 

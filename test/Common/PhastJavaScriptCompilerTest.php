@@ -36,9 +36,9 @@ class PhastJavaScriptCompilerTest extends TestCase {
             return 123;
         };
         $scripts = [new PhastJavaScript('f1', $funcs1), new PhastJavaScript('f2', $funcs2)];
-        $compiled = $this->runCompiler($scripts);
+        $compiled = (new PhastJavaScriptCompiler($this->cache))->compileScripts($scripts);
 
-        $expected = '(function(){var phast={"config":{}};(function(){var a;})();(function(){var b;})();})();';
+        $expected = 'function phastScripts(phast){(function(){var a;})();(function(){var b;})();}';
         $this->assertEquals($expected, $compiled);
     }
 
@@ -52,9 +52,10 @@ class PhastJavaScriptCompilerTest extends TestCase {
         };
         $script = new PhastJavaScript('f1', $funcs1);
         $script->setConfig('configKey1', ['item' => 'value']);
-        $compiled = $this->runCompiler([$script]);
+        $compiled = (new PhastJavaScriptCompiler($this->cache))->compileScriptsWithConfig([$script]);
 
-        $this->assertContains('var phast={"config":{"configKey1":{"item":"value"}}};', $compiled);
+        $this->assertStringStartsWith('(', $compiled);
+        $this->assertStringEndsWith(')({"config":{"configKey1":{"item":"value"}}});', $compiled);
     }
 
     public function testCaching() {
@@ -80,18 +81,14 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $s2 = new PhastJavaScript('f2', $funcs1);
         $s3 = new PhastJavaScript('f2', $funcs2);
 
-        $this->assertEquals('cached', $this->runCompiler([$s1, $s2]));
-        $this->assertEquals('cached', $this->runCompiler([$s1, $s2]));
-        $this->assertEquals('cached', $this->runCompiler([$s2]));
-        $this->assertEquals('cached', $this->runCompiler([$s3]));
+        $compiler = new PhastJavaScriptCompiler($this->cache);
+        $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
+        $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
+        $this->assertEquals('cached', $compiler->compileScripts([$s2]));
+        $this->assertEquals('cached', $compiler->compileScripts([$s3]));
 
         $this->assertEquals($keys[0], $keys[1]);
         $this->assertNotEquals($keys[1], $keys[2]);
         $this->assertNotEquals($keys[2], $keys[3]);
-    }
-
-    private function runCompiler(array $scripts) {
-        $compiler = new PhastJavaScriptCompiler($this->cache);
-        return $compiler->compileScripts($scripts);
     }
 }

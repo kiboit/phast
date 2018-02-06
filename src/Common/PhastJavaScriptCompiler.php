@@ -32,6 +32,11 @@ class PhastJavaScriptCompiler {
         });
     }
 
+    public function compileScriptsWithConfig(array $scripts) {
+        $compiled = $this->compileScripts($scripts);
+        return '(' . $compiled . ')(' . $this->compileConfig($scripts) . ');';
+    }
+
     /**
      * @param PhastJavaScript[] $scripts
      * @return string
@@ -41,8 +46,7 @@ class PhastJavaScriptCompiler {
             $carry .= $this->interpolate($script->getContents());
             return $carry;
         }, '');
-        $compiled = $this->compileConfig($scripts). $compiled;
-        $compiled = $this->interpolate($compiled);
+        $compiled = 'function phastScripts(phast){' . $compiled . '}';
         return (new JSMinifier($compiled))->min();
     }
 
@@ -57,7 +61,7 @@ class PhastJavaScriptCompiler {
                 $config->{$script->getConfigKey()} = $script->getConfig();
             }
         }
-        return 'var phast=' . json_encode(['config' => $config]) . ';';
+        return json_encode(['config' => $config]);
     }
 
     /**
