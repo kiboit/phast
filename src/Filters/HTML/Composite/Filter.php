@@ -31,9 +31,10 @@ class Filter {
     private $filters = [];
 
     /**
-     * CompositeHTMLFilter constructor.
-     *
-     * @param int $maxBufferSizeToApply
+     * Filter constructor.
+     * @param $maxBufferSizeToApply
+     * @param DOMDocument $dom
+     * @param ObjectifiedFunctions|null $functions
      */
     public function __construct($maxBufferSizeToApply, DOMDocument $dom, ObjectifiedFunctions $functions = null) {
         $this->maxBufferSizeToApply = $maxBufferSizeToApply;
@@ -122,15 +123,7 @@ class Filter {
         libxml_clear_errors();
         libxml_use_internal_errors($xmlErrors);
 
-        // This gets us UTF-8 instead of entities
-        $output = '<!doctype html>';
-        foreach ($doc->childNodes as $node) {
-            if (!$node instanceof \DOMDocumentType
-                && !$node instanceof \DOMProcessingInstruction
-            ) {
-                $output .= $doc->saveHTML($node);
-            }
-        }
+        $output = $this->dom->serializeToHTML5();
 
         $time_delta = microtime(true) - $time_start;
 

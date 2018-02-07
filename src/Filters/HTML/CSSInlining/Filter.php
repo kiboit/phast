@@ -3,91 +3,18 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements HTMLFilter {
-    use BodyFinderTrait, LoggingTrait;
-
-    /**
-     * @var string
-     */
-    private $ieFallbackScript = <<<EOJS
-(function () {
-    
-    var ua = window.navigator.userAgent;
-    if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident/') === -1) {
-        return;
-    }
-    
-    document.addEventListener('readystatechange', function () {
-        Array.prototype.forEach.call(
-            document.querySelectorAll('link[data-phast-ie-fallback-url]'),
-            function (el) {
-                console.log(el);
-                el.getAttribute('data-phast-ie-fallback-url');
-                el.setAttribute('href', el.getAttribute('data-phast-ie-fallback-url'));
-            }
-        );
-    });
-
-    
-    Array.prototype.forEach.call(
-        document.querySelectorAll('style[data-phast-ie-fallback-url]'),
-        function (el) {
-            var link = document.createElement('link');
-            if (el.hasAttribute('media')) {
-                link.setAttribute('media', el.getAttribute('media'));
-            }
-            link.setAttribute('rel', 'stylesheet');
-            link.setAttribute('href', el.getAttribute('data-phast-ie-fallback-url'));
-            el.parentNode.insertBefore(link, el);
-            el.parentNode.removeChild(el);
-        }
-    );
-    Array.prototype.forEach.call(
-        document.querySelectorAll('style[data-phast-nested-inlined]'),
-        function (groupEl) {
-            groupEl.parentNode.removeChild(groupEl);
-        }
-    );
-    
-})();
-EOJS;
-
-    private $inlinedCSSRetriever = <<<EOJS
-(function() {
-    Array.prototype.forEach.call(
-        document.querySelectorAll('style[data-phast-href]'),
-        function (style) {
-            retrieve(style.getAttribute('data-phast-href'), function (css) {
-                style.textContent = css;
-                style.removeAttribute('data-phast-href');
-            });
-        }
-    );
-
-    function retrieve(url, fn) {
-        var req = new XMLHttpRequest();
-        req.addEventListener('load', load);
-        req.open('GET', url);
-        req.send();
-        function load() {
-            if (req.status >= 200 && req.status < 300) {
-                fn(req.responseText);
-            }
-        }
-    }
-})();
-EOJS;
-
+    use LoggingTrait;
 
     /**
      * @var ServiceSignature
@@ -374,20 +301,13 @@ EOJS;
     private function addIEFallbackScript(DOMDocument $document) {
         $this->logger()->info('Adding IE fallback script');
         $this->withIEFallback = false;
-        $this->addScript($document, $this->ieFallbackScript);
+        $document->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/ie-fallback.js'));
     }
 
     private function addInlinedRetrieverScript(DOMDocument $document) {
         $this->logger()->info('Adding inlined retriever script');
         $this->hasDoneInlining = false;
-        $this->addScript($document, $this->inlinedCSSRetriever);
-    }
-
-    private function addScript(DOMDocument $document, $content) {
-        $script = $document->createElement('script');
-        $script->setAttribute('data-phast-no-defer', 'data-phast-no-defer');
-        $script->textContent = $content;
-        $this->getBodyElement($document)->appendChild($script);
+        $document->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js'));
     }
 
     private function getImportedURLs($cssContent) {

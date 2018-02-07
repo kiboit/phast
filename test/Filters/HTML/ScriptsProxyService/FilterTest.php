@@ -18,19 +18,21 @@ class FilterTest extends HTMLFilterTestCase {
      */
     private $filter;
 
+    private $config = [
+        'match' => [
+            '/example\.com/',
+            '/test\.com/'
+        ],
+        'serviceUrl' => 'script-proxy.php',
+        'urlRefreshTime' => 7200
+    ];
+
     private $modTime;
 
-    public function setUp($modTime = false) {
+    public function setUp() {
         parent::setUp();
         $this->modTime = false;
-        $config = [
-            'match' => [
-                '/example\.com/',
-                '/test\.com/'
-            ],
-            'serviceUrl' => 'script-proxy.php',
-            'urlRefreshTime' => 7200
-        ];
+
 
         $this->retriever = $this->createMock(Retriever::class);
         $this->retriever->method('getLastModificationTime')
@@ -39,11 +41,11 @@ class FilterTest extends HTMLFilterTestCase {
             });
 
         $functions = new ObjectifiedFunctions();
-        $functions->time = function () use ($config) {
-            return $config['urlRefreshTime'] * 2.5;
+        $functions->time = function () {
+            return $this->config['urlRefreshTime'] * 2.5;
         };
         $this->filter = new Filter(
-            $config,
+            $this->config,
             $this->retriever,
             $functions
         );
@@ -145,16 +147,23 @@ class FilterTest extends HTMLFilterTestCase {
         $this->filter->transformHTMLDOM($this->dom);
 
         $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
-        $this->assertEquals(2, sizeof($scripts));
-        $this->assertSame($script, $scripts[1]);
-        $this->assertContains('script-proxy.php', $scripts[0]->textContent);
+        $this->assertEquals(1, sizeof($scripts));
+        $this->assertSame($script, $scripts[0]);
+
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertCount(1, $scripts);
+        $this->assertStringEndsWith('ScriptsProxyService/rewrite-function.js', $scripts[0]->getFilename());
+        $this->assertTrue($scripts[0]->hasConfig());
+        $this->assertEquals('script-proxy-service', $scripts[0]->getConfigKey());
+        $config = $scripts[0]->getConfig();
+        $this->assertEquals($this->config['serviceUrl'], $config['serviceUrl']);
+        $this->assertEquals($this->config['urlRefreshTime'], $config['urlRefreshTime']);
+        $this->assertEquals($this->config['match'], $config['whitelist']);
     }
 
     public function testDontInjectScriptForNothing() {
         $this->filter->transformHTMLDOM($this->dom);
-
-        $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
-        $this->assertEquals(0, sizeof($scripts));
+        $this->assertEmpty($this->dom->getPhastJavaScripts());
     }
 
     public function testDontInjectScriptForNonJS() {
@@ -167,6 +176,8 @@ class FilterTest extends HTMLFilterTestCase {
         $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
         $this->assertEquals(1, sizeof($scripts));
         $this->assertSame($script, $scripts[0]);
+
+        $this->assertEmpty($this->dom->getPhastJavaScripts());
     }
 
 

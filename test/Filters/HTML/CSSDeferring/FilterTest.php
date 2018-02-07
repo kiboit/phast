@@ -28,15 +28,19 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->filter->transformHTMLDOM($this->dom);
 
-        $links = iterator_to_array($this->dom->getElementsByTagName('link'));
-        $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
+        $links = $this->dom->getElementsByTagName('link');
+        $scripts = $this->dom->getElementsByTagName('script');
 
-        $this->assertEquals(1, sizeof($links));
-        $this->assertSame($other_link, $links[0]);
+        $this->assertEquals(1, $links->length);
+        $this->assertSame($other_link, $links->item(0));
 
-        $this->assertEquals(2, sizeof($scripts));
-        $this->assertContains('test.css', $scripts[0]->textContent);
-        $this->assertNotContains('test.css', $scripts[1]->textContent);
+        $this->assertEquals(1, $scripts->length);
+        $this->assertContains('test.css', $scripts->item(0)->textContent);
+        $this->assertEquals('phast-link', $scripts->item(0)->getAttribute('type'));
+
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertCount(1, $scripts);
+        $this->assertStringEndsWith('CSSDeferring/styles-loader.js', $scripts[0]->getFilename());
     }
 
     public function testDoNothing() {
@@ -45,13 +49,13 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->filter->transformHTMLDOM($this->dom);
 
-        $links = iterator_to_array($this->dom->getElementsByTagName('link'));
-        $scripts = iterator_to_array($this->dom->getElementsByTagName('script'));
+        $links = $this->dom->getElementsByTagName('link');
+        $scripts = $this->dom->getElementsByTagName('script');
 
-        $this->assertEquals(1, sizeof($links));
-        $this->assertSame($other_link, $links[0]);
+        $this->assertEquals(1, $links->length);
+        $this->assertSame($other_link, $links->item(0));
 
-        $this->assertEquals(0, sizeof($scripts));
+        $this->assertEquals(0, $scripts->length);
     }
 
 }

@@ -50,8 +50,9 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals('non-js', $nonJS->getAttribute('type'));
 
-        $this->assertEquals(1, $this->body->childNodes->length);
-        $this->assertEquals('script', $this->body->childNodes->item(0)->tagName);
+        $scripts = $this->dom->getPhastJavaScripts();
+        $this->assertCount(1, $scripts);
+        $this->assertStringEndsWith('ScriptsDeferring/rewrite.js', $scripts[0]->getFilename());
     }
 
     public function testDisableRewriting() {

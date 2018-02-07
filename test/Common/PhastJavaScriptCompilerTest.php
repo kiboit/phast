@@ -1,0 +1,101 @@
+<?php
+
+namespace Kibo\Phast\Common;
+
+
+use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\ValueObjects\PhastJavaScript;
+use PHPUnit\Framework\TestCase;
+
+class PhastJavaScriptCompilerTest extends TestCase {
+
+    private $cache;
+
+    public function setUp() {
+        parent::setUp();
+        $this->cache = $this->createMock(Cache::class);
+        $this->cache->method('get')
+            ->willReturnCallback(function ($key, callable $cb) {
+                return $cb();
+            });
+    }
+
+    public function testCompileScripts() {
+        $funcs1 = new ObjectifiedFunctions();
+        $funcs1->file_get_contents = function () {
+            return 'var    a;';
+        };
+        $funcs1->filemtime = function () {
+            return 123;
+        };
+        $funcs2 = new ObjectifiedFunctions();
+        $funcs2->file_get_contents = function () {
+            return 'var    b;';
+        };
+        $funcs2->filemtime = function () {
+            return 123;
+        };
+        $scripts = [new PhastJavaScript('f1', $funcs1), new PhastJavaScript('f2', $funcs2)];
+        $compiled = (new PhastJavaScriptCompiler($this->cache))->compileScripts($scripts);
+
+        $phastEnvFuncStart = '(function(){';
+        $phastEnvFuncEnd = '})();';
+        $phastStart = 'function phastScripts(phast){' . $phastEnvFuncStart;
+        $expectedScript1 = '(function(){var a;})();';
+        $expectedScript2 = '(function(){var b;})();';
+        $phastEnd = $phastEnvFuncEnd . $expectedScript1 . $expectedScript2 . '}';
+
+        $this->assertStringStartsWith($phastStart, $compiled);
+        $this->assertStringEndsWith($phastEnd, $compiled);
+    }
+
+    public function testCompilingWithConfig() {
+        $funcs1 = new ObjectifiedFunctions();
+        $funcs1->file_get_contents = function () {
+            return 'var a;';
+        };
+        $funcs1->filemtime = function () {
+            return 123;
+        };
+        $script = new PhastJavaScript('f1', $funcs1);
+        $script->setConfig('configKey1', ['item' => 'value']);
+        $compiled = (new PhastJavaScriptCompiler($this->cache))->compileScriptsWithConfig([$script]);
+
+        $this->assertStringStartsWith('(', $compiled);
+        $this->assertStringEndsWith(')({"config":{"configKey1":{"item":"value"}}});', $compiled);
+    }
+
+    public function testCaching() {
+        $keys = [];
+        $this->cache = $this->createMock(Cache::class);
+        $this->cache->expects($this->exactly(4))
+            ->method('get')
+            ->willReturnCallback(function ($key, callable $cb) use (&$keys) {
+                $keys[] = $key;
+                return 'cached';
+            });
+
+        $funcs1 = new ObjectifiedFunctions();
+        $funcs1->filemtime = function () {
+            return 123;
+        };
+        $funcs2 = new ObjectifiedFunctions();
+        $funcs2->filemtime = function () {
+            return 234;
+        };
+
+        $s1 = new PhastJavaScript('f1', $funcs1);
+        $s2 = new PhastJavaScript('f2', $funcs1);
+        $s3 = new PhastJavaScript('f2', $funcs2);
+
+        $compiler = new PhastJavaScriptCompiler($this->cache);
+        $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
+        $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
+        $this->assertEquals('cached', $compiler->compileScripts([$s2]));
+        $this->assertEquals('cached', $compiler->compileScripts([$s3]));
+
+        $this->assertEquals($keys[0], $keys[1]);
+        $this->assertNotEquals($keys[1], $keys[2]);
+        $this->assertNotEquals($keys[2], $keys[3]);
+    }
+}
