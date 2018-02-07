@@ -1,12 +1,9 @@
-Array.prototype.forEach.call(
-    document.querySelectorAll('style[data-phast-href]'),
-    function (style) {
-        retrieve(style.getAttribute('data-phast-href'), function (css) {
-            style.textContent = css;
-            style.removeAttribute('data-phast-href');
-        });
-    }
-);
+phast.forEachSelectedElement('style[data-phast-href]', function (style) {
+    retrieve(style.getAttribute('data-phast-href'), function (css) {
+        style.textContent = css;
+        style.removeAttribute('data-phast-href');
+    });
+});
 
 function retrieve(url, fn) {
     var req = new XMLHttpRequest();
