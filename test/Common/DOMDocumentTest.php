@@ -17,7 +17,7 @@ class DOMDocumentTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $jsCompiler = $this->createMock(PhastJavaScriptCompiler::class);
-        $jsCompiler->method('compileScripts')
+        $jsCompiler->method('compileScriptsWithConfig')
             ->willReturn('compiled-js');
         $this->dom = DOMDocument::makeForLocation(URL::fromString('http://phast.test'), $jsCompiler);
     }
