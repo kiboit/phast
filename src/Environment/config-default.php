@@ -111,6 +111,7 @@ return [
     'styles' => [
 
         'filters' => [
+            \Kibo\Phast\Filters\CSS\ImportsStripper\Filter::class => [],
             \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
             \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => [],
             \Kibo\Phast\Filters\CSS\ImageURLRewriter\Filter::class => []

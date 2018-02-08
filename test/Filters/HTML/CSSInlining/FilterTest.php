@@ -91,6 +91,8 @@ class FilterTest extends HTMLFilterTestCase {
         $expectedUrl2 = self::SERVICE_URL . '?src=' . urlencode(self::BASE_URL . '/the-file-2.css');
         $this->assertStringStartsWith($expectedUrl1, $styles[0]->getAttribute('data-phast-href'));
         $this->assertStringStartsWith($expectedUrl2, $styles[1]->getAttribute('data-phast-href'));
+        $this->assertContains('&strip-imports', $styles[0]->getAttribute('data-phast-href'));
+        $this->assertContains('&strip-imports', $styles[1]->getAttribute('data-phast-href'));
 
         $scripts = $this->dom->getPhastJavaScripts();
         $this->assertCount(1, $scripts);

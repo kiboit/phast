@@ -25,6 +25,9 @@ class Filter implements CachedResultServiceFilter {
     public function getCacheHash(Resource $resource, array $request) {
         $parts = array_map('get_class', $this->filters);
         $parts[] = md5($resource->getContent());
+        if (isset ($request['strip-imports'])) {
+            $parts[] = 'strip-imports';
+        }
         return join("\n", $parts);
     }
 

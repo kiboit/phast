@@ -16,6 +16,16 @@ use Kibo\Phast\ValueObjects\URL;
 class Filter implements HTMLFilter {
     use LoggingTrait;
 
+    const CSS_IMPORTS_REGEXP = '~
+        @import \s++
+        ( url \( )?+                # url() is optional
+        ( (?(1) ["\']?+ | ["\'] ) ) # without url() a quote is necessary
+        \s*+ (?<url>[A-Za-z0-9_/.:?&=+%,-]++) \s*+
+        \2                          # match ending quote
+        (?(1)\))                    # match closing paren if url( was used
+        \s*+ ;
+    ~xi';
+
     /**
      * @var ServiceSignature
      */
@@ -311,16 +321,7 @@ class Filter implements HTMLFilter {
     }
 
     private function getImportedURLs($cssContent) {
-        preg_match_all(
-            '~
-                @import \s++
-                ( url \( )?+                # url() is optional
-                ( (?(1) ["\']?+ | ["\'] ) ) # without url() a quote is necessary
-                \s*+ (?<url>[A-Za-z0-9_/.:?&=+%,-]++) \s*+
-                \2                          # match ending quote
-                (?(1)\))                    # match closing paren if url( was used
-                \s*+ ;
-            ~xi',
+        preg_match_all(self::CSS_IMPORTS_REGEXP,
             $cssContent,
             $matches,
             PREG_SET_ORDER
@@ -334,7 +335,7 @@ class Filter implements HTMLFilter {
             $style->setAttribute('media', $media);
         }
         if ($optimized) {
-            $style->setAttribute('data-phast-href', $this->makeServiceURL($url));
+            $style->setAttribute('data-phast-href', $this->makeServiceURL($url, true));
         }
         $style->textContent = $content;
         return $style;
@@ -350,12 +351,15 @@ class Filter implements HTMLFilter {
         return $link;
     }
 
-    protected function makeServiceURL(URL $originalLocation) {
+    protected function makeServiceURL(URL $originalLocation, $stripImports = false) {
         $lastModTime = $this->retriever->getLastModificationTime($originalLocation);
         $params = [
             'src' => (string) $originalLocation,
             'cacheMarker' => $lastModTime ? $lastModTime : floor(time() / $this->urlRefreshTime)
         ];
+        if ($stripImports) {
+            $params['strip-imports'] = 1;
+        }
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
             ->sign($this->signature)
