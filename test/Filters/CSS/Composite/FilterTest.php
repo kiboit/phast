@@ -58,6 +58,8 @@ class FilterTest extends TestCase {
         $hashes[] = $this->filter->getCacheHash($resource, []);
         $resource2 = Resource::makeWithContent(URL::fromString('http://phast.test'), 'other-content');
         $hashes[] = $this->filter->getCacheHash($resource2, []);
+        $resource3 = Resource::makeWithContent(URL::fromString('http://phast.test/other-url.css'), 'the-content');
+        $hashes[] = $this->filter->getCacheHash($resource3, []);
 
         foreach ($hashes as $idx => $hash) {
             $this->assertTrue(is_string($hash), "Hash $idx is not string");
