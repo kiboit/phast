@@ -47,11 +47,10 @@ class PhastJavaScriptCompiler {
      * @return string
      */
     private function performCompilation(array $scripts) {
-        $compiled = array_reduce($scripts, function ($carry, PhastJavaScript $script) {
-            $carry .= $this->interpolate($script->getContents());
-            return $carry;
-        }, '');
-        $compiled = 'function phastScripts(phast){' . $compiled . '}';
+        $compiled = implode(',', array_map(function (PhastJavaScript $script) {
+            return $this->interpolate($script->getContents());
+        }, $scripts));
+        $compiled = 'function phastScripts(phast){phast.scripts=[' . $compiled . '];(phast.scripts.shift())();}';
         return (new JSMinifier($compiled))->min();
     }
 
@@ -74,7 +73,7 @@ class PhastJavaScriptCompiler {
      * @return string
      */
     private function interpolate($script) {
-        return sprintf('(function(){%s})();', $script);
+        return sprintf('(function(){%s})', $script);
     }
 
     /**

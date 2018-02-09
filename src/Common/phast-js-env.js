@@ -4,3 +4,7 @@ phast.forEachSelectedElement = function (selector, callback) {
         callback
     );
 };
+
+while (phast.scripts.length) {
+    (phast.scripts.shift())();
+}
