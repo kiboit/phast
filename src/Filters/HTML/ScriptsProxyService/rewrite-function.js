@@ -4,8 +4,10 @@ var cacheMarker = Math.floor((new Date).getTime() / 1000 / config.urlRefreshTime
 var id = 0;
 var whitelist = compileWhitelistPatterns(config.whitelist);
 
-overrideDOMMethod('appendChild');
-overrideDOMMethod('insertBefore');
+phast.scripts.push(function () {
+    overrideDOMMethod('appendChild');
+    overrideDOMMethod('insertBefore');
+});
 
 function compileWhitelistPatterns(patterns) {
     var re = /^(.)(.*)\1([a-z]*)$/i;
