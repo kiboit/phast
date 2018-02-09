@@ -3,8 +3,6 @@
 namespace Kibo\Phast\Services\Css;
 
 use Kibo\Phast\Cache\File\Cache;
-use Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter;
-use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriterFactory;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFilterFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
