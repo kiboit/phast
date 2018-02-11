@@ -1,13 +1,79 @@
 # Phast
 
-__Phast__ is an automated page optimisation suite for PHP.
+__Phast__ is a unique automated page optimization suite for PHP by [Kibo
+IT](https://www.kiboit.com).
 
-Our goal is to make it easy to get your PageSpeed score from 0 to 100, and
-improve load times besides.
+Phast applies advanced optimization techniques to any PHP-based site without
+changing any code. Optimizations are applied in such a way that no changes to
+your site are necessary.  Sites optimized by Phast easily score 90+ in Google
+PageSpeed Insights, and usually reach 100/100 with small adjustments.
 
-[![Build Status](https://travis-ci.org/kiboit/phast.svg?branch=master)](https://travis-ci.org/kiboit/phast)
+A free integration for WordPress is available as
+[PhastPress](https://wordpress.org/plugins/phastpress/)
+([Github](https://github.com/kiboit/phastpress)).
 
-© 2017, [Kibo IT EOOD](https://kiboit.com/)
+__[Contact Kibo IT](https://www.kiboit.com/contact)__
+([email](info@kiboit.com)): We'd love your feedback. We can help you try out
+Phast and provide custom services for website optimization.
+
+
+## Getting started
+
+Install Phast into your project using Composer:
+
+~~~
+composer install kiboit/phast:dev-master
+~~~
+
+Create `http://your.site/phast.php` to serve optimized versions of resources:
+
+~~~php
+<?php
+require 'vendor/kiboit/phast/src/services.php';
+~~~
+
+Load Phast on all of your pages:
+
+~~~php
+<?php
+// At the top of your index.php
+require 'vendor/kiboit/phast/src/html-filters.php';
+~~~
+
+Test your site!
+
+
+## Features
+
+* Image optimization: Images are recompressed, optimised (via
+  [pngquant](https://pngquant.org/) and
+  [jpegtran](https://en.wikipedia.org/wiki/Libjpeg#jpegtran)) and converted to
+  WebP, when supported by the browser.
+
+* CSS optimization: We break down included stylesheets and remove all
+  class-based selectors that cannot apply to the current document. The optimised
+  CSS is inlined. After the page has loaded, the original CSS is included, so
+  any classes used in JavaScript will be available.
+
+* CSS inlining: Small stylesheets (including Google Fonts) get inlined.
+
+* CSS deferring: Any external stylesheets that weren't inlined are loaded
+  asynchronously.
+
+* Delay IFrames: IFrames are loaded after the page finishes, to prevent stealing
+  bandwidth and resources from the main page load.
+
+* Scripts rearrangement: We move all &lt;script&gt; tags to the bottom of the
+  page, so the important stuff gets loaded first.
+
+* Scripts deferring: Scripts are loaded asynchronously with full compatibility.
+  To make sure that legacy scripts work while being loaded asynchronously, we
+  use a custom script loader that loads the scripts in order, and triggers
+  DOMContentLoaded when they have finished.
+
+* Scripts proxy: External scripts such as Google Analytics are loaded through a
+  proxy script. This allows us to extend the cache duration.
+
 
 ## Browser compatibility
 
@@ -18,6 +84,7 @@ We support at least the following (and later) versions of the major browsers:
 * Firefox 52
 * IE 11
 * Safari 5.1 (on Snow Leopard)
+
 
 ## Thanks, BrowserStack!
 
