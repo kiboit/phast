@@ -135,6 +135,19 @@ class OptimizerTest extends HTMLFilterTestCase {
         $this->assertContains('red', $cssOptimized);
     }
 
+    /**
+     * This is a regression test: our pattern would not match the first rule in
+     * a media query, because it was preceded by '{' and thus ignored.
+     */
+    public function testOptimizeCSSInMediaQuery() {
+        $css = '@media print{.hidden-print{display:none}}';
+
+        $optimizer = new Optimizer($this->dom, $this->cache);
+        $optimizedCSS = $optimizer->optimizeCSS($css);
+
+        $this->assertEquals('@media print{}', $optimizedCSS);
+    }
+
     private function makeElement($tag, $content) {
         $el = $this->dom->createElement($tag);
         $el->textContent = $content;
