@@ -1,19 +1,21 @@
 RUN = docker run -it -v $(shell pwd):/data -w /data $(shell cat .docker-image-id)
 
 
+.PHONY : all test test-local update docker
+
+
 all : vendor/autoload.php
 
-
-.PHONY : test update
-
 test : all docker
-	$(RUN) ./vendor/phpunit/phpunit/phpunit
+	$(RUN) vendor/bin/phpunit
 
 test-local : all
-	vendor/phpunit/phpunit/phpunit
+	vendor/bin/phpunit
 
 update : all
 	vendor/composer.phar update
+
+docker : .docker-image-id
 
 
 vendor/autoload.php : vendor/composer.phar composer.json composer.lock
@@ -25,7 +27,6 @@ vendor/composer.phar :
 	chmod +x $@~
 	mv $@~ $@
 
-docker : .docker-image-id
 .docker-image-id : Dockerfile docker/entrypoint
 	docker build -q . > $@~
 	mv $@~ $@
