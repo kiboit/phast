@@ -70,7 +70,7 @@ class Optimizer {
      * @param $css
      * @return array|void
      */
-    public function parseCSS($css) {
+    private function parseCSS($css) {
         $re_simple_selector_chars = "[A-Z0-9_.#*:()>+\~\s-]";
         $re_selector = "(?: $re_simple_selector_chars | \[[a-z]++\] )++";
         $re_rule = "~
