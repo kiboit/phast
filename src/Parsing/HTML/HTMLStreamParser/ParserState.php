@@ -22,13 +22,13 @@ abstract class ParserState {
         $this->parser->reset();
     }
 
-    public function startTag($name, $attributes, $startOffset, $endOffset, $selfClosing = false) {
+    public function startTag($name, $attributes, $originalString, $selfClosing = false) {
         $this->parser->reset();
         // TODO: Return default text mode
         return 0;
     }
 
-    public function endTag($name, $startOffset, $endOffset) {
+    public function endTag($name, $originalString) {
         $this->parser->reset();
     }
 

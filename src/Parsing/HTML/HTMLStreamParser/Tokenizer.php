@@ -390,7 +390,7 @@ class Tokenizer
             $selfClose = false;
         }
 
-        $mode = $this->events->startTag($name, $attributes, $foundOnIndex, $this->scanner->position(), $selfClose);
+        $mode = $this->events->startTag($name, $attributes, $foundOnIndex, $selfClose);
         // Should we do this? What does this buy that selfClose doesn't?
         if ($selfClose) {
             //$this->events->endTag($name);

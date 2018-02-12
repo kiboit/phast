@@ -37,7 +37,7 @@ class ConstructingTextContainingTag extends ParserState {
         $this->text = $cdata;
     }
 
-    public function endTag($name, $startOffset, $endOffset) {
+    public function endTag($name, $originalString) {
         if ($name == $this->startTag->getTagName()) {
             $closing = new ClosingTag($name);
             $tag = new TextContainingTag(

@@ -2,14 +2,23 @@
 
 namespace Kibo\Phast\Common;
 
-use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
+use Kibo\Phast\Parsing\HTML\HTMLStream;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\OpeningTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\TextContainingTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Parser;
+use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Tokenizer;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
+use Masterminds\HTML5\Parser\Scanner;
+use Masterminds\HTML5\Parser\StringInputStream;
 
-class DOMDocument extends \DOMDocument {
-    use BodyFinderTrait;
+class DOMDocument {
 
-    private $xpath;
+    /**
+     * @var HTMLStream
+     */
+    private $stream;
 
     /**
      * @var PhastJavaScriptCompiler
@@ -33,16 +42,26 @@ class DOMDocument extends \DOMDocument {
      */
     public static function makeForLocation(URL $documentLocation, PhastJavaScriptCompiler $jsCompiler) {
         $instance = new self();
+        $instance->stream = new HTMLStream();
         $instance->documentLocation = $documentLocation;
         $instance->jsCompiler = $jsCompiler;
         return $instance;
     }
 
     public function query($query) {
-        if (!isset($this->xpath)) {
-            $this->xpath = new \DOMXPath($this);
-        }
-        return $this->xpath->query($query);
+        $tagName = substr($query, 2);
+        return $this->getElementsByTagName($tagName);
+    }
+
+    public function getElementsByTagName($tagName) {
+        return $this->stream->getElementsByTagName($tagName);
+    }
+
+    public function loadHTML($string) {
+        $parser = new Parser($this->stream);
+        $inputStream = new StringInputStream($string);
+        $tokenizer = new Tokenizer(new Scanner($inputStream), $parser);
+        $tokenizer->parse();
     }
 
     /**
@@ -73,16 +92,14 @@ class DOMDocument extends \DOMDocument {
 
     public function serializeToHTML5() {
         $this->maybeAddPhastScripts();
-        // This gets us UTF-8 instead of entities
-        $output = '<!doctype html>';
-        foreach ($this->childNodes as $node) {
-            if (!$node instanceof \DOMDocumentType
-                && !$node instanceof \DOMProcessingInstruction
-            ) {
-                $output .= $this->saveHTML($node);
-            }
-        }
-        return $output;
+        return '';
+    }
+
+    public function createElement($tagName) {
+        return new TextContainingTag(
+            new OpeningTag($tagName, []),
+            new ClosingTag($tagName)
+        );
     }
 
     private function maybeAddPhastScripts() {
@@ -91,7 +108,11 @@ class DOMDocument extends \DOMDocument {
         }
         $script = $this->createElement('script');
         $script->textContent = $this->jsCompiler->compileScriptsWithConfig($this->phastJavaScripts);
-        $this->getBodyElement($this)->appendChild($script);
+        $body = $this->getElementsByTagName('body')->item(0);
+        $bodyClosing = $this->stream->getClosingTag($body);
+        if ($bodyClosing) {
+            $bodyClosing->appendChild($script);
+        }
     }
 
 }

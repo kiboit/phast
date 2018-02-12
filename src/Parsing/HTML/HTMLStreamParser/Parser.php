@@ -58,12 +58,12 @@ class Parser {
         $this->state->doctype($name, $idType, $id, $quirks);
     }
 
-    public function startTag($name, $attributes, $startOffset, $endOffset, $selfClosing = false) {
-        return $this->state->startTag($name, $attributes, $startOffset, $endOffset, $selfClosing);
+    public function startTag($name, $attributes, $originalString, $selfClosing = false) {
+        return $this->state->startTag($name, $attributes, $originalString, $selfClosing);
     }
 
-    public function endTag($name, $startOffset, $endOffset) {
-        $this->state->endTag($name, $startOffset, $endOffset);
+    public function endTag($name, $originalString) {
+        $this->state->endTag($name, $originalString);
     }
 
     public function comment($cdata) {
