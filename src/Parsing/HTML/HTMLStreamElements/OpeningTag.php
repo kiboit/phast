@@ -7,8 +7,8 @@ class OpeningTag extends Tag {
 
     protected $attributes;
 
-    public function __construct($startStreamOffset, $endStreamOffset, $tagName, array $attributes) {
-        parent::__construct($startStreamOffset, $endStreamOffset, $tagName);
+    public function __construct($tagName, array $attributes) {
+        parent::__construct($tagName);
         $this->attributes = $attributes;
     }
 

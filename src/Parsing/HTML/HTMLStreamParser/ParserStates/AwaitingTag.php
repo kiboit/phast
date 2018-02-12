@@ -12,7 +12,8 @@ use Masterminds\HTML5\Elements;
 class AwaitingTag extends ParserState {
 
     public function startTag($name, $attributes, $startOffset, $endOffset, $selfClosing = false) {
-        $tag = new OpeningTag($startOffset, $endOffset, $name, $attributes);
+        $tag = new OpeningTag($name, $attributes);
+        $tag->setStreamOffsets($startOffset, $endOffset);
         if ($name == 'script' || $name == 'style') {
             $newState = new ConstructingTextContainingTag($this->parser, $tag);
             $this->parser->setState($newState);
@@ -23,7 +24,8 @@ class AwaitingTag extends ParserState {
     }
 
     public function endTag($name, $startOffset, $endOffset) {
-        $tag = new ClosingTag($startOffset, $endOffset, $name);
+        $tag = new ClosingTag($name);
+        $tag->setStreamOffsets($startOffset, $endOffset);
         $this->parser->getStream()->addElement($tag);
     }
 

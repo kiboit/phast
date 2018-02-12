@@ -16,7 +16,8 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
 
     public function setUp() {
         parent::setUp();
-        $openingTag = new OpeningTag(10, 15, 'style', ['class' => 'the-value']);
+        $openingTag = new OpeningTag('style', ['class' => 'the-value']);
+        $openingTag->setStreamOffsets(10, 15);
         $this->state = new ConstructingTextContainingTag($this->parser, $openingTag);
         $this->parser->setState($this->state);
     }
@@ -48,7 +49,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
     }
 
     public function testResettingOnWrongClosingTag() {
-        $this->state->endTag('script', 30, 40);
+        $this->state->endTag('script', 10, 20);
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
         $this->assertEmpty($this->htmlStream->getElements());

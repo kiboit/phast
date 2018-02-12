@@ -21,10 +21,21 @@ abstract class Tag implements Element {
      */
     protected $tagName;
 
-    public function __construct($startStreamOffset, $endStreamOffset, $tagName) {
-        $this->startStreamOffset = $startStreamOffset;
-        $this->endStreamOffset = $endStreamOffset;
+    public function __construct($tagName) {
         $this->tagName = $tagName;
+    }
+
+
+    public function setStreamOffsets($startOffset, $endOffset) {
+        $this->startStreamOffset = $startOffset;
+        $this->endStreamOffset = $endOffset;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTagName() {
+        return $this->tagName;
     }
 
     /**
@@ -39,13 +50,6 @@ abstract class Tag implements Element {
      */
     public function getEndStreamOffset() {
         return $this->endStreamOffset;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTagName() {
-        return $this->tagName;
     }
 
     public function output() {

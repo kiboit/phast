@@ -38,9 +38,11 @@ class ConstructingTextContainingTag extends ParserState {
 
     public function endTag($name, $startOffset, $endOffset) {
         if ($name == $this->startTag->getTagName()) {
+            $closing = new ClosingTag($name);
+            $closing->setStreamOffsets($startOffset, $endOffset);
             $tag = new TextContainingTag(
                 $this->startTag,
-                new ClosingTag($startOffset, $endOffset, $name),
+                $closing,
                 $this->text
             );
             $this->parser->getStream()->addElement($tag);
