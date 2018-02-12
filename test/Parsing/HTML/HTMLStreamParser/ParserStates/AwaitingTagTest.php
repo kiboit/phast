@@ -1,0 +1,103 @@
+<?php
+
+namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates;
+
+
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\OpeningTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserTestCase;
+use Masterminds\HTML5\Elements;
+
+class AwaitingTagTest extends ParserTestCase {
+
+    /**
+     * @var AwaitingTag
+     */
+    private $state;
+
+    public function setUp() {
+        parent::setUp();
+        $this->state = new AwaitingTag($this->parser);
+    }
+
+    /**
+     * @dataProvider getOpeningTagInputData
+     */
+    public function testOpeningTagInput($tagName, $expectedReturn) {
+        $start = mt_rand(10, 40);
+        $end = mt_rand(60, 80);
+        $attr = 'offset-' . $start;
+        $returned = $this->state->startTag($tagName, ['data-start' => $attr], $start, $end);
+
+        $this->assertEquals($expectedReturn, $returned);
+
+        $newState = $this->parser->getState();
+        $this->assertInstanceOf(AwaitingTag::class, $newState);
+
+        $elements = $this->htmlStream->getElements();
+        $this->assertCount(1, $elements);
+
+        /** @var OpeningTag $tag */
+        $tag = $elements[0];
+        $this->assertInstanceOf(OpeningTag::class, $tag);
+        $this->assertEquals($tagName, $tag->getTagName());
+        $this->assertTrue($tag->hasAttribute('data-start'));
+        $this->assertEquals($attr, $tag->getAttribute('data-start'));
+        $this->assertEquals($start, $tag->getStartStreamOffset());
+        $this->assertEquals($end, $tag->getEndStreamOffset());
+    }
+
+    public function getOpeningTagInputData() {
+        foreach (Elements::$html5 as $tagName => $tagType) {
+            if (in_array($tagName, ['script', 'style'])) {
+                continue;
+            }
+            yield [$tagName, $tagType];
+        }
+    }
+
+    /**
+     * @dataProvider getNextStateForStyleAndScriptData
+     */
+    public function testNextStateForStyleAndScript($tagName, $expectedReturn) {
+        $returned = $this->state->startTag($tagName, [], 0, 15);
+
+        $this->assertEquals($returned, $expectedReturn);
+
+        $this->assertEmpty($this->htmlStream->getElements());
+
+        /** @var ConstructingTextContainingTag $newState */
+        $newState = $this->parser->getState();
+        $this->assertInstanceOf(ConstructingTextContainingTag::class, $newState);
+
+        /** @var OpeningTag $tag */
+        $tag = $newState->getStartTag();
+        $this->assertInstanceOf(OpeningTag::class, $tag);
+        $this->assertEquals($tagName, $tag->getTagName());
+        $this->assertEquals(0, $tag->getStartStreamOffset());
+        $this->assertEquals(15, $tag->getEndStreamOffset());
+    }
+
+    public function getNextStateForStyleAndScriptData() {
+        return [
+            ['script', Elements::element('script')],
+            ['style' , Elements::element('style')]
+        ];
+    }
+
+    public function testAddingCloseTagsToStream() {
+        $this->state->endTag('a', 20, 30);
+        $newState = $this->parser->getState();
+        $this->assertInstanceOf(AwaitingTag::class, $newState);
+
+        $elements = $this->htmlStream->getElements();
+        $this->assertCount(1, $elements);
+
+        /** @var ClosingTag $element */
+        $element = $elements[0];
+        $this->assertEquals('a', $element->getTagName());
+        $this->assertEquals(20, $element->getStartStreamOffset());
+        $this->assertEquals(30, $element->getEndStreamOffset());
+    }
+
+}
