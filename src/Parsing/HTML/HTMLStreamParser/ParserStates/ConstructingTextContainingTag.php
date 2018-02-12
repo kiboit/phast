@@ -6,7 +6,6 @@ namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates;
 
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\OpeningTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Text;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\TextContainingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Parser;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserState;
@@ -41,8 +40,8 @@ class ConstructingTextContainingTag extends ParserState {
         if ($name == $this->startTag->getTagName()) {
             $tag = new TextContainingTag(
                 $this->startTag,
-                new Text($this->text),
-                new ClosingTag($startOffset, $endOffset, $name)
+                new ClosingTag($startOffset, $endOffset, $name),
+                $this->text
             );
             $this->parser->getStream()->addElement($tag);
         }

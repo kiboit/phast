@@ -12,9 +12,9 @@ class TextContainingTag implements Element {
     private $openingTag;
 
     /**
-     * @var Text
+     * @var string
      */
-    private $text;
+    private $text = '';
 
     /**
      * @var ClosingTag
@@ -24,10 +24,9 @@ class TextContainingTag implements Element {
     /**
      * TextContainingTag constructor.
      * @param OpeningTag $openingTag
-     * @param Text $text
      * @param ClosingTag $closingTag
      */
-    public function __construct(OpeningTag $openingTag, Text $text, ClosingTag $closingTag) {
+    public function __construct(OpeningTag $openingTag, ClosingTag $closingTag, $text = '') {
         $this->openingTag = $openingTag;
         $this->text = $text;
         $this->closingTag = $closingTag;
@@ -54,7 +53,7 @@ class TextContainingTag implements Element {
     }
 
     public function getTextContent() {
-        return $this->text->getText();
+        return $this->text;
     }
 
     public function output() {
