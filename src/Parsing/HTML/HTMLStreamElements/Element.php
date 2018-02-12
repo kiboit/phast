@@ -3,13 +3,20 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
+use Kibo\Phast\Parsing\HTML\HTMLStream;
 
-interface Element {
+class Element {
 
-    public function getStartStreamOffset();
+    /**
+     * @var HTMLStream
+     */
+    protected $stream;
 
-    public function getEndStreamOffset();
-
-    public function output();
+    /**
+     * @param HTMLStream $stream
+     */
+    public function setStream(HTMLStream $stream) {
+        $this->stream = $stream;
+    }
 
 }

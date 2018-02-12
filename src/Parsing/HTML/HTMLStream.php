@@ -3,16 +3,9 @@
 
 namespace Kibo\Phast\Parsing\HTML;
 
-
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
-use Masterminds\HTML5\Parser\InputStream;
 
 class HTMLStream {
-
-    /**
-     * @var InputStream
-     */
-    private $dataStream;
 
     /**
      * @var Element[]
@@ -20,18 +13,16 @@ class HTMLStream {
     private $elements = [];
 
     /**
-     * HTMLStream constructor.
-     * @param InputStream $dataStream
-     */
-    public function __construct(InputStream $dataStream) {
-        $this->dataStream = $dataStream;
-    }
-
-    /**
      * @param Element $element
      */
     public function addElement(Element $element) {
         $this->elements[] = $element;
+        $element->setStream($this);
+    }
+
+    public function insertBeforeElement(Element $reference, Element $toInsert) {
+        $index = array_search($reference, $this->elements, true);
+        array_splice($this->elements, $index, 0, [$toInsert]);
     }
 
 
@@ -41,5 +32,4 @@ class HTMLStream {
     public function getElements() {
         return $this->elements;
     }
-
 }

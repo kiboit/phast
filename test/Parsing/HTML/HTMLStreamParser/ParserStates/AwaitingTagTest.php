@@ -43,8 +43,6 @@ class AwaitingTagTest extends ParserTestCase {
         $this->assertEquals($tagName, $tag->getTagName());
         $this->assertTrue($tag->hasAttribute('data-start'));
         $this->assertEquals($attr, $tag->getAttribute('data-start'));
-        $this->assertEquals($start, $tag->getStartStreamOffset());
-        $this->assertEquals($end, $tag->getEndStreamOffset());
     }
 
     public function getOpeningTagInputData() {
@@ -74,8 +72,6 @@ class AwaitingTagTest extends ParserTestCase {
         $tag = $newState->getStartTag();
         $this->assertInstanceOf(OpeningTag::class, $tag);
         $this->assertEquals($tagName, $tag->getTagName());
-        $this->assertEquals(0, $tag->getStartStreamOffset());
-        $this->assertEquals(15, $tag->getEndStreamOffset());
     }
 
     public function getNextStateForStyleAndScriptData() {
@@ -96,8 +92,6 @@ class AwaitingTagTest extends ParserTestCase {
         /** @var ClosingTag $element */
         $element = $elements[0];
         $this->assertEquals('a', $element->getTagName());
-        $this->assertEquals(20, $element->getStartStreamOffset());
-        $this->assertEquals(30, $element->getEndStreamOffset());
     }
 
 }

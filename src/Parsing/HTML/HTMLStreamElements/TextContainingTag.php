@@ -4,7 +4,9 @@
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
 
-class TextContainingTag implements Element {
+use Kibo\Phast\Parsing\HTML\HTMLStream;
+
+class TextContainingTag extends Element {
 
     /**
      * @var OpeningTag
@@ -12,24 +14,25 @@ class TextContainingTag implements Element {
     private $openingTag;
 
     /**
-     * @var string
-     */
-    private $text = '';
-
-    /**
      * @var ClosingTag
      */
     private $closingTag;
 
     /**
+     * @var Text
+     */
+    private $text = '';
+
+    /**
      * TextContainingTag constructor.
      * @param OpeningTag $openingTag
      * @param ClosingTag $closingTag
+     * @param Text $text
      */
-    public function __construct(OpeningTag $openingTag, ClosingTag $closingTag, $text = '') {
+    public function __construct(OpeningTag $openingTag, ClosingTag $closingTag, Text $text = null) {
         $this->openingTag = $openingTag;
-        $this->text = $text;
         $this->closingTag = $closingTag;
+        $this->text = $text;
     }
 
     public function getTagName() {
@@ -44,21 +47,12 @@ class TextContainingTag implements Element {
         return $this->openingTag->getAttribute($attr);
     }
 
-    public function getStartStreamOffset() {
-        return $this->openingTag->getStartStreamOffset();
-    }
-
-    public function getEndStreamOffset() {
-        return $this->closingTag->getEndStreamOffset();
+    public function setAttribute($attr, $value) {
+        $this->openingTag->setAttribute($attr, $value);
     }
 
     public function getTextContent() {
-        return $this->text;
+        return isset ($this->text) ? $this->text->getText() : '';
     }
-
-    public function output() {
-        // TODO: Implement output() method.
-    }
-
 
 }

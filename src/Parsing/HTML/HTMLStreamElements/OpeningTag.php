@@ -20,6 +20,8 @@ class OpeningTag extends Tag {
         return $this->hasAttribute($attrName) ? $this->attributes[$attrName] : null;
     }
 
-
+    public function setAttribute($attrName, $value) {
+        $this->attributes[$attrName] = $value;
+    }
 
 }
