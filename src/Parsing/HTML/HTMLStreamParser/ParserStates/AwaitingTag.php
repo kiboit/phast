@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates;
 
-
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserState;

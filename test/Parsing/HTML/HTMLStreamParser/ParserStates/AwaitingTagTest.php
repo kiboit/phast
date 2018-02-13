@@ -58,7 +58,7 @@ class AwaitingTagTest extends ParserTestCase {
      * @dataProvider getNextStateForStyleAndScriptData
      */
     public function testNextStateForStyleAndScript($tagName, $expectedReturn) {
-        $returned = $this->state->startTag($tagName, [], 0, 15);
+        $returned = $this->state->startTag($tagName, [], 'the-tag');
 
         $this->assertEquals($returned, $expectedReturn);
 
@@ -69,7 +69,7 @@ class AwaitingTagTest extends ParserTestCase {
         $this->assertInstanceOf(ConstructingTextContainingTag::class, $newState);
 
         /** @var Tag $tag */
-        $tag = $newState->getStartTag();
+        $tag = $newState->getTag();
         $this->assertInstanceOf(Tag::class, $tag);
         $this->assertEquals($tagName, $tag->getTagName());
     }
@@ -82,7 +82,7 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testAddingCloseTagsToStream() {
-        $this->state->endTag('a', 20, 30);
+        $this->state->endTag('a', 'a');
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
 

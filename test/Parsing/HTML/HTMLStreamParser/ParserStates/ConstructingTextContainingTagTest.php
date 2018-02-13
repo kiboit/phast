@@ -35,9 +35,9 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
         $elements = $this->htmlStream->getAllElements();
         $this->assertCount(1, $elements);
 
-        /** @var TextContainingTag $tag */
+        /** @var Tag $tag */
         $tag = $elements[0];
-        $this->assertInstanceOf(TextContainingTag::class, $tag);
+        $this->assertInstanceOf(Tag::class, $tag);
         $this->assertEquals('style', $tag->getTagName());
         $this->assertFalse($tag->hasAttribute('src'));
         $this->assertTrue($tag->hasAttribute('class'));
@@ -46,7 +46,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
     }
 
     public function testResettingOnWrongClosingTag() {
-        $this->state->endTag('script', 10, 20);
+        $this->state->endTag('script', 'the-script');
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
         $this->assertEmpty($this->htmlStream->getAllElements());

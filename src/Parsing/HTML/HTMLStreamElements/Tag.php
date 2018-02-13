@@ -18,18 +18,21 @@ class Tag extends Element {
     /**
      * @var string
      */
-    private $textContent;
+    private $textContent = '';
 
     /**
      * @var string
      */
     private $closingTag;
 
-    public function __construct($tagName, array $attributes = [], $textContent = '', $closingTag = null) {
+    /**
+     * Tag constructor.
+     * @param $tagName
+     * @param array $attributes
+     */
+    public function __construct($tagName, array $attributes = []) {
         $this->tagName = $tagName;
         $this->attributes = $attributes;
-        $this->textContent = $textContent;
-        $this->closingTag = $closingTag;
     }
 
     /**
@@ -84,5 +87,22 @@ class Tag extends Element {
      */
     public function setTextContent($textContent) {
         $this->textContent = $textContent;
+    }
+
+    /**
+     * @param $closingTag
+     * @return Tag
+     */
+    public function withClosingTag($closingTag) {
+        $new = clone $this;
+        $new->closingTag = $closingTag;
+        return $new;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClosingTag() {
+        return $this->closingTag;
     }
 }
