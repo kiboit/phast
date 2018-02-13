@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\ScriptsRearrangement;
 
 use Kibo\Phast\Filters\HTML\RearrangementHTMLFilterTestCase;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 
 class FilterTest extends RearrangementHTMLFilterTestCase {
 
@@ -44,18 +45,23 @@ class FilterTest extends RearrangementHTMLFilterTestCase {
         $body->appendChild($div);
 
         $divScript = $dom->createElement('script');
-        $div->appendChild($divScript);
+        $body->appendChild($divScript);
+
+        $closingDiv = new ClosingTag('div');
+        $body->appendChild($closingDiv);
 
         $this->filter->transformHTMLDOM($dom);
 
-        $this->assertFalse($head->hasChildNodes());
-        $this->assertFalse($div->hasChildNodes());
+        $this->assertEquals(2, $this->stream->getElementIndex($this->head));
 
-        $this->assertSame($bodyScriptWithTypeJSON, $body->childNodes[0]);
-        $this->assertSame($headScriptNoType, $body->childNodes[2]);
-        $this->assertSame($headScriptWithTypeText, $body->childNodes[3]);
-        $this->assertSame($headScriptWithTypeApp, $body->childNodes[4]);
-        $this->assertSame($headScriptWithTypeCharset, $body->childNodes[5]);
-        $this->assertSame($divScript, $body->childNodes[6]);
+        $openingDivIndex = $this->stream->getElementIndex($div);
+        $this->assertEquals($openingDivIndex + 1, $this->stream->getElementIndex($closingDiv));
+
+        $this->assertEquals(4, $this->stream->getElementIndex($bodyScriptWithTypeJSON));
+        $this->assertEquals(7, $this->stream->getElementIndex($headScriptNoType));
+        $this->assertEquals(8, $this->stream->getElementIndex($headScriptWithTypeText));
+        $this->assertEquals(9, $this->stream->getElementIndex($headScriptWithTypeApp));
+        $this->assertEquals(10, $this->stream->getElementIndex($headScriptWithTypeCharset));
+        $this->assertEquals(11, $this->stream->getElementIndex($divScript));
     }
 }

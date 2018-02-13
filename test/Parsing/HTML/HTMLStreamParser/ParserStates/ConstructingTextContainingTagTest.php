@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates;
 
 
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\OpeningTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\TextContainingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserTestCase;
 
@@ -16,7 +16,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
 
     public function setUp() {
         parent::setUp();
-        $openingTag = new OpeningTag('style', ['class' => 'the-value']);
+        $openingTag = new Tag('style', ['class' => 'the-value']);
         $this->state = new ConstructingTextContainingTag($this->parser, $openingTag);
         $this->parser->setState($this->state);
     }
@@ -26,13 +26,13 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
 
         $currentState = $this->parser->getState();
         $this->assertInstanceOf(ConstructingTextContainingTag::class, $currentState);
-        $this->assertEmpty($this->htmlStream->getElements());
+        $this->assertEmpty($this->htmlStream->getAllElements());
 
         $this->state->endTag('style', 100, 200);
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
 
-        $elements = $this->htmlStream->getElements();
+        $elements = $this->htmlStream->getAllElements();
         $this->assertCount(1, $elements);
 
         /** @var TextContainingTag $tag */
@@ -49,7 +49,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
         $this->state->endTag('script', 10, 20);
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
-        $this->assertEmpty($this->htmlStream->getElements());
+        $this->assertEmpty($this->htmlStream->getAllElements());
     }
 
 }

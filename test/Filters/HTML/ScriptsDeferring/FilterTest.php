@@ -35,9 +35,6 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->filter->transformHTMLDOM($this->dom);
 
-        $elements = $this->head->childNodes;
-        $this->assertEquals(3, $elements->length);
-
         $this->assertEquals('phast-script', $notInline->getAttribute('type'));
         $this->assertEquals('the-src', $notInline->getAttribute('src'));
         $this->assertTrue($notInline->hasAttribute('defer'));
@@ -65,11 +62,8 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->filter->transformHTMLDOM($this->dom);
 
-        $elements = $this->head->childNodes;
-        $this->assertEquals(1, $elements->length);
-
-        $this->assertEquals('text/javascript', $elements->item(0)->getAttribute('type'));
-        $this->assertFalse($elements->item(0)->hasAttribute('data-phast-no-defer'));
+        $this->assertEquals('text/javascript', $script->getAttribute('type'));
+        $this->assertFalse($script->hasAttribute('data-phast-no-defer'));
     }
 
 }

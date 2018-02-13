@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class Filter implements HTMLFilter {
 
@@ -22,16 +23,19 @@ class Filter implements HTMLFilter {
     }
 
     public function transformHTMLDOM(DOMDocument $document) {
-        $styleTags = $document->query('//style');
+        $styleTags = $document->getElementsByTagName('style');
         /** @var \DOMElement $styleTag */
         foreach ($styleTags as $styleTag) {
             $styleTag->textContent = $this->rewriter->rewriteStyle($styleTag->textContent);
         }
 
-        $styleAttrs = $document->query('//@style');
-        /** @var \DOMAttr $styleAttr */
-        foreach ($styleAttrs as $styleAttr) {
-            $styleAttr->value = htmlspecialchars($this->rewriter->rewriteStyle($styleAttr->value));
+        $tags = $document->getElementsWithAttr('style');
+        /** @var Tag $tag */
+        foreach ($tags as $tag) {
+            $tag->setAttribute(
+                'style',
+                $this->rewriter->rewriteStyle($tag->getAttribute('style'))
+            );
         }
     }
 }

@@ -8,15 +8,19 @@ trait BodyFinderTrait {
 
     /**
      * @param DOMDocument $document
-     * @return \DOMElement
+     * @return \Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag|null
      * @throws \Exception
      */
     private function getBodyElement(DOMDocument $document) {
-        $bodies = iterator_to_array($document->query('//body'));
-        if (count($bodies) == 0) {
+        $body = $document->getElementsByTagName('body')->item(0);
+        if (is_null($body)) {
             throw new \Exception('No body tag found in document');
         }
-        return $bodies[0];
+        $bodyClosing = $document->getStream()->getClosingTag($body);
+        if (is_null($bodyClosing)) {
+            throw new \Exception('No body tag found in document');
+        }
+        return $bodyClosing;
     }
 
 }

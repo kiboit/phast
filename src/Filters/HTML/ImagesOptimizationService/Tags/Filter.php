@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements HTMLFilter {
@@ -36,7 +37,7 @@ class Filter implements HTMLFilter {
         }
     }
 
-    private function rewriteSrc(\DOMElement $img) {
+    private function rewriteSrc(Tag $img) {
         $url = $this->rewriter->makeURLAbsoluteToBase($img->getAttribute('src'), $this->baseUrl);
         if (!$this->rewriter->shouldRewriteUrl($url)) {
             return;
@@ -54,7 +55,7 @@ class Filter implements HTMLFilter {
         );
     }
 
-    private function rewriteSrcset(\DOMElement $img) {
+    private function rewriteSrcset(Tag $img) {
         $srcset = $img->getAttribute('srcset');
         if (!$srcset) {
             return;

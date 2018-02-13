@@ -4,7 +4,7 @@ namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates;
 
 
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\OpeningTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserTestCase;
 use Masterminds\HTML5\Elements;
 
@@ -34,12 +34,12 @@ class AwaitingTagTest extends ParserTestCase {
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
 
-        $elements = $this->htmlStream->getElements();
+        $elements = $this->htmlStream->getAllElements();
         $this->assertCount(1, $elements);
 
-        /** @var OpeningTag $tag */
+        /** @var Tag $tag */
         $tag = $elements[0];
-        $this->assertInstanceOf(OpeningTag::class, $tag);
+        $this->assertInstanceOf(Tag::class, $tag);
         $this->assertEquals($tagName, $tag->getTagName());
         $this->assertTrue($tag->hasAttribute('data-start'));
         $this->assertEquals($attr, $tag->getAttribute('data-start'));
@@ -62,15 +62,15 @@ class AwaitingTagTest extends ParserTestCase {
 
         $this->assertEquals($returned, $expectedReturn);
 
-        $this->assertEmpty($this->htmlStream->getElements());
+        $this->assertEmpty($this->htmlStream->getAllElements());
 
         /** @var ConstructingTextContainingTag $newState */
         $newState = $this->parser->getState();
         $this->assertInstanceOf(ConstructingTextContainingTag::class, $newState);
 
-        /** @var OpeningTag $tag */
+        /** @var Tag $tag */
         $tag = $newState->getStartTag();
-        $this->assertInstanceOf(OpeningTag::class, $tag);
+        $this->assertInstanceOf(Tag::class, $tag);
         $this->assertEquals($tagName, $tag->getTagName());
     }
 
@@ -86,7 +86,7 @@ class AwaitingTagTest extends ParserTestCase {
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
 
-        $elements = $this->htmlStream->getElements();
+        $elements = $this->htmlStream->getAllElements();
         $this->assertCount(1, $elements);
 
         /** @var ClosingTag $element */

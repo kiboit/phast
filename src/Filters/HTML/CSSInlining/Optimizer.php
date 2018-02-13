@@ -147,8 +147,8 @@ class Optimizer {
     private function getUsedClasses(DOMDocument $document) {
         $classes = [];
 
-        foreach ($document->query('//@class') as $class) {
-            foreach (preg_split('/\s+/', $class->value) as $cls) {
+        foreach ($document->getElementsWithAttr('class') as $tag) {
+            foreach (preg_split('/\s+/', $tag->getAttribute('class')) as $cls) {
                 if ($cls != ''
                     && !isset($classes[$cls])
                     && preg_match("/^{$this->classNamePattern}$/", $cls)

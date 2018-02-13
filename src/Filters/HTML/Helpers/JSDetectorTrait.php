@@ -2,13 +2,16 @@
 
 namespace Kibo\Phast\Filters\HTML\Helpers;
 
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
+
 trait JSDetectorTrait {
 
+
     /**
-     * @param \DOMElement $element
-     * @return bool|int
+     * @param Tag $element
+     * @return bool|false|int
      */
-    private function isJSElement(\DOMElement $element) {
+    private function isJSElement(Tag $element) {
         if (!$element->hasAttribute('type')) {
             return true;
         }

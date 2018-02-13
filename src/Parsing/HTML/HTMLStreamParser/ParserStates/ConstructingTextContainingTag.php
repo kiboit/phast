@@ -5,7 +5,7 @@ namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates;
 
 
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\OpeningTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Text;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\TextContainingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Parser;
@@ -14,7 +14,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserState;
 class ConstructingTextContainingTag extends ParserState {
 
     /**
-     * @var OpeningTag
+     * @var Tag
      */
     private $startTag;
 
@@ -26,9 +26,9 @@ class ConstructingTextContainingTag extends ParserState {
     /**
      * AwaitingText constructor.
      * @param Parser $parser
-     * @param OpeningTag $startTag
+     * @param Tag $startTag
      */
-    public function __construct(Parser $parser, OpeningTag $startTag) {
+    public function __construct(Parser $parser, Tag $startTag) {
         parent::__construct($parser);
         $this->startTag = $startTag;
     }
@@ -51,7 +51,7 @@ class ConstructingTextContainingTag extends ParserState {
     }
 
     /**
-     * @return OpeningTag
+     * @return Tag
      */
     public function getStartTag() {
         return $this->startTag;

@@ -2,10 +2,9 @@
 
 namespace Kibo\Phast\Common;
 
+use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStream;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\OpeningTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\TextContainingTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Parser;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Tokenizer;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
@@ -14,6 +13,7 @@ use Masterminds\HTML5\Parser\Scanner;
 use Masterminds\HTML5\Parser\StringInputStream;
 
 class DOMDocument {
+    use BodyFinderTrait;
 
     /**
      * @var HTMLStream
@@ -36,16 +36,35 @@ class DOMDocument {
     private $phastJavaScripts = [];
 
     /**
+     * DOMDocument constructor.
+     * @param HTMLStream $stream
+     */
+    public function __construct(HTMLStream $stream) {
+        $this->stream = $stream;
+    }
+
+
+    /**
      * @param URL $documentLocation
      * @param PhastJavaScriptCompiler $jsCompiler
      * @return DOMDocument
      */
     public static function makeForLocation(URL $documentLocation, PhastJavaScriptCompiler $jsCompiler) {
-        $instance = new self();
-        $instance->stream = new HTMLStream();
+        $instance = new self(new HTMLStream());
         $instance->documentLocation = $documentLocation;
         $instance->jsCompiler = $jsCompiler;
         return $instance;
+    }
+
+    public function setStream(HTMLStream $stream) {
+        $this->stream = $stream;
+    }
+
+    /**
+     * @return HTMLStream
+     */
+    public function getStream() {
+        return $this->stream;
     }
 
     public function query($query) {
@@ -53,8 +72,20 @@ class DOMDocument {
         return $this->getElementsByTagName($tagName);
     }
 
+    /**
+     * @param $tagName
+     * @return \Kibo\Phast\Parsing\HTML\HTMLStreamElements\TagCollection
+     */
     public function getElementsByTagName($tagName) {
         return $this->stream->getElementsByTagName($tagName);
+    }
+
+    /**
+     * @param $attr
+     * @return \Kibo\Phast\Parsing\HTML\HTMLStreamElements\TagCollection
+     */
+    public function getElementsWithAttr($attr) {
+        return $this->stream->getElementsWithAttr($attr);
     }
 
     public function loadHTML($string) {
@@ -68,7 +99,7 @@ class DOMDocument {
      * @return URL
      */
     public function getBaseURL() {
-        $bases = $this->query('//base');
+        $bases = $this->getElementsByTagName('base');
         if ($bases->length > 0) {
             $baseHref = URL::fromString($bases->item(0)->getAttribute('href'));
             return $baseHref->withBase($this->documentLocation);
@@ -96,10 +127,7 @@ class DOMDocument {
     }
 
     public function createElement($tagName) {
-        return new TextContainingTag(
-            new OpeningTag($tagName, []),
-            new ClosingTag($tagName)
-        );
+        return new Tag($tagName);
     }
 
     private function maybeAddPhastScripts() {
@@ -108,11 +136,7 @@ class DOMDocument {
         }
         $script = $this->createElement('script');
         $script->textContent = $this->jsCompiler->compileScriptsWithConfig($this->phastJavaScripts);
-        $body = $this->getElementsByTagName('body')->item(0);
-        $bodyClosing = $this->stream->getClosingTag($body);
-        if ($bodyClosing) {
-            $bodyClosing->appendChild($script);
-        }
+        $this->getBodyElement($this)->appendChild($script);
     }
 
 }

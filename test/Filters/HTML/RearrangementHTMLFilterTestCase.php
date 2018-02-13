@@ -2,6 +2,8 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
+use Kibo\Phast\Parsing\HTML\HTMLStream;
+
 class RearrangementHTMLFilterTestCase extends HTMLFilterTestCase {
 
     /**
@@ -11,7 +13,7 @@ class RearrangementHTMLFilterTestCase extends HTMLFilterTestCase {
 
     public function testExceptionOnNoBody() {
         $this->expectException(\Exception::class);
-        $dom = new \Kibo\Phast\Common\DOMDocument();
+        $dom = new \Kibo\Phast\Common\DOMDocument(new HTMLStream());
         $this->filter->transformHTMLDOM($dom);
     }
 

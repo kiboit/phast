@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceFilter;
@@ -91,6 +92,11 @@ class Filter implements HTMLFilter {
      */
     private $optimizer;
 
+    /**
+     * @var DOMDocument
+     */
+    private $document;
+
     public function __construct(
         ServiceSignature $signature,
         URL $baseURL,
@@ -122,6 +128,7 @@ class Filter implements HTMLFilter {
     }
 
     public function transformHTMLDOM(DOMDocument $document) {
+        $this->document = $document;
         $this->optimizer = $this->optimizerFactory->makeForDocument($document);
         $links = iterator_to_array($document->query('//link'));
         $styles = iterator_to_array($document->query('//style'));
@@ -139,7 +146,7 @@ class Filter implements HTMLFilter {
         }
     }
 
-    private function inlineLink(\DOMElement $link, URL $baseUrl) {
+    private function inlineLink(Tag $link, URL $baseUrl) {
         if (!$link->hasAttribute('rel')
             || $link->getAttribute('rel') != 'stylesheet'
             || !$link->hasAttribute('href')
@@ -154,18 +161,18 @@ class Filter implements HTMLFilter {
         }
 
         $media = $link->getAttribute('media');
-        $elements = $this->inlineURL($link->ownerDocument, $location, $media);
+        $elements = $this->inlineURL($this->document, $location, $media);
         if (!is_null($elements)) {
             $this->replaceElement($elements, $link);
         }
     }
 
-    private function inlineStyle(\DOMElement $style) {
+    private function inlineStyle(Tag $style) {
         $processed = $this->cssFilter
             ->apply(Resource::makeWithContent($this->baseURL, $style->textContent), [])
             ->getContent();
         $elements = $this->inlineCSS(
-            $style->ownerDocument,
+            $this->document,
             $this->baseURL,
             $processed,
             $style->getAttribute('media'),
@@ -175,10 +182,11 @@ class Filter implements HTMLFilter {
     }
 
     private function replaceElement($replacements, $element) {
+        $stream = $this->document->getStream();
         foreach ($replacements as $replacement) {
-            $element->parentNode->insertBefore($replacement, $element);
+            $stream->insertBeforeElement($element, $replacement);
         }
-        $element->parentNode->removeChild($element);
+        $stream->removeElement($element);
     }
 
     private function findInWhitelist(URL $url) {
@@ -198,7 +206,7 @@ class Filter implements HTMLFilter {
      * @param boolean $ieCompatible
      * @param int $currentLevel
      * @param string[] $seen
-     * @return \DOMElement[]
+     * @return Tag[]
      */
     private function inlineURL(DOMDocument $document, URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
         $whitelistEntry = $this->findInWhitelist($url);

@@ -7,6 +7,7 @@ use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
@@ -69,7 +70,7 @@ class Filter implements HTMLFilter {
         }
     }
 
-    private function rewriteScriptSource(\DOMElement $element) {
+    private function rewriteScriptSource(Tag $element) {
         if (!$element->hasAttribute('src')) {
             return;
         }
