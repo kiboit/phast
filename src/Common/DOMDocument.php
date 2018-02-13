@@ -10,7 +10,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Tokenizer;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 use Masterminds\HTML5\Parser\Scanner;
-use Masterminds\HTML5\Parser\StringInputStream;
+use Kibo\Phast\Parsing\HTML\StringInputStream;
 
 class DOMDocument {
     use BodyFinderTrait;
@@ -89,8 +89,8 @@ class DOMDocument {
     }
 
     public function loadHTML($string) {
-        $parser = new Parser($this->stream);
         $inputStream = new StringInputStream($string);
+        $parser = new Parser($this->stream, $inputStream);
         $tokenizer = new Tokenizer(new Scanner($inputStream), $parser);
         $tokenizer->parse();
     }

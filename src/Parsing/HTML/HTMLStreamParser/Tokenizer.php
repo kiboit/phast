@@ -330,6 +330,9 @@ class Tokenizer
         if ($this->scanner->current() != '/') {
             return false;
         }
+
+        $startPosition = $this->scanner->position();
+
         $tok = $this->scanner->next();
 
         // a-zA-Z -> tagname
@@ -355,7 +358,7 @@ class Tokenizer
             $this->scanner->charsUntil('>');
         }
 
-        $this->events->endTag($name, $this->scanner->position());
+        $this->events->endTag($name, $startPosition, $this->scanner->position());
         $this->scanner->next();
         return true;
     }
@@ -390,7 +393,7 @@ class Tokenizer
             $selfClose = false;
         }
 
-        $mode = $this->events->startTag($name, $attributes, $foundOnIndex, $selfClose);
+        $mode = $this->events->startTag($name, $attributes, $foundOnIndex, $this->scanner->position(), $selfClose);
         // Should we do this? What does this buy that selfClose doesn't?
         if ($selfClose) {
             //$this->events->endTag($name);

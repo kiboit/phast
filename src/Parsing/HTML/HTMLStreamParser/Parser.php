@@ -6,7 +6,8 @@ namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser;
 
 use Kibo\Phast\Parsing\HTML\HTMLStream;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates\AwaitingTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates\AwaitingTagStart;
+use Kibo\Phast\Parsing\HTML\StringInputStream;
+use Masterminds\HTML5\Parser\InputStream;
 
 class Parser {
 
@@ -18,15 +19,42 @@ class Parser {
     /**
      * @var HTMLStream
      */
-    private $stream;
+    private $htmlStream;
 
     /**
-     * HTMLStreamParser constructor.
-     * @param HTMLStream $stream
+     * @var StringInputStream
      */
-    public function __construct(HTMLStream $stream) {
-        $this->stream = $stream;
+    private $inputStream;
+
+    /**
+     * @var int
+     */
+    private $lastInsertedByteOffset = 0;
+
+    /**
+     * Parser constructor.
+     * @param HTMLStream $stream
+     * @param StringInputStream $inputStream
+     */
+    public function __construct(HTMLStream $stream, StringInputStream $inputStream) {
+        $this->htmlStream = $stream;
+        $this->inputStream = $inputStream;
         $this->reset();
+    }
+
+
+    /**
+     * @return HTMLStream
+     */
+    public function getHtmlStream() {
+        return $this->htmlStream;
+    }
+
+    /**
+     * @return StringInputStream
+     */
+    public function getInputStream() {
+        return $this->inputStream;
     }
 
     /**
@@ -43,27 +71,34 @@ class Parser {
         $this->state = $state;
     }
 
-    public function reset() {
-        $this->state = new AwaitingTag($this);
+    /**
+     * @return int
+     */
+    public function getLastInsertedByteOffset() {
+        return $this->lastInsertedByteOffset;
     }
 
     /**
-     * @return HTMLStream
+     * @param int $lastInsertedByteOffset
      */
-    public function getStream() {
-        return $this->stream;
+    public function setLastInsertedByteOffset($lastInsertedByteOffset) {
+        $this->lastInsertedByteOffset = $lastInsertedByteOffset;
+    }
+
+    public function reset() {
+        $this->state = new AwaitingTag($this);
     }
 
     public function doctype($name, $idType = 0, $id = null, $quirks = false) {
         $this->state->doctype($name, $idType, $id, $quirks);
     }
 
-    public function startTag($name, $attributes, $originalString, $selfClosing = false) {
-        return $this->state->startTag($name, $attributes, $originalString, $selfClosing);
+    public function startTag($name, $attributes, $startOffset, $endOffset, $selfClosing = false) {
+        return $this->state->startTag($name, $attributes, $startOffset, $endOffset, $selfClosing);
     }
 
-    public function endTag($name, $originalString) {
-        $this->state->endTag($name, $originalString);
+    public function endTag($name, $startOffset, $endOffset) {
+        $this->state->endTag($name, $startOffset, $endOffset);
     }
 
     public function comment($cdata) {

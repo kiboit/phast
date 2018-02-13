@@ -23,7 +23,7 @@ class Tag extends Element {
     /**
      * @var string
      */
-    private $closingTag;
+    private $closingTag = '';
 
     /**
      * Tag constructor.
@@ -104,5 +104,9 @@ class Tag extends Element {
      */
     public function getClosingTag() {
         return $this->closingTag;
+    }
+
+    public function toString() {
+        return parent::toString() . $this->textContent . $this->closingTag;
     }
 }

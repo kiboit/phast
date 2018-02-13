@@ -76,10 +76,10 @@ class HTMLStream {
 
 
     /**
-     * @return Element[]
+     * @return TagCollection
      */
     public function getAllElements() {
-        return $this->elements;
+        return $this->makeTagCollection($this->elements);
     }
 
     public function getElementsBetween(Element $element1, Element $element2) {

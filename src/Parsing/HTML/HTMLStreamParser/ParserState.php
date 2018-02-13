@@ -3,6 +3,9 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser;
 
+use Kibo\Phast\Parsing\HTML\HTMLStream;
+use Kibo\Phast\Parsing\HTML\StringInputStream;
+
 abstract class ParserState {
 
     /**
@@ -11,24 +14,35 @@ abstract class ParserState {
     protected $parser;
 
     /**
+     * @var StringInputStream
+     */
+    protected $inputStream;
+
+    /**
+     * @var HTMLStream
+     */
+    protected $htmlStream;
+
+    /**
      * ParserState constructor.
      * @param Parser $parser
      */
     public function __construct(Parser $parser) {
         $this->parser = $parser;
+        $this->inputStream = $parser->getInputStream();
+        $this->htmlStream = $parser->getHtmlStream();
     }
 
     public function doctype($name, $idType = 0, $id = null, $quirks = false) {
         $this->parser->reset();
     }
 
-    public function startTag($name, $attributes, $originalString, $selfClosing = false) {
+    public function startTag($name, $attributes, $startOffset, $endOffset, $selfClosing = false) {
         $this->parser->reset();
-        // TODO: Return default text mode
         return 0;
     }
 
-    public function endTag($name, $originalString) {
+    public function endTag($name, $startOffset, $endOffset) {
         $this->parser->reset();
     }
 
@@ -42,11 +56,11 @@ abstract class ParserState {
 
     public function eof() {
         $this->parser->reset();
+        // TODO: Handle infinite loop
+        $this->parser->eof();
     }
 
-    public function parseError($msg, $line, $col) {
-        $this->parser->reset();
-    }
+    public function parseError($msg, $line, $col) {}
 
     public function cdata($data) {
         $this->parser->reset();
