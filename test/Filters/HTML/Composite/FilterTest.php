@@ -158,7 +158,8 @@ class FilterTest extends TestCase {
         $this->shouldTransform();
         $buffer = "<html><body>$script</body></html>";
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains($script, $filtered);
+        $this->assertStringStartsWith($buffer, $filtered);
+        $this->assertNotEmpty($this->stream->getAllElements());
     }
 
     public function shouldHandleTagCloseInScriptDataProvider() {
