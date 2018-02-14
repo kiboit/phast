@@ -46,9 +46,6 @@ class ConstructingTextContainingTag extends ParserState {
         $closingTag = $this->inputStream->getSubString($startOffset, $endOffset);
         $newTag = $this->tag->withClosingTag($closingTag);
         $this->parser->getHtmlStream()->addElement($newTag);
-        $lastOffset = $this->parser->getCaretPosition();
-        echo "Finish-tag: $startOffset-$endOffset\n";
-        echo "Text: " . $newTag->toString() . "\n";
         $this->parser->setCaretPosition($endOffset + 1);
     }
 

@@ -81,7 +81,6 @@ class Parser {
      * @param int $caretPosition
      */
     public function setCaretPosition($caretPosition) {
-        echo "Set-caret: $caretPosition\n\n";
         $this->caretPosition = $caretPosition;
     }
 
