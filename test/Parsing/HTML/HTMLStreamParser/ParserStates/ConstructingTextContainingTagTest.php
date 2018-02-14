@@ -50,7 +50,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
         $this->assertEquals('some-text', $tag->getTextContent());
         $this->assertEquals('the-original-contentsome-textthe-end-tag', $tag->toString());
 
-        $this->assertEquals(strlen($tag->toString()) - 1, $this->parser->getLastInsertedByteOffset());
+        $this->assertEquals(112, $this->parser->getCaretPosition());
     }
 
     public function testResettingOnWrongClosingTag() {

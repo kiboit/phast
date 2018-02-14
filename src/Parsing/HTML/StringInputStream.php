@@ -339,7 +339,10 @@ class StringInputStream implements InputStream
 
     public function getSubString($startOffset, $endOffset = null)
     {
-        $length = is_null($endOffset) ? null : $endOffset - $startOffset;
+        if (is_null($endOffset)) {
+            return substr($this->data, $startOffset);
+        }
+        $length = $endOffset - $startOffset + 1;
         return substr($this->data, $startOffset, $length);
     }
 }

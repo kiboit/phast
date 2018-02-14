@@ -7,7 +7,6 @@ namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser;
 use Kibo\Phast\Parsing\HTML\HTMLStream;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\ParserStates\AwaitingTag;
 use Kibo\Phast\Parsing\HTML\StringInputStream;
-use Masterminds\HTML5\Parser\InputStream;
 
 class Parser {
 
@@ -29,7 +28,7 @@ class Parser {
     /**
      * @var int
      */
-    private $lastInsertedByteOffset = 0;
+    private $caretPosition = 0;
 
     /**
      * Parser constructor.
@@ -74,15 +73,16 @@ class Parser {
     /**
      * @return int
      */
-    public function getLastInsertedByteOffset() {
-        return $this->lastInsertedByteOffset;
+    public function getCaretPosition() {
+        return $this->caretPosition;
     }
 
     /**
-     * @param int $lastInsertedByteOffset
+     * @param int $caretPosition
      */
-    public function setLastInsertedByteOffset($lastInsertedByteOffset) {
-        $this->lastInsertedByteOffset = $lastInsertedByteOffset;
+    public function setCaretPosition($caretPosition) {
+        echo "Set-caret: $caretPosition\n\n";
+        $this->caretPosition = $caretPosition;
     }
 
     public function reset() {

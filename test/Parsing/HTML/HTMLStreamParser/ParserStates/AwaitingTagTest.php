@@ -28,7 +28,7 @@ class AwaitingTagTest extends ParserTestCase {
 
         $this->assertEquals($expectedReturn, $returned);
 
-        $this->assertEquals(20, $this->parser->getLastInsertedByteOffset());
+        $this->assertEquals(21, $this->parser->getCaretPosition());
 
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
@@ -61,7 +61,7 @@ class AwaitingTagTest extends ParserTestCase {
 
         $this->assertEquals($returned, $expectedReturn);
 
-        $this->assertEquals(0, $this->parser->getLastInsertedByteOffset());
+        $this->assertEquals(0, $this->parser->getCaretPosition());
 
         $this->assertEmpty($this->htmlStream->getAllElements());
 
@@ -87,7 +87,7 @@ class AwaitingTagTest extends ParserTestCase {
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
 
-        $this->assertEquals(20, $this->parser->getLastInsertedByteOffset());
+        $this->assertEquals(21, $this->parser->getCaretPosition());
 
         $elements = $this->htmlStream->getAllElements();
         $this->assertCount(1, $elements);
@@ -102,9 +102,9 @@ class AwaitingTagTest extends ParserTestCase {
             ->method('getSubString')
             ->willReturnMap([
                 [0, 10, 'tag-1'],
-                [10, 20, 'text-1'],
+                [11, 19, 'text-1'],
                 [20, 30, 'tag-2'],
-                [30, null, 'text-2']
+                [31, null, 'text-2']
             ]);
         $this->parser->startTag('span', [], 0, 10);
         $this->parser->endTag('span', 20, 30);
@@ -128,7 +128,7 @@ class AwaitingTagTest extends ParserTestCase {
         $this->inputStream
             ->method('getSubString')
             ->willReturnMap([
-                [0, 10, 'the-text-1'],
+                [0, 9, 'the-text-1'],
                 [10, 20, 'the-tag']
             ]);
         $this->parser->startTag('style', [], 10, 20);
@@ -137,7 +137,7 @@ class AwaitingTagTest extends ParserTestCase {
         $this->assertEquals(1, $elements->count());
         $this->assertNotInstanceOf(Tag::class, $elements->item(0));
         $this->assertEquals('the-text-1', $elements->item(0)->toString());
-        $this->assertEquals(9, $this->parser->getLastInsertedByteOffset());
+        $this->assertEquals(10, $this->parser->getCaretPosition());
 
         /** @var ConstructingTextContainingTag $newState */
         $newState = $this->parser->getState();

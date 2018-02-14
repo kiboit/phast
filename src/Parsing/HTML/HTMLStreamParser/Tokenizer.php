@@ -3,10 +3,10 @@
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamParser;
 
 use Masterminds\HTML5\Elements;
+use Masterminds\HTML5\Parser\CharacterReference;
+use Masterminds\HTML5\Parser\EventHandler;
 use Masterminds\HTML5\Parser\ParseError;
 use Masterminds\HTML5\Parser\UTF8Utils;
-use Masterminds\HTML5\Parser\EventHandler;
-use Masterminds\HTML5\Parser\CharacterReference;
 
 
 /**
@@ -331,7 +331,7 @@ class Tokenizer
             return false;
         }
 
-        $startPosition = $this->scanner->position();
+        $startPosition = $this->scanner->position() - 1;
 
         $tok = $this->scanner->next();
 
@@ -374,7 +374,7 @@ class Tokenizer
             return false;
         }
 
-        $foundOnIndex = $this->scanner->position();
+        $foundOnIndex = $this->scanner->position() - 1;
 
         // We know this is at least one char.
         $name = $this->scanner->charsWhile(":_-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
