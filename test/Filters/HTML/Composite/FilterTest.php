@@ -171,12 +171,11 @@ class FilterTest extends TestCase {
     }
 
     public function testShouldAllowSelfClosingDiv() {
-        $this->markTestSkipped('Do we need this now?');
         $this->shouldTransform();
         $div = "<div /><span></span></div>";
         $buffer = "<html><body>$div</body></html>";
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains('<div><span></span></div>', $filtered);
+        $this->assertContains('<div /><span></span></div>', $filtered);
     }
 
     public function testShouldHandleExceptions() {
