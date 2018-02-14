@@ -96,16 +96,8 @@ class Filter {
     }
 
     private function tryToApply($buffer, $time_start) {
-        $fixedBuffer = $this->cleanUTF8($buffer);
-        $fixedBuffer = $this->escapeCloseTagInScript($fixedBuffer);
-        $fixedBuffer = $this->fixIllegalSelfClosingTags($fixedBuffer);
-
-        $xmlErrors = libxml_use_internal_errors(true);
         $doc = $this->dom;
-        //$doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
         $doc->loadHTML($buffer);
-
-        //$this->restoreCloseTagInScript($doc);
 
         $timings = [];
 
@@ -120,9 +112,6 @@ class Filter {
             );
             $timings[get_class($filter)] = $time_filter_delta;
         }
-
-        //libxml_clear_errors();
-        //libxml_use_internal_errors($xmlErrors);
 
         $output = $this->dom->serialize();
 
@@ -143,76 +132,6 @@ class Filter {
         $output .= '<script>window.console&&console.log(' . json_encode($log) . ')</script>';
         $this->logger()->info($log);
         return $output;
-    }
-
-    private function cleanUTF8($buffer) {
-        // Treat every byte that is not valid UTF-8 as Windows-1252
-        // https://www.w3.org/International/questions/qa-forms-utf-8
-        return preg_replace_callback(
-            '~
-                [\x09\x0A\x0D\x20-\x7E]++          # ASCII
-              | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
-              |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
-              | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
-              |  \xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
-              |  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
-              | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
-              |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
-              | (.)
-            ~xs',
-            function($match) {
-                if (isset($match[1]) && strlen($match[1])) {
-                    return mb_convert_encoding($match[1], 'UTF-8', 'Windows-1252');
-                } else {
-                    return $match[0];
-                }
-            },
-            $buffer
-        );
-    }
-
-    private function escapeCloseTagInScript($buffer) {
-        return preg_replace_callback(
-            '~
-                (<script(?:\s[^>]*)?>)
-                (.*?)
-                (</script>)
-            ~xsi',
-            function ($match) {
-                return $match[1] . preg_replace('~(<@*)(/)~', '$1@$2', $match[2]) . $match[3];
-            },
-            $buffer
-        );
-    }
-
-    private function restoreCloseTagInScript(DOMDocument $dom) {
-        foreach ($dom->query('//script') as $script) {
-            $script->textContent = preg_replace('~(<@*)@(/)~', '$1$2', $script->textContent);
-        }
-    }
-
-    private function fixIllegalSelfClosingTags($buffer) {
-        // The tags are those HTML elements[1] that are not void[2].
-        // 1: https://w3c.github.io/html-reference/elements.html
-        // 2: https://w3c.github.io/html-reference/syntax.html#syntax-elements
-        return preg_replace(
-            '~
-                (
-                    <
-                    (?>a|abbr|address|article|aside|audio|b|bdi|bdo|blockquote|body|button|canvas|caption|cite|code|colgroup|datalist|dd|del|details|dfn|div|dl|dt|em|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|head|header|hgroup|html|i|iframe|ins|kbd|label|legend|li|map|mark|menu|meter|nav|noscript|object|ol|optgroup|option|output|p|pre|progress|q|rp|rt|ruby|s|samp|script|section|select|small|span|strong|style|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|title|tr|u|ul|var|video)
-                    \b
-                    (?:
-                          [^"\'`/>]*+
-                        | "[^"]*+"
-                        | \'[^\']*+\'
-                        | `[^`]*+`
-                    )*
-                )
-                />
-            ~xi',
-            '\1>',
-            $buffer
-        );
     }
 
 }
