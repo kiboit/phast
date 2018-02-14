@@ -145,19 +145,10 @@ class FilterTest extends TestCase {
     }
 
     public function testHandleMixedUTF8AndWindows1252() {
-        $this->markTestSkipped('Do we need this now?');
         $this->shouldTransform();
         $buffer = "<html><body>ü\xfc</body></html>";
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains('üü', $filtered);
-    }
-
-    public function testHandleMixedUTF8AndWindows1252WithEuroSign() {
-        $this->markTestSkipped('Do we need this now?');
-        $this->shouldTransform();
-        $buffer = "<html><body>ü\x80</body></html>";
-        $filtered = $this->filter->apply($buffer);
-        $this->assertContains('ü€', $filtered);
+        $this->assertContains("ü\xfc", $filtered);
     }
 
     /**

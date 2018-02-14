@@ -74,7 +74,6 @@ class StringInputStream implements InputStream
      */
     public function __construct($data, $encoding = 'UTF-8', $debug = '')
     {
-        $data = UTF8Utils::convertToUTF8($data, $encoding);
         if ($debug)
             fprintf(STDOUT, $debug, $data, strlen($data));
 
