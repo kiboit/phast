@@ -21,9 +21,15 @@ class FilterTest extends TestCase {
      */
     private $filter;
 
+    /**
+     * @var HTMLStream
+     */
+    private $stream;
+
     public function setUp() {
         parent::setUp();
-        $this->filter = new Filter(self::MAX_BUFFER_SIZE_TO_APPLY, new DOMDocument(new HTMLStream()));
+        $this->stream = new HTMLStream();
+        $this->filter = new Filter(self::MAX_BUFFER_SIZE_TO_APPLY, new DOMDocument($this->stream));
     }
 
     public function testShouldApplyOnHTML() {
@@ -76,13 +82,10 @@ class FilterTest extends TestCase {
     }
 
     public function testNotLoadingBadHTML() {
-        $this->markTestSkipped('Do we need this now?');
         $this->shouldNotTransform();
         $buffer = "\0<html><body></body></html>";
-        $doc = new \Kibo\Phast\Common\DOMDocument(new HTMLStream());
-        $loads = @$doc->loadHTML($buffer);
-        $this->assertFalse($loads);
         $this->assertEquals($buffer, $this->filter->apply($buffer));
+        $this->assertEmpty($this->stream->getAllElements());
     }
 
     public function testShouldReturnApplied() {
