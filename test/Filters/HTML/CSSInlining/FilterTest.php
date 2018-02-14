@@ -473,15 +473,14 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testInlineUTF8() {
-        $this->markTestSkipped('Not implemented');
         $css = 'body { content: "ü"; }';
         $this->makeLink($this->head, $css);
         $this->runTheFilter();
 
-        $elements = $this->head->childNodes;
+        $elements = $this->getHeadElements();
         $this->assertEquals(1, $elements->length);
         $this->assertContains('ü', $elements->item(0)->textContent);
-        $this->assertContains('ü', $this->dom->saveHTML($this->dom->firstChild));
+        $this->assertContains('ü', $this->dom->serialize());
     }
 
     public function testRespectingBaseTag() {

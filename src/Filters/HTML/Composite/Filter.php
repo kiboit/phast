@@ -102,9 +102,10 @@ class Filter {
 
         $xmlErrors = libxml_use_internal_errors(true);
         $doc = $this->dom;
-        $doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
+        //$doc->loadHTML('<?xml encoding="utf-8"?' . '>' . $fixedBuffer);
+        $doc->loadHTML($buffer);
 
-        $this->restoreCloseTagInScript($doc);
+        //$this->restoreCloseTagInScript($doc);
 
         $timings = [];
 
@@ -120,10 +121,10 @@ class Filter {
             $timings[get_class($filter)] = $time_filter_delta;
         }
 
-        libxml_clear_errors();
-        libxml_use_internal_errors($xmlErrors);
+        //libxml_clear_errors();
+        //libxml_use_internal_errors($xmlErrors);
 
-        $output = $this->dom->serializeToHTML5();
+        $output = $this->dom->serialize();
 
         $time_delta = microtime(true) - $time_start;
 

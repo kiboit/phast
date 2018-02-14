@@ -25,6 +25,8 @@ class Tag extends Element {
      */
     private $closingTag = '';
 
+    private $dirty = false;
+
     /**
      * Tag constructor.
      * @param $tagName
@@ -63,6 +65,7 @@ class Tag extends Element {
      * @param string $value
      */
     public function setAttribute($attrName, $value) {
+        $this->dirty = true;
         $this->attributes[$attrName] = $value;
     }
 
@@ -70,6 +73,7 @@ class Tag extends Element {
      * @param string $attr
      */
     public function removeAttribute($attr) {
+        $this->dirty = true;
         if ($this->hasAttribute($attr)) {
             unset ($this->attributes[$attr]);
         }
@@ -107,6 +111,28 @@ class Tag extends Element {
     }
 
     public function toString() {
-        return parent::toString() . $this->textContent . $this->closingTag;
+        return $this->getOpening() . $this->textContent . $this->getClosing();
+    }
+
+    private function getOpening() {
+        if ($this->dirty || !isset ($this->originalString)) {
+            return $this->generateOpeningTag();
+        }
+        return parent::toString();
+    }
+
+    private function getClosing() {
+        if (empty ($this->closingTag) && !empty($this->textContent)) {
+            return '</' . $this->tagName . '>';
+        }
+        return $this->closingTag;
+    }
+
+    private function generateOpeningTag() {
+        $parts = ['<' . $this->tagName];
+        foreach ($this->attributes as $name => $value) {
+            $parts[] = $name . '="' . htmlspecialchars($value) . '"';
+        }
+        return join(' ', $parts) . '>';
     }
 }

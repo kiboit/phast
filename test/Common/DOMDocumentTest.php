@@ -50,24 +50,20 @@ class DOMDocumentTest extends TestCase {
     }
 
     public function testSerializeToHTML5() {
-        $this->markTestSkipped('Not implemented');
         $original = '<?ins v>';
         $original .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
         $original .= '<html><head></head><body>the-body</body></html><div>some-div</div>';
         $this->dom->loadHTML($original);
-        $serialized = $this->dom->serializeToHTML5();
-        $expected = "<!doctype html><html><head></head><body>the-body</body></html>";
-        $expected .= "<html><div>some-div</div></html>";
-        $this->assertEquals($expected, str_replace("\n", '', $serialized));
+        $serialized = $this->dom->serialize();
+        $this->assertEquals($original, $serialized);
     }
 
     public function testAddingPhastJavaScripts() {
-        $this->markTestSkipped('Not implemented');
         $html = '<html><head></head><body></body></html>';
         $this->dom->loadHTML($html);
         $this->dom->addPhastJavaScript(new PhastJavaScript('f1'));
-        $serialized = $this->dom->serializeToHTML5();
-        $expected = '<!doctype html><html><head></head><body><script>compiled-js</script></body></html>';
+        $serialized = $this->dom->serialize();
+        $expected = '<html><head></head><body><script>compiled-js</script></body></html>';
         $this->assertEquals($expected, str_replace("\n", '', $serialized));
     }
 

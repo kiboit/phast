@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\CSSDeferring;
 use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
 class Filter implements HTMLFilter {
@@ -13,18 +14,20 @@ class Filter implements HTMLFilter {
     public function transformHTMLDOM(DOMDocument $document) {
         $insert_loader = false;
 
-        /** @var \DOMElement $link */
-        foreach (iterator_to_array($document->query('//link')) as $link) {
+        /** @var Tag $link */
+        foreach (iterator_to_array($document->getElementsByTagName('link')) as $link) {
             if ($link->getAttribute('rel') != 'stylesheet') {
                 continue;
             }
 
             $this->logger()->info('Deferring {src}', ['src' => $link->getAttribute('href')]);
-            $script = $document->createElement('script', trim($document->saveHTML($link)));
+            $script = $document->createElement('script');
+            $script->setTextContent(trim($link->toString()));
             $script->setAttribute('type', 'phast-link');
 
-            $link->parentNode->insertBefore($script, $link);
-            $link->parentNode->removeChild($link);
+            $stream = $document->getStream();
+            $stream->insertBeforeElement($link, $script);
+            $stream->removeElement($link);
 
             $insert_loader = true;
         }

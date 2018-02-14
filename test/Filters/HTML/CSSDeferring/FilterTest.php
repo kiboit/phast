@@ -18,7 +18,6 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testDeferCSS() {
-        $this->markTestSkipped('Not implemented');
         $style_link = $this->dom->createElement('link');
         $style_link->setAttribute('rel', 'stylesheet');
         $style_link->setAttribute('href', 'test.css');
