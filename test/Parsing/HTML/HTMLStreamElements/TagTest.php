@@ -18,6 +18,12 @@ class TagTest extends \PHPUnit_Framework_TestCase {
         );
     }
 
+    public function testNotClosingWithOriginal() {
+        $tag = new Tag('html');
+        $tag->setOriginalString('<html>');
+        $this->assertEquals('<html>', $tag->toString());
+    }
+
     public function testGeneratingWithRemovedAttr() {
         $tag = $this->makeTheTag();
         $tag->removeAttribute('class');
@@ -42,6 +48,9 @@ class TagTest extends \PHPUnit_Framework_TestCase {
         $tag = new Tag('span');
         $tag->setTextContent('the-text');
         $this->assertEquals('<span>the-text</span>', $tag->toString());
+
+        $tag = new Tag('span');
+        $this->assertEquals('<span></span>', $tag->toString());
     }
 
     private function makeTheTag() {

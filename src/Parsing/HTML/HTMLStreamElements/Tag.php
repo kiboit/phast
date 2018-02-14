@@ -3,6 +3,8 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
+use Masterminds\HTML5\Elements;
+
 class Tag extends Element {
 
     /**
@@ -122,10 +124,13 @@ class Tag extends Element {
     }
 
     private function getClosing() {
-        if (empty ($this->closingTag) && !empty($this->textContent)) {
+        if ($this->closingTag) {
+            return $this->closingTag;
+        }
+        if ($this->mustHaveClosing() && !$this->isFromParser()) {
             return '</' . $this->tagName . '>';
         }
-        return $this->closingTag;
+        return '';
     }
 
     private function generateOpeningTag() {
@@ -134,5 +139,13 @@ class Tag extends Element {
             $parts[] = $name . '="' . htmlspecialchars($value) . '"';
         }
         return join(' ', $parts) . '>';
+    }
+
+    private function mustHaveClosing() {
+        return !Elements::isA($this->tagName, Elements::VOID_TAG);
+    }
+
+    private function isFromParser() {
+        return isset ($this->originalString);
     }
 }
