@@ -13,7 +13,7 @@ A free integration for WordPress is available as
 ([Github](https://github.com/kiboit/phastpress)).
 
 __[Contact Kibo IT](https://www.kiboit.com/contact)__
-([email](info@kiboit.com)): We'd love your feedback. We can help you try out
+([email](mailto:info@kiboit.com)): We'd love your feedback. We can help you try out
 Phast and provide custom services for website optimization.
 
 
