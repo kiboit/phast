@@ -461,6 +461,22 @@ class Tokenizer
      */
     protected function attribute(&$attributes)
     {
+        $attributePattern = "~
+            (?'name' [^/><=\n\f\t ]++ )
+            [\n\t\f ]*
+            (?:
+                (?! = ) |
+                =
+                [\n\t\f ]*+
+                \" (?'value' [^\f&\"]*+ ) \"
+            )
+        ~Ax";
+
+        if ($this->scanner->consumeMatch($attributePattern, $match)) {
+            $attributes[$match['name']] = isset($match['value']) ? $match['value'] : null;
+            return true;
+        }
+
         $tok = $this->scanner->current();
         if ($tok == '/' || $tok == '>' || $tok === false) {
             return false;

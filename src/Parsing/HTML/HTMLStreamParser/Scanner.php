@@ -210,4 +210,8 @@ class Scanner
     {
         return $this->is->remainingChars();
     }
+
+    public function consumeMatch($pattern, &$match = null) {
+        return $this->is->consumeMatch($pattern, $match);
+    }
 }

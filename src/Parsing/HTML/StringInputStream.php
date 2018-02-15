@@ -358,4 +358,12 @@ class StringInputStream implements InputStream
         $length = $endOffset - $startOffset + 1;
         return substr($this->data, $startOffset, $length);
     }
+
+    public function consumeMatch($pattern, &$match = null) {
+        if (preg_match($pattern, $this->data, $match, 0, $this->char)) {
+            $this->char += strlen($match[0]);
+            $this->setCurrent();
+            return $match;
+        }
+    }
 }
