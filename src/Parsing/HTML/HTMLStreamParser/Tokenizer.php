@@ -127,13 +127,22 @@ class Tokenizer
      */
     protected function consumeData()
     {
-        // Character Ref
-        /*
-         * $this->characterReference() || $this->tagOpen() || $this->eof() || $this->characterData();
-         */
-        $this->characterReference();
-        $this->tagOpen();
-        $this->eof();
+        $current = $this->scanner->current();
+
+        if ($current === '&') {
+            $this->characterReference();
+            $current = $this->scanner->current();
+        }
+
+        if ($current === '<') {
+            $this->tagOpen();
+            $current = $this->scanner->current();
+        }
+
+        if ($current === false) {
+            $this->eof();
+        }
+
         $this->characterData();
 
         return $this->carryOn;
