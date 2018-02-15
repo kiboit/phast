@@ -143,7 +143,7 @@ class Tokenizer
             $this->eof();
         }
 
-        $this->characterData();
+        $this->characterData('&<');
 
         return $this->carryOn;
     }
@@ -155,7 +155,7 @@ class Tokenizer
      *
      * @see Elements::TEXT_RAW Elements::TEXT_RCDATA.
      */
-    protected function characterData()
+    protected function characterData($untilChars = null)
     {
         $tok = $this->scanner->current();
         if ($tok === false) {
@@ -170,16 +170,21 @@ class Tokenizer
                 if (strspn($tok, "<&")) {
                     return false;
                 }
-                return $this->text();
+                return $this->text($untilChars);
         }
     }
 
     /**
      * This buffers the current token as character data.
      */
-    protected function text()
+    protected function text($untilChars = null)
     {
-        $tok = $this->scanner->current();
+        if ($untilChars === null) {
+            $tok = $this->scanner->current();
+            $this->scanner->next();
+        } else {
+            $tok = $this->scanner->charsUntil($untilChars);
+        }
 
         // This should never happen...
         if ($tok === false) {
@@ -191,7 +196,6 @@ class Tokenizer
         }
         // fprintf(STDOUT, "Writing '%s'", $tok);
         $this->buffer($tok);
-        $this->scanner->next();
         return true;
     }
 
