@@ -30,6 +30,8 @@ class Filter {
      */
     private $filters = [];
 
+    private $timings = [];
+
     /**
      * Filter constructor.
      * @param $maxBufferSizeToApply
@@ -96,31 +98,28 @@ class Filter {
     }
 
     private function tryToApply($buffer, $time_start) {
-        $doc = $this->dom;
-        $doc->loadHTML($buffer);
 
-        $timings = [];
+        $this->time('Parsing', function () use ($buffer) {
+            $this->dom->loadHTML($buffer);
+        });
 
         foreach ($this->filters as $filter) {
             $this->logger()->info('Starting {filter}', ['filter' => get_class($filter)]);
-            $time_filter_start = microtime(true);
-            $filter->transformHTMLDOM($doc);
-            $time_filter_delta = microtime(true) - $time_filter_start;
-            $this->logger()->info(
-                'Finished {filter} in {seconds}',
-                ['filter' => get_class($filter), 'seconds' => $time_filter_delta]
-            );
-            $timings[get_class($filter)] = $time_filter_delta;
+            $this->time(get_class($filter), function () use ($filter) {
+                $filter->transformHTMLDOM($this->dom);
+            });
         }
 
-        $output = $this->dom->serialize();
+        $output = $this->time('Serialization', function () {
+            return $this->dom->serialize();
+        });
 
         $time_delta = microtime(true) - $time_start;
 
         $time_accounted = 0.;
         $log = "Page automatically optimized by Phast\n\n";
-        arsort($timings);
-        foreach ($timings as $cls => $time) {
+        arsort($this->timings);
+        foreach ($this->timings as $cls => $time) {
             $cls = str_replace('Kibo\Phast\Filters\HTML\\', '', $cls);
             $log .= sprintf("      % -43s % 4dms\n", $cls, $time*1000);
             $time_accounted += $time;
@@ -132,6 +131,15 @@ class Filter {
         $output .= '<script>window.console&&console.log(' . json_encode($log) . ')</script>';
         $this->logger()->info($log);
         return $output;
+    }
+
+    private function time($label, callable $cb) {
+        $start = microtime(true);
+        $returned = $cb();
+        $delta = microtime(true) - $start;
+        $this->timings[$label] = $delta;
+        $this->logger()->info('Finished {label} in {time}', ['label' => $label, 'time' => $delta]);
+        return $returned;
     }
 
 }
