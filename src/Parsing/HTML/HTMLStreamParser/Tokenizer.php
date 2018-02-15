@@ -658,15 +658,15 @@ class Tokenizer
 
         // Replace NULL with the replacement char.
         if ($tok == "\0") {
-            $tok = UTF8Utils::FFFD;
-        }
-        while (! $this->isCommentEnd()) {
-            $comment .= $tok;
-            $tok = $this->scanner->next();
+            $comment .= UTF8Utils::FFFD;
         }
 
+        $comment .= $this->readUntilSequence('-->');
+
+        $this->scanner->consume(3);
+
         $this->events->comment($comment);
-        $this->scanner->next();
+
         return true;
     }
 
