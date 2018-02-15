@@ -8,10 +8,10 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Parser;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Tokenizer;
+use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Scanner;
 use Kibo\Phast\Parsing\HTML\StringInputStream;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
-use Masterminds\HTML5\Parser\Scanner;
 
 class DOMDocument {
     use BodyFinderTrait;

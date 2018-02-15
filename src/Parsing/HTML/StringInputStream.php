@@ -65,6 +65,8 @@ class StringInputStream implements InputStream
      */
     public $errors = array();
 
+    public $current;
+
     /**
      * Create a new InputStream wrapper.
      *
@@ -90,6 +92,7 @@ class StringInputStream implements InputStream
         $this->data = $data;
         $this->char = 0;
         $this->EOF = strlen($data);
+        $this->setCurrent();
     }
 
     /**
@@ -188,6 +191,11 @@ class StringInputStream implements InputStream
         return $this->data[$this->char];
     }
 
+    private function setCurrent()
+    {
+        $this->current = isset($this->data[$this->char]) ? $this->data[$this->char] : false;
+    }
+
     /**
      * Advance the pointer.
      * This is part of the Iterator interface.
@@ -195,6 +203,7 @@ class StringInputStream implements InputStream
     public function next()
     {
         $this->char ++;
+        $this->setCurrent();
     }
 
     /**
@@ -203,6 +212,7 @@ class StringInputStream implements InputStream
     public function rewind()
     {
         $this->char = 0;
+        $this->setCurrent();
     }
 
     /**
@@ -235,6 +245,7 @@ class StringInputStream implements InputStream
         if ($this->char < $this->EOF) {
             $data = substr($this->data, $this->char);
             $this->char = $this->EOF;
+            $this->setCurrent();
 
             return $data;
         }
@@ -271,6 +282,7 @@ class StringInputStream implements InputStream
 
         $string = (string) substr($this->data, $this->char, $len);
         $this->char += $len;
+        $this->setCurrent();
 
         return $string;
     }
@@ -302,6 +314,7 @@ class StringInputStream implements InputStream
         }
         $string = (string) substr($this->data, $this->char, $len);
         $this->char += $len;
+        $this->setCurrent();
 
         return $string;
     }
@@ -316,6 +329,7 @@ class StringInputStream implements InputStream
     {
         if (($this->char - $howMany) >= 0) {
             $this->char = $this->char - $howMany;
+            $this->setCurrent();
         }
     }
 

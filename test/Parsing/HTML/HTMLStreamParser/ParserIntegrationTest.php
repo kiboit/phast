@@ -8,7 +8,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStream;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\StringInputStream;
-use Masterminds\HTML5\Parser\Scanner;
+use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Scanner;
 use PHPUnit\Framework\TestCase;
 
 class ParserIntegrationTest extends TestCase {
