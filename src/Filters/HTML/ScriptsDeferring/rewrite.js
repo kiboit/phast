@@ -1,68 +1,71 @@
-var deferreds = [];
-var replace = function (original, rewritten) {
-    original.parentNode.insertBefore(rewritten, original);
-    original.parentNode.removeChild(original);
-};
-var lastScript;
 var scriptIndex = 0;
-try {
-    Object.defineProperty(document, 'readyState', {
-        configurable: true,
-        get: function() {
-            return 'loading';
-        }
-    });
-} catch (e) {
-    window.console && console.error("Phast: Unable to override document.readyState on this browser: ", e);
-}
-Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"]'), function (el) {
-    var script = document.createElement('script');
-    Array.prototype.forEach.call(el.attributes, function (attr) {
-        script.setAttribute(attr.nodeName, attr.nodeValue);
-    });
-    if (!el.hasAttribute('async')) {
-        script.async = false;
-    }
-    if (el.hasAttribute('data-phast-original-type')) {
-        script.setAttribute('type', el.getAttribute('data-phast-original-type'));
-        script.removeAttribute('data-phast-original-type');
-    } else {
-        script.removeAttribute('type');
-    }
-    if (!el.hasAttribute('src')) {
-        script.setAttribute('src', 'data:,;');
-        try {
-            Object.defineProperty(script, 'src', {
-                configurable: true,
-                get: function() { return ''; }
-            });
-        } catch (e) {
-            window.console && console.error("Phast: Unable to override script.src on this browser: ", e);
-        }
-        script.addEventListener('load', function () {
-            delete script['src'];
-            script.removeAttribute('src');
-            script.textContent = el.textContent;
-            // See: http://perfectionkills.com/global-eval-what-are-the-options/
-            (1,eval)(el.textContent);
+
+function loadScripts() {
+    var deferreds = [];
+    var replace = function (original, rewritten) {
+        original.parentNode.insertBefore(rewritten, original);
+        original.parentNode.removeChild(original);
+    };
+    var lastScript;
+    try {
+        Object.defineProperty(document, 'readyState', {
+            configurable: true,
+            get: function() {
+                return 'loading';
+            }
         });
+    } catch (e) {
+        window.console && console.error("Phast: Unable to override document.readyState on this browser: ", e);
     }
-    if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
-        fakeDocumentWrite(el, script);
+    Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"]'), function (el) {
+        var script = document.createElement('script');
+        Array.prototype.forEach.call(el.attributes, function (attr) {
+            script.setAttribute(attr.nodeName, attr.nodeValue);
+        });
+        if (!el.hasAttribute('async')) {
+            script.async = false;
+        }
+        if (el.hasAttribute('data-phast-original-type')) {
+            script.setAttribute('type', el.getAttribute('data-phast-original-type'));
+            script.removeAttribute('data-phast-original-type');
+        } else {
+            script.removeAttribute('type');
+        }
+        if (!el.hasAttribute('src')) {
+            script.setAttribute('src', 'data:,;');
+            try {
+                Object.defineProperty(script, 'src', {
+                    configurable: true,
+                    get: function() { return ''; }
+                });
+            } catch (e) {
+                window.console && console.error("Phast: Unable to override script.src on this browser: ", e);
+            }
+            script.addEventListener('load', function () {
+                delete script['src'];
+                script.removeAttribute('src');
+                script.textContent = el.textContent;
+                // See: http://perfectionkills.com/global-eval-what-are-the-options/
+                (1,eval)(el.textContent);
+            });
+        }
+        if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
+            fakeDocumentWrite(el, script);
+        }
+        if (el.hasAttribute('src') && el.hasAttribute('defer')) {
+            deferreds.push({original: el, rewritten: script});
+        } else {
+            replace(el, script);
+            lastScript = script;
+        }
+    });
+    deferreds.forEach(function (deferred) {
+        replace(deferred.original, deferred.rewritten);
+    });
+    if (lastScript) {
+        lastScript.addEventListener('load', restoreReadyState);
+        lastScript.onerror = restoreReadyState;
     }
-    if (el.hasAttribute('src') && el.hasAttribute('defer')) {
-        deferreds.push({original: el, rewritten: script});
-    } else {
-        replace(el, script);
-        lastScript = script;
-    }
-});
-deferreds.forEach(function (deferred) {
-    replace(deferred.original, deferred.rewritten);
-});
-if (lastScript) {
-    lastScript.addEventListener('load', restoreReadyState);
-    lastScript.onerror = restoreReadyState;
 }
 function restoreReadyState() {
     delete document['write'];
