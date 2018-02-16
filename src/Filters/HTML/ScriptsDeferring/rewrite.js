@@ -1,4 +1,20 @@
 var scriptIndex = 0;
+var didGo;
+
+function go() {
+    if (didGo) { return; }
+    didGo = true;
+    console.log("Phast: Loading scripts...");
+    loadScripts();
+}
+
+if (phast.stylesLoading) {
+    console.log("Phast: Waiting for styles before loading scripts...");
+    phast.onStylesLoaded = go;
+    setTimeout(go, 2000);
+} else {
+    go();
+}
 
 function loadScripts() {
     var deferreds = [];
