@@ -1,5 +1,9 @@
-function test(file, fn) {
+function test(file, fn, withPhast) {
     var name = file.replace(/\.php$/, '');
+
+    if (withPhast === undefined) {
+        withPhast = true;
+    }
 
     QUnit.test(name, function (assert) {
         assert.timeout(5000);
@@ -19,6 +23,8 @@ function test(file, fn) {
             error++;
         });
 
+        iframe.contentWindow.assert = assert;
+
         function onFrameLoad() {
             done();
             iframe.removeEventListener('load', onFrameLoad);
@@ -26,16 +32,20 @@ function test(file, fn) {
             var doc = iframe.contentWindow.document;
 
             var scripts = doc.getElementsByTagName('script');
-            assert.ok(scripts.length >= 1, "Any document processed by Phast contains at least one script");
-
             var logCount = 0;
+
             Array.prototype.forEach.call(scripts, function (script) {
                 if (/Page automatically optimized/.test(script.textContent)) {
                     logCount++;
                 }
             });
 
-            assert.equal(logCount, 1, "Exactly one script should contain Phast's log message");
+            if (withPhast) {
+                assert.ok(scripts.length >= 1, "Any document processed by Phast contains at least one script");
+                assert.equal(logCount, 1, "Exactly one script should contain Phast's log message");
+            } else {
+                assert.equal(logCount, 0, "No scripts should contain Phast's log message");
+            }
 
             assert.equal(error, 0, "No errors should be thrown");
 
@@ -65,7 +75,9 @@ function wait(assert, predicate, fn) {
         function check() {
             if (predicate()) {
                 done();
-                fn();
+                if (fn !== undefined) {
+                    fn();
+                }
             } else {
                 window.setTimeout(check);
             }
