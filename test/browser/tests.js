@@ -58,3 +58,17 @@ function retrieve(url, fn) {
         fn(this.responseText);
     }
 }
+
+function wait(assert, predicate, fn) {
+    async(assert, function (done) {
+        window.setTimeout(check);
+        function check() {
+            if (predicate()) {
+                done();
+                fn();
+            } else {
+                window.setTimeout(check);
+            }
+        }
+    });
+}
