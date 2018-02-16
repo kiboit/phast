@@ -5,21 +5,15 @@ phast.forEachSelectedElement('style[data-phast-href]', function (style) {
     retrieve(style.getAttribute('data-phast-href'), function (css) {
         style.textContent = css;
         style.removeAttribute('data-phast-href');
-    }, function () {
-        // TODO: Use a wrapper to make sure this really just happens once
+    }, phast.once(function () {
         phast.stylesLoading--;
-        console.log("Phast: One down! Waiting for ", phast.stylesLoading, " stylesheets");
         if (phast.stylesLoading === 0 && phast.onStylesLoaded) {
             phast.onStylesLoaded();
         }
-    });
+    }));
 });
 
-if (phast.stylesLoading) {
-    console.log("Phast: Waiting for ", phast.stylesLoading, " stylesheets");
-}
-
-function retrieve(url, fn, always) {
+function retrieve(url, done, always) {
     var req = new XMLHttpRequest();
     req.addEventListener('load', load);
     req.addEventListener('error', error);
@@ -28,7 +22,7 @@ function retrieve(url, fn, always) {
     req.send();
     function load() {
         if (req.status >= 200 && req.status < 300) {
-            fn(req.responseText);
+            done(req.responseText);
         }
         always();
     }

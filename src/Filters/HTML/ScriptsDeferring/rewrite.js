@@ -1,17 +1,10 @@
 var scriptIndex = 0;
-var didGo;
 
-function go() {
-    if (didGo) { return; }
-    didGo = true;
-    console.log("Phast: Loading scripts...");
-    loadScripts();
-}
+var go = phast.once(loadScripts);
 
 if (phast.stylesLoading) {
-    console.log("Phast: Waiting for styles before loading scripts...");
     phast.onStylesLoaded = go;
-    setTimeout(go, 2000);
+    setTimeout(go, 4000);
 } else {
     go();
 }
