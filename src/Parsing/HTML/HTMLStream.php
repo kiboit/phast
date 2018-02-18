@@ -16,23 +16,40 @@ class HTMLStream {
     private $elements = [];
 
     /**
+     * @var Element[][]
+     */
+    private $elementsByTagName = [];
+
+    /**
      * @param Element $element
      */
     public function addElement(Element $element) {
         $this->elements[] = $element;
         $element->setStream($this);
+        if ($element instanceof Tag) {
+            $this->elementsByTagName[$element->getTagName()][] = $element;
+        }
     }
 
     public function insertBeforeElement(Element $reference, Element $toInsert) {
         $this->removeElement($toInsert);
         $index = $this->getElementIndex($reference);
         array_splice($this->elements, $index, 0, [$toInsert]);
+        if ($toInsert instanceof Tag) {
+            $this->elementsByTagName[$toInsert->getTagName()][] = $toInsert;
+        }
     }
 
     public function removeElement(Element $element) {
         $index = $this->getElementIndex($element);
         if ($index !== false) {
             array_splice($this->elements, $index, 1);
+        }
+        if (($element instanceof Tag) && isset ($this->elementsByTagName[$element->getTagName()])) {
+            $indexIdx = array_search($element, $this->elementsByTagName[$element->getTagName()], true);
+            if ($indexIdx !== false) {
+                array_splice($this->elementsByTagName[$element->getTagName()], $indexIdx, 1);
+            }
         }
     }
 
@@ -56,10 +73,7 @@ class HTMLStream {
      * @return TagCollection
      */
     public function getElementsByTagName($name) {
-        $tags = array_filter($this->elements, function (Element $element) use ($name) {
-            return ($element instanceof Tag) && $element->getTagName() == $name;
-
-        });
+        $tags = isset ($this->elementsByTagName[$name]) ? $this->elementsByTagName[$name] : [];
         return $this->makeTagCollection($tags);
     }
 
