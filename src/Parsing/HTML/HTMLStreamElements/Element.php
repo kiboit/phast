@@ -46,7 +46,11 @@ class Element {
     }
 
     public function toString() {
-        return $this->originalString;
+        return $this->__toString();
+    }
+
+    public function __toString() {
+        return isset ($this->originalString) ? $this->originalString : '';
     }
 
 }

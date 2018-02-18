@@ -124,10 +124,7 @@ class DOMDocument {
 
     public function serialize() {
         $this->maybeAddPhastScripts();
-        $elements = iterator_to_array($this->stream->getAllElements());
-        return array_reduce($elements, function ($carry, Element $e) {
-            return $carry . $e->toString();
-        }, '');
+        return join('', $this->stream->getElementsArray());
     }
 
     public function createElement($tagName) {

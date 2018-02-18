@@ -74,6 +74,13 @@ class HTMLStream {
         return $this->makeTagCollection($tags);
     }
 
+    /**
+     * @return Element[]
+     */
+    public function getElementsArray() {
+        return $this->elements;
+    }
+
 
     /**
      * @return TagCollection

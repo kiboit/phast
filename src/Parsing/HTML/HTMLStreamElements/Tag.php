@@ -112,7 +112,7 @@ class Tag extends Element {
         return $this->closingTag;
     }
 
-    public function toString() {
+    public function __toString() {
         return $this->getOpening() . $this->textContent . $this->getClosing();
     }
 
@@ -120,7 +120,7 @@ class Tag extends Element {
         if ($this->dirty || !isset ($this->originalString)) {
             return $this->generateOpeningTag();
         }
-        return parent::toString();
+        return parent::__toString();
     }
 
     private function getClosing() {
