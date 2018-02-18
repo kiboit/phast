@@ -21,23 +21,29 @@ class HTMLStream {
     private $elementsByTagName = [];
 
     /**
+     * @var Element[]
+     */
+    private $elementsWithStyle = [];
+
+    /**
+     * @var Element[]
+     */
+    private $elementsWithClass = [];
+
+    /**
      * @param Element $element
      */
     public function addElement(Element $element) {
         $this->elements[] = $element;
         $element->setStream($this);
-        if ($element instanceof Tag) {
-            $this->elementsByTagName[$element->getTagName()][] = $element;
-        }
+        $this->addToIndexes($element);
     }
 
     public function insertBeforeElement(Element $reference, Element $toInsert) {
         $this->removeElement($toInsert);
         $index = $this->getElementIndex($reference);
         array_splice($this->elements, $index, 0, [$toInsert]);
-        if ($toInsert instanceof Tag) {
-            $this->elementsByTagName[$toInsert->getTagName()][] = $toInsert;
-        }
+        $this->addToIndexes($toInsert);
     }
 
     public function removeElement(Element $element) {
@@ -82,9 +88,15 @@ class HTMLStream {
      * @return TagCollection
      */
     public function getElementsWithAttr($attrName) {
-        $tags = array_filter($this->elements, function (Element $element) use ($attrName) {
-            return ($element instanceof Tag) && $element->hasAttribute($attrName);
-        });
+        if ($attrName == 'style') {
+            $tags = $this->elementsWithStyle;
+        } else if ($attrName == 'class') {
+            $tags = $this->elementsWithClass;
+        } else {
+            $tags = array_filter($this->elements, function (Element $element) use ($attrName) {
+                return ($element instanceof Tag) && $element->hasAttribute($attrName);
+            });
+        }
         return $this->makeTagCollection($tags);
     }
 
@@ -124,5 +136,18 @@ class HTMLStream {
      */
     private function makeTagCollection(array $tags) {
         return new TagCollection(array_values($tags));
+    }
+
+    private function addToIndexes(Element $tag) {
+        if (!($tag instanceof Tag)) {
+            return;
+        }
+        $this->elementsByTagName[$tag->getTagName()][] = $tag;
+        if ($tag->hasAttribute('class')) {
+            $this->elementsWithClass[] = $tag;
+        }
+        if ($tag->hasAttribute('style')) {
+            $this->elementsWithStyle[] = $tag;
+        }
     }
 }
