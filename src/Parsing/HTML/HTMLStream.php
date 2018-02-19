@@ -57,11 +57,13 @@ class HTMLStream {
 
     public function removeElement(Element $element) {
         $this->elements->remove($element);
-        if (($element instanceof Tag) && isset ($this->elementsByTagName[$element->getTagName()])) {
-            $indexIdx = array_search($element, $this->elementsByTagName[$element->getTagName()], true);
-            if ($indexIdx !== false) {
-                array_splice($this->elementsByTagName[$element->getTagName()], $indexIdx, 1);
-            }
+        if (
+            ($element instanceof Tag)
+            &&
+            isset ($this->elementsByTagName[$element->getTagName()])
+            && isset ($this->elementsByTagName[$element->getTagName()][spl_object_hash($element)])
+        ) {
+            unset ($this->elementsByTagName[$element->getTagName()][spl_object_hash($element)]);
         }
     }
 
@@ -144,12 +146,12 @@ class HTMLStream {
         if (!($tag instanceof Tag)) {
             return;
         }
-        $this->elementsByTagName[$tag->getTagName()][] = $tag;
+        $this->elementsByTagName[$tag->getTagName()][spl_object_hash($tag)] = $tag;
         if ($tag->hasAttribute('class')) {
-            $this->elementsWithClass[] = $tag;
+            $this->elementsWithClass[spl_object_hash($tag)] = $tag;
         }
         if ($tag->hasAttribute('style')) {
-            $this->elementsWithStyle[] = $tag;
+            $this->elementsWithStyle[spl_object_hash($tag)] = $tag;
         }
     }
 }
