@@ -44,6 +44,12 @@ class HTMLStream {
         $this->addToIndexes($element);
     }
 
+    /**
+     * Inserts $toInsert before $reference
+     *
+     * @param Element $reference
+     * @param Element $toInsert
+     */
     public function insertBeforeElement(Element $reference, Element $toInsert) {
         $this->removeElement($toInsert);
         $this->elements->insertBefore($reference, $toInsert);
@@ -116,15 +122,16 @@ class HTMLStream {
         return $this->makeTagCollection($this->getElementsArray());
     }
 
+    /**
+     * @param Element $element1
+     * @param Element $element2
+     * @return TagCollection
+     */
     public function getElementsBetween(Element $element1, Element $element2) {
         $index1 = $this->getElementIndex($element1);
         $index2 = $this->getElementIndex($element2);
         $tags = array_slice($this->getElementsArray(), $index1 + 1, $index2 - $index1 -1);
         return $this->makeTagCollection($tags);
-    }
-
-    public function getElement($index) {
-        return $this->elements[$index];
     }
 
     public function getElementIndex(Element $element) {
