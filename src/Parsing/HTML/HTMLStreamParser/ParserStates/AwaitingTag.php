@@ -51,7 +51,7 @@ class AwaitingTag extends ParserState {
         } else {
             $text = $this->inputStream->getSubString($caretOffset, $currentStartOffset);
         }
-        if (empty ($text)) {
+        if ($text === '') {
             return;
         }
         $textElement = new Element();

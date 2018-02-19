@@ -24,6 +24,8 @@ class AwaitingTagTest extends ParserTestCase {
      * @dataProvider getTagInputData
      */
     public function testTagInput($tagName, $expectedReturn) {
+        $this->mockGetSubString([]);
+
         $returned = $this->state->startTag($tagName, ['data-attr' => 'val'], 0, 20);
 
         $this->assertEquals($expectedReturn, $returned);
@@ -57,6 +59,8 @@ class AwaitingTagTest extends ParserTestCase {
      * @dataProvider getNextStateForStyleAndScriptData
      */
     public function testNextStateForStyleAndScript($tagName, $expectedReturn) {
+        $this->mockGetSubString([]);
+
         $returned = $this->state->startTag($tagName, [], 10, 20);
 
         $this->assertEquals($returned, $expectedReturn);
@@ -83,6 +87,8 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testAddingCloseTagsToStream() {
+        $this->mockGetSubString([]);
+
         $this->state->endTag('a', 10, 20);
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
@@ -98,7 +104,7 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testAddingNonTags() {
-        $this->mockInputStreamSubString([
+        $this->mockGetSubString([
             [0, 10, 'tag-1'],
             [11, 19, 'text-1'],
             [20, 30, 'tag-2'],
@@ -123,7 +129,7 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testAddingNonTagsBeforeNextState() {
-        $this->mockInputStreamSubString([
+        $this->mockGetSubString([
             [0, 9, 'the-text-1'],
             [10, 20, 'the-tag']
         ]);
@@ -141,7 +147,7 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testSettingOriginalOnTextContainingTags() {
-        $this->mockInputStreamSubString([
+        $this->mockGetSubString([
             [0, 0, ''],
             [0, 10, 'the-tag']
         ]);
@@ -153,7 +159,7 @@ class AwaitingTagTest extends ParserTestCase {
         $this->assertEquals('the-tag', $newState->getTag()->toString());
     }
 
-    private function mockInputStreamSubString($map) {
+    private function mockGetSubString($map) {
         $this->inputStream
             ->method('getSubString')
             ->willReturnCallback(function () use ($map) {
