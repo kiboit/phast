@@ -175,7 +175,7 @@ class Filter {
             '~
                 (<script(?:\s[^>]*)?>)
                 (.*?)
-                (</script)
+                (</script>)
             ~xsi',
             function ($match) {
                 return $match[1] . preg_replace('~(<@*)(/)~', '$1@$2', $match[2]) . $match[3];
