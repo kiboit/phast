@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Parsing\HTML;
 
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ElementsDoublyLinkedList;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
@@ -62,21 +61,6 @@ class HTMLStream {
             $indexIdx = array_search($element, $this->elementsByTagName[$element->getTagName()], true);
             if ($indexIdx !== false) {
                 array_splice($this->elementsByTagName[$element->getTagName()], $indexIdx, 1);
-            }
-        }
-    }
-
-    /**
-     * @param Tag $tag
-     * @return ClosingTag | null
-     */
-    public function getClosingTag(Tag $tag) {
-        // we are only doing this to find the body closing tag
-        // so that's why it works
-        foreach ($this->elements->getReverseIterator() as $element) {
-            /** @var ClosingTag $element */
-            if (($element instanceof ClosingTag) && $element->getTagName() == $tag->getTagName()) {
-                return $element;
             }
         }
     }
