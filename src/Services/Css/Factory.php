@@ -3,8 +3,8 @@
 namespace Kibo\Phast\Services\Css;
 
 use Kibo\Phast\Cache\File\Cache;
-use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFilterFactory;
+use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetriever;
@@ -35,7 +35,8 @@ class Factory {
             (new ServiceSignatureFactory())->make($config),
             [],
             $retriever,
-            $caching
+            $caching,
+            $config
         );
     }
 

@@ -35,22 +35,30 @@ abstract class BaseService {
     protected $filter;
 
     /**
+     * @var array
+     */
+    protected $config;
+
+    /**
      * BaseService constructor.
      * @param ServiceSignature $signature
-     * @param string[] $whitelist
+     * @param array $whitelist
      * @param Retriever $retriever
      * @param ServiceFilter $filter
+     * @param array $config
      */
     public function __construct(
         ServiceSignature $signature,
         array $whitelist,
         Retriever $retriever,
-        ServiceFilter $filter
+        ServiceFilter $filter,
+        array $config
     ) {
         $this->signature = $signature;
         $this->whitelist = $whitelist;
         $this->retriever = $retriever;
         $this->filter = $filter;
+        $this->config = $config;
     }
 
     /**
@@ -61,7 +69,7 @@ abstract class BaseService {
         $this->validateRequest($request);
         $request = $this->getParams($request);
         $resource = Resource::makeWithRetriever(
-            URL::fromString($request['src']),
+            URL::fromString(isset ($request['src']) ? $request['src'] : ''),
             $this->retriever
         );
         $filtered = $this->filter->apply($resource, $request);

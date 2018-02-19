@@ -32,7 +32,8 @@ class Factory {
             (new ServiceSignatureFactory())->make($config),
             $config['documents']['filters'][Filter::class]['match'],
             $retriever,
-            $filter
+            $filter,
+            $config
         );
     }
 

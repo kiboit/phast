@@ -30,4 +30,16 @@ class Service extends BaseService {
         }
         return $response;
     }
+
+    protected function validateIntegrity(ServiceRequest $request) {
+        if (!$this->config['images']['api-mode']) {
+            parent::validateIntegrity($request);
+        }
+    }
+
+    protected function validateWhitelisted(ServiceRequest $request) {
+        if (!$this->config['images']['api-mode']) {
+            parent::validateWhitelisted($request);
+        }
+    }
 }

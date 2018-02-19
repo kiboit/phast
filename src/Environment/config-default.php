@@ -77,6 +77,8 @@ return [
     'images' => [
         'enable-cache' => 'imgcache',
 
+        'api-mode' => false,
+
         'whitelist' => [
             '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/[^#?]*\.(jpe?g|gif|png)~i',
             '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~'
