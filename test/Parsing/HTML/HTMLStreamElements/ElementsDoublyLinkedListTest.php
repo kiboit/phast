@@ -18,42 +18,42 @@ class ElementsDoublyLinkedListTest extends \PHPUnit_Framework_TestCase {
     public function testAdding() {
         list ($e1, $e2, $e3) =  $this->makeAndAdd(3);
 
-        $this->assertSame($e1->getNext(), $e2);
-        $this->assertSame($e2->getNext(), $e3);
-        $this->assertSame($e3->getPrevious(), $e2);
-        $this->assertSame($e2->getPrevious(), $e1);
-        $this->assertNull($e1->getPrevious());
-        $this->assertNull($e3->getNext());
+        $this->assertSame($e1->next, $e2);
+        $this->assertSame($e2->next, $e3);
+        $this->assertSame($e3->previous, $e2);
+        $this->assertSame($e2->previous, $e1);
+        $this->assertNull($e1->previous);
+        $this->assertNull($e3->next);
     }
 
     public function testRemovingMiddle() {
         list ($e1, $e2, $e3) = $this->makeAndAdd(3);
 
         $this->list->remove($e2);
-        $this->assertSame($e1->getNext(), $e3);
-        $this->assertSame($e3->getPrevious(), $e1);
+        $this->assertSame($e1->next, $e3);
+        $this->assertSame($e3->previous, $e1);
     }
 
     public function testRemovingTail() {
         list ($e1, $e2) = $this->makeAndAdd(2);
         $this->list->remove($e2);
-        $this->assertNull($e1->getNext());
+        $this->assertNull($e1->next);
     }
 
     public function testRemovingHead() {
         list ($e1, $e2) = $this->makeAndAdd(2);
         $this->list->remove($e1);
-        $this->assertNull($e2->getPrevious());
+        $this->assertNull($e2->previous);
     }
 
     public function testInsertInMiddle() {
         list ($e1, $e3) = $this->makeAndAdd(2);
         $e2 = new Element();
         $this->list->insertBefore($e3, $e2);
-        $this->assertSame($e1->getNext(), $e2);
-        $this->assertSame($e2->getNext(), $e3);
-        $this->assertSame($e3->getPrevious(), $e2);
-        $this->assertSame($e2->getPrevious(), $e1);
+        $this->assertSame($e1->next, $e2);
+        $this->assertSame($e2->next, $e3);
+        $this->assertSame($e3->previous, $e2);
+        $this->assertSame($e2->previous, $e1);
     }
 
     public function testInsertInsertBeforeHead() {
@@ -61,9 +61,9 @@ class ElementsDoublyLinkedListTest extends \PHPUnit_Framework_TestCase {
         $this->list->add($e2);
         $e1 = new Element();
         $this->list->insertBefore($e2, $e1);
-        $this->assertNull($e1->getPrevious());
-        $this->assertSame($e1->getNext(), $e2);
-        $this->assertSame($e2->getPrevious(), $e1);
+        $this->assertNull($e1->previous);
+        $this->assertSame($e1->next, $e2);
+        $this->assertSame($e2->previous, $e1);
     }
 
     public function testIterator() {

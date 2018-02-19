@@ -21,38 +21,38 @@ class ElementsDoublyLinkedList implements \IteratorAggregate {
             $this->head = $element;
         }
         if (isset ($this->tail)) {
-            $element->setPrevious($this->tail);
-            $this->tail->setNext($element);
+            $element->previous = $this->tail;
+            $this->tail->next = $element;
         }
         $this->tail = $element;
     }
 
     public function remove(Element $element) {
-        $prev = $element->getPrevious();
-        $next = $element->getNext();
+        $prev = $element->previous;
+        $next = $element->next;
         if ($next) {
-            $next->setPrevious($prev);
+            $next->previous = $prev;
         }
         if ($prev) {
-            $prev->setNext($next);
+            $prev->next = $next;
         }
     }
 
     public function insertBefore(Element $reference, Element $toInsert) {
-        $prev = $reference->getPrevious();
+        $prev = $reference->previous;
         if ($prev) {
-            $toInsert->setPrevious($prev);
-            $prev->setNext($toInsert);
+            $toInsert->previous = $prev;
+            $prev->next = $toInsert;
         }
-        $reference->setPrevious($toInsert);
-        $toInsert->setNext($reference);
+        $reference->previous = $toInsert;
+        $toInsert->next = $reference;
     }
 
     public function getIterator() {
         $next = $this->head;
         while ($next) {
             yield $next;
-            $next = $next->getNext();
+            $next = $next->next;
         }
     }
 
@@ -60,7 +60,7 @@ class ElementsDoublyLinkedList implements \IteratorAggregate {
         $prev = $this->tail;
         while ($prev) {
             yield $prev;
-            $prev = $prev->getPrevious();
+            $prev = $prev->previous;
         }
     }
 
