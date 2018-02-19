@@ -3,17 +3,18 @@
 
 namespace Kibo\Phast\Parsing\HTML;
 
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ElementsDoublyLinkedList;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\TagCollection;
 
 class HTMLStream {
 
     /**
-     * @var Element[]
+     * @var ElementsDoublyLinkedList
      */
-    private $elements = [];
+    private $elements;
 
     /**
      * @var Element[][]
@@ -30,27 +31,27 @@ class HTMLStream {
      */
     private $elementsWithClass = [];
 
+    public function __construct() {
+        $this->elements = new ElementsDoublyLinkedList();
+    }
+
     /**
      * @param Element $element
      */
     public function addElement(Element $element) {
-        $this->elements[] = $element;
+        $this->elements->add($element);
         $element->setStream($this);
         $this->addToIndexes($element);
     }
 
     public function insertBeforeElement(Element $reference, Element $toInsert) {
         $this->removeElement($toInsert);
-        $index = $this->getElementIndex($reference);
-        array_splice($this->elements, $index, 0, [$toInsert]);
+        $this->elements->insertBefore($reference, $toInsert);
         $this->addToIndexes($toInsert);
     }
 
     public function removeElement(Element $element) {
-        $index = $this->getElementIndex($element);
-        if ($index !== false) {
-            array_splice($this->elements, $index, 1);
-        }
+        $this->elements->remove($element);
         if (($element instanceof Tag) && isset ($this->elementsByTagName[$element->getTagName()])) {
             $indexIdx = array_search($element, $this->elementsByTagName[$element->getTagName()], true);
             if ($indexIdx !== false) {
@@ -64,10 +65,10 @@ class HTMLStream {
      * @return ClosingTag | null
      */
     public function getClosingTag(Tag $tag) {
-        $startIndex = $this->getElementIndex($tag);
-        for ($i = count($this->elements) - 1; $i > $startIndex; $i--) {
+        // we are only doing this to find the body closing tag
+        // so that's why it works
+        foreach ($this->elements->getReverseIterator() as $element) {
             /** @var ClosingTag $element */
-            $element = $this->elements[$i];
             if (($element instanceof ClosingTag) && $element->getTagName() == $tag->getTagName()) {
                 return $element;
             }
@@ -93,7 +94,7 @@ class HTMLStream {
         } else if ($attrName == 'class') {
             $tags = $this->elementsWithClass;
         } else {
-            $tags = array_filter($this->elements, function (Element $element) use ($attrName) {
+            $tags = array_filter($this->getElementsArray(), function (Element $element) use ($attrName) {
                 return ($element instanceof Tag) && $element->hasAttribute($attrName);
             });
         }
@@ -104,7 +105,7 @@ class HTMLStream {
      * @return Element[]
      */
     public function getElementsArray() {
-        return $this->elements;
+        return iterator_to_array($this->elements);
     }
 
 
@@ -112,13 +113,13 @@ class HTMLStream {
      * @return TagCollection
      */
     public function getAllElements() {
-        return $this->makeTagCollection($this->elements);
+        return $this->makeTagCollection($this->getElementsArray());
     }
 
     public function getElementsBetween(Element $element1, Element $element2) {
         $index1 = $this->getElementIndex($element1);
         $index2 = $this->getElementIndex($element2);
-        $tags = array_slice($this->elements, $index1 + 1, $index2 - $index1 -1);
+        $tags = array_slice($this->getElementsArray(), $index1 + 1, $index2 - $index1 -1);
         return $this->makeTagCollection($tags);
     }
 
@@ -127,7 +128,7 @@ class HTMLStream {
     }
 
     public function getElementIndex(Element $element) {
-        return array_search($element, $this->elements, true);
+        return array_search($element, $this->getElementsArray(), true);
     }
 
     /**

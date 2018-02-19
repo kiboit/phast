@@ -8,6 +8,16 @@ use Kibo\Phast\Parsing\HTML\HTMLStream;
 class Element {
 
     /**
+     * @var Element
+     */
+    protected $previous;
+
+    /**
+     * @var Element
+     */
+    protected $next;
+
+    /**
      * @var HTMLStream
      */
     protected $stream;
@@ -16,6 +26,34 @@ class Element {
      * @var string
      */
     protected $originalString;
+
+    /**
+     * @return Element
+     */
+    public function getPrevious() {
+        return $this->previous;
+    }
+
+    /**
+     * @param Element $previous
+     */
+    public function setPrevious($previous) {
+        $this->previous = $previous;
+    }
+
+    /**
+     * @return Element
+     */
+    public function getNext() {
+        return $this->next;
+    }
+
+    /**
+     * @param Element $next
+     */
+    public function setNext($next) {
+        $this->next = $next;
+    }
 
     /**
      * @param HTMLStream $stream
