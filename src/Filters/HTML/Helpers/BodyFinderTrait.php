@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\Helpers;
 
 use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 
 trait BodyFinderTrait {
 
@@ -12,15 +13,12 @@ trait BodyFinderTrait {
      * @throws \Exception
      */
     private function getBodyElement(DOMDocument $document) {
-        $body = $document->getElementsByTagName('body')->item(0);
-        if (is_null($body)) {
-            throw new \Exception('No body tag found in document');
+        foreach ($document->getStream()->getElements()->getReverseIterator() as $tag) {
+            if ($tag instanceof ClosingTag && $tag->getTagName() == 'body') {
+                return $tag;
+            }
         }
-        $bodyClosing = $document->getStream()->getClosingTag($body);
-        if (is_null($bodyClosing)) {
-            throw new \Exception('No body tag found in document');
-        }
-        return $bodyClosing;
+        throw new \Exception('No closing body tag found in document');
     }
 
 }
