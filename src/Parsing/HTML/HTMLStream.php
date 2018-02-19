@@ -100,9 +100,12 @@ class HTMLStream {
         } else if ($attrName == 'class') {
             $tags = $this->elementsWithClass;
         } else {
-            $tags = array_filter($this->getElementsArray(), function (Element $element) use ($attrName) {
-                return ($element instanceof Tag) && $element->hasAttribute($attrName);
-            });
+            $tags = [];
+            foreach ($this->elements as $element) {
+                if ($element instanceof Tag && $element->hasAttribute($attrName)) {
+                    $tags[] = $element;
+                }
+            }
         }
         return $this->makeTagCollection($tags);
     }
