@@ -108,6 +108,13 @@ class HTMLStream {
     }
 
     /**
+     * @return ElementsDoublyLinkedList
+     */
+    public function getElements() {
+        return $this->elements;
+    }
+
+    /**
      * @return Element[]
      */
     public function getElementsArray() {
