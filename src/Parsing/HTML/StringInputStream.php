@@ -353,10 +353,10 @@ class StringInputStream implements InputStream
     public function getSubString($startOffset, $endOffset = null)
     {
         if (is_null($endOffset)) {
-            return substr($this->data, $startOffset);
+            return (string) substr($this->data, $startOffset);
         }
         $length = $endOffset - $startOffset + 1;
-        return substr($this->data, $startOffset, $length);
+        return (string) substr($this->data, $startOffset, $length);
     }
 
     public function consumeMatch($pattern, &$match = null) {
