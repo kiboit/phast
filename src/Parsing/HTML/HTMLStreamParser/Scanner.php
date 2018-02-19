@@ -82,9 +82,7 @@ class Scanner
      */
     public function consume($count = 1)
     {
-        for ($i = 0; $i < $count; ++ $i) {
-            $this->next();
-        }
+        $this->is->consume($count);
     }
 
     /**

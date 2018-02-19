@@ -229,6 +229,11 @@ class StringInputStream implements InputStream
         return false;
     }
 
+    public function consume($chars) {
+        $this->char += $chars;
+        $this->setCurrent();
+    }
+
     /**
      * Get all characters until EOF.
      *
