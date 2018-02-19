@@ -2,7 +2,7 @@
 
 return call_user_func(function () use ($iterations) {
 
-    $html = file_get_contents(__DIR__ . '/../../test/test-app/webcarpet.php');
+    $html = file_get_contents(__DIR__ . '/../../test/test-app/example.php');
     $filter = new Kibo\Phast\Filters\HTML\ScriptsRearrangement\Filter();
 
     for ($i = 0; $i < $iterations; $i++) {
