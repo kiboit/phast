@@ -65,7 +65,7 @@ class HTMLStream {
      */
     public function getClosingTag(Tag $tag) {
         $startIndex = $this->getElementIndex($tag);
-        for ($i = $startIndex; $i < count($this->elements); $i++) {
+        for ($i = count($this->elements) - 1; $i > $startIndex; $i--) {
             /** @var ClosingTag $element */
             $element = $this->elements[$i];
             if (($element instanceof ClosingTag) && $element->getTagName() == $tag->getTagName()) {
