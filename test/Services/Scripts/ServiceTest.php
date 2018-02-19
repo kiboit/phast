@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Services\Scripts;
 
-use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
@@ -45,7 +44,8 @@ class ServiceTest extends TestCase {
             $signature,
             ['~http://allowed\.com~'],
             $this->retriever,
-            $this->filter
+            $this->filter,
+            []
         );
     }
 
