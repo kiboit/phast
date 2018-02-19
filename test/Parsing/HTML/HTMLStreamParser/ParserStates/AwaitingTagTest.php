@@ -98,14 +98,12 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testAddingNonTags() {
-        $this->inputStream
-            ->method('getSubString')
-            ->willReturnMap([
-                [0, 10, 'tag-1'],
-                [11, 19, 'text-1'],
-                [20, 30, 'tag-2'],
-                [31, null, 'text-2']
-            ]);
+        $this->mockInputStreamSubString([
+            [0, 10, 'tag-1'],
+            [11, 19, 'text-1'],
+            [20, 30, 'tag-2'],
+            [31, null, 'text-2']
+        ]);
         $this->parser->startTag('span', [], 0, 10);
         $this->parser->endTag('span', 20, 30);
         $this->parser->eof();
@@ -125,12 +123,10 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testAddingNonTagsBeforeNextState() {
-        $this->inputStream
-            ->method('getSubString')
-            ->willReturnMap([
-                [0, 9, 'the-text-1'],
-                [10, 20, 'the-tag']
-            ]);
+        $this->mockInputStreamSubString([
+            [0, 9, 'the-text-1'],
+            [10, 20, 'the-tag']
+        ]);
         $this->parser->startTag('style', [], 10, 20);
 
         $elements = $this->htmlStream->getAllElementsTagCollection();
@@ -145,12 +141,10 @@ class AwaitingTagTest extends ParserTestCase {
     }
 
     public function testSettingOriginalOnTextContainingTags() {
-        $this->inputStream
-            ->method('getSubString')
-            ->willReturnMap([
-                [0, 0, ''],
-                [0, 10, 'the-tag']
-            ]);
+        $this->mockInputStreamSubString([
+            [0, 0, ''],
+            [0, 10, 'the-tag']
+        ]);
 
         $this->parser->startTag('style', [], 0, 10);
 
@@ -158,4 +152,20 @@ class AwaitingTagTest extends ParserTestCase {
         $newState = $this->parser->getState();
         $this->assertEquals('the-tag', $newState->getTag()->toString());
     }
+
+    private function mockInputStreamSubString($map) {
+        $this->inputStream
+            ->method('getSubString')
+            ->willReturnCallback(function () use ($map) {
+                $args = func_get_args();
+                foreach ($map as $invocation) {
+                    $return = array_pop($invocation);
+                    if ($args === $invocation) {
+                        return $return;
+                    }
+                }
+                return '';
+            });
+    }
+
 }
