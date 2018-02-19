@@ -125,7 +125,7 @@ class HTMLStream {
     /**
      * @return TagCollection
      */
-    public function getAllElements() {
+    public function getAllElementsTagCollection() {
         return $this->makeTagCollection($this->getElementsArray());
     }
 

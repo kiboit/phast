@@ -26,7 +26,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
 
         $currentState = $this->parser->getState();
         $this->assertInstanceOf(ConstructingTextContainingTag::class, $currentState);
-        $this->assertEmpty($this->htmlStream->getAllElements());
+        $this->assertEmpty($this->htmlStream->getAllElementsTagCollection());
 
         $this->inputStream->method('getSubstring')
             ->with(100, 111)
@@ -36,7 +36,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
         $this->assertInstanceOf(AwaitingTag::class, $newState);
 
 
-        $elements = $this->htmlStream->getAllElements();
+        $elements = $this->htmlStream->getAllElementsTagCollection();
         $this->assertCount(1, $elements);
 
 
@@ -57,7 +57,7 @@ class ConstructingTextContainingTagTest extends ParserTestCase {
         $this->state->endTag('script', 10, 20);
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
-        $this->assertEmpty($this->htmlStream->getAllElements());
+        $this->assertEmpty($this->htmlStream->getAllElementsTagCollection());
     }
 
 }

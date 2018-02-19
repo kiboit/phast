@@ -8,7 +8,6 @@ use Kibo\Phast\Parsing\HTML\HTMLStream;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\StringInputStream;
-use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Scanner;
 use PHPUnit\Framework\TestCase;
 
 class ParserIntegrationTest extends TestCase {
@@ -19,7 +18,7 @@ class ParserIntegrationTest extends TestCase {
 
         $htmlStream = $this->parseHTML($html);
 
-        $elements = $htmlStream->getAllElements();
+        $elements = $htmlStream->getAllElementsTagCollection();
 
         $expectedTokens = [
             '<!doctype html>', '<html charset="utf-8">',
@@ -68,7 +67,7 @@ class ParserIntegrationTest extends TestCase {
         $html = '<html><style>text</style></html> final text';
         $stream = $this->parseHTML($html);
 
-        $elements = iterator_to_array($stream->getAllElements());
+        $elements = iterator_to_array($stream->getAllElementsTagCollection());
         $last = array_pop($elements);
         $this->assertEquals(' final text', $last->toString());
     }
@@ -77,7 +76,7 @@ class ParserIntegrationTest extends TestCase {
         $html = '<style>text</tag></style><script>text</tag></script>';
         $stream = $this->parseHTML($html);
 
-        $elements = $stream->getAllElements();
+        $elements = $stream->getAllElementsTagCollection();
 
         $this->assertCount(2, $elements);
         $this->assertInstanceOf(Tag::class, $elements->item(0));

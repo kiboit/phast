@@ -33,7 +33,7 @@ class AwaitingTagTest extends ParserTestCase {
         $newState = $this->parser->getState();
         $this->assertInstanceOf(AwaitingTag::class, $newState);
 
-        $elements = $this->htmlStream->getAllElements();
+        $elements = $this->htmlStream->getAllElementsTagCollection();
         $this->assertCount(1, $elements);
 
         /** @var Tag $tag */
@@ -63,7 +63,7 @@ class AwaitingTagTest extends ParserTestCase {
 
         $this->assertEquals(0, $this->parser->getCaretPosition());
 
-        $this->assertEmpty($this->htmlStream->getAllElements());
+        $this->assertEmpty($this->htmlStream->getAllElementsTagCollection());
 
         /** @var ConstructingTextContainingTag $newState */
         $newState = $this->parser->getState();
@@ -89,7 +89,7 @@ class AwaitingTagTest extends ParserTestCase {
 
         $this->assertEquals(21, $this->parser->getCaretPosition());
 
-        $elements = $this->htmlStream->getAllElements();
+        $elements = $this->htmlStream->getAllElementsTagCollection();
         $this->assertCount(1, $elements);
 
         /** @var ClosingTag $element */
@@ -110,7 +110,7 @@ class AwaitingTagTest extends ParserTestCase {
         $this->parser->endTag('span', 20, 30);
         $this->parser->eof();
 
-        $elements = $this->htmlStream->getAllElements();
+        $elements = $this->htmlStream->getAllElementsTagCollection();
         $this->assertEquals(4, $elements->count());
 
         $this->assertInstanceOf(Tag::class, $elements->item(0));
@@ -133,7 +133,7 @@ class AwaitingTagTest extends ParserTestCase {
             ]);
         $this->parser->startTag('style', [], 10, 20);
 
-        $elements = $this->htmlStream->getAllElements();
+        $elements = $this->htmlStream->getAllElementsTagCollection();
         $this->assertEquals(1, $elements->count());
         $this->assertNotInstanceOf(Tag::class, $elements->item(0));
         $this->assertEquals('the-text-1', $elements->item(0)->toString());

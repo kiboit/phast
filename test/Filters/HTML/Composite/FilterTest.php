@@ -85,7 +85,7 @@ class FilterTest extends TestCase {
         $this->shouldNotTransform();
         $buffer = "\0<html><body></body></html>";
         $this->assertEquals($buffer, $this->filter->apply($buffer));
-        $this->assertEmpty($this->stream->getAllElements());
+        $this->assertEmpty($this->stream->getAllElementsTagCollection());
     }
 
     public function testShouldReturnApplied() {
@@ -159,7 +159,7 @@ class FilterTest extends TestCase {
         $buffer = "<html><body>$script</body></html>";
         $filtered = $this->filter->apply($buffer);
         $this->assertStringStartsWith($buffer, $filtered);
-        $this->assertNotEmpty($this->stream->getAllElements());
+        $this->assertNotEmpty($this->stream->getAllElementsTagCollection());
     }
 
     public function shouldHandleTagCloseInScriptDataProvider() {
