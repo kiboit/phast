@@ -90,6 +90,15 @@ class ParserIntegrationTest extends TestCase {
 
     }
 
+    public function testLiteralZeroTextElement() {
+        $html = '<div>0</div>';
+
+        $stream = $this->parseHTML($html);
+
+        $elements = $stream->getAllElementsTagCollection();
+        $this->assertCount(3, $elements);
+    }
+
 
     /**
      * @param $html
