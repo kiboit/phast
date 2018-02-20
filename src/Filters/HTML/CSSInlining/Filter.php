@@ -2,9 +2,9 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -14,7 +14,7 @@ use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter implements HTMLFilter {
+class Filter extends BaseHTMLPageContextFilter {
     use LoggingTrait;
 
     const CSS_IMPORTS_REGEXP = '~
@@ -88,14 +88,14 @@ class Filter implements HTMLFilter {
     private $cssFilter;
 
     /**
+     * @var Element[]
+     */
+    private $elements;
+
+    /**
      * @var Optimizer
      */
     private $optimizer;
-
-    /**
-     * @var DOMDocument
-     */
-    private $document;
 
     public function __construct(
         ServiceSignature $signature,
@@ -127,44 +127,46 @@ class Filter implements HTMLFilter {
         }
     }
 
-    public function transformHTMLDOM(DOMDocument $document) {
-        $this->document = $document;
-        $this->optimizer = $this->optimizerFactory->makeForElements($document->getStream()->getElements());
-        $links = iterator_to_array($document->query('//link'));
-        $styles = iterator_to_array($document->query('//style'));
-        foreach ($links as $link) {
-            $this->inlineLink($link, $document->getBaseURL());
+    protected function beforeLoop() {
+        $this->elements = iterator_to_array($this->context->getElements());
+        $this->optimizer = $this->optimizerFactory->makeForElements(new \ArrayIterator($this->elements));
+        $this->context->setElements(new \ArrayIterator($this->elements));
+    }
+
+    protected function isTagOfInterest(Tag $tag) {
+        return $tag->getTagName() == 'style'
+               || (
+                  $tag->getTagName() == 'link'
+                  && $tag->getAttribute('rel') == 'stylesheet'
+                  && $tag->hasAttribute('href')
+               );
+    }
+
+    protected function handleTag(Tag $tag) {
+        if ($tag->getTagName() == 'link') {
+            return $this->inlineLink($tag, $this->context->getBaseUrl());
         }
-        foreach ($styles as $style) {
-            $this->inlineStyle($style);
-        }
+        return $this->inlineStyle($tag);
+    }
+
+    protected function afterLoop() {
         if ($this->withIEFallback) {
-            $this->addIEFallbackScript($document);
+            $this->addIEFallbackScript();
         }
         if ($this->hasDoneInlining) {
-            $this->addInlinedRetrieverScript($document);
+            $this->addInlinedRetrieverScript();
         }
     }
 
     private function inlineLink(Tag $link, URL $baseUrl) {
-        if (!$link->hasAttribute('rel')
-            || $link->getAttribute('rel') != 'stylesheet'
-            || !$link->hasAttribute('href')
-        ) {
-            return;
-        }
-
         $location = URL::fromString(trim($link->getAttribute('href')))->withBase($baseUrl);
 
         if (!$this->findInWhitelist($location)) {
-            return;
+            return [$link];
         }
 
-        $media = $link->getAttribute('media');
-        $elements = $this->inlineURL($this->document, $location, $media);
-        if (!is_null($elements)) {
-            $this->replaceElement($elements, $link);
-        }
+        $elements = $this->inlineURL($location, $link->getAttribute('media'));
+        return is_null($elements) ? [$link] : $elements;
     }
 
     private function inlineStyle(Tag $style) {
@@ -172,21 +174,12 @@ class Filter implements HTMLFilter {
             ->apply(Resource::makeWithContent($this->baseURL, $style->textContent), [])
             ->getContent();
         $elements = $this->inlineCSS(
-            $this->document,
             $this->baseURL,
             $processed,
             $style->getAttribute('media'),
             false
         );
-        $this->replaceElement($elements, $style);
-    }
-
-    private function replaceElement($replacements, $element) {
-        $stream = $this->document->getStream();
-        foreach ($replacements as $replacement) {
-            $stream->insertBeforeElement($element, $replacement);
-        }
-        $stream->removeElement($element);
+        return $elements;
     }
 
     private function findInWhitelist(URL $url) {
@@ -200,7 +193,6 @@ class Filter implements HTMLFilter {
     }
 
     /**
-     * @param DOMDocument $document
      * @param URL $url
      * @param string $media
      * @param boolean $ieCompatible
@@ -208,12 +200,12 @@ class Filter implements HTMLFilter {
      * @param string[] $seen
      * @return Tag[]
      */
-    private function inlineURL(DOMDocument $document, URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
+    private function inlineURL(URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
         $whitelistEntry = $this->findInWhitelist($url);
 
         if (!$whitelistEntry) {
             $this->logger()->info('Not inlining {url}. Not in whitelist', ['url' => ($url)]);
-            return [$this->makeLink($document, $url, $media)];
+            return [$this->makeLink($url, $media)];
         }
 
         if (!$whitelistEntry['ieCompatible']) {
@@ -228,7 +220,7 @@ class Filter implements HTMLFilter {
         }
 
         if ($currentLevel > $this->maxInlineDepth) {
-            return $this->addIEFallback($ieFallbackUrl, [$this->makeLink($document, $url, $media)]);
+            return $this->addIEFallback($ieFallbackUrl, [$this->makeLink($url, $media)]);
         }
 
         $seen[] = $url;
@@ -237,7 +229,7 @@ class Filter implements HTMLFilter {
         $content = $this->retriever->retrieve($url);
         if ($content === false) {
             $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
-            return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($document, $url, $media)]);
+            return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($url, $media)]);
         }
 
 
@@ -254,7 +246,6 @@ class Filter implements HTMLFilter {
         }
         $this->hasDoneInlining = true;
         $elements = $this->inlineCSS(
-            $document,
             $url,
             $content,
             $media,
@@ -268,7 +259,6 @@ class Filter implements HTMLFilter {
     }
 
     private function inlineCSS(
-        DOMDocument $document,
         URL $url,
         $content,
         $media,
@@ -283,18 +273,18 @@ class Filter implements HTMLFilter {
         foreach ($urlMatches as $match) {
             $content = str_replace($match[0], '', $content);
             $matchedUrl = URL::fromString($match['url'])->withBase($url);
-            $replacement = $this->inlineURL($document, $matchedUrl, $media, $ieCompatible, $currentLevel + 1, $seen);
+            $replacement = $this->inlineURL($matchedUrl, $media, $ieCompatible, $currentLevel + 1, $seen);
             $elements = array_merge($elements, $replacement);
         }
 
-        $elements[] = $this->makeStyle($document, $url, $content, $media, $optimized);
+        $elements[] = $this->makeStyle($url, $content, $media, $optimized);
 
         return $elements;
     }
 
-    private function makeServiceLink(DOMDocument $document, URL $location, $media) {
+    private function makeServiceLink(URL $location, $media) {
         $url = $this->makeServiceURL($location);
-        return $this->makeLink($document, URL::fromString($url), $media);
+        return $this->makeLink(URL::fromString($url), $media);
     }
 
     private function addIEFallback(URL $fallbackUrl = null, array $elements = null) {
@@ -316,16 +306,16 @@ class Filter implements HTMLFilter {
         return $elements;
     }
 
-    private function addIEFallbackScript(DOMDocument $document) {
+    private function addIEFallbackScript() {
         $this->logger()->info('Adding IE fallback script');
         $this->withIEFallback = false;
-        $document->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/ie-fallback.js'));
+        $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/ie-fallback.js'));
     }
 
-    private function addInlinedRetrieverScript(DOMDocument $document) {
+    private function addInlinedRetrieverScript() {
         $this->logger()->info('Adding inlined retriever script');
         $this->hasDoneInlining = false;
-        $document->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js'));
+        $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js'));
     }
 
     private function getImportedURLs($cssContent) {
@@ -337,22 +327,20 @@ class Filter implements HTMLFilter {
         return $matches;
     }
 
-    private function makeStyle(DOMDocument $document, URL $url, $content, $media, $optimized) {
-        $style = $document->createElement('style');
+    private function makeStyle(URL $url, $content, $media, $optimized) {
+        $style = new Tag('style');
         if ($media !== '') {
             $style->setAttribute('media', $media);
         }
         if ($optimized) {
             $style->setAttribute('data-phast-href', $this->makeServiceURL($url, true));
         }
-        $style->textContent = $content;
+        $style->setTextContent($content);
         return $style;
     }
 
-    private function makeLink(DOMDocument $document, URL $url, $media) {
-        $link = $document->createElement('link');
-        $link->setAttribute('rel', 'stylesheet');
-        $link->setAttribute('href', (string)$url);
+    private function makeLink(URL $url, $media) {
+        $link = new Tag('link', ['rel' => 'stylesheet', 'href' => (string) $url]);
         if ($media !== '') {
             $link->setAttribute('media', $media);
         }
