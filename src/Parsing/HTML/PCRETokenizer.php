@@ -32,14 +32,14 @@ class PCRETokenizer {
             <!--.*?-->
         ",
         'SCRIPT' => "
-            < (?'tag_name' script ) @@attrs @tag_end
+            (?= <script[\s>]) @@TAG
             (?'body' .*? )
-            (?'closing_tag' </script[^a-z>]*+> )
+            (?'closing_tag' </script/?(\s[^a-z>]*+)?> )
         ",
         'STYLE' => "
-            < (?'tag_name' style ) @@attrs @tag_end
+            (?= <style[\s>]) @@TAG
             (?'body' .*? )
-            (?'closing_tag' </style[^a-z>]*+> )
+            (?'closing_tag' </style/?(\s[^a-z>]*+)?> )
         ",
         'TAG' => "
             < @@tag_name @@attrs @tag_end
