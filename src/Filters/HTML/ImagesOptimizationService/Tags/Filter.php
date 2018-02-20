@@ -2,13 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
-use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter implements HTMLFilter {
+class Filter extends BaseHTMLPageContextFilter {
 
     /**
      * @var ImageURLRewriter
@@ -28,13 +27,18 @@ class Filter implements HTMLFilter {
         $this->rewriter = $rewriter;
     }
 
-    public function transformHTMLDOM(DOMDocument $document) {
-        $this->baseUrl = $document->getBaseURL();
-        /** @var \DOMElement $img */
-        foreach ($document->query('//img') as $img) {
-            $this->rewriteSrc($img);
-            $this->rewriteSrcset($img);
-        }
+    public function beforeLoop() {
+        $this->baseUrl = $this->context->getBaseUrl();
+    }
+
+    public function isTagOfInterest(Tag $tag) {
+        return $tag->getTagName() == 'img';
+    }
+
+    protected function handleTag(Tag $tag) {
+        $this->rewriteSrc($tag);
+        $this->rewriteSrcset($tag);
+        yield $tag;
     }
 
     private function rewriteSrc(Tag $img) {

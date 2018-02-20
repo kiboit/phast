@@ -2,28 +2,31 @@
 
 namespace Kibo\Phast\Filters\HTML\DelayedIFrameLoading;
 
-use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
-class Filter implements HTMLFilter {
+class Filter extends BaseHTMLPageContextFilter {
     use LoggingTrait;
 
-    public function transformHTMLDOM(DOMDocument $document) {
-        $addScript = false;
-        foreach ($document->query('//iframe') as $iframe) {
-            /** @var \DOMElement $iframe */
-            if (!$iframe->hasAttribute('src')) {
-                continue;
-            }
-            $this->logger()->info('Delaying iframe {src}', ['src' => $iframe->getAttribute('src')]);
-            $iframe->setAttribute('data-phast-src', $iframe->getAttribute('src'));
-            $iframe->setAttribute('src', 'about:blank');
-            $addScript = true;
-        }
-        if ($addScript) {
-            $document->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/iframe-loader.js'));
+    protected $addScript = false;
+
+    protected function isTagOfInterest(Tag $tag) {
+        return $tag->getTagName() == 'iframe' && $tag->hasAttribute('src');
+    }
+
+    protected function handleTag(Tag $iframe) {
+        $this->logger()->info('Delaying iframe {src}', ['src' => $iframe->getAttribute('src')]);
+        $iframe->setAttribute('data-phast-src', $iframe->getAttribute('src'));
+        $iframe->setAttribute('src', 'about:blank');
+        $this->addScript = true;
+        yield $iframe;
+    }
+
+    protected function afterLoop() {
+        if ($this->addScript) {
+            $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/iframe-loader.js'));
         }
     }
 

@@ -13,8 +13,8 @@ class RearrangementHTMLFilterTestCase extends HTMLFilterTestCase {
 
     public function testExceptionOnNoBody() {
         $this->expectException(\Exception::class);
-        $dom = new \Kibo\Phast\Common\DOMDocument(new HTMLStream());
-        $this->filter->transformHTMLDOM($dom);
+        $this->dom->setStream(new HTMLStream());
+        $this->filter->transformHTMLDOM($this->dom);
     }
 
 }

@@ -2,10 +2,9 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
-use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
@@ -13,7 +12,7 @@ use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter implements HTMLFilter {
+class Filter extends BaseHTMLPageContextFilter {
     use JSDetectorTrait, LoggingTrait;
 
     /**
@@ -39,6 +38,11 @@ class Filter implements HTMLFilter {
     private $id = 0;
 
     /**
+     * @var bool
+     */
+    private $didInject = false;
+
+    /**
      * Filter constructor.
      * @param array $config
      * @param Retriever $retriever
@@ -54,20 +58,21 @@ class Filter implements HTMLFilter {
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
-    public function transformHTMLDOM(DOMDocument $document) {
-        $this->baseUrl = $document->getBaseURL();
-        $scripts = iterator_to_array($document->query('//script'));
-        $didInject = false;
-        foreach ($scripts as $script) {
-            if (!$this->isJSElement($script)) {
-                continue;
-            }
-            $this->rewriteScriptSource($script);
-            if (!$didInject) {
-                $this->addScript($document);
-                $didInject = true;
-            }
+    protected function beforeLoop() {
+        $this->baseUrl = $this->context->getBaseUrl();
+    }
+
+    protected function isTagOfInterest(Tag $tag) {
+        return $tag->getTagName() == 'script' && $this->isJSElement($tag);
+    }
+
+    protected function handleTag(Tag $script) {
+        $this->rewriteScriptSource($script);
+        if (!$this->didInject) {
+            $this->addScript();
+            $this->didInject = true;
         }
+        yield $script;
     }
 
     private function rewriteScriptSource(Tag $element) {
@@ -114,7 +119,7 @@ class Filter implements HTMLFilter {
         return false;
     }
 
-    private function addScript(DOMDocument $document) {
+    private function addScript() {
         $config = [
             'serviceUrl' => $this->config['serviceUrl'],
             'urlRefreshTime' => $this->config['urlRefreshTime'],
@@ -122,7 +127,7 @@ class Filter implements HTMLFilter {
         ];
         $script = new PhastJavaScript(__DIR__ . '/rewrite-function.js');
         $script->setConfig('script-proxy-service', $config);
-        $document->addPhastJavaScript($script);
+        $this->context->addPhastJavaScript($script);
     }
 
 }

@@ -2,39 +2,32 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSDeferring;
 
-use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
-class Filter implements HTMLFilter {
+class Filter extends BaseHTMLPageContextFilter {
     use LoggingTrait;
 
-    public function transformHTMLDOM(DOMDocument $document) {
-        $insert_loader = false;
+    private $insertLoader = false;
 
-        /** @var Tag $link */
-        foreach (iterator_to_array($document->getElementsByTagName('link')) as $link) {
-            if ($link->getAttribute('rel') != 'stylesheet') {
-                continue;
-            }
+    protected function isTagOfInterest(Tag $tag) {
+        return $tag->getTagName() == 'link' && $tag->getAttribute('rel') == 'stylesheet';
+    }
 
-            $this->logger()->info('Deferring {src}', ['src' => $link->getAttribute('href')]);
-            $script = $document->createElement('script');
-            $script->setTextContent(trim($link->toString()));
-            $script->setAttribute('type', 'phast-link');
+    protected function handleTag(Tag $link) {
+        $this->logger()->info('Deferring {src}', ['src' => $link->getAttribute('href')]);
+        $script = new Tag('script', ['type' => 'phast-link']);
+        $script->setTextContent(trim($link->toString()));
+        $this->insertLoader = true;
+        yield $script;
+    }
 
-            $stream = $document->getStream();
-            $stream->insertBeforeElement($link, $script);
-            $stream->removeElement($link);
-
-            $insert_loader = true;
-        }
-
-        if ($insert_loader) {
+    protected function afterLoop() {
+        if ($this->insertLoader) {
             $this->logger()->info('Inserting JS loader');
-            $document->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/styles-loader.js'));
+            $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/styles-loader.js'));
         } else {
             $this->logger()->info('No links were deferred. Not inserting JS loader.');
         }

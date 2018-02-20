@@ -2,12 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
-use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
-class Filter implements HTMLFilter {
+class Filter extends BaseHTMLPageContextFilter implements HTMLFilter {
 
     /**
      * @var ImageURLRewriter
@@ -22,20 +22,18 @@ class Filter implements HTMLFilter {
         $this->rewriter = $rewriter;
     }
 
-    public function transformHTMLDOM(DOMDocument $document) {
-        $styleTags = $document->getElementsByTagName('style');
-        /** @var \DOMElement $styleTag */
-        foreach ($styleTags as $styleTag) {
-            $styleTag->textContent = $this->rewriter->rewriteStyle($styleTag->textContent);
-        }
-
-        $tags = $document->getElementsWithAttr('style');
-        /** @var Tag $tag */
-        foreach ($tags as $tag) {
+    protected function handleTag(Tag $tag) {
+        if ($tag->getTagName() == 'style') {
+            $tag->setTextContent(
+                $this->rewriter->rewriteStyle($tag->getTextContent())
+            );
+        } else if ($tag->hasAttribute('style')) {
             $tag->setAttribute(
                 'style',
                 $this->rewriter->rewriteStyle($tag->getAttribute('style'))
             );
         }
+        yield $tag;
     }
+
 }

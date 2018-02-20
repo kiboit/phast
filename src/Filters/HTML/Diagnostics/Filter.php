@@ -4,13 +4,16 @@
 namespace Kibo\Phast\Filters\HTML\Diagnostics;
 
 
-use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\Filters\HTML\Helpers\ElementsToDOMFilterAdapter;
 use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Filters\HTML\HTMLPageContext;
+use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter implements HTMLFilter {
+class Filter implements HTMLStreamFilter, HTMLFilter {
+    use ElementsToDOMFilterAdapter;
 
     private $serviceUrl;
 
@@ -18,11 +21,11 @@ class Filter implements HTMLFilter {
         $this->serviceUrl = $serviceUrl;
     }
 
-    public function transformHTMLDOM(DOMDocument $document) {
+    public function transformElements(HTMLPageContext $context) {
         $url = (new ServiceRequest())->withUrl(URL::fromString($this->serviceUrl))->serialize();
         $script = new PhastJavaScript(__DIR__ . '/diagnostics.js');
         $script->setConfig('diagnostics', ['serviceUrl' => $url]);
-        $document->addPhastJavaScript($script);
+        $context->addPhastJavaScript($script);
     }
 
 
