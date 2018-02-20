@@ -73,6 +73,17 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('2', $tag->getAttribute('b'));
     }
 
+    public function testCase() {
+        $this->markTestIncomplete("Where should we handle case normalization?");
+
+        $html = '<DiV AttR="A">';
+
+        $tag = $this->tokenizeSingleTag($html);
+
+        $this->assertEquals('div', $tag->getTagName());
+        $this->assertEquals('A', $tag->getAttribute('attr'));
+    }
+
     /**
      * @param $html
      * @return Tag
