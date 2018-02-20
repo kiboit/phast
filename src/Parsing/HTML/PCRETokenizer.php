@@ -85,22 +85,24 @@ class PCRETokenizer {
             }
             if (!empty($match['COMMENT'][0])) {
                 $element = new Comment();
+                $element->setOriginalString($match[0][0]);
             } elseif (!empty($match['TAG'][0])
                       || !empty($match['SCRIPT'][0])
                       || !empty($match['STYLE'][0])
             ) {
                 $attributes = $this->parseAttributes($match['attrs'][0]);
                 $element = new Tag($match['tag_name'][0], $attributes);
+                $element->setOriginalString($match['TAG'][0]);
                 if (isset($match['body'][1]) && $match['body'][1] != -1) {
                     $element->setTextContent($match['body'][0]);
                     $element = $element->withClosingTag($match['closing_tag'][0]);
                 }
             } elseif (!empty($match['CLOSING_TAG'][0])) {
                 $element = new ClosingTag($match['tag_name'][0]);
+                $element->setOriginalString($match[0][0]);
             } else {
                 throw new RuntimeException("Unhandled match:\n" . json_encode($match, JSON_PRETTY_PRINT));
             }
-            $element->setOriginalString($match[0][0]);
             yield $element;
             $offset = $match[0][1] + strlen($match[0][0]);
         }
