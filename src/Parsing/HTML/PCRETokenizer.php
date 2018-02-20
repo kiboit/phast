@@ -42,16 +42,16 @@ class PCRETokenizer {
             (?'closing_tag' </style/?(\s[^a-z>]*+)?> )
         ",
         'TAG' => "
-            < @@tag_name @@attrs @tag_end
+            < @@tag_name @@attrs? @tag_end
         ",
         'tag_name' => "
             [^\s>]++
         ",
         'attrs' => "
-            ( @attr )*+
+            \s++ ( @attr )*+
         ",
         'attr' => "
-            \s++
+            \s*+
             @@attr_name
             (?: \s*+ = \s*+ @attr_value )?
         ",
@@ -59,7 +59,11 @@ class PCRETokenizer {
             [^\s>][^\s>=]*+
         ",
         'attr_value' => "
-            \"(?'attr_value'[^\"]*+)\"
+            (?|
+                \"(?'attr_value'[^\"]*+)\" |
+                ' (?'attr_value' [^']*+) ' |
+                (?'attr_value' [^\s>]*+)
+            )
         ",
         'tag_end' => "
             \s*+ >

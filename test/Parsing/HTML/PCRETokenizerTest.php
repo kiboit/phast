@@ -50,4 +50,45 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
         $this->assertEmpty($expected);
     }
 
+    public function testAttributeStyles() {
+        $html = '<div a=1 b="2" c=\'3\' d = 4 e = "5" ==6 f=`7`>';
+
+        $tag = $this->tokenizeSingleTag($html);
+
+        $this->assertEquals('1', $tag->getAttribute('a'));
+        $this->assertEquals('2', $tag->getAttribute('b'));
+        $this->assertEquals('3', $tag->getAttribute('c'));
+        $this->assertEquals('4', $tag->getAttribute('d'));
+        $this->assertEquals('5', $tag->getAttribute('e'));
+        $this->assertEquals('6', $tag->getAttribute('='));
+        $this->assertEquals('`7`', $tag->getAttribute('f'));
+    }
+
+    public function testJoinedAttributes() {
+        $html = '<div a="1"b=2>';
+
+        $tag = $this->tokenizeSingleTag($html);
+
+        $this->assertEquals('1', $tag->getAttribute('a'));
+        $this->assertEquals('2', $tag->getAttribute('b'));
+    }
+
+    /**
+     * @param $html
+     * @return Tag
+     */
+    private function tokenizeSingleTag($html) {
+        $tokenizer = new PCRETokenizer();
+        $tokens = iterator_to_array($tokenizer->tokenize($html));
+
+        $this->assertCount(1, $tokens);
+
+        /** @var Tag $tag */
+        $tag = $tokens[0];
+
+        $this->assertInstanceOf(Tag::class, $tag);
+
+        return $tag;
+    }
+
 }
