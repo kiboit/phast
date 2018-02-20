@@ -3,7 +3,7 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
-use Masterminds\HTML5\Elements;
+use Kibo\Phast\Parsing\HTML\HTMLInfo;
 
 class Tag extends Element {
 
@@ -142,7 +142,7 @@ class Tag extends Element {
     }
 
     private function mustHaveClosing() {
-        return !Elements::isA($this->tagName, Elements::VOID_TAG);
+        return !HTMLInfo::isA($this->tagName, HTMLInfo::VOID_TAG);
     }
 
     private function isFromParser() {

@@ -95,6 +95,38 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('script', $tag->getTagName());
     }
 
+    public function testGettingLastText() {
+        $html = '<html><style>text</style></html> final text';
+
+        $elements = iterator_to_array((new PCRETokenizer())->tokenize($html));
+        $last = array_pop($elements);
+        $this->assertEquals(' final text', $last->toString());
+    }
+
+    public function testMalformedScriptAndStyle() {
+        $html = '<style>text</tag></style><script>text</tag></script>';
+
+        /** @var Tag[] $elements */
+        $elements = iterator_to_array((new PCRETokenizer())->tokenize($html));
+
+        $this->assertCount(2, $elements);
+        $this->assertInstanceOf(Tag::class, $elements[0]);
+        $this->assertInstanceOf(Tag::class, $elements[1]);
+
+        $this->assertEquals('style', $elements[0]->getTagName());
+        $this->assertEquals('text</tag>', $elements[0]->getTextContent());
+
+        $this->assertEquals('script', $elements[1]->getTagName());
+        $this->assertEquals('text</tag>', $elements[1]->getTextContent());
+    }
+
+    public function testLiteralZeroTextElement() {
+        $html = '<div>0</div>';
+        $elements = iterator_to_array((new PCRETokenizer())->tokenize($html));
+        $this->assertCount(3, $elements);
+    }
+
+
     /**
      * @param $html
      * @return Tag

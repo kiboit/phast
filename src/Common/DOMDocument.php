@@ -5,11 +5,7 @@ namespace Kibo\Phast\Common;
 use Kibo\Phast\Filters\HTML\Helpers\BodyFinderTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStream;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Parser;
-use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Scanner;
-use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Tokenizer;
 use Kibo\Phast\Parsing\HTML\PCRETokenizer;
-use Kibo\Phast\Parsing\HTML\StringInputStream;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
