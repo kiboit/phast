@@ -20,11 +20,11 @@ class PCRETokenizer {
             @@CLOSING_TAG |
             @@TAG
         )
-    ~Xxs";
+    ~Xxsi";
 
     private $attributePattern = "~
         @attr
-    ~Xxs";
+    ~Xxsi";
 
     private $subroutines = [
         'COMMENT' => "
