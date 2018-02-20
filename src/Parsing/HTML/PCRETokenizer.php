@@ -117,8 +117,8 @@ class PCRETokenizer {
 
         foreach ($matches as $match) {
             // TODO: Move this to Tag. Do not decode/recode unless a specific attribute is changed.
-            $attributes[$match['attr_name']] =
-                isset($match['attr_value']) ? html_entity_decode($match['attr_value'], ENT_QUOTES, 'UTF-8') : '';
+            $attributes[$match['attr_name'][0]] =
+                isset($match['attr_value'][0]) ? html_entity_decode($match['attr_value'][0], ENT_QUOTES, 'UTF-8') : '';
         }
 
         return $attributes;
@@ -128,9 +128,8 @@ class PCRETokenizer {
         $offset = 0;
 
         while (preg_match($pattern, $subject, $match, PREG_OFFSET_CAPTURE, $offset)) {
-            $offset = $match[0][1] + strlen($match[0][0]);
-            $match = array_map(function ($group) { return $group[0]; }, $match);
             yield $match;
+            $offset = $match[0][1] + strlen($match[0][0]);
         }
 
         if ($offset < strlen($subject) - 1) {
