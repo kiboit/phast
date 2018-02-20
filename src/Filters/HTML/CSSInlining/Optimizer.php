@@ -4,7 +4,7 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\Cache;
-use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class Optimizer {
 
@@ -20,8 +20,8 @@ class Optimizer {
      */
     private $cache;
 
-    public function __construct(DOMDocument $document, Cache $cache) {
-        $this->usedClasses = $this->getUsedClasses($document);
+    public function __construct(\Traversable $elements, Cache $cache) {
+        $this->usedClasses = $this->getUsedClasses($elements);
         $this->cache = $cache;
     }
 
@@ -144,10 +144,14 @@ class Optimizer {
         return $newSelectors;
     }
 
-    private function getUsedClasses(DOMDocument $document) {
+    private function getUsedClasses(\Traversable $elements) {
         $classes = [];
 
-        foreach ($document->getElementsWithAttr('class') as $tag) {
+        /** @var Tag $tag */
+        foreach ($elements as $tag) {
+            if (!($tag instanceof Tag)) {
+                continue;
+            }
             foreach (preg_split('/\s+/', $tag->getAttribute('class')) as $cls) {
                 if ($cls != ''
                     && !isset($classes[$cls])

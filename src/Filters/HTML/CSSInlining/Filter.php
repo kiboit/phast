@@ -129,7 +129,7 @@ class Filter implements HTMLFilter {
 
     public function transformHTMLDOM(DOMDocument $document) {
         $this->document = $document;
-        $this->optimizer = $this->optimizerFactory->makeForDocument($document);
+        $this->optimizer = $this->optimizerFactory->makeForElements($document->getStream()->getElements());
         $links = iterator_to_array($document->query('//link'));
         $styles = iterator_to_array($document->query('//style'));
         foreach ($links as $link) {

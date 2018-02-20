@@ -4,7 +4,6 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 
 use Kibo\Phast\Cache\File\Cache;
-use Kibo\Phast\Common\DOMDocument;
 
 class OptimizerFactory {
 
@@ -18,11 +17,11 @@ class OptimizerFactory {
     }
 
     /**
-     * @param DOMDocument $document
+     * @param \Traversable $elements
      * @return Optimizer
      */
-    public function makeForDocument(DOMDocument $document) {
-        return new Optimizer($document, $this->cache);
+    public function makeForElements(\Traversable $elements) {
+        return new Optimizer($elements, $this->cache);
     }
 
 }

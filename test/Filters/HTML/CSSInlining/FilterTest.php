@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\Cache;
-use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
@@ -541,11 +540,10 @@ class FilterTest extends HTMLFilterTestCase {
 
         $optimizerFactory = $this->createMock(OptimizerFactory::class);
         $optimizerFactory->expects($this->once())
-            ->method('makeForDocument')
-            ->with($this->dom)
-            ->willReturnCallback(function (DOMDocument $document) use ($cache) {
+            ->method('makeForElements')
+            ->willReturnCallback(function ($elements) use ($cache) {
                 return is_null($this->optimizerMock)
-                    ? new Optimizer($document, $cache)
+                    ? new Optimizer($elements, $cache)
                     : $this->optimizerMock;
             });
 

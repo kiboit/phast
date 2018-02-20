@@ -37,7 +37,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $div->setAttribute('class', 'some-class class1 another-class');
         $this->body->appendChild($div);
 
-        $optimizer = new Optimizer($this->dom, $this->cache);
+        $optimizer = $this->makeOptimizer();
         $firstCSSOptimized = $optimizer->optimizeCSS($firstCSS);
         $secondCSSOptimized = $optimizer->optimizeCSS($secondCSS);
 
@@ -64,7 +64,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $div->setAttribute('class', 'some-class class1 another-class');
         $this->body->appendChild($div);
 
-        $cssOptimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
+        $cssOptimized = $this->optimizeCSS($css);
 
         $this->assertContains('.class1', $cssOptimized);
         $this->assertContains('red', $cssOptimized);
@@ -97,7 +97,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $div = $this->makeElement('div', 'Hello, World!');
         $this->body->appendChild($div);
 
-        $cssOptimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
+        $cssOptimized = $this->optimizeCSS($css);
 
         $this->assertNotContains('.class1', $cssOptimized);
         $this->assertContains('span', $cssOptimized);
@@ -110,7 +110,7 @@ class OptimizerTest extends HTMLFilterTestCase {
         $css = file_get_contents(__DIR__ . '/../../../resources/large.css');
         $this->assertNotFalse($css);
 
-        $optimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
+        $optimized = $this->optimizeCSS($css);
         $this->assertNotEmpty($optimized);
     }
 
@@ -128,7 +128,7 @@ class OptimizerTest extends HTMLFilterTestCase {
 
         $this->body->appendChild($div);
 
-        $cssOptimized = (new Optimizer($this->dom, $this->cache))->optimizeCSS($css);
+        $cssOptimized = $this->optimizeCSS($css);
 
         $this->assertNotContains('.no', $cssOptimized);
         $this->assertContains('.yes', $cssOptimized);
@@ -142,8 +142,7 @@ class OptimizerTest extends HTMLFilterTestCase {
     public function testOptimizeCSSInMediaQuery() {
         $css = '@media print{.hidden-print{display:none}}';
 
-        $optimizer = new Optimizer($this->dom, $this->cache);
-        $optimizedCSS = $optimizer->optimizeCSS($css);
+        $optimizedCSS = $this->optimizeCSS($css);
 
         $this->assertEquals('@media print{}', $optimizedCSS);
     }
@@ -152,6 +151,21 @@ class OptimizerTest extends HTMLFilterTestCase {
         $el = $this->dom->createElement($tag);
         $el->textContent = $content;
         return $el;
+    }
+
+    /**
+     * @return Optimizer
+     */
+    private function makeOptimizer() {
+        return new Optimizer($this->dom->getStream()->getElements(), $this->cache);
+    }
+
+    /**
+     * @param $css
+     * @return string
+     */
+    private function optimizeCSS($css) {
+        return $this->makeOptimizer()->optimizeCSS($css);
     }
 
 }
