@@ -29,4 +29,8 @@ class ClosingTag extends Element {
         $this->stream->insertBeforeElement($this, $element);
     }
 
+    public function dumpValue() {
+        return $this->tagName;
+    }
+
 }

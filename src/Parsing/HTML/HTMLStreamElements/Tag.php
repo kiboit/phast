@@ -148,4 +148,19 @@ class Tag extends Element {
     private function isFromParser() {
         return isset ($this->originalString);
     }
+
+    public function dumpValue() {
+        $o = $this->tagName;
+
+        foreach ($this->attributes as $name => $_) {
+            $o .= " $name=\"" . $this->getAttribute($name) . "\"";
+        }
+
+        if ($this->textContent) {
+            $o .= " content=[{$this->textContent}]";
+        }
+
+        return $o;
+    }
+
 }

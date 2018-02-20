@@ -63,4 +63,12 @@ class Element {
         return isset ($this->originalString) ? $this->originalString : '';
     }
 
+    public function dump() {
+        return '<' . preg_replace('~^.*\\\\~', '', get_class($this)) . ' ' . $this->dumpValue() . '>';
+    }
+
+    public function dumpValue() {
+        return json_encode($this->originalString);
+    }
+
 }
