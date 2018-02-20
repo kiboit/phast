@@ -8,6 +8,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Parser;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Scanner;
 use Kibo\Phast\Parsing\HTML\HTMLStreamParser\Tokenizer;
+use Kibo\Phast\Parsing\HTML\PCRETokenizer;
 use Kibo\Phast\Parsing\HTML\StringInputStream;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
@@ -89,10 +90,10 @@ class DOMDocument {
     }
 
     public function loadHTML($string) {
-        $inputStream = new StringInputStream($string);
-        $parser = new Parser($this->stream, $inputStream);
-        $tokenizer = new Tokenizer(new Scanner($inputStream), $parser);
-        $tokenizer->parse();
+        $tokenizer = new PCRETokenizer();
+        foreach ($tokenizer->tokenize($string) as $token) {
+            $this->stream->addElement($token);
+        }
     }
 
     /**
