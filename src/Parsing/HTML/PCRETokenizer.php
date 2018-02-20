@@ -14,11 +14,11 @@ class PCRETokenizer {
         (?J)
 
         (
-            @@comment |
-            @@script |
-            @@style |
-            @@closing_tag |
-            @@tag
+            @@COMMENT |
+            @@SCRIPT |
+            @@STYLE |
+            @@CLOSING_TAG |
+            @@TAG
         )
     ~Xxs";
 
@@ -27,20 +27,20 @@ class PCRETokenizer {
     ~Xxs";
 
     private $subroutines = [
-        'comment' => "
+        'COMMENT' => "
             <!--.*?-->
         ",
-        'script' => "
+        'SCRIPT' => "
             < (?'tag_name' script ) @@attrs @tag_end
             (?'body' .*? )
             (?'closing_tag' </script[^a-z>]*+> )
         ",
-        'style' => "
+        'STYLE' => "
             < (?'tag_name' style ) @@attrs @tag_end
             (?'body' .*? )
             (?'closing_tag' </style[^a-z>]*+> )
         ",
-        'tag' => "
+        'TAG' => "
             < @@tag_name @@attrs @tag_end
         ",
         'tag_name' => "
@@ -63,7 +63,7 @@ class PCRETokenizer {
         'tag_end' => "
             \s*+ >
         ",
-        'closing_tag' => "
+        'CLOSING_TAG' => "
             </ @@tag_name [^>]*+ >
         "
     ];
@@ -82,11 +82,11 @@ class PCRETokenizer {
                 $element->setOriginalString(substr($data, $offset, $match[0][1] - $offset));
                 yield $element;
             }
-            if (!empty($match['comment'][0])) {
+            if (!empty($match['COMMENT'][0])) {
                 $element = new Element();
-            } elseif (!empty($match['tag'][0])
-                      || !empty($match['script'][0])
-                      || !empty($match['style'][0])
+            } elseif (!empty($match['TAG'][0])
+                      || !empty($match['SCRIPT'][0])
+                      || !empty($match['STYLE'][0])
             ) {
                 $attributes = $this->parseAttributes($match['attrs'][0]);
                 $element = new Tag($match['tag_name'][0], $attributes);
@@ -94,7 +94,7 @@ class PCRETokenizer {
                     $element->setTextContent($match['body'][0]);
                     $element = $element->withClosingTag($match['closing_tag'][0]);
                 }
-            } elseif (!empty($match['closing_tag'][0])) {
+            } elseif (!empty($match['CLOSING_TAG'][0])) {
                 $element = new ClosingTag($match['tag_name'][0]);
             } else {
                 throw new RuntimeException("Unhandled match:\n" . json_encode($match, JSON_PRETTY_PRINT));
