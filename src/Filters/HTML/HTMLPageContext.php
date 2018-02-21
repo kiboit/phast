@@ -62,6 +62,7 @@ class HTMLPageContext {
     /**
      * @param PhastJavaScriptCompiler $jsCompiler
      * @return string
+     * @TODO: Move this to the composite filter
      */
     public function serialize(PhastJavaScriptCompiler $jsCompiler, \Traversable $elements) {
         $scriptsAdded = false;
