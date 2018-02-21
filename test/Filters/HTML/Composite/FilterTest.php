@@ -2,14 +2,16 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
-use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Common\PhastJavaScriptCompiler;
+use Kibo\Phast\Filters\HTML\HTMLPageContext;
+use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\Logger;
 use Kibo\Phast\Logging\LogLevel;
 use Kibo\Phast\Logging\LogWriter;
-use Kibo\Phast\Parsing\HTML\HTMLStream;
+use Kibo\Phast\ValueObjects\PhastJavaScript;
+use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class FilterTest extends TestCase {
@@ -22,14 +24,23 @@ class FilterTest extends TestCase {
     private $filter;
 
     /**
-     * @var HTMLStream
+     * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    private $stream;
+    private $jsCompiler;
+
+    /**
+     * @var array
+     */
+    private $parsedElements;
 
     public function setUp() {
         parent::setUp();
-        $this->stream = new HTMLStream();
-        $this->filter = new Filter(self::MAX_BUFFER_SIZE_TO_APPLY, new DOMDocument($this->stream));
+        $this->jsCompiler = $this->createMock(PhastJavaScriptCompiler::class);
+        $this->filter = new Filter(
+            self::MAX_BUFFER_SIZE_TO_APPLY,
+            URL::fromString('http://phast.test'),
+            $this->jsCompiler
+        );
     }
 
     public function testShouldApplyOnHTML() {
@@ -85,7 +96,7 @@ class FilterTest extends TestCase {
         $this->shouldNotTransform();
         $buffer = "\0<html><body></body></html>";
         $this->assertEquals($buffer, $this->filter->apply($buffer));
-        $this->assertEmpty($this->stream->getAllElementsTagCollection());
+        $this->assertEmpty($this->parsedElements);
     }
 
     public function testShouldReturnApplied() {
@@ -159,7 +170,7 @@ class FilterTest extends TestCase {
         $buffer = "<html><body>$script</body></html>";
         $filtered = $this->filter->apply($buffer);
         $this->assertStringStartsWith($buffer, $filtered);
-        $this->assertNotEmpty($this->stream->getAllElementsTagCollection());
+        $this->assertNotEmpty($this->parsedElements);
     }
 
     public function shouldHandleTagCloseInScriptDataProvider() {
@@ -180,9 +191,9 @@ class FilterTest extends TestCase {
     }
 
     public function testShouldHandleExceptions() {
-        $filter = $this->createMock(HTMLFilter::class);
+        $filter = $this->createMock(HTMLStreamFilter::class);
         $filter->expects($this->once())
-            ->method('transformHTMLDOM')
+            ->method('transformElements')
             ->willThrowException(new \Exception());
         $this->filter->addHTMLFilter($filter);
         $buffer = '<html><body></body></html>';
@@ -203,9 +214,33 @@ class FilterTest extends TestCase {
         $this->assertEquals($buffer, $actual);
     }
 
+    public function testShouldAddPhastJS() {
+        $this->jsCompiler->method('compileScriptsWithConfig')
+            ->willReturn('the-js');
+        $filterMock = $this->createMock(HTMLStreamFilter::class);
+        $filterMock->method('transformElements')
+            ->willReturnCallback(function (HTMLPageContext $context) {
+                $context->addPhastJavascript(new PhastJavaScript('some-file'));
+                return $context->getElements();
+            });
+        $this->filter->addHTMLFilter($filterMock);
+
+        $html = '<html><body></body></body></html>';
+        $actual = $this->filter->apply($html);
+
+        $expected = '<html><body><script>the-js</script></body></body></html>';
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
     private function setExpectation($expectation) {
-        $filterMock = $this->createMock(HTMLFilter::class);
-        $filterMock->expects($expectation)->method('transformHTMLDOM');
+        $filterMock = $this->createMock(HTMLStreamFilter::class);
+        $filterMock
+            ->expects($expectation)
+            ->method('transformElements')
+            ->willReturnCallback(function (HTMLPageContext $context) {
+                $this->parsedElements = iterator_to_array($context->getElements());
+                return new \ArrayIterator($this->parsedElements);
+            });
         $this->filter->addHTMLFilter($filterMock);
         return $filterMock;
     }

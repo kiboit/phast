@@ -2,23 +2,15 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
-use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Common\ObjectifiedFunctions;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
+use Kibo\Phast\Common\PhastJavaScriptCompiler;
+use Kibo\Phast\Filters\HTML\HTMLPageContext;
+use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Parsing\HTML\PCRETokenizer;
+use Kibo\Phast\ValueObjects\URL;
 
 class Filter {
     use LoggingTrait;
-
-    /**
-     * @var DOMDocument
-     */
-    private $dom;
-
-    /**
-     * @var ObjectifiedFunctions
-     */
-    private $functions;
 
     /**
      * @var integer
@@ -26,7 +18,17 @@ class Filter {
     private $maxBufferSizeToApply;
 
     /**
-     * @var HTMLFilter[]
+     * @var URL
+     */
+    private $baseUrl;
+
+    /**
+     * @var PhastJavaScriptCompiler
+     */
+    private $jsCompiler;
+
+    /**
+     * @var HTMLStreamFilter[]
      */
     private $filters = [];
 
@@ -34,15 +36,16 @@ class Filter {
 
     /**
      * Filter constructor.
-     * @param $maxBufferSizeToApply
-     * @param DOMDocument $dom
-     * @param ObjectifiedFunctions|null $functions
+     * @param int $maxBufferSizeToApply
+     * @param URL $baseUrl
+     * @param PhastJavaScriptCompiler $jsCompiler
      */
-    public function __construct($maxBufferSizeToApply, DOMDocument $dom, ObjectifiedFunctions $functions = null) {
+    public function __construct($maxBufferSizeToApply, URL $baseUrl, PhastJavaScriptCompiler $jsCompiler) {
         $this->maxBufferSizeToApply = $maxBufferSizeToApply;
-        $this->dom = $dom;
-        $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
+        $this->baseUrl = $baseUrl;
+        $this->jsCompiler = $jsCompiler;
     }
+
 
     /**
      * @param string $buffer
@@ -93,25 +96,24 @@ class Filter {
         return $output;
     }
 
-    public function addHTMLFilter(HTMLFilter $filter) {
+    public function addHTMLFilter(HTMLStreamFilter $filter) {
         $this->filters[] = $filter;
     }
 
     private function tryToApply($buffer, $time_start) {
 
-        $this->time('Parsing', function () use ($buffer) {
-            $this->dom->loadHTML($buffer);
-        });
+        $tokenizer = new PCRETokenizer();
+        $context = new HTMLPageContext($this->baseUrl, $tokenizer->tokenize($buffer));
 
         foreach ($this->filters as $filter) {
             $this->logger()->info('Starting {filter}', ['filter' => get_class($filter)]);
-            $this->time(get_class($filter), function () use ($filter) {
-                $filter->transformHTMLDOM($this->dom);
+            $this->time(get_class($filter), function () use ($filter, $context) {
+                $context->setElements($filter->transformElements($context));
             });
         }
 
-        $output = $this->time('Serialization', function () {
-            return $this->dom->serialize();
+        $output = $this->time('Serialization', function () use ($context) {
+            return $context->serialize($this->jsCompiler);
         });
 
         $time_delta = microtime(true) - $time_start;

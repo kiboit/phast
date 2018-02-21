@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\HTML\Composite;
 
 use Kibo\Phast\Cache\File\Cache;
-use Kibo\Phast\Common\DOMDocument;
 use Kibo\Phast\Common\PhastJavaScriptCompiler;
 use Kibo\Phast\Environment\Package;
 use Kibo\Phast\ValueObjects\URL;
@@ -15,10 +14,8 @@ class Factory {
         $compiler = new PhastJavaScriptCompiler($cache);
         $composite = new Filter(
             $config['documents']['maxBufferSizeToApply'],
-            DOMDocument::makeForLocation(
-                URL::fromString($config['documents']['baseUrl']),
-                $compiler
-            )
+            URL::fromString($config['documents']['baseUrl']),
+            $compiler
         );
         foreach (array_keys($config['documents']['filters']) as $class) {
             $package = Package::fromPackageClass($class);
