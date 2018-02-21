@@ -6,6 +6,7 @@ namespace Kibo\Phast\Common;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
+// TODO: Move to Kibo\Phast\Filters\HTML\PhastScriptsCompiler
 class PhastJavaScriptCompiler {
 
     /**

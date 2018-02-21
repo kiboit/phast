@@ -73,6 +73,8 @@ return [
 
             \Kibo\Phast\Filters\HTML\ScriptsDeferring\Filter::class => [],
 
+            Kibo\Phast\Filters\HTML\PhastScriptsCompiler\Filter::class => []
+
         ]
     ],
 

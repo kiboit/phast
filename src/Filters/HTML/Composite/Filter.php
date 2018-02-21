@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
-use Kibo\Phast\Common\PhastJavaScriptCompiler;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -23,11 +22,6 @@ class Filter {
     private $baseUrl;
 
     /**
-     * @var PhastJavaScriptCompiler
-     */
-    private $jsCompiler;
-
-    /**
      * @var HTMLStreamFilter[]
      */
     private $filters = [];
@@ -38,12 +32,10 @@ class Filter {
      * Filter constructor.
      * @param int $maxBufferSizeToApply
      * @param URL $baseUrl
-     * @param PhastJavaScriptCompiler $jsCompiler
      */
-    public function __construct($maxBufferSizeToApply, URL $baseUrl, PhastJavaScriptCompiler $jsCompiler) {
+    public function __construct($maxBufferSizeToApply, URL $baseUrl) {
         $this->maxBufferSizeToApply = $maxBufferSizeToApply;
         $this->baseUrl = $baseUrl;
-        $this->jsCompiler = $jsCompiler;
     }
 
 
@@ -112,8 +104,12 @@ class Filter {
             });
         }
 
-        $output = $this->time('Serialization', function () use ($context, $elements) {
-            return $context->serialize($this->jsCompiler, $elements);
+        $output = $this->time('Serialization', function () use ($elements) {
+            $output = '';
+            foreach ($elements as $element) {
+                $output .= $element;
+            }
+            return $output;
         });
 
         $time_delta = microtime(true) - $time_start;

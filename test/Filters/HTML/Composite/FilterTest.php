@@ -2,15 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
-use Kibo\Phast\Common\PhastJavaScriptCompiler;
-use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\Logger;
 use Kibo\Phast\Logging\LogLevel;
 use Kibo\Phast\Logging\LogWriter;
-use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
@@ -24,22 +21,15 @@ class FilterTest extends TestCase {
     private $filter;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    private $jsCompiler;
-
-    /**
      * @var array
      */
     private $parsedElements;
 
     public function setUp() {
         parent::setUp();
-        $this->jsCompiler = $this->createMock(PhastJavaScriptCompiler::class);
         $this->filter = new Filter(
             self::MAX_BUFFER_SIZE_TO_APPLY,
-            URL::fromString('http://phast.test'),
-            $this->jsCompiler
+            URL::fromString('http://phast.test')
         );
     }
 
@@ -212,24 +202,6 @@ class FilterTest extends TestCase {
 
         $this->assertStringStartsWith('Phast: CompositeHTMLFilter: ', $msg);
         $this->assertEquals($buffer, $actual);
-    }
-
-    public function testShouldAddPhastJS() {
-        $this->jsCompiler->method('compileScriptsWithConfig')
-            ->willReturn('the-js');
-        $filterMock = $this->createMock(HTMLStreamFilter::class);
-        $filterMock->method('transformElements')
-            ->willReturnCallback(function (\Traversable $elements, HTMLPageContext $context) {
-                $context->addPhastJavascript(new PhastJavaScript('some-file'));
-                return $elements;
-            });
-        $this->filter->addHTMLFilter($filterMock);
-
-        $html = '<html><body></body></body></html>';
-        $actual = $this->filter->apply($html);
-
-        $expected = '<html><body><script>the-js</script></body></body></html>';
-        $this->assertStringStartsWith($expected, $actual);
     }
 
     private function setExpectation($expectation) {
