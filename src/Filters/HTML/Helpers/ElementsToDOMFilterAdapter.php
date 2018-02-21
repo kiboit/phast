@@ -18,7 +18,7 @@ trait ElementsToDOMFilterAdapter {
         $context = new HTMLPageContext($document->getBaseURL());
         $stream = new HTMLStream();
         $document->setStream($stream);
-        foreach ($this->transformElements($context, $elements) as $element) {
+        foreach ($this->transformElements($elements, $context) as $element) {
             $stream->addElement($element);
         }
         foreach ($context->getPhastJavaScripts() as $script) {

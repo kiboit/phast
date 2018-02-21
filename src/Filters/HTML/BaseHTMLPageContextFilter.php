@@ -27,7 +27,7 @@ abstract class BaseHTMLPageContextFilter implements HTMLStreamFilter, HTMLFilter
      */
     abstract protected function handleTag(Tag $tag);
 
-    public function transformElements(HTMLPageContext $context, \Traversable $elements) {
+    public function transformElements(\Traversable $elements, HTMLPageContext $context) {
         $this->context = $context;
         $this->elements = $elements;
         $this->beforeLoop();

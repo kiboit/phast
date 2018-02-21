@@ -21,7 +21,7 @@ class Filter implements HTMLStreamFilter, HTMLFilter {
         $this->serviceUrl = $serviceUrl;
     }
 
-    public function transformElements(HTMLPageContext $context, \Traversable $elements) {
+    public function transformElements(\Traversable $elements, HTMLPageContext $context) {
         $url = (new ServiceRequest())->withUrl(URL::fromString($this->serviceUrl))->serialize();
         $script = new PhastJavaScript(__DIR__ . '/diagnostics.js');
         $script->setConfig('diagnostics', ['serviceUrl' => $url]);

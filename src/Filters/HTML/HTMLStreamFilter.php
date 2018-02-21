@@ -7,10 +7,10 @@ namespace Kibo\Phast\Filters\HTML;
 interface HTMLStreamFilter {
 
     /**
-     * @param HTMLPageContext $context
      * @param \Traversable $elements
+     * @param HTMLPageContext $context
      * @return \Traversable
      */
-    public function transformElements(HTMLPageContext $context, \Traversable $elements);
+    public function transformElements(\Traversable $elements, HTMLPageContext $context);
 
 }

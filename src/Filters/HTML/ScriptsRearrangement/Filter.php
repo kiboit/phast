@@ -25,7 +25,7 @@ class Filter implements HTMLStreamFilter, HTMLFilter {
      */
     private $foundBody = false;
 
-    public function transformElements(HTMLPageContext $context, \Traversable $elements) {
+    public function transformElements(\Traversable $elements, HTMLPageContext $context) {
         foreach ($elements as $element) {
             if ($this->isScript($element)) {
                 $this->scripts[] = $element;
