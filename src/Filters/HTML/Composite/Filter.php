@@ -102,18 +102,16 @@ class Filter {
 
     private function tryToApply($buffer, $time_start) {
 
-        $tokenizer = new PCRETokenizer();
-        $context = new HTMLPageContext($this->baseUrl, $tokenizer->tokenize($buffer));
+        $context = new HTMLPageContext($this->baseUrl);
+        $elements = (new PCRETokenizer())->tokenize($buffer);
 
         foreach ($this->filters as $filter) {
             $this->logger()->info('Starting {filter}', ['filter' => get_class($filter)]);
-            $this->time(get_class($filter), function () use ($filter, $context) {
-                $context->setElements($filter->transformElements($context));
-            });
+            $elements = $filter->transformElements($context, $elements);
         }
 
-        $output = $this->time('Serialization', function () use ($context) {
-            return $context->serialize($this->jsCompiler);
+        $output = $this->time('Serialization', function () use ($context, $elements) {
+            return $context->serialize($this->jsCompiler, $elements);
         });
 
         $time_delta = microtime(true) - $time_start;

@@ -17,15 +17,21 @@ abstract class BaseHTMLPageContextFilter implements HTMLStreamFilter, HTMLFilter
     protected $context;
 
     /**
+     * @var \Traversable
+     */
+    protected $elements;
+
+    /**
      * @param Tag $tag
      * @return Element
      */
     abstract protected function handleTag(Tag $tag);
 
-    public function transformElements(HTMLPageContext $context) {
+    public function transformElements(HTMLPageContext $context, \Traversable $elements) {
         $this->context = $context;
+        $this->elements = $elements;
         $this->beforeLoop();
-        foreach ($context->getElements() as $element) {
+        foreach ($this->elements as $element) {
             if (($element instanceof Tag) && $this->isTagOfInterest($element)) {
                 foreach ($this->handleTag($element) as $item) {
                     yield $item;

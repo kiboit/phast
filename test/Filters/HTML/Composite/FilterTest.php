@@ -219,9 +219,9 @@ class FilterTest extends TestCase {
             ->willReturn('the-js');
         $filterMock = $this->createMock(HTMLStreamFilter::class);
         $filterMock->method('transformElements')
-            ->willReturnCallback(function (HTMLPageContext $context) {
+            ->willReturnCallback(function (HTMLPageContext $context, \Traversable $elements) {
                 $context->addPhastJavascript(new PhastJavaScript('some-file'));
-                return $context->getElements();
+                return $elements;
             });
         $this->filter->addHTMLFilter($filterMock);
 
@@ -237,9 +237,9 @@ class FilterTest extends TestCase {
         $filterMock
             ->expects($expectation)
             ->method('transformElements')
-            ->willReturnCallback(function (HTMLPageContext $context) {
-                $this->parsedElements = iterator_to_array($context->getElements());
-                return new \ArrayIterator($this->parsedElements);
+            ->willReturnCallback(function (HTMLPageContext $context, \Traversable $elements) {
+                $this->parsedElements = $elements;
+                return $elements;
             });
         $this->filter->addHTMLFilter($filterMock);
         return $filterMock;

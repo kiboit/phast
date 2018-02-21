@@ -4,7 +4,6 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
 use Kibo\Phast\Logging\LoggingTrait;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -88,11 +87,6 @@ class Filter extends BaseHTMLPageContextFilter {
     private $cssFilter;
 
     /**
-     * @var Element[]
-     */
-    private $elements;
-
-    /**
      * @var Optimizer
      */
     private $optimizer;
@@ -128,9 +122,8 @@ class Filter extends BaseHTMLPageContextFilter {
     }
 
     protected function beforeLoop() {
-        $this->elements = iterator_to_array($this->context->getElements());
+        $this->elements = iterator_to_array($this->elements);
         $this->optimizer = $this->optimizerFactory->makeForElements(new \ArrayIterator($this->elements));
-        $this->context->setElements(new \ArrayIterator($this->elements));
     }
 
     protected function isTagOfInterest(Tag $tag) {

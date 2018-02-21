@@ -23,18 +23,11 @@ class HTMLPageContext {
     private $phastJavaScripts = [];
 
     /**
-     * @var \Traversable
-     */
-    private $elements;
-
-    /**
      * HTMLPageContext constructor.
      * @param URL $baseUrl
-     * @param \Traversable $elements
      */
-    public function __construct(URL $baseUrl, \Traversable $elements) {
+    public function __construct(URL $baseUrl) {
         $this->baseUrl = $baseUrl;
-        $this->elements = $elements;
     }
 
 
@@ -67,27 +60,13 @@ class HTMLPageContext {
     }
 
     /**
-     * @return \Traversable
-     */
-    public function getElements() {
-        return $this->elements;
-    }
-
-    /**
-     * @param \Traversable $elements
-     */
-    public function setElements(\Traversable $elements) {
-        $this->elements = $elements;
-    }
-
-    /**
      * @param PhastJavaScriptCompiler $jsCompiler
      * @return string
      */
-    public function serialize(PhastJavaScriptCompiler $jsCompiler) {
+    public function serialize(PhastJavaScriptCompiler $jsCompiler, \Traversable $elements) {
         $scriptsAdded = false;
         $output = '';
-        foreach ($this->elements as $element) {
+        foreach ($elements as $element) {
             if ($this->isClosingBody($element) && $this->shouldAddPhastJS($scriptsAdded)) {
                 $output .= $this->getCompiledPhastJS($jsCompiler);
             }

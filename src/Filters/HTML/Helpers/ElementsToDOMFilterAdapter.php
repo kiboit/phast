@@ -9,15 +9,16 @@ use Kibo\Phast\Parsing\HTML\HTMLStream;
 
 trait ElementsToDOMFilterAdapter {
 
-    public function transformElements(HTMLPageContext $context) {
-        return $context->getElements();
+    public function transformElements(HTMLPageContext $context, \Traversable $elements) {
+        return $elements;
     }
 
     public function transformHTMLDOM(DOMDocument $document) {
-        $context = new HTMLPageContext($document->getBaseURL(), $document->getStream()->getElements());
+        $elements = $document->getStream()->getElements();
+        $context = new HTMLPageContext($document->getBaseURL());
         $stream = new HTMLStream();
         $document->setStream($stream);
-        foreach ($this->transformElements($context) as $element) {
+        foreach ($this->transformElements($context, $elements) as $element) {
             $stream->addElement($element);
         }
         foreach ($context->getPhastJavaScripts() as $script) {
