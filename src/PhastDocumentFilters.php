@@ -15,14 +15,16 @@ class PhastDocumentFilters {
 
     private $buffer = '';
 
+    private $offset = 0;
+
     private $startPattern = '~
-        ^ (
+        (
             \s*+ <!doctype\s++html> |
             \s*+ <html> |
             \s*+ <head> |
             \s*+ <!--.*?-->
         )++
-    ~xsi';
+    ~xsiA';
 
     public static function deploy(array $userConfig) {
         $request = ServiceRequest::fromHTTPRequest(Request::fromGlobals());
@@ -63,8 +65,8 @@ class PhastDocumentFilters {
         }
         $this->buffer .= $chunk;
         $output = '';
-        if (preg_match($this->startPattern, $this->buffer, $match)) {
-            $this->buffer = substr($this->buffer, strlen($match[0]));
+        if (preg_match($this->startPattern, $this->buffer, $match, $this->offset)) {
+            $this->offset += strlen($match[0]);
             $output .= $match[0];
         }
         if ($phase & PHP_OUTPUT_HANDLER_FINAL) {
@@ -74,7 +76,7 @@ class PhastDocumentFilters {
     }
 
     private function finalize() {
-        $result = $this->filter->apply($this->buffer);
+        $result = $this->filter->apply($this->buffer, $this->offset);
         $this->buffer = null;
         return $result;
     }

@@ -43,7 +43,7 @@ class Filter {
      * @param string $buffer
      * @return string
      */
-    public function apply($buffer) {
+    public function apply($buffer, $offset = 0) {
         $time_start = microtime(true);
 
         if (strlen($buffer) > $this->maxBufferSizeToApply) {
@@ -69,6 +69,8 @@ class Filter {
             $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');
             return $buffer;
         }
+
+        $buffer = substr($buffer, $offset);
 
         try {
             $output = $this->tryToApply($buffer, $time_start);
