@@ -115,18 +115,20 @@ class Filter {
         $time_delta = microtime(true) - $time_start;
 
         $time_accounted = 0.;
-        $log = "Page automatically optimized by Phast\n\n";
         arsort($this->timings);
         foreach ($this->timings as $cls => $time) {
             $cls = str_replace('Kibo\Phast\Filters\HTML\\', '', $cls);
-            $log .= sprintf("      % -43s % 4dms\n", $cls, $time*1000);
+            $log .= sprintf("% -43s % 4dms\n", $cls, $time*1000);
             $time_accounted += $time;
         }
         $log .= "\n";
-        $log .= sprintf("      % 43s % 4dms\n", '(other)', ($time_delta - $time_accounted)*1000);
-        $log .= sprintf("      % 43s % 4dms\n", '(total)', $time_delta*1000);
+        $log .= sprintf("% 43s % 4dms\n", '(other)', ($time_delta - $time_accounted)*1000);
+        $log .= sprintf("% 43s % 4dms\n", '(total)', $time_delta*1000);
 
-        $output .= '<script>window.console&&console.log(' . json_encode($log) . ')</script>';
+        $output .= '<script>try{';
+        $output .= 'console.group(' . json_encode("[Phast] Server-side performance metrics") . ');';
+        $output .= 'console.log(' . json_encode($log) . ');console.groupEnd();';
+        $output .= '}catch(e){}</script>';
         $this->logger()->info($log);
         return $output;
     }
