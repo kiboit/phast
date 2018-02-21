@@ -15,7 +15,7 @@ class Tag extends Element {
     /**
      * @var array
      */
-    private $attributes;
+    private $attributes = [];
 
     /**
      * @var string
@@ -35,8 +35,10 @@ class Tag extends Element {
      * @param array $attributes
      */
     public function __construct($tagName, array $attributes = []) {
-        $this->tagName = $tagName;
-        $this->attributes = $attributes;
+        $this->tagName = strtolower($tagName);
+        foreach ($attributes as $name => $value) {
+            $this->attributes[strtolower($name)] = $value;
+        }
     }
 
     /**

@@ -53,6 +53,13 @@ class TagTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('<span></span>', $tag->toString());
     }
 
+    public function testCaseInsensitivity() {
+        $tag = new Tag('SpAn', ['Class' => 'CamelCase']);
+        $this->assertEquals('span', $tag->getTagName());
+        $this->assertTrue($tag->hasAttribute('class'));
+        $this->assertEquals('CamelCase', $tag->getAttribute('class'));
+    }
+
     private function makeTheTag() {
         $tag = new Tag('span', ['class' => 'SoMe\"Class\"']);
         $tag->setOriginalString($this->opening);
