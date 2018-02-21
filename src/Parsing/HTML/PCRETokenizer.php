@@ -41,13 +41,13 @@ class PCRETokenizer {
             (?'closing_tag' </style/?(\s[^a-z>]*+)?> )
         ",
         'TAG' => "
-            < @@tag_name @@attrs? @tag_end
+            < @@tag_name \s*+ @@attrs? @tag_end
         ",
         'tag_name' => "
             [^\s>]++
         ",
         'attrs' => "
-            \s++ ( @attr )*+
+            ( @attr )*+
         ",
         'attr' => "
             \s*+
@@ -93,7 +93,7 @@ class PCRETokenizer {
                       || !empty($match['SCRIPT'][0])
                       || !empty($match['STYLE'][0])
             ) {
-                $attributes = $this->parseAttributes($match['attrs'][0]);
+                $attributes = $match['attrs'][0] === '' ? [] : $this->parseAttributes($match['attrs'][0]);
                 $element = new Tag($match['tag_name'][0], $attributes);
                 $element->setOriginalString($match['TAG'][0]);
                 if (isset($match['body'][1]) && $match['body'][1] != -1) {
