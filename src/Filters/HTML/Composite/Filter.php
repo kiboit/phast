@@ -107,7 +107,9 @@ class Filter {
 
         foreach ($this->filters as $filter) {
             $this->logger()->info('Starting {filter}', ['filter' => get_class($filter)]);
-            $elements = $filter->transformElements($elements, $context);
+            $this->time(get_class($filter), function () use ($filter, $context, &$elements) {
+                $elements = $filter->transformElements($elements, $context);
+            });
         }
 
         $output = $this->time('Serialization', function () use ($context, $elements) {
