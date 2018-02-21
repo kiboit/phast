@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\HTML;
 
 
 use Kibo\Phast\Filters\HTML\Helpers\ElementsToDOMFilterAdapter;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
@@ -33,10 +32,7 @@ abstract class BaseHTMLStreamFilter implements HTMLStreamFilter, HTMLFilter {
         $this->elements = $elements;
         $this->beforeLoop();
         foreach ($this->elements as $element) {
-            if ($element instanceof ClosingTag && $element->getTagName() == 'body') {
-                $this->onBodyEnd();
-                yield $element;
-            } else if (($element instanceof Tag) && $this->isTagOfInterest($element)) {
+            if (($element instanceof Tag) && $this->isTagOfInterest($element)) {
                 foreach ($this->handleTag($element) as $item) {
                     yield $item;
                 }
@@ -44,6 +40,7 @@ abstract class BaseHTMLStreamFilter implements HTMLStreamFilter, HTMLFilter {
                 yield $element;
             }
         }
+        $this->afterLoop();
     }
 
     /**
@@ -57,7 +54,7 @@ abstract class BaseHTMLStreamFilter implements HTMLStreamFilter, HTMLFilter {
 
     protected function beforeLoop() {}
 
-    protected function onBodyEnd() {}
+    protected function afterLoop() {}
 
 
 }

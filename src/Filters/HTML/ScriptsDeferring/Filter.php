@@ -23,7 +23,7 @@ class Filter extends BaseHTMLStreamFilter {
         yield $script;
     }
 
-    protected function onBodyEnd() {
+    protected function afterLoop() {
         $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/rewrite.js'));
     }
 

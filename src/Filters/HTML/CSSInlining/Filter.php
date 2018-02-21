@@ -142,7 +142,7 @@ class Filter extends BaseHTMLStreamFilter {
         return $this->inlineStyle($tag);
     }
 
-    protected function onBodyEnd() {
+    protected function afterLoop() {
         if ($this->withIEFallback) {
             $this->addIEFallbackScript();
         }
