@@ -2,12 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsDeferring;
 
-use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
-class Filter extends BaseHTMLPageContextFilter {
+class Filter extends BaseHTMLStreamFilter {
     use JSDetectorTrait;
 
     protected function isTagOfInterest(Tag $tag) {

@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
-use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
@@ -12,7 +12,7 @@ use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter extends BaseHTMLPageContextFilter {
+class Filter extends BaseHTMLStreamFilter {
     use JSDetectorTrait, LoggingTrait;
 
     /**

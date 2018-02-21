@@ -2,12 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
-use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter extends BaseHTMLPageContextFilter {
+class Filter extends BaseHTMLStreamFilter {
 
     /**
      * @var ImageURLRewriter

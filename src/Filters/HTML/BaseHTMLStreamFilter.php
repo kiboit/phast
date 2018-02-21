@@ -8,7 +8,7 @@ use Kibo\Phast\Filters\HTML\Helpers\ElementsToDOMFilterAdapter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
-abstract class BaseHTMLPageContextFilter implements HTMLStreamFilter, HTMLFilter {
+abstract class BaseHTMLStreamFilter implements HTMLStreamFilter, HTMLFilter {
     use ElementsToDOMFilterAdapter;
 
     /**

@@ -2,12 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\DelayedIFrameLoading;
 
-use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
-class Filter extends BaseHTMLPageContextFilter {
+class Filter extends BaseHTMLStreamFilter {
     use LoggingTrait;
 
     protected $addScript = false;

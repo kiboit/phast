@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-use Kibo\Phast\Filters\HTML\BaseHTMLPageContextFilter;
+use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
@@ -13,7 +13,7 @@ use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter extends BaseHTMLPageContextFilter {
+class Filter extends BaseHTMLStreamFilter {
     use LoggingTrait;
 
     const CSS_IMPORTS_REGEXP = '~
