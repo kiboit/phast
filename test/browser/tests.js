@@ -35,7 +35,7 @@ function test(file, fn, withPhast) {
             var logCount = 0;
 
             Array.prototype.forEach.call(scripts, function (script) {
-                if (/Page automatically optimized/.test(script.textContent)) {
+                if (/Server-side performance metrics/.test(script.textContent)) {
                     logCount++;
                 }
             });
