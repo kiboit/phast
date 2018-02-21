@@ -116,6 +116,7 @@ class Filter {
 
         $time_accounted = 0.;
         arsort($this->timings);
+        $log = '';
         foreach ($this->timings as $cls => $time) {
             $cls = str_replace('Kibo\Phast\Filters\HTML\\', '', $cls);
             $log .= sprintf("% -43s % 4dms\n", $cls, $time*1000);
