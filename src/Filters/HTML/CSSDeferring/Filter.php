@@ -24,7 +24,7 @@ class Filter extends BaseHTMLStreamFilter {
         yield $script;
     }
 
-    protected function afterLoop() {
+    protected function onBodyEnd() {
         if ($this->insertLoader) {
             $this->logger()->info('Inserting JS loader');
             $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/styles-loader.js'));

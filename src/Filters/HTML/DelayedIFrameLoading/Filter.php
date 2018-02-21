@@ -24,7 +24,7 @@ class Filter extends BaseHTMLStreamFilter {
         yield $iframe;
     }
 
-    protected function afterLoop() {
+    protected function onBodyEnd() {
         if ($this->addScript) {
             $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/iframe-loader.js'));
         }
