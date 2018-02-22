@@ -6,15 +6,24 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
 
+    public function setUp() {
+        parent::setUp();
+        $this->filter = new Filter();
+    }
+
     public function testRewriting() {
 
-        $regularFrame = $this->dom->createElement('iframe');
-        $rewrittenFrame = $this->dom->createElement('iframe');
+        $regularFrame = $this->makeMarkedElement('iframe');
+        $rewrittenFrame = $this->makeMarkedElement('iframe');
         $rewrittenFrame->setAttribute('src', 'http://kibo.test/index.php');
         $this->body->appendChild($regularFrame);
         $this->body->appendChild($rewrittenFrame);
 
-        (new Filter())->transformHTMLDOM($this->dom);
+        $this->applyFilter();
+
+
+        $regularFrame = $this->getMatchingElement($regularFrame);
+        $rewrittenFrame = $this->getMatchingElement($rewrittenFrame);
 
         $this->assertFalse($regularFrame->hasAttribute('src'));
         $this->assertFalse($regularFrame->hasAttribute('data-phast-src'));
@@ -23,16 +32,14 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals('about:blank', $rewrittenFrame->getAttribute('src'));
         $this->assertEquals('http://kibo.test/index.php', $rewrittenFrame->getAttribute('data-phast-src'));
 
-        $scripts = $this->dom->getPhastJavaScripts();
-        $this->assertCount(1, $scripts);
-        $this->assertStringEndsWith('DelayedIFrameLoading/iframe-loader.js', $scripts[0]->getFilename());
+        $this->assertHasCompiled('DelayedIFrameLoading/iframe-loader.js');
     }
 
     public function testNotAppendingScript() {
         $frame = $this->dom->createElement('iframe');
         $this->body->appendChild($frame);
-        (new Filter())->transformHTMLDOM($this->dom);
-        $this->assertCount(0, $this->dom->getPhastJavaScripts());
+        $this->applyFilter();
+        $this->assertHasNotCompiledScripts();
     }
 
 }

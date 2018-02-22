@@ -6,34 +6,33 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
 
-    /**
-     * @var Filter
-     */
-    private $filter;
-
     public function setUp() {
         parent::setUp();
         $this->filter = new Filter();
     }
 
     public function testRewriting() {
-        $notInline  = $this->dom->createElement('script');
+        $notInline  = $this->makeMarkedElement('script');
         $notInline->setAttribute('src', 'the-src');
         $notInline->setAttribute('defer', 'defer');
         $notInline->setAttribute('async', 'async');
 
-        $inline = $this->dom->createElement('script');
+        $inline = $this->makeMarkedElement('script');
         $inline->setAttribute('type', 'application/javascript');
         $inline->textContent = 'the-inline-content';
 
-        $nonJS = $this->dom->createElement('script');
+        $nonJS = $this->makeMarkedElement('script');
         $nonJS->setAttribute('type', 'non-js');
 
         $this->head->appendChild($notInline);
         $this->head->appendChild($inline);
         $this->head->appendChild($nonJS);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->applyFilter();
+
+        $notInline = $this->getMatchingElement($notInline);
+        $inline = $this->getMatchingElement($inline);
+        $nonJS = $this->getMatchingElement($nonJS);
 
         $this->assertEquals('phast-script', $notInline->getAttribute('type'));
         $this->assertEquals('the-src', $notInline->getAttribute('src'));
@@ -47,21 +46,20 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals('non-js', $nonJS->getAttribute('type'));
 
-        $scripts = $this->dom->getPhastJavaScripts();
-        $this->assertCount(1, $scripts);
-        $this->assertStringEndsWith('ScriptsDeferring/rewrite.js', $scripts[0]->getFilename());
+        $this->assertHasCompiled('ScriptsDeferring/rewrite.js');
     }
 
     public function testDisableRewriting() {
-        $script = $this->dom->createElement('script');
+        $script = $this->makeMarkedElement('script');
         $script->setAttribute('type', 'text/javascript');
         $script->setAttribute('src', 'the-src');
         $script->setAttribute('data-phast-no-defer', '');
 
         $this->head->appendChild($script);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->applyFilter();
 
+        $script = $this->getMatchingElement($script);
         $this->assertEquals('text/javascript', $script->getAttribute('type'));
         $this->assertFalse($script->hasAttribute('data-phast-no-defer'));
     }

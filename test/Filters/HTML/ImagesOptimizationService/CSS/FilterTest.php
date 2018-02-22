@@ -10,11 +10,6 @@ use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
 
-    /**
-     * @var Filter
-     */
-    private $filter;
-
     public function setUp() {
         parent::setUp();
 
@@ -36,10 +31,11 @@ class FilterTest extends HTMLFilterTestCase {
      * @dataProvider caseProvider
      */
     public function testRewritingInTags($input, $expected) {
-        $style = $this->dom->createElement('style');
+        $style = $this->makeMarkedElement('style');
         $style->textContent = "body { $input }";
         $this->head->appendChild($style);
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->applyFilter();
+        $style = $this->getMatchingElement($style);
         $this->assertEquals("body { $expected }", $style->textContent);
     }
 
@@ -47,10 +43,13 @@ class FilterTest extends HTMLFilterTestCase {
      * @dataProvider caseProvider
      */
     public function testRewritingInAttributes($input, $expected) {
-        $div = $this->dom->createElement('div');
+        $div = $this->makeMarkedElement('div');
         $div->setAttribute('style', $input);
         $this->body->appendChild($div);
-        $this->filter->transformHTMLDOM($this->dom);
+
+        $this->applyFilter();
+
+        $div = $this->getMatchingElement($div);
         $this->assertEquals($expected, $div->getAttribute('style'));
     }
 
@@ -85,15 +84,18 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function testNotRewritingNonWhitelistedUrls() {
         $css = 'background: url("http://somewhere.else/img.png")';
-        $style = $this->dom->createElement('style');
+        $style = $this->makeMarkedElement('style');
         $style->textContent = $css;
         $this->body->appendChild($style);
-        $div = $this->dom->createElement('div');
+
+        $div = $this->makeMarkedElement('div');
         $div->setAttribute('style', $css);
         $this->body->appendChild($div);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->applyFilter();
 
+        $style = $this->getMatchingElement($style);
+        $div = $this->getMatchingElement($div);
         $this->assertEquals($css, $style->textContent);
         $this->assertEquals($css, $div->getAttribute('style'));
     }

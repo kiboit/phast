@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\HTML\ScriptsRearrangement;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 
 class FilterTest extends HTMLFilterTestCase {
 
@@ -18,55 +17,55 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testScriptsMoving() {
-        $dom = $this->dom;
         $head = $this->head;
         $body = $this->body;
 
-        $headScriptNoType = $dom->createElement('script');
+        $headScriptNoType = $this->makeMarkedElement('script', 'head-no-type');
         $head->appendChild($headScriptNoType);
 
-        $headScriptWithTypeText = $dom->createElement('script');
+        $headScriptWithTypeText = $this->makeMarkedElement('script', 'head-type-text');
         $headScriptWithTypeText->setAttribute('type', 'text/javascript');
         $head->appendChild($headScriptWithTypeText);
 
-        $headScriptWithTypeApp = $dom->createElement('script');
+        $headScriptWithTypeApp = $this->makeMarkedElement('script', 'head-type-app');
         $headScriptWithTypeApp->setAttribute('type', 'application/javascript');
         $head->appendChild($headScriptWithTypeApp);
 
-        $headScriptWithTypeCharset = $dom->createElement('script');
+        $headScriptWithTypeCharset = $this->makeMarkedElement('script', 'head-type-charset');
         $headScriptWithTypeCharset->setAttribute('type', 'text/javascript; charset="UTF-8"');
         $head->appendChild($headScriptWithTypeCharset);
 
-        $bodyScriptWithTypeJSON = $dom->createElement('script');
+        $bodyScriptWithTypeJSON = $this->makeMarkedElement('script', 'head-type-json');
         $bodyScriptWithTypeJSON->setAttribute('type', 'application/json');
         $body->appendChild($bodyScriptWithTypeJSON);
 
-        $div = $dom->createElement('div');
+        $div = $this->makeMarkedElement('div', 'div');
         $body->appendChild($div);
 
-        $divScript = $dom->createElement('script');
+        $divScript = $this->makeMarkedElement('script', 'div-script');
         $body->appendChild($divScript);
 
-        $closingDiv = new ClosingTag('div');
-        $body->appendChild($closingDiv);
 
-        $this->filter->transformHTMLDOM($dom);
+        $this->applyFilter();
 
-        $this->assertEquals(2, $this->stream->getElementIndex($this->head));
+        $this->assertEquals(0, $this->head->childNodes->length);
 
-        $openingDivIndex = $this->stream->getElementIndex($div);
-        $this->assertEquals($openingDivIndex + 1, $this->stream->getElementIndex($closingDiv));
+        $elements = $this->body->childNodes;
 
-        $this->assertEquals(4, $this->stream->getElementIndex($bodyScriptWithTypeJSON));
-        $this->assertEquals(7, $this->stream->getElementIndex($headScriptNoType));
-        $this->assertEquals(8, $this->stream->getElementIndex($headScriptWithTypeText));
-        $this->assertEquals(9, $this->stream->getElementIndex($headScriptWithTypeApp));
-        $this->assertEquals(10, $this->stream->getElementIndex($headScriptWithTypeCharset));
-        $this->assertEquals(11, $this->stream->getElementIndex($divScript));
+        $this->assertElementsMatch($bodyScriptWithTypeJSON, $elements->item(0));
+        $this->assertElementsMatch($div, $elements->item(1));
+        $this->assertElementsMatch($headScriptNoType, $elements->item(2));
+        $this->assertElementsMatch($headScriptWithTypeText, $elements->item(3));
+        $this->assertElementsMatch($headScriptWithTypeApp, $elements->item(4));
+        $this->assertElementsMatch($headScriptWithTypeCharset, $elements->item(5));
+        $this->assertElementsMatch($divScript, $elements->item(6));
+
     }
 
     public function testDoubleBodyClosingTag() {
         $this->markTestIncomplete("Test this the 'new' way :)");
     }
+
+
 
 }

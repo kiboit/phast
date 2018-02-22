@@ -2,17 +2,18 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-use Kibo\Phast\Common\DOMDocument;
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\PhastJavaScriptCompiler;
+use Kibo\Phast\Filters\HTML\BaseURLSetter;
+use Kibo\Phast\Filters\HTML\Composite;
+use Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 use Kibo\Phast\Parsing\HTML\HTMLStream;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class HTMLFilterTestCase extends TestCase {
 
-    const BASE_URL = 'http://kibo-test.org';
+    const BASE_URL = 'http://phast.test';
 
     /**
      * @var HTMLStream
@@ -20,67 +21,40 @@ class HTMLFilterTestCase extends TestCase {
     protected $stream;
 
     /**
-     * @var \Kibo\Phast\Common\DOMDocument
+     * @var \DOMDocument
      */
     protected $dom;
 
     /**
-     * @var Tag
-     */
-    protected $openingHtml;
-
-    /**
-     * @var ClosingTag
+     * @var \DOMElement
      */
     protected $html;
 
     /**
-     * @var Tag
-     */
-    protected $openingHead;
-
-    /**
-     * @var ClosingTag
+     * @var \DOMElement
      */
     protected $head;
 
     /**
-     * @var Tag
-     */
-    protected $openingBody;
-
-    /**
-     * @var ClosingTag
+     * @var \DOMElement
      */
     protected $body;
+
+    /**
+     * @var HTMLStreamFilter
+     */
+    protected $filter;
 
     public function setUp() {
         parent::setUp();
 
-        $this->stream = new HTMLStream();
-
-        $jsCompiler = $this->createMock(PhastJavaScriptCompiler::class);
-        $this->dom = DOMDocument::makeForLocation(
-            URL::fromString(self::BASE_URL),
-            $jsCompiler
-        );
-        $this->dom->setStream($this->stream);
-
-        $this->openingHtml = new Tag('html');
-        $this->openingHead = new Tag('head');
-        $this->head = new ClosingTag('head');
-        $this->openingBody = new Tag('body');
-        $this->body = new ClosingTag('body');
-        $this->html = new ClosingTag('html');
-
-
-        $this->stream->addElement($this->openingHtml);
-        $this->stream->addElement($this->openingHead);
-        $this->stream->addElement($this->head);
-        $this->stream->addElement($this->openingBody);
-        $this->stream->addElement($this->body);
-        $this->stream->addElement($this->html);
-
+        $this->dom = new \DOMDocument();
+        $this->html = $this->dom->createElement('html');
+        $this->head = $this->dom->createElement('head');
+        $this->body = $this->dom->createElement('body');
+        $this->dom->appendChild($this->html);
+        $this->html->appendChild($this->head);
+        $this->html->appendChild($this->body);
     }
 
     public function addBaseTag($href) {
@@ -90,12 +64,100 @@ class HTMLFilterTestCase extends TestCase {
         return $base;
     }
 
-    protected function getHeadElements() {
-        return $this->stream->getElementsBetween($this->openingHead, $this->head);
+    protected function applyFilter() {
+        $cache = $this->createMock(Cache::class);
+        $compiler = new PhastJavaScriptCompiler($cache);
+
+        $composite = new Composite\Filter(URL::fromString(self::BASE_URL));
+        $composite->addHTMLFilter(new BaseURLSetter\Filter());
+        $composite->addHTMLFilter($this->filter);
+        $composite->addHTMLFilter(new PhastScriptsCompiler\Filter($compiler));
+
+        $html = $this->dom->saveHTML();
+        $filtered = $composite->apply($html);
+
+        $this->dom = new \DOMDocument();
+        $this->dom->loadHTML($filtered);
+        $this->head = $this->dom->getElementsByTagName('head')->item(0);
+        $this->body = $this->dom->getElementsByTagName('body')->item(0);
     }
 
-    protected function getBodyElements() {
-        return $this->stream->getElementsBetween($this->openingBody, $this->body);
+    protected function assertHasCompiled($scriptName) {
+        $compiled = $this->getCompiledScript();
+        $this->assertNotNull($compiled, 'Failed asserting that phast scripts have been compiled');
+        $names = explode(',', $compiled->getAttribute('data-phast-compiled-js-names'));
+        $this->assertContains($scriptName, $names, "Failed asserting thata $scriptName has been compiled");
     }
+
+    protected function assertHasNotCompiledScripts() {
+        $this->assertNull($this->getCompiledScript(), 'Failed asserting that scripts have not been compiled');
+    }
+
+    /**
+     * @return \DOMElement|null
+     */
+    protected function getCompiledScript() {
+        $allScripts = $this->dom->getElementsByTagName('script');
+        /** @var \DOMElement[] $compiled */
+        $compiled = array_values(array_filter(iterator_to_array($allScripts), function (\DOMElement $element) {
+            return $element->hasAttribute('data-phast-compiled-js-names');
+        }));
+        return empty ($compiled) ? null : $compiled[0];
+    }
+
+    /**
+     * @param \DOMElement $element
+     * @param string | null $mark
+     * @return string
+     */
+    protected function markElement(\DOMElement $element, $mark = null) {
+        if (is_null($mark)) {
+            $mark = uniqid();
+        }
+        $element->setAttribute('id', $mark);
+        return $mark;
+    }
+
+    /**
+     * @param $tagName
+     * @param string|null $mark
+     * @return \DOMElement
+     */
+    protected function makeMarkedElement($tagName, $mark = null) {
+        $element = $this->dom->createElement($tagName);
+        $this->markElement($element, $mark);
+        return $element;
+    }
+
+    /**
+     * @param \DOMElement $element
+     * @return \DOMElement
+     */
+    protected function getMatchingElement(\DOMElement $element) {
+        $this->assertTrue($element->hasAttribute('id'), 'Given element does not have an id');
+        $id = $element->getAttribute('id');
+        $element = $this->dom->getElementById($id);
+        $this->assertNotNull(
+            $element,
+            "Failed asserting that a matching element exists for id $id"
+        );
+        return $element;
+    }
+
+    protected function assertMatchingElementExists(\DOMElement $element) {
+        $this->getMatchingElement($element);
+    }
+
+    protected function assertElementsMatch(\DOMElement $expected, \DOMElement $actual) {
+        $this->assertTrue($expected->hasAttribute('id'), 'Expected element is not marked');
+        $this->assertTrue($actual->hasAttribute('id'), 'Failed asserting elements match. Actual has no mark');
+        $this->assertEquals(
+            $expected->getAttribute('id'),
+            $actual->getAttribute('id'),
+            'Failed asserting elements match.'
+        );
+
+    }
+
 
 }

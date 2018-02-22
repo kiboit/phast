@@ -6,54 +6,43 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
 
-    /**
-     * @var Filter
-     */
-    private $filter;
-
     public function setUp() {
         parent::setUp();
-
         $this->filter = new Filter();
     }
 
     public function testDeferCSS() {
-        $style_link = $this->dom->createElement('link');
-        $style_link->setAttribute('rel', 'stylesheet');
-        $style_link->setAttribute('href', 'test.css');
-        $this->head->appendChild($style_link);
+        $styleLink = $this->dom->createElement('link');
+        $styleLink->setAttribute('rel', 'stylesheet');
+        $styleLink->setAttribute('href', 'test.css');
+        $this->head->appendChild($styleLink);
 
-        $other_link = $this->dom->createElement('link');
-        $this->head->appendChild($other_link);
+        $otherLink = $this->makeMarkedElement('link');
+        $this->head->appendChild($otherLink);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->applyFilter();
 
-        $links = $this->dom->getElementsByTagName('link');
         $scripts = $this->dom->getElementsByTagName('script');
 
-        $this->assertEquals(1, $links->length);
-        $this->assertSame($other_link, $links->item(0));
+        $this->assertMatchingElementExists($otherLink);
 
-        $this->assertEquals(1, $scripts->length);
+        $this->assertGreaterThan(0, $scripts->length);
         $this->assertContains('test.css', $scripts->item(0)->textContent);
         $this->assertEquals('phast-link', $scripts->item(0)->getAttribute('type'));
 
-        $scripts = $this->dom->getPhastJavaScripts();
-        $this->assertCount(1, $scripts);
-        $this->assertStringEndsWith('CSSDeferring/styles-loader.js', $scripts[0]->getFilename());
+
+        $this->assertHasCompiled('CSSDeferring/styles-loader.js');
+
     }
 
     public function testDoNothing() {
-        $other_link = $this->dom->createElement('link');
-        $this->head->appendChild($other_link);
+        $otherLink = $this->makeMarkedElement('link');
+        $this->head->appendChild($otherLink);
 
-        $this->filter->transformHTMLDOM($this->dom);
+        $this->applyFilter();
 
-        $links = $this->dom->getElementsByTagName('link');
-        $scripts = $this->dom->getElementsByTagName('script');
-
-        $this->assertEquals(1, $links->length);
-        $this->assertSame($other_link, $links->item(0));
+        $this->assertMatchingElementExists($otherLink);
+        $scripts = $this->body->getElementsByTagName('script');
 
         $this->assertEquals(0, $scripts->length);
     }

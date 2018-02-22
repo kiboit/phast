@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
+use Kibo\Phast\Parsing\HTML\PCRETokenizer;
 
 class OptimizerTest extends HTMLFilterTestCase {
 
@@ -157,7 +158,8 @@ class OptimizerTest extends HTMLFilterTestCase {
      * @return Optimizer
      */
     private function makeOptimizer() {
-        return new Optimizer($this->dom->getStream()->getElements(), $this->cache);
+        $html = $this->dom->saveHTML();
+        return new Optimizer((new PCRETokenizer())->tokenize($html), $this->cache);
     }
 
     /**
