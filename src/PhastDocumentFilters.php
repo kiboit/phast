@@ -25,7 +25,10 @@ class PhastDocumentFilters {
             return;
         }
         $filter = (new Factory())->make($runtimeConfig);
-        $handler = new OutputBufferHandler($filter);
+        $handler = new OutputBufferHandler(
+            $runtimeConfig['documents']['maxBufferSizeToApply'],
+            $filter
+        );
         $handler->install();
         Log::info('Phast deployed!');
     }

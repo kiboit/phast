@@ -13,8 +13,6 @@ use PHPUnit\Framework\TestCase;
 
 class FilterTest extends TestCase {
 
-    const MAX_BUFFER_SIZE_TO_APPLY = 1024;
-
     /**
      * @var Filter
      */
@@ -27,66 +25,7 @@ class FilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new Filter(
-            self::MAX_BUFFER_SIZE_TO_APPLY,
-            URL::fromString('http://phast.test')
-        );
-    }
-
-    public function testShouldApplyOnHTML() {
-        $this->shouldTransform();
-        $buffer = "<!DOCTYPE html>\n<html>\n<body></body>\n</html>";
-        $filtered = $this->filter->apply($buffer);
-        $this->assertRegExp("~^<!DOCTYPE html>\s*<html>\s*<body></body>\s*</html>~", $filtered);
-    }
-
-    public function testShouldApplyOnXHTML() {
-        $this->shouldTransform();
-        $buffer = "<?xml version=\"1.0\"?\><!DOCTYPE html>\n<html>\n<body></body>\n</html>";
-        $this->filter->apply($buffer);
-    }
-
-    public function testShouldApplyOnLowerDOCTYPE() {
-        $this->shouldTransform();
-        $buffer = "<!doctype html>\n<html>\n<body></body>\n</html>";
-        $this->filter->apply($buffer);
-    }
-
-    public function testShouldApplyWithNoDOCTYPE() {
-        $this->shouldTransform();
-        $buffer = "<html>\n<body></body>\n</html>";
-        $this->filter->apply($buffer);
-    }
-
-    public function testShouldApplyWithWhitespacesStart() {
-        $this->shouldTransform();
-        $buffer = "    \n<!doctype       html>\n<html>\n<body></body>\n</html>";
-        $this->filter->apply($buffer);
-    }
-
-    public function testShouldApplyWithComments() {
-        $this->shouldTransform();
-        $buffer = "<!doctype html>\n<!-- hello -->\n<html>\n<body></body>\n</html>";
-        $this->filter->apply($buffer);
-    }
-
-    public function testShouldNotApplyWithNoBodyEndTag() {
-        $this->shouldNotTransform();
-        $buffer = "<html>\n<body>";
-        $this->filter->apply($buffer);
-    }
-
-    public function testShouldNotApplyIfNotHTML() {
-        $this->shouldNotTransform();
-        $buffer = '<?xml version="1.0"?\><tag>asd</tag>';
-        $this->filter->apply($buffer);
-    }
-
-    public function testNotLoadingBadHTML() {
-        $this->shouldNotTransform();
-        $buffer = "\0<html><body></body></html>";
-        $this->assertEquals($buffer, $this->filter->apply($buffer));
-        $this->assertEmpty($this->parsedElements);
+        $this->filter = new Filter(URL::fromString('http://phast.test'));
     }
 
     public function testShouldReturnApplied() {
@@ -97,52 +36,11 @@ class FilterTest extends TestCase {
         $this->assertNotEquals($buffer, $return);
     }
 
-    public function testShouldReturnOriginal() {
-        $this->shouldNotTransform();
-        $buffer = 'yolo';
-        $this->assertEquals($buffer, $this->filter->apply($buffer));
-    }
-
-    public function testShouldReturnAppliedWithOffset() {
-        $this->shouldTransform();
-        $buffer = "<html><body></body>";
-        $return = $this->filter->apply($buffer, 6);
-        $this->assertTrue(is_string($return));
-        $this->assertStringStartsWith('<body>', $return);
-    }
-
-    public function testShouldReturnOriginalWithOffset() {
-        $this->shouldNotTransform();
-        $buffer = 'Hello, World!';
-        $this->assertEquals('World!', $this->filter->apply($buffer, 7));
-    }
-
     public function testShouldApplyAllFilters() {
         $this->shouldTransform();
         $this->shouldTransform();
         $buffer = '<html><body></body></html>';
         $this->filter->apply($buffer);
-    }
-
-    public function testShouldNotApplyIfBufferIsTooBig() {
-        $this->shouldNotTransform();
-        $buffer = sprintf('<html><body>%s</body></html>', str_pad('', self::MAX_BUFFER_SIZE_TO_APPLY, 's'));
-        $filtered = $this->filter->apply($buffer);
-        $this->assertEquals($buffer, $filtered);
-    }
-
-    public function testShouldNotApplyToAmpWithAsciiDeclaration() {
-        $this->shouldNotTransform();
-        $buffer = '<!doctype html><html amp><body></body></html>';
-        $filtered = $this->filter->apply($buffer);
-        $this->assertEquals($buffer, $filtered);
-    }
-
-    public function testShouldNotApplyToAmpWithUnicodeDeclaration() {
-        $this->shouldNotTransform();
-        $buffer = '<!doctype html><html ⚡><body></body></html>';
-        $filtered = $this->filter->apply($buffer);
-        $this->assertEquals($buffer, $filtered);
     }
 
     public function testShouldOutputUTF8WithDeclaration() {

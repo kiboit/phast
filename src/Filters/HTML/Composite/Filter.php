@@ -12,11 +12,6 @@ class Filter {
     use LoggingTrait;
 
     /**
-     * @var integer
-     */
-    private $maxBufferSizeToApply;
-
-    /**
      * @var URL
      */
     private $baseUrl;
@@ -33,8 +28,7 @@ class Filter {
      * @param int $maxBufferSizeToApply
      * @param URL $baseUrl
      */
-    public function __construct($maxBufferSizeToApply, URL $baseUrl) {
-        $this->maxBufferSizeToApply = $maxBufferSizeToApply;
+    public function __construct(URL $baseUrl) {
         $this->baseUrl = $baseUrl;
     }
 
@@ -42,33 +36,8 @@ class Filter {
      * @param string $fullBuffer
      * @return string
      */
-    public function apply($fullBuffer, $offset = 0) {
+    public function apply($buffer, $offset = 0) {
         $time_start = microtime(true);
-
-        $buffer = substr($fullBuffer, $offset);
-
-        if (strlen($buffer) > $this->maxBufferSizeToApply) {
-            $this->logger()->info(
-                'Buffer exceeds max. size ({buffersize} bytes). Not applying',
-                ['buffersize' => $this->maxBufferSizeToApply]
-            );
-            return $buffer;
-        }
-
-        $pattern = "~
-            ^
-            \s* (<\?xml[^>]*>)?
-            \s* (<!doctype\s+html[^>]*>)?
-            (\s* <!--(.*?)-->)*
-            \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
-            .*
-            ( </body> | </html> )
-        ~isx";
-
-        if (!preg_match($pattern, $fullBuffer)) {
-            $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');
-            return $buffer;
-        }
 
         try {
             $output = $this->tryToApply($buffer, $time_start);
@@ -85,6 +54,7 @@ class Filter {
             );
             $output = $buffer;
         }
+
         return $output;
     }
 

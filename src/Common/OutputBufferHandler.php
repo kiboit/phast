@@ -3,8 +3,10 @@
 namespace Kibo\Phast\Common;
 
 use Kibo\Phast\Filters\HTML\Composite\Filter;
+use Kibo\Phast\Logging\LoggingTrait;
 
 class OutputBufferHandler {
+    use LoggingTrait;
 
     private $filter;
 
@@ -21,7 +23,13 @@ class OutputBufferHandler {
         )++
     ~xsiA';
 
-    public function __construct(Filter $filter) {
+    /**
+     * @var integer
+     */
+    private $maxBufferSizeToApply;
+
+    public function __construct($maxBufferSizeToApply, Filter $filter) {
+        $this->maxBufferSizeToApply = $maxBufferSizeToApply;
         $this->filter = $filter;
     }
 
@@ -41,6 +49,16 @@ class OutputBufferHandler {
             return $chunk;
         }
         $this->buffer .= $chunk;
+        if (strlen($this->buffer) > $this->maxBufferSizeToApply) {
+            $this->logger()->info(
+                'Buffer exceeds max. size ({buffersize} bytes). Not applying',
+                ['buffersize' => $this->maxBufferSizeToApply]
+            );
+            $output = $this->buffer;
+            $this->buffer = null;
+            return $output;
+        }
+
         $output = '';
         if (preg_match($this->startPattern, $this->buffer, $match, 0, $this->offset)) {
             $this->offset += strlen($match[0]);
@@ -53,8 +71,26 @@ class OutputBufferHandler {
     }
 
     private function finalize() {
-        $result = $this->filter->apply($this->buffer, $this->offset);
+        $pattern = "~
+            ^
+            \s* (<\?xml[^>]*>)?
+            \s* (<!doctype\s+html[^>]*>)?
+            (\s* <!--(.*?)-->)*
+            \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
+            .*
+            ( </body> | </html> )
+        ~isx";
+
+        $input = substr($this->buffer, $this->offset);
+
+        if (!preg_match($pattern, $this->buffer)) {
+            $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');
+            return $input;
+        }
+
         $this->buffer = null;
+        $result = $this->filter->apply($input);
+
         return $result;
     }
 
