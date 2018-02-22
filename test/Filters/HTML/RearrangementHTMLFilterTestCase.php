@@ -11,10 +11,4 @@ class RearrangementHTMLFilterTestCase extends HTMLFilterTestCase {
      */
     protected $filter;
 
-    public function testExceptionOnNoBody() {
-        $this->expectException(\Exception::class);
-        $this->dom->setStream(new HTMLStream());
-        $this->filter->transformHTMLDOM($this->dom);
-    }
-
 }

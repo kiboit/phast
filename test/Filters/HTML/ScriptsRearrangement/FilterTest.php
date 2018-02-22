@@ -64,4 +64,9 @@ class FilterTest extends RearrangementHTMLFilterTestCase {
         $this->assertEquals(10, $this->stream->getElementIndex($headScriptWithTypeCharset));
         $this->assertEquals(11, $this->stream->getElementIndex($divScript));
     }
+
+    public function testDoubleBodyClosingTag() {
+        $this->markTestIncomplete("Test this the 'new' way :)");
+    }
+
 }

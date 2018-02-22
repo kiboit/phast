@@ -20,11 +20,6 @@ class Filter implements HTMLStreamFilter, HTMLFilter {
      */
     private $scripts = [];
 
-    /**
-     * @var bool
-     */
-    private $foundBody = false;
-
     public function transformElements(\Traversable $elements, HTMLPageContext $context) {
         foreach ($elements as $element) {
             if ($this->isScript($element)) {
@@ -32,15 +27,15 @@ class Filter implements HTMLStreamFilter, HTMLFilter {
                 continue;
             }
             if ($this->isClosingBody($element)) {
-                $this->foundBody = true;
                 foreach ($this->scripts as $script) {
                     yield $script;
                 }
+                $this->scripts = [];
             }
             yield $element;
         }
-        if (!$this->foundBody) {
-            throw new \Exception('No closing body tag found in document');
+        foreach ($this->scripts as $script) {
+            yield $script;
         }
     }
 
