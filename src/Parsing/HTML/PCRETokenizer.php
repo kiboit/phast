@@ -83,26 +83,26 @@ class PCRETokenizer {
         while (preg_match($this->mainPattern, $data, $match, PREG_OFFSET_CAPTURE, $offset)) {
             if ($match[0][1] > $offset) {
                 $element = new Element();
-                $element->setOriginalString(substr($data, $offset, $match[0][1] - $offset));
+                $element->originalString = substr($data, $offset, $match[0][1] - $offset);
                 yield $element;
             }
             if (!empty($match['COMMENT'][0])) {
                 $element = new Element();
-                $element->setOriginalString($match[0][0]);
+                $element->originalString = $match[0][0];
             } elseif (!empty($match['TAG'][0])
                       || !empty($match['SCRIPT'][0])
                       || !empty($match['STYLE'][0])
             ) {
                 $attributes = $match['attrs'][0] === '' ? [] : $this->parseAttributes($match['attrs'][0]);
                 $element = new Tag($match['tag_name'][0], $attributes);
-                $element->setOriginalString($match['TAG'][0]);
+                $element->originalString = $match['TAG'][0];
                 if (isset($match['body'][1]) && $match['body'][1] != -1) {
                     $element->setTextContent($match['body'][0]);
                     $element = $element->withClosingTag($match['closing_tag'][0]);
                 }
             } elseif (!empty($match['CLOSING_TAG'][0])) {
                 $element = new ClosingTag($match['tag_name'][0]);
-                $element->setOriginalString($match[0][0]);
+                $element->originalString = $match[0][0];
             } else {
                 throw new RuntimeException("Unhandled match:\n" . json_encode($match, JSON_PRETTY_PRINT));
             }
@@ -112,7 +112,7 @@ class PCRETokenizer {
 
         if ($offset < strlen($data) - 1) {
             $element = new Element();
-            $element->setOriginalString(substr($data, $offset));
+            $element->originalString = substr($data, $offset);
             yield $element;
         }
     }

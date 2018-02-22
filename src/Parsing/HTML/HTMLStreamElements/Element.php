@@ -25,7 +25,7 @@ class Element {
     /**
      * @var string
      */
-    protected $originalString;
+    public $originalString;
 
     /**
      * @param HTMLStream $stream
