@@ -44,7 +44,7 @@ class PhastDocumentFilters {
         $handler->startBuffer();
     }
 
-    private function __construct(Filter $filter) {
+    public function __construct(Filter $filter) {
         $this->filter = $filter;
     }
 
@@ -59,7 +59,7 @@ class PhastDocumentFilters {
         ob_implicit_flush(true);
     }
 
-    private function handleChunk($chunk, $phase) {
+    public function handleChunk($chunk, $phase) {
         if ($this->buffer === null) {
             return $chunk;
         }
