@@ -2,10 +2,10 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsRearrangement;
 
-use Kibo\Phast\Filters\HTML\RearrangementHTMLFilterTestCase;
+use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 
-class FilterTest extends RearrangementHTMLFilterTestCase {
+class FilterTest extends HTMLFilterTestCase {
 
     /**
      * @var Filter
