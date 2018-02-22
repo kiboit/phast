@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
-use Kibo\Phast\ValueObjects\URL;
 
 class Filter extends BaseHTMLStreamFilter {
 
@@ -15,20 +14,11 @@ class Filter extends BaseHTMLStreamFilter {
     private $rewriter;
 
     /**
-     * @var URL
-     */
-    private $baseUrl;
-
-    /**
      * Filter constructor.
      * @param ImageURLRewriter $rewriter
      */
     public function __construct(ImageURLRewriter $rewriter) {
         $this->rewriter = $rewriter;
-    }
-
-    public function beforeLoop() {
-        $this->baseUrl = $this->context->getBaseUrl();
     }
 
     public function isTagOfInterest(Tag $tag) {
@@ -42,7 +32,7 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function rewriteSrc(Tag $img) {
-        $url = $this->rewriter->makeURLAbsoluteToBase($img->getAttribute('src'), $this->baseUrl);
+        $url = $this->rewriter->makeURLAbsoluteToBase($img->getAttribute('src'), $this->context->getBaseUrl());
         if (!$this->rewriter->shouldRewriteUrl($url)) {
             return;
         }
@@ -65,7 +55,7 @@ class Filter extends BaseHTMLStreamFilter {
             return;
         }
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) {
-            $url = $this->rewriter->makeURLAbsoluteToBase($match[1], $this->baseUrl);
+            $url = $this->rewriter->makeURLAbsoluteToBase($match[1], $this->context->getBaseUrl());
             if ($this->rewriter->shouldRewriteUrl($url)) {
                 $params = ['src' => $url];
                 $url = $this->rewriter->makeSignedUrl($params);

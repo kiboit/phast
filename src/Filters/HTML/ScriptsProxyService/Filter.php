@@ -16,11 +16,6 @@ class Filter extends BaseHTMLStreamFilter {
     use JSDetectorTrait, LoggingTrait;
 
     /**
-     * @var URL
-     */
-    private $baseUrl;
-
-    /**
      * @var array
      */
     private $config;
@@ -58,10 +53,6 @@ class Filter extends BaseHTMLStreamFilter {
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
-    protected function beforeLoop() {
-        $this->baseUrl = $this->context->getBaseUrl();
-    }
-
     protected function isTagOfInterest(Tag $tag) {
         return $tag->getTagName() == 'script' && $this->isJSElement($tag);
     }
@@ -86,7 +77,7 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function rewriteURL($src, $id) {
-        $url = URL::fromString($src)->withBase($this->baseUrl);
+        $url = URL::fromString($src)->withBase($this->context->getBaseUrl());
         if (!$this->shouldRewriteURL($url)) {
             $this->logger()->info('Not proxying {src}', ['src' => $src]);
             return $src;
@@ -107,7 +98,7 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function shouldRewriteURL(URL $url) {
-        if ($url->isLocalTo($this->baseUrl)) {
+        if ($url->isLocalTo($this->context->getBaseUrl())) {
             return true;
         }
         $str = (string) $url;
