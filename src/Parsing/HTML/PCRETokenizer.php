@@ -33,12 +33,12 @@ class PCRETokenizer {
         'SCRIPT' => "
             (?= <script[\s>]) @@TAG
             (?'body' .*? )
-            (?'closing_tag' </script/?(\s[^a-z>]*+)?> )
+            (?'closing_tag' </script/?+(?:\s[^a-z>]*+)?+> )
         ",
         'STYLE' => "
             (?= <style[\s>]) @@TAG
             (?'body' .*? )
-            (?'closing_tag' </style/?(\s[^a-z>]*+)?> )
+            (?'closing_tag' </style/?+(?:\s[^a-z>]*+)?+> )
         ",
         'TAG' => "
             < @@tag_name \s*+ @@attrs? @tag_end
@@ -47,7 +47,7 @@ class PCRETokenizer {
             [^\s>]++
         ",
         'attrs' => "
-            ( @attr )*+
+            (?: @attr )*+
         ",
         'attr' => "
             \s*+
