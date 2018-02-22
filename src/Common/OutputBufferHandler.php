@@ -42,7 +42,7 @@ class OutputBufferHandler {
         }
         $this->buffer .= $chunk;
         $output = '';
-        if (preg_match($this->startPattern, $this->buffer, $match, $this->offset)) {
+        if (preg_match($this->startPattern, $this->buffer, $match, 0, $this->offset)) {
             $this->offset += strlen($match[0]);
             $output .= $match[0];
         }

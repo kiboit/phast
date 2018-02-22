@@ -103,6 +103,20 @@ class FilterTest extends TestCase {
         $this->assertEquals($buffer, $this->filter->apply($buffer));
     }
 
+    public function testShouldReturnAppliedWithOffset() {
+        $this->shouldTransform();
+        $buffer = "<html><body></body>";
+        $return = $this->filter->apply($buffer, 6);
+        $this->assertTrue(is_string($return));
+        $this->assertStringStartsWith('<body>', $return);
+    }
+
+    public function testShouldReturnOriginalWithOffset() {
+        $this->shouldNotTransform();
+        $buffer = 'Hello, World!';
+        $this->assertEquals('World!', $this->filter->apply($buffer, 7));
+    }
+
     public function testShouldApplyAllFilters() {
         $this->shouldTransform();
         $this->shouldTransform();

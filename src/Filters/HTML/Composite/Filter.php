@@ -38,13 +38,14 @@ class Filter {
         $this->baseUrl = $baseUrl;
     }
 
-
     /**
-     * @param string $buffer
+     * @param string $fullBuffer
      * @return string
      */
-    public function apply($buffer, $offset = 0) {
+    public function apply($fullBuffer, $offset = 0) {
         $time_start = microtime(true);
+
+        $buffer = substr($fullBuffer, $offset);
 
         if (strlen($buffer) > $this->maxBufferSizeToApply) {
             $this->logger()->info(
@@ -53,7 +54,6 @@ class Filter {
             );
             return $buffer;
         }
-
 
         $pattern = "~
             ^
@@ -65,12 +65,10 @@ class Filter {
             ( </body> | </html> )
         ~isx";
 
-        if (!preg_match($pattern, $buffer)) {
+        if (!preg_match($pattern, $fullBuffer)) {
             $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');
             return $buffer;
         }
-
-        $buffer = substr($buffer, $offset);
 
         try {
             $output = $this->tryToApply($buffer, $time_start);
