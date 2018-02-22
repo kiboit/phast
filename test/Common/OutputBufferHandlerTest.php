@@ -3,7 +3,9 @@
 namespace Kibo\Phast;
 
 
-class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
+use Kibo\Phast\Common\OutputBufferHandler;
+
+class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
 
     /** @var PhastDocumentFilters */
     private $handler;
@@ -14,7 +16,7 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
             return strtoupper(substr($buffer, $offset));
         });
 
-        $this->handler = new PhastDocumentFilters($filter);
+        $this->handler = new OutputBufferHandler($filter);
     }
 
     public function testImmediateFinal() {
