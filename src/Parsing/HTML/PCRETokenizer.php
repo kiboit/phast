@@ -119,15 +119,13 @@ class PCRETokenizer {
 
     private function parseAttributes($str) {
         $matches = $this->repeatMatch($this->attributePattern, $str);
-        $attributes = [];
 
         foreach ($matches as $match) {
             // TODO: Move this to Tag. Do not decode/recode unless a specific attribute is changed.
-            $attributes[$match['attr_name'][0]] =
+            yield
+                $match['attr_name'][0] =>
                 isset($match['attr_value'][0]) ? html_entity_decode($match['attr_value'][0], ENT_QUOTES, 'UTF-8') : '';
         }
-
-        return $attributes;
     }
 
     private function repeatMatch($pattern, $subject) {

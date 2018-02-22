@@ -18,6 +18,16 @@ class Tag extends Element {
     private $attributes = [];
 
     /**
+     * @var array
+     */
+    private $newAttributes = [];
+
+    /**
+     * @var \Iterator
+     */
+    private $attributeReader;
+
+    /**
      * @var string
      */
     private $textContent = '';
@@ -32,12 +42,16 @@ class Tag extends Element {
     /**
      * Tag constructor.
      * @param $tagName
-     * @param array $attributes
+     * @param array|\Traversable $attributes
      */
-    public function __construct($tagName, array $attributes = []) {
+    public function __construct($tagName, $attributes = []) {
         $this->tagName = strtolower($tagName);
-        foreach ($attributes as $name => $value) {
-            $this->attributes[strtolower($name)] = $value;
+        if ($attributes instanceof \Iterator) {
+            $this->attributeReader = $attributes;
+        } elseif (is_array($attributes)) {
+            $this->attributeReader = new \ArrayIterator($attributes);
+        } else {
+            throw new \InvalidArgumentException("Attributes must be array or Iterator");
         }
     }
 
@@ -53,7 +67,7 @@ class Tag extends Element {
      * @return bool
      */
     public function hasAttribute($attrName) {
-        return isset ($this->attributes[$attrName]);
+        return $this->getAttribute($attrName) !== null;
     }
 
     /**
@@ -61,7 +75,31 @@ class Tag extends Element {
      * @return mixed|null
      */
     public function getAttribute($attrName) {
-        return $this->hasAttribute($attrName) ? $this->attributes[$attrName] : null;
+        if (array_key_exists($attrName, $this->newAttributes)) {
+            return $this->newAttributes[$attrName];
+        }
+        if (!array_key_exists($attrName, $this->attributes)) {
+            $this->readUntilAttribute($attrName);
+        }
+        if (isset($this->attributes[$attrName])) {
+            return $this->attributes[$attrName];
+        }
+    }
+
+    private function readUntilAttribute($attrName) {
+        if (!$this->attributeReader) {
+            return;
+        }
+        while ($this->attributeReader->valid()) {
+            $name = strtolower($this->attributeReader->key());
+            $value = $this->attributeReader->current();
+            $this->attributeReader->next();
+            $this->attributes[$name] = $value;
+            if ($name == $attrName) {
+                return;
+            }
+        }
+        $this->attributeReader = null;
     }
 
     /**
@@ -70,17 +108,15 @@ class Tag extends Element {
      */
     public function setAttribute($attrName, $value) {
         $this->dirty = true;
-        $this->attributes[$attrName] = $value;
+        $this->newAttributes[$attrName] = $value;
     }
 
     /**
-     * @param string $attr
+     * @param string $attrName
      */
-    public function removeAttribute($attr) {
+    public function removeAttribute($attrName) {
         $this->dirty = true;
-        if ($this->hasAttribute($attr)) {
-            unset ($this->attributes[$attr]);
-        }
+        $this->newAttributes[$attrName] = null;
     }
 
     /**
@@ -137,8 +173,12 @@ class Tag extends Element {
 
     private function generateOpeningTag() {
         $parts = ['<' . $this->tagName];
-        foreach ($this->attributes as $name => $value) {
-            $parts[] = $name . '="' . htmlspecialchars($value) . '"';
+        $this->readUntilAttribute(null);
+        $attributes = array_merge($this->attributes, $this->newAttributes);
+        foreach ($attributes as $name => $value) {
+            if ($value !== null) {
+                $parts[] = $name . '="' . htmlspecialchars($value) . '"';
+            }
         }
         return join(' ', $parts) . '>';
     }
