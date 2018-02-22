@@ -3,39 +3,50 @@
 namespace Kibo\Phast\Filters\HTML\BaseURLSetter;
 
 
+use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
+use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
-use Kibo\Phast\ValueObjects\URL;
 
-class FilterTest extends \PHPUnit_Framework_TestCase {
+class FilterTest extends HTMLFilterTestCase {
 
     public function testBaseURLSetting() {
-        $original = 'http://phast.test';
-        $context = new HTMLPageContext(URL::fromString($original));
-        $elements = [
-            new Tag('html'),
-            new Tag('head'),
-            new Tag('base', ['target' => '_self']),
-            new Tag('base', ['href' => '/dir/']),
-            new Tag('body')
-        ];
+        $checkPoint1 = $this->makeMarkedElement('meta');
+        $checkPoint1->setAttribute('data-expected-base', self::BASE_URL);
+        $this->head->appendChild($checkPoint1);
 
-        $transformed = (new Filter())->transformElements(new \ArrayIterator($elements), $context);
+        $baseWithTarget = $this->makeMarkedElement('base');
+        $baseWithTarget->setAttribute('target', '_self');
+        $this->head->appendChild($baseWithTarget);
 
-        $transformed->current();
-        $this->assertEquals($original, $context->getBaseUrl());
-        $transformed->next();
-        $this->assertEquals($original, $context->getBaseUrl());
-        $transformed->next();
-        $this->assertEquals($original, $context->getBaseUrl());
+        $checkPoint2 = $this->makeMarkedElement('meta');
+        $checkPoint2->setAttribute('data-expected-base', self::BASE_URL);
+        $this->head->appendChild($checkPoint2);
 
-        $expected = $original . '/dir/';
-        $transformed->next();
-        $this->assertEquals($expected, $context->getBaseUrl());
-        $transformed->next();
-        $this->assertEquals($expected, $context->getBaseUrl());
+        $baseWithHref = $this->makeMarkedElement('base');
+        $baseWithHref->setAttribute('href', '/dir/');
+        $this->head->appendChild($baseWithHref);
 
+        $checkPoint3 = $this->makeMarkedElement('meta');
+        $checkPoint3->setAttribute('data-expected-base', self::BASE_URL . '/dir/');
+        $this->head->appendChild($checkPoint3);
 
+        $this->filter = $this->createMock(HTMLStreamFilter::class);
+        $this->filter->expects($this->once())
+            ->method('transformElements')
+            ->willReturnCallback(function (\Traversable $elements, HTMLPageContext $context) {
+                /** @var Tag $element */
+                foreach ($elements as $element) {
+                    if ($element instanceof Tag && $element->hasAttribute('data-expected-base')) {
+                        $this->assertEquals(
+                            $element->getAttribute('data-expected-base'),
+                            $context->getBaseUrl()
+                        );
+                    }
+                    yield $element;
+                }
+            });
+
+        $this->applyFilter();
     }
-
 }

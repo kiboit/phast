@@ -41,6 +41,16 @@ class HTMLFilterTestCase extends TestCase {
     protected $body;
 
     /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $compilerCache;
+
+    /**
+     * @var PhastJavaScriptCompiler
+     */
+    protected $jsCompiler;
+
+    /**
      * @var HTMLStreamFilter
      */
     protected $filter;
@@ -55,6 +65,9 @@ class HTMLFilterTestCase extends TestCase {
         $this->dom->appendChild($this->html);
         $this->html->appendChild($this->head);
         $this->html->appendChild($this->body);
+
+        $this->compilerCache = $this->createMock(Cache::class);
+        $this->jsCompiler = new PhastJavaScriptCompiler($this->compilerCache);
     }
 
     public function addBaseTag($href) {
@@ -64,22 +77,24 @@ class HTMLFilterTestCase extends TestCase {
         return $base;
     }
 
-    protected function applyFilter() {
-        $cache = $this->createMock(Cache::class);
-        $compiler = new PhastJavaScriptCompiler($cache);
+    protected function applyFilter($inputHtml = null, $skipResultParsing = false) {
 
         $composite = new Composite\Filter(URL::fromString(self::BASE_URL));
         $composite->addHTMLFilter(new BaseURLSetter\Filter());
         $composite->addHTMLFilter($this->filter);
-        $composite->addHTMLFilter(new PhastScriptsCompiler\Filter($compiler));
+        $composite->addHTMLFilter(new PhastScriptsCompiler\Filter($this->jsCompiler));
 
-        $html = $this->dom->saveHTML();
+        $html = is_null($inputHtml) ? $this->dom->saveHTML() : $inputHtml;
         $filtered = $composite->apply($html);
 
-        $this->dom = new \DOMDocument();
-        $this->dom->loadHTML($filtered);
-        $this->head = $this->dom->getElementsByTagName('head')->item(0);
-        $this->body = $this->dom->getElementsByTagName('body')->item(0);
+        if (!$skipResultParsing) {
+            $this->dom = new \DOMDocument();
+            $this->dom->loadHTML($filtered);
+            $this->head = $this->dom->getElementsByTagName('head')->item(0);
+            $this->body = $this->dom->getElementsByTagName('body')->item(0);
+        }
+
+        return $filtered;
     }
 
     protected function assertHasCompiled($scriptName) {
