@@ -25,7 +25,6 @@ class Filter {
 
     /**
      * Filter constructor.
-     * @param int $maxBufferSizeToApply
      * @param URL $baseUrl
      */
     public function __construct(URL $baseUrl) {
@@ -33,14 +32,14 @@ class Filter {
     }
 
     /**
-     * @param string $fullBuffer
+     * @param string $buffer
      * @return string
      */
-    public function apply($buffer, $offset = 0) {
-        $time_start = microtime(true);
+    public function apply($buffer) {
+        $timeStart = microtime(true);
 
         try {
-            $output = $this->tryToApply($buffer, $time_start);
+            return $this->tryToApply($buffer, $timeStart);
         } catch (\Exception $e) {
             $this->logger()->critical(
                 'Phast: CompositeHTMLFilter: {exception} Msg: {message}, Code: {code}, File: {file}, Line: {line}',
@@ -52,17 +51,15 @@ class Filter {
                     'line' => $e->getLine()
                 ]
             );
-            $output = $buffer;
+            return $buffer;
         }
-
-        return $output;
     }
 
     public function addHTMLFilter(HTMLStreamFilter $filter) {
         $this->filters[] = $filter;
     }
 
-    private function tryToApply($buffer, $time_start) {
+    private function tryToApply($buffer, $timeStart) {
 
         $context = new HTMLPageContext($this->baseUrl);
         $elements = (new PCRETokenizer())->tokenize($buffer);
@@ -82,19 +79,21 @@ class Filter {
             return $output;
         });
 
-        $time_delta = microtime(true) - $time_start;
+        $timeDelta = microtime(true) - $timeStart;
 
-        $time_accounted = 0.;
-        arsort($this->timings);
+        $msTimings = array_map(function ($t) { return round($t * 1000); }, $this->timings);
+        arsort($msTimings);
+
+        $timeAccounted = 0.;
         $log = '';
-        foreach ($this->timings as $cls => $time) {
+        foreach ($msTimings as $cls => $time) {
             $cls = str_replace('Kibo\Phast\Filters\HTML\\', '', $cls);
-            $log .= sprintf("% -43s % 4dms\n", $cls, $time*1000);
-            $time_accounted += $time;
+            $log .= sprintf("% -43s % 4dms\n", $cls, $time);
+            $timeAccounted += $time / 1000;
         }
         $log .= "\n";
-        $log .= sprintf("% 43s % 4dms\n", '(other)', ($time_delta - $time_accounted)*1000);
-        $log .= sprintf("% 43s % 4dms\n", '(total)', $time_delta*1000);
+        $log .= sprintf("% 43s % 4dms\n", '(other)', ($timeDelta - $timeAccounted)*1000);
+        $log .= sprintf("% 43s % 4dms\n", '(total)', $timeDelta*1000);
 
         $output .= '<script>try{';
         $output .= 'console.group(' . json_encode("[Phast] Server-side performance metrics") . ');';

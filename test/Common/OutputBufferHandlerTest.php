@@ -14,8 +14,8 @@ class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
 
     public function setUp() {
         $filter = $this->createMock(Filters\HTML\Composite\Filter::class);
-        $filter->method('apply')->willReturnCallback(function ($buffer, $offset) {
-            return strtoupper(substr($buffer, $offset));
+        $filter->method('apply')->willReturnCallback(function ($buffer) {
+            return strtoupper($buffer);
         });
 
         $this->handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, $filter);
