@@ -3,36 +3,13 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
-use Kibo\Phast\Parsing\HTML\HTMLStream;
-
 class Element {
-
-    /**
-     * @var Element
-     */
-    public $previous;
-
-    /**
-     * @var Element
-     */
-    public $next;
-
-    /**
-     * @var HTMLStream
-     */
-    protected $stream;
 
     /**
      * @var string
      */
     public $originalString;
 
-    /**
-     * @param HTMLStream $stream
-     */
-    public function setStream(HTMLStream $stream) {
-        $this->stream = $stream;
-    }
 
     /**
      * @param string $originalString

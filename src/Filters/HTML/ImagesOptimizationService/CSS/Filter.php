@@ -3,11 +3,10 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
 use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
-class Filter extends BaseHTMLStreamFilter implements HTMLFilter {
+class Filter extends BaseHTMLStreamFilter {
 
     /**
      * @var ImageURLRewriter

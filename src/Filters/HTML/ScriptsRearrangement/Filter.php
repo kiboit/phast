@@ -2,18 +2,15 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsRearrangement;
 
-use Kibo\Phast\Common\DOMDocument;
-use Kibo\Phast\Filters\HTML\Helpers\ElementsToDOMFilterAdapter;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
-class Filter implements HTMLStreamFilter, HTMLFilter {
-    use JSDetectorTrait, ElementsToDOMFilterAdapter;
+class Filter implements HTMLStreamFilter {
+    use JSDetectorTrait;
 
     /**
      * @var Tag[]
@@ -45,14 +42,5 @@ class Filter implements HTMLStreamFilter, HTMLFilter {
 
     private function isClosingBody(Element $element) {
         return $element instanceof ClosingTag && $element->getTagName() == 'body';
-    }
-
-    protected function getElementsToRearrange(DOMDocument $document) {
-        $scripts = $document->query('//script');
-        foreach ($scripts as $script) {
-            if ($this->isJSElement($script)) {
-                yield $script;
-            }
-        }
     }
 }
