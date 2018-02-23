@@ -37,7 +37,13 @@ class Response {
      * @return array
      */
     public function getHeaders() {
-        return $this->headers;
+        $headers = $this->headers;
+
+        if (!isset($headers['ETag'])) {
+            $headers['ETag'] = $this->generateETag();
+        }
+
+        return $headers;
     }
 
     /**
@@ -60,6 +66,10 @@ class Response {
      */
     public function setContent($content) {
         $this->content = $content;
+    }
+
+    private function generateETag() {
+        return md5(http_build_query($this->headers) . "\0" . $this->content);
     }
 
 }

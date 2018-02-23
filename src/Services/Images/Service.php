@@ -24,7 +24,6 @@ class Service extends BaseService {
         $srcUrl = $resource->getUrl();
         $response->setHeader('Link', "<$srcUrl>; rel=\"canonical\"");
         $response->setHeader('Content-Type', $resource->getMimeType());
-        $response->setHeader('ETag', md5($resource->getMimeType() . "\n" . $resource->getContent()));
         if ($resource->getMimeType() != Image::TYPE_PNG) {
             $response->setHeader('Vary', 'Accept');
         }
