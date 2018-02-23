@@ -104,6 +104,18 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
         $this->assertCount(3, $elements);
     }
 
+    public function testDuplicateAttributes() {
+        $html = '<div class=first class=second>';
+
+        $tag = $this->tokenizeSingleTag($html);
+
+        $this->assertEquals('first', $tag->getAttribute('class'));
+
+        // Force the reading of remaining attributes
+        $this->assertNull($tag->getAttribute('nope'));
+
+        $this->assertEquals('first', $tag->getAttribute('class'));
+    }
 
     /**
      * @param $html

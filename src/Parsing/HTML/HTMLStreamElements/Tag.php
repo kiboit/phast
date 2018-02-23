@@ -94,7 +94,9 @@ class Tag extends Element {
             $name = strtolower($this->attributeReader->key());
             $value = $this->attributeReader->current();
             $this->attributeReader->next();
-            $this->attributes[$name] = $value;
+            if (!isset($this->attributes[$name])) {
+                $this->attributes[$name] = $value;
+            }
             if ($name == $attrName) {
                 return;
             }
