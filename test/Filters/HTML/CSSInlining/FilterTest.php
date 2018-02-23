@@ -454,16 +454,11 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testInlineUTF8() {
-        $this->markTestIncomplete('Figure out how to perform this test');
         $css = 'body { content: "ü"; }';
-        $this->makeLink($this->head, $css);
-        $this->applyFilter();
-
-        $elements = $this->head->childNodes;
-        $this->assertEquals(1, $elements->length);
-        $this->assertContains('ü', $elements->item(0)->textContent);
-
-        $this->assertContains('ü', $this->dom->serialize());
+        $this->files['/utf-css.css'] = $css;
+        $html = '<html><head><link rel="stylesheet" href="/utf-css.css"></head></html>';
+        $actual = $this->applyFilter($html, false);
+        $this->assertContains('ü', $actual);
     }
 
     public function testRespectingBaseTag() {

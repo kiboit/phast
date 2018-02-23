@@ -63,7 +63,11 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testDoubleBodyClosingTag() {
-        $this->markTestIncomplete("Test this the 'new' way :)");
+        $html = '<html><head><script>the-script</script></head><body></body></body></html>';
+        $actual = $this->applyFilter($html, true);
+
+        $expected = '<html><head></head><body><script>the-script</script></body></body></html>';
+        $this->assertStringStartsWith($expected, $actual);
     }
 
 
