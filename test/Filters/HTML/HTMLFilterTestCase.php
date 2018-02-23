@@ -102,6 +102,16 @@ class HTMLFilterTestCase extends TestCase {
         $this->assertNull($this->getCompiledScript(), 'Failed asserting that scripts have not been compiled');
     }
 
+    protected function assertCompiledConfigEqauls(array $expectedConfig, $actualConfigKey) {
+        $actualConfig = $this->jsCompiler->getLastCompiledConfig();
+        $this->assertObjectHasAttribute($actualConfigKey, $actualConfig, 'Failed asserting that config key exists');
+        $this->assertEquals(
+            $expectedConfig,
+            $actualConfig->$actualConfigKey,
+            'Failed asserting that configs are equal'
+        );
+    }
+
     /**
      * @return \DOMElement|null
      */

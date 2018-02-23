@@ -153,7 +153,10 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertMatchingElementExists($script);
         $this->assertHasCompiled('ScriptsProxyService/rewrite-function.js');
 
-        $this->markTestIncomplete('Figure out how to test the comment');
+        $expectedConfig = $this->config;
+        $expectedConfig['whitelist'] = $expectedConfig['match'];
+        unset ($expectedConfig['match']);
+        $this->assertCompiledConfigEqauls($expectedConfig, 'script-proxy-service');
     }
 
     public function testDontInjectScriptForNothing() {

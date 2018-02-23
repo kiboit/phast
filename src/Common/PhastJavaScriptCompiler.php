@@ -15,11 +15,23 @@ class PhastJavaScriptCompiler {
     private $cache;
 
     /**
+     * @var \stdClass
+     */
+    private $lastCompiledConfig;
+
+    /**
      * PhastJavaScriptCompiler constructor.
      * @param Cache $cache
      */
     public function __construct(Cache $cache) {
         $this->cache = $cache;
+    }
+
+    /**
+     * @return \stdClass|null
+     */
+    public function getLastCompiledConfig() {
+        return $this->lastCompiledConfig;
     }
 
 
@@ -66,6 +78,7 @@ class PhastJavaScriptCompiler {
                 $config->{$script->getConfigKey()} = $script->getConfig();
             }
         }
+        $this->lastCompiledConfig = $config;
         return json_encode(['config' => $config]);
     }
 
