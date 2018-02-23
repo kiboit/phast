@@ -89,11 +89,13 @@ function loadScripts() {
         }
     });
     deferreds.forEach(function (deferred) {
+        deferred.rewritten.removeAttribute('defer');
         replace(deferred.original, deferred.rewritten);
+        lastScript = deferred.rewritten;
     });
     if (lastScript) {
-        lastScript.addEventListener('load', restoreReadyState);
-        lastScript.onerror = restoreReadyState;
+        lastScript.addEventListener('load',  restoreReadyState);
+        lastScript.addEventListener('error', restoreReadyState);
     }
 }
 function restoreReadyState() {
