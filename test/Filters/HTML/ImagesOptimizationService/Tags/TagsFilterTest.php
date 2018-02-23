@@ -52,8 +52,8 @@ class TagsFilterTest extends HTMLFilterTestCase {
     }
 
     public function testRewriteSrcWithSpace() {
-        $this->makeImage(' /img ');
-        $this->applyFilter();
+        $html = '<html><body><img src=" /img "></body></html>';
+        $this->applyFilter($html);
         $this->checkSrc($this->dom->getElementsByTagName('img')->item(0)->getAttribute('src'),
                         ['src' => self::BASE_URL . '/img']);
     }

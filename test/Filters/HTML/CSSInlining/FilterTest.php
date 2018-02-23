@@ -70,7 +70,7 @@ class FilterTest extends HTMLFilterTestCase {
             ->withConsecutive(['the-file-contents'], ['the-file-2-contents'])
             ->willReturnArgument(0);
 
-        $this->runTheFilter();
+        $this->applyFilter();
 
 
         $styles = $this->getTheStyles();
@@ -99,14 +99,14 @@ class FilterTest extends HTMLFilterTestCase {
     public function testCallingTheFilterOnBothStylesAndLinks() {
         $this->makeLink($this->head, 'the-file-contents');
         $this->head->appendChild($this->makeMarkedElement('style'));
-        $this->runTheFilter();
+        $this->applyFilter();
         $this->assertEquals(2, $this->cssFilterCalledTimes);
     }
 
     public function testNotAddingPhastHrefToExistingStyleTags() {
         $style = $this->makeMarkedElement('style');
         $this->head->appendChild($style);
-        $this->runTheFilter();
+        $this->applyFilter();
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertFalse($styles->item(0)->hasAttribute('data-phast-href'));
         $this->assertHasNotCompiledScripts();
@@ -118,7 +118,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->optimizerMock->expects($this->once())
             ->method('optimizeCSS')
             ->willReturn(null);
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $this->assertHasNotCompiledScripts();
 
@@ -137,7 +137,7 @@ class FilterTest extends HTMLFilterTestCase {
             ->method('optimizeCSS')
             ->with($originalContent)
             ->willReturn($optimizedContent);
-        $this->runTheFilter();
+        $this->applyFilter();
         $style = $this->head->getElementsByTagName('style')->item(0);
         $this->assertEquals($originalContent, $style->textContent);
         $this->assertFalse($style->hasAttribute('data-phast-href'));
@@ -154,7 +154,7 @@ class FilterTest extends HTMLFilterTestCase {
         $noHref->removeAttribute('href');
         $crossSite->setAttribute('href', 'http://www.example.com/some-file.css');
 
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $this->assertEmpty($this->getTheStyles());
 
@@ -169,7 +169,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
         unset ($this->files[self::BASE_URL . '/the-css.css']);
 
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $this->assertEmpty($this->getTheStyles());
 
@@ -191,7 +191,7 @@ class FilterTest extends HTMLFilterTestCase {
     public function testSettingRightCacheMarkerOnLocalScripts() {
         $this->retrieverLastModificationTime = 123;
         $this->makeLink($this->head, 'css');
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $style = $this->head->getElementsByTagName('style')->item(0);
         $url = parse_url($style->getAttribute('data-phast-href'));
@@ -210,7 +210,7 @@ class FilterTest extends HTMLFilterTestCase {
             });
 
         $this->makeLink($this->head, 'some-css');
-        $this->runTheFilter();
+        $this->applyFilter();
     }
 
     public function testInliningImports() {
@@ -234,7 +234,7 @@ class FilterTest extends HTMLFilterTestCase {
         $css = implode("\n", $css);
 
         $this->makeLink($this->head, $css);
-        $this->runTheFilter();
+        $this->applyFilter();
         $styles = $this->getTheStyles();
 
         $this->assertCount(sizeof($formats) + 1, $styles);
@@ -253,7 +253,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files['/file3'] = 'we-should-not-see-this';
         $this->makeLink($this->head, $css);
 
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $headElements = $this->head->childNodes;
         $this->assertEquals(4, $headElements->length);
@@ -281,7 +281,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files['/file2'] = '@import "file1"; sub2';
         $this->makeLink($this->head, $css);
 
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $children = $this->head->childNodes;
         $this->assertEquals(3, $children->length);
@@ -295,7 +295,7 @@ class FilterTest extends HTMLFilterTestCase {
         $css = '@import "something" projection, print; @import "something-else" media and non-media;';
         $link = $this->makeLink($this->head, $css);
         $link->setAttribute('media', 'some, other, screen');
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $headElements = $this->head->childNodes;
         $this->assertEquals(1, $headElements->length);
@@ -310,7 +310,7 @@ class FilterTest extends HTMLFilterTestCase {
     public function testNotAddingNonsenseMedia() {
         $css = '@import "something"; the-css';
         $this->makeLink($this->head, $css);
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $elements = $this->head->childNodes;
         $this->assertFalse($elements->item(0)->hasAttribute('media'));
@@ -327,7 +327,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->makeLink($this->head, 'css4', 'https://fonts.googleapis.com/missing');
         unset ($this->files['https://fonts.googleapis.com/missing']);
 
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $headElements = $this->head->childNodes;
         $notAllowedLink = $headElements->item(0);
@@ -373,7 +373,7 @@ class FilterTest extends HTMLFilterTestCase {
             body { color: red; }
         ';
         $this->makeLink($this->head, $css);
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $elements = iterator_to_array($this->head->childNodes);
         $this->assertCount(2, $elements);
@@ -419,7 +419,7 @@ class FilterTest extends HTMLFilterTestCase {
         ';
         $this->makeLink($this->head, $css);
         $this->files['https://fonts.googleapis.com/css1'] = 'hello-world;';
-        $this->runTheFilter();
+        $this->applyFilter();
 
 
         $elements = $this->head->childNodes;
@@ -435,7 +435,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->files['/test'] = 'hello';
 
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $elements = $this->head->childNodes;
         $this->assertEquals(2, $elements->length);
@@ -445,7 +445,7 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function testNotRewritingNotWhitelisted() {
         $this->makeLink($this->head, 'css', 'http://not-allowed.com');
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $elements = $this->head->childNodes;
         $this->assertEquals(1, $elements->length);
@@ -458,7 +458,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->markTestIncomplete('Figure out how to perform this test');
         $css = 'body { content: "ü"; }';
         $this->makeLink($this->head, $css);
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $elements = $this->head->childNodes;
         $this->assertEquals(1, $elements->length);
@@ -475,7 +475,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->head->appendChild($link);
 
         $this->files['/new-root/the-css-file.css'] = 'the-css-content';
-        $this->runTheFilter();
+        $this->applyFilter();
 
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertEquals(1, $styles->length);
@@ -483,20 +483,17 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testSpaceInLinkHref() {
-        $link = $this->makeMarkedElement('link');
-        $link->setAttribute('rel', 'stylesheet');
-        $link->setAttribute('href', ' the-css-file.css ');
-        $this->head->appendChild($link);
+        $html = '<html><head><link rel="stylesheet" href=" the-css-file.css "></head><body></body></html>';
 
         $this->files['/the-css-file.css'] = 'the-css-content';
-        $this->runTheFilter();
+        $this->applyFilter($html);
 
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertEquals(1, $styles->length);
         $this->assertEquals('the-css-content', $styles->item(0)->textContent);
     }
 
-    private function runTheFilter() {
+    protected function applyFilter($htmlInput = null, $skipResultParsing = false) {
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
             ->willReturn('the-token');
@@ -548,7 +545,7 @@ class FilterTest extends HTMLFilterTestCase {
             $cssFilter
         );
         $this->filter = $filter;
-        $this->applyFilter();
+        return parent::applyFilter($htmlInput, $skipResultParsing);
     }
 
     /**
