@@ -27,6 +27,8 @@ return [
 
         'filters' => [
 
+            \Kibo\Phast\Filters\HTML\CommentsRemoval\Filter::class => [],
+
             \Kibo\Phast\Filters\HTML\BaseURLSetter\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [

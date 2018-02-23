@@ -4,6 +4,7 @@ namespace Kibo\Phast\Parsing\HTML;
 
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Comment;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
@@ -87,7 +88,7 @@ class PCRETokenizer {
                 yield $element;
             }
             if (!empty($match['COMMENT'][0])) {
-                $element = new Element();
+                $element = new Comment();
                 $element->originalString = $match[0][0];
             } elseif (!empty($match['TAG'][0])
                       || !empty($match['SCRIPT'][0])
