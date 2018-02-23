@@ -1,18 +1,27 @@
 var scriptIndex = 0;
 
+// Save insertBefore before it is overridden by the scripts proxy filter.
+var insertBefore = Element.prototype.insertBefore;
+
 var go = phast.once(loadScripts);
 
-if (phast.stylesLoading) {
-    phast.onStylesLoaded = go;
-    setTimeout(go, 4000);
-} else {
-    go();
-}
+document.addEventListener('DOMContentLoaded', function () {
+    if (phast.stylesLoading) {
+        phast.onStylesLoaded = go;
+        setTimeout(go, 4000);
+    } else {
+        setTimeout(go);
+    }
+});
 
 function loadScripts() {
+    var scripts = document.querySelectorAll('script[type="phast-script"]');
+    if (scripts.length === 0) {
+        return;
+    }
     var deferreds = [];
     var replace = function (original, rewritten) {
-        original.parentNode.insertBefore(rewritten, original);
+        insertBefore.call(original.parentNode, rewritten, original);
         original.parentNode.removeChild(original);
     };
     var lastScript;
@@ -26,7 +35,7 @@ function loadScripts() {
     } catch (e) {
         window.console && console.error("Phast: Unable to override document.readyState on this browser: ", e);
     }
-    Array.prototype.forEach.call(document.querySelectorAll('script[type="phast-script"]'), function (el) {
+    Array.prototype.forEach.call(scripts, function (el) {
         var script = document.createElement('script');
         Array.prototype.forEach.call(el.attributes, function (attr) {
             script.setAttribute(attr.nodeName, attr.nodeValue);
