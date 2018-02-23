@@ -23,6 +23,9 @@ class Filter implements HTMLStreamFilter{
         $script = new PhastJavaScript(__DIR__ . '/diagnostics.js');
         $script->setConfig('diagnostics', ['serviceUrl' => $url]);
         $context->addPhastJavaScript($script);
+        foreach ($elements as $element) {
+            yield $element;
+        }
     }
 
 
