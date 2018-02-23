@@ -82,10 +82,8 @@ class FilterTest extends HTMLFilterTestCase {
         $noRewrite2 = $this->getMatchingElement($noRewrite2);
 
         foreach ([$rewrite1, $rewrite2, $rewrite3] as $i => $script) {
-            $url = parse_url($script->getAttribute('src'));
+            list ($query, $url) = $this->parseSrc($script);
             $this->assertEquals('script-proxy.php', $url['path']);
-            $query = [];
-            parse_str($url['query'], $query);
             $this->assertArrayHasKey('src', $query);
             $this->assertArrayHasKey('cacheMarker', $query);
             $this->assertEquals($urls[$i], $query['src']);
@@ -94,6 +92,65 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
         $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
+    }
+
+    public function testSettingDifferentIds() {
+        $urls = ['script-a', 'script-b', 'script-b'];
+        $scripts = [];
+        foreach ($urls as $url) {
+            $script = $this->makeMarkedElement('script');
+            $script->setAttribute('src', $url);
+            $this->head->appendChild($script);
+            $scripts[] = $script;
+        }
+        $this->applyFilter();
+        foreach ($scripts as $script) {
+            $script = $this->getMatchingElement($script);
+            list ($query) = $this->parseSrc($script);
+
+            $this->assertArrayHasKey('id', $query);
+            if (isset ($lastId)) {
+                $this->assertNotEquals($lastId, $query['id']);
+            }
+            $lastId = $query['id'];
+        }
+    }
+
+    public function testSettingSameIdForSameURLInDifferentDocs() {
+        $scriptA = $this->makeMarkedElement('script');
+        $scriptA->setAttribute('src', 'url-a');
+
+        $scriptB = $this->makeMarkedElement('script');
+        $scriptB->setAttribute('src', 'url-b');
+
+        $this->head->appendChild($scriptA);
+        $this->head->appendChild($scriptB);
+
+        $this->applyFilter();
+
+        $scriptA1 = $this->getMatchingElement($scriptA);
+        $scriptB1 = $this->getMatchingElement($scriptB);
+
+        $this->setUp();
+
+        $scriptA = $this->makeMarkedElement('script');
+        $scriptA->setAttribute('src', 'url-a');
+
+        $scriptB = $this->makeMarkedElement('script');
+        $scriptB->setAttribute('src', 'url-b');
+
+        $this->head->appendChild($scriptB);
+        $this->head->appendChild($scriptA);
+
+        $this->applyFilter();
+
+        $scriptA2 = $this->getMatchingElement($scriptA);
+        $scriptB2 = $this->getMatchingElement($scriptB);
+
+        $this->assertEquals($scriptA1->getAttribute('src'), $scriptA2->getAttribute('src'));
+        $this->assertEquals($scriptB1->getAttribute('src'), $scriptB2->getAttribute('src'));
+
+
     }
 
     public function testSettingLastModifiedTimeForCacheMarker() {
@@ -175,5 +232,12 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertHasNotCompiledScripts();
     }
 
+    private function parseSrc(\DOMElement $script) {
+        $url = parse_url($script->getAttribute('src'));
+        $this->assertEquals('script-proxy.php', $url['path']);
+        $query = [];
+        parse_str($url['query'], $query);
+        return [$query, $url];
+    }
 
 }

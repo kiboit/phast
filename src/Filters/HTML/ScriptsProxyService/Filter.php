@@ -30,7 +30,7 @@ class Filter extends BaseHTMLStreamFilter {
      */
     private $functions;
 
-    private $id = 0;
+    private $ids = [];
 
     /**
      * @var bool
@@ -70,10 +70,21 @@ class Filter extends BaseHTMLStreamFilter {
         if (!$element->hasAttribute('src')) {
             return;
         }
-        $id = "s" . ++$this->id;
-        $url = $this->rewriteURL(trim($element->getAttribute('src')), $id);
+        $src = trim($element->getAttribute('src'));
+        $id = $this->getRewriteId($src);
+        $url = $this->rewriteURL($src, $id);
         $element->setAttribute('src', $url);
         $element->setAttribute('data-phast-proxied-script', $id);
+    }
+
+    private function getRewriteId($src) {
+        $id = "s" . md5($src);
+        if (isset ($this->ids[$id])) {
+            $id .= '-' . $this->ids[$id]++;
+        } else {
+            $this->ids[$id] = 1;
+        }
+        return $id;
     }
 
     private function rewriteURL($src, $id) {
