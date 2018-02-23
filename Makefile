@@ -23,7 +23,7 @@ vendor/autoload.php : vendor/composer.phar composer.json composer.lock
 
 vendor/composer.phar :
 	mkdir -p vendor
-	wget -O $@~ https://github.com/composer/composer/releases/download/1.5.2/composer.phar
+	wget -O $@~ https://github.com/composer/composer/releases/download/1.6.3/composer.phar
 	chmod +x $@~
 	mv $@~ $@
 
