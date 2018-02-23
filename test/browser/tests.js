@@ -26,6 +26,28 @@ function test(file, fn, withPhast) {
         iframe.contentWindow.assert = assert;
 
         function onFrameLoad() {
+            var complete = 0;
+            var interval = 1;
+
+            setTimeout(waitForComplete);
+
+            function waitForComplete() {
+                if (iframe.contentWindow
+                    && iframe.contentWindow.document.readyState === 'complete'
+                ) {
+                    complete++;
+                } else {
+                    complete = 0;
+                }
+                if (complete >= 20) {
+                    setTimeout(runTest);
+                } else {
+                    setTimeout(waitForComplete, interval);
+                }
+            }
+        }
+
+        function runTest() {
             done();
             iframe.removeEventListener('load', onFrameLoad);
 
