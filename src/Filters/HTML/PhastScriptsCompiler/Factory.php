@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 
 use Kibo\Phast\Cache\File\Cache;
-use Kibo\Phast\Common\PhastJavaScriptCompiler;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 
 class Factory implements HTMLFilterFactory {

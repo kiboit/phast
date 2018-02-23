@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Kibo\Phast\Common;
+namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Common\JSMinifier;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
-// TODO: Move to Kibo\Phast\Filters\HTML\PhastScriptsCompiler
 class PhastJavaScriptCompiler {
 
     /**

@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 
-use Kibo\Phast\Common\PhastJavaScriptCompiler;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;

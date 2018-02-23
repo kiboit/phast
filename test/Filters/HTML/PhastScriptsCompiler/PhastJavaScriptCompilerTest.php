@@ -1,9 +1,10 @@
 <?php
 
-namespace Kibo\Phast\Common;
+namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use PHPUnit\Framework\TestCase;
 

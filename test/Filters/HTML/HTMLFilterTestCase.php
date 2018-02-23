@@ -3,10 +3,10 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Cache\Cache;
-use Kibo\Phast\Common\PhastJavaScriptCompiler;
 use Kibo\Phast\Filters\HTML\BaseURLSetter;
 use Kibo\Phast\Filters\HTML\Composite;
 use Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
+use Kibo\Phast\Filters\HTML\PhastScriptsCompiler\PhastJavaScriptCompiler;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
