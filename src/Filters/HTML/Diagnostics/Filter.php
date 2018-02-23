@@ -4,16 +4,13 @@
 namespace Kibo\Phast\Filters\HTML\Diagnostics;
 
 
-use Kibo\Phast\Filters\HTML\Helpers\ElementsToDOMFilterAdapter;
-use Kibo\Phast\Filters\HTML\HTMLFilter;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter implements HTMLStreamFilter, HTMLFilter {
-    use ElementsToDOMFilterAdapter;
+class Filter implements HTMLStreamFilter{
 
     private $serviceUrl;
 
