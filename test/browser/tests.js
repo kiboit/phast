@@ -1,5 +1,5 @@
 function test(file, fn, withPhast) {
-    var name = file.replace(/\.php$/, '');
+    var name = file.replace(/\.php$/, '').replace(/_/g, ' ');
 
     if (withPhast === undefined) {
         withPhast = true;
