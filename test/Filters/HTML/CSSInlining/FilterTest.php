@@ -4,7 +4,6 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceFilter;
@@ -571,14 +570,6 @@ class FilterTest extends HTMLFilterTestCase {
      */
     private function getTheStyles() {
         return iterator_to_array($this->dom->getElementsByTagName('style'));
-    }
-
-    private function assertElementBetween(Element $left, Element $between, Element $right) {
-        $leftIndex = $this->stream->getElementIndex($left);
-        $rightIndex = $this->stream->getElementIndex($right);
-        $betweenIndex = $this->stream->getElementIndex($between);
-        $this->assertGreaterThan($leftIndex, $betweenIndex, 'Element is on the right');
-        $this->assertLessThan($rightIndex, $betweenIndex, 'Element is not the left');
     }
 
 }
