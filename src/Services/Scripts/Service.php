@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Services\Scripts;
 
-use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Services\ProxyBaseService;
 use Kibo\Phast\ValueObjects\Resource;
 
