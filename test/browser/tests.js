@@ -26,6 +26,8 @@ function test(file, fn, withPhast) {
         iframe.contentWindow.assert = assert;
 
         function onFrameLoad() {
+            iframe.removeEventListener('load', onFrameLoad);
+
             var complete = 0;
             var interval = 1;
 
@@ -49,7 +51,6 @@ function test(file, fn, withPhast) {
 
         function runTest() {
             done();
-            iframe.removeEventListener('load', onFrameLoad);
 
             var doc = iframe.contentWindow.document;
 

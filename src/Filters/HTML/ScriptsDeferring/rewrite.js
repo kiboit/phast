@@ -14,6 +14,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+var loadHappened = false;
+
+window.addEventListener('load', function () {
+    loadHappened = true;
+});
+
+var triggerLoad = false;
+
 function loadScripts() {
     var scripts = document.querySelectorAll('script[type="phast-script"]');
     if (scripts.length === 0) {
@@ -34,6 +42,9 @@ function loadScripts() {
         });
     } catch (e) {
         window.console && console.error("Phast: Unable to override document.readyState on this browser: ", e);
+    }
+    if (loadHappened) {
+        triggerLoad = true;
     }
     Array.prototype.forEach.call(scripts, function (el) {
         var script = document.createElement('script');
@@ -90,13 +101,18 @@ function restoreReadyState() {
 
     delete document['readyState'];
 
-    if (document.onreadystatechange) {
-        exec(document.onreadystatechange, document);
+    triggerEvent(document, 'readystatechange');
+    triggerEvent(document, 'DOMContentLoaded');
+
+    if (triggerLoad) {
+        triggerEvent(window, 'load');
     }
 
-    var dcl = document.createEvent("Event");
-    dcl.initEvent("DOMContentLoaded", true, true);
-    window.document.dispatchEvent(dcl);
+    function triggerEvent(on, name) {
+        var e = document.createEvent('Event');
+        e.initEvent(name, true, true);
+        on.dispatchEvent(e);
+    }
 }
 function exec(func, opt_scopeObject) {
     try {
