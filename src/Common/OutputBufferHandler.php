@@ -8,13 +8,7 @@ use Kibo\Phast\Logging\LoggingTrait;
 class OutputBufferHandler {
     use LoggingTrait;
 
-    private $filter;
-
-    private $buffer = '';
-
-    private $offset = 0;
-
-    private $startPattern = '~
+    const START_PATTERN = '~
         (
             \s*+ <!doctype\s++html> |
             \s*+ <html> |
@@ -22,6 +16,21 @@ class OutputBufferHandler {
             \s*+ <!--.*?-->
         )++
     ~xsiA';
+
+    CONST DOCUMENT_PATTERN = "~
+        \s* (<\?xml[^>]*>)?
+        \s* (<!doctype\s+html[^>]*>)?
+        (\s* <!--(.*?)-->)*
+        \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
+        .*
+        ( </body> | </html> )
+    ~xsiA";
+
+    private $filter;
+
+    private $buffer = '';
+
+    private $offset = 0;
 
     /**
      * @var integer
@@ -60,7 +69,7 @@ class OutputBufferHandler {
         }
 
         $output = '';
-        if (preg_match($this->startPattern, $this->buffer, $match, 0, $this->offset)) {
+        if (preg_match(self::START_PATTERN, $this->buffer, $match, 0, $this->offset)) {
             $this->offset += strlen($match[0]);
             $output .= $match[0];
         }
@@ -71,19 +80,9 @@ class OutputBufferHandler {
     }
 
     private function finalize() {
-        $pattern = "~
-            ^
-            \s* (<\?xml[^>]*>)?
-            \s* (<!doctype\s+html[^>]*>)?
-            (\s* <!--(.*?)-->)*
-            \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
-            .*
-            ( </body> | </html> )
-        ~isx";
-
         $input = substr($this->buffer, $this->offset);
 
-        if (!preg_match($pattern, $this->buffer)) {
+        if (!preg_match(self::DOCUMENT_PATTERN, $this->buffer)) {
             $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');
             return $input;
         }
