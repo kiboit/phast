@@ -1,15 +1,15 @@
 <?php
 
 if (PHP_SAPI != 'cli') {
-    die ('CLI sript');
+    echo "This script must be run from the command line.\n";
+    exit(1);
 }
 
-if (!isset ($argv[1])) {
-    die ("Missing \$argv[1]. Specify a php script which must return a callable to profile.\n");
-}
-
-if (!isset ($argv[2])) {
-    die ("Missing \$argv[2]. Specify a number of iterations.");
+if (sizeof($argv) != 3) {
+    echo "Run a script that returns in callable inside a profiling loop for\n";
+    echo "the specified number of iterations.\n\n";
+    echo "Usage: {$argv[0]} <script> <iterations>\n";
+    exit(1);
 }
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -19,7 +19,8 @@ $iterations = (int)$argv[2];
 
 $callback = require_once $file;
 if (!is_callable($callback)) {
-    die ("$file did not return a callable");
+    echo "$file did not return a callable\n";
+    exit(1);
 }
 
 tideways_xhprof_enable();
