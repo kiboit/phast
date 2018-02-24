@@ -78,12 +78,11 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function getRewriteId($src) {
-        $id = "s" . md5($src);
-        if (isset ($this->ids[$id])) {
-            $id .= '-' . $this->ids[$id]++;
-        } else {
-            $this->ids[$id] = 1;
+        $hash = md5($src);
+        if (!isset ($this->ids[$hash])) {
+            $this->ids[$hash] = 0;
         }
+        $id = "s-" . $hash . "-" . ++$this->ids[$hash];
         return $id;
     }
 
