@@ -109,17 +109,11 @@ function restoreReadyState() {
     if (triggerLoad) {
         triggerEvent(window, 'load');
     }
-
-    function triggerEvent(on, name) {
-        var e = document.createEvent('Event');
-        e.initEvent(name, true, true);
-        on.dispatchEvent(e);
-    }
 }
-function exec(func, opt_scopeObject) {
-    try {
-        func.call(opt_scopeObject || window);
-    } catch (err) {}
+function triggerEvent(on, name) {
+    var e = document.createEvent('Event');
+    e.initEvent(name, true, true);
+    on.dispatchEvent(e);
 }
 function fakeDocumentWrite(originalScript, newScript) {
     var scriptId = ++scriptIndex;
