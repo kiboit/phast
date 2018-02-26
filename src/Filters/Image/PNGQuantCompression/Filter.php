@@ -11,8 +11,13 @@ class Filter extends ExternalAppImageFilter {
         return $image->getType() == Image::TYPE_PNG;
     }
 
-    protected function getCommand() {
-        $cmd = $this->config['cmdpath'];
+    protected function getDefaultBinName() {
+        return 'pngquant';
+    }
+
+
+    protected function getCmdArgs() {
+        $cmd = '';
         if (isset ($this->config['quality'])) {
             $cmd .= ' --quality=' . $this->config['quality'];
         }

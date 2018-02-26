@@ -11,8 +11,12 @@ class Filter extends ExternalAppImageFilter {
         return $image->getType() == Image::TYPE_JPEG;
     }
 
-    protected function getCommand() {
-        return $this->config['cmdpath'] . ' -copy none -optimize';
+    protected function getDefaultBinName() {
+        return 'jpegtran';
+    }
+
+    protected function getCmdArgs() {
+        return ' -copy none -optimize';
     }
 
 }

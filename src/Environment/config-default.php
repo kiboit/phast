@@ -106,13 +106,10 @@ return [
             ],
 
             \Kibo\Phast\Filters\Image\PNGQuantCompression\Filter::class => [
-                'cmdpath' => '/usr/bin/pngquant',
                 'quality' => '50-85'
             ],
 
-            \Kibo\Phast\Filters\Image\JPEGTransEnhancer\Filter::class => [
-                'cmdpath' => '/usr/bin/jpegtran'
-            ]
+            \Kibo\Phast\Filters\Image\JPEGTransEnhancer\Filter::class => []
         ]
     ],
 

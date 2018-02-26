@@ -23,10 +23,15 @@ abstract class ExternalAppImageFilter implements ImageFilter {
     /**
      * @return string
      */
-    abstract protected function getCommand();
+    abstract protected function getDefaultBinName();
 
     /**
-     * PNGCompressionImageFilter constructor.
+     * @return string
+     */
+    abstract protected function getCmdArgs();
+
+    /**
+     * ExternalAppImageFilter constructor.
      *
      * @param array $config
      */
@@ -40,10 +45,7 @@ abstract class ExternalAppImageFilter implements ImageFilter {
             return $image;
         }
 
-        if (!file_exists($this->config['cmdpath'])) {
-            throw new ImageProcessingException("Executable not found: " . $this->config['cmdpath']);
-        }
-        $command = $this->getCommand();
+        $command = $this->getBin() . $this->getCmdArgs();
 
         $this->logger()->info('Applying {command}', ['command' => $command]);
 
@@ -80,4 +82,35 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         return $newImage;
     }
 
+    private function getBin() {
+        $bin = $this->getBinFromConfig();
+        if ($bin) {
+            return $bin;
+        }
+        return $this->findBinInEnv();
+    }
+
+    private function getBinFromConfig() {
+        if (isset ($this->config['binpath'])) {
+            if (!file_exists($this->config['binpath'])) {
+                throw new ImageProcessingException("Executable not found: " . $this->config['binpath']);
+            }
+            return $this->config['binpath'];
+        }
+        return false;
+    }
+
+    private function findBinInEnv() {
+        $defaultBin = $this->getDefaultBinName();
+        $paths = explode(':', getenv('PATH'));
+        $paths[] = '/usr/local/bin';
+        $paths[] = '/usr/bin';
+        foreach ($paths as $path) {
+            $bin = $path . '/' . $defaultBin;
+            if (file_exists($bin)) {
+                return $bin;
+            }
+        }
+        throw new ImageProcessingException("Executable not found: " . $defaultBin);
+    }
 }
