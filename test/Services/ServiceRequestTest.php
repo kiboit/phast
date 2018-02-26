@@ -171,13 +171,13 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testGettingSwitchesFromPathInfo() {
-        $pathInfo = '/switches=-2Ddiagnostics.phast';
+        $pathInfo = '/phast=diagnostics,-2Dphast';
         $httpRequest = Request::fromArray([], ['PATH_INFO' => $pathInfo]);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
 
         $expected = [
-            'diagnostics' => false,
-            'phast' => true,
+            'diagnostics' => true,
+            'phast' => false,
         ];
         $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
     }
