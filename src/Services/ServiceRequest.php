@@ -13,6 +13,8 @@ class ServiceRequest {
 
     const FORMAT_PATH  = 2;
 
+    private static $defaultSerializationMode = self::FORMAT_PATH;
+
     /**
      * @var string
      */
@@ -55,9 +57,14 @@ class ServiceRequest {
     }
 
     public static function resetRequestState() {
+        self::$defaultSerializationMode = self::FORMAT_PATH;
         self::$propagatedSwitches = '';
         self::$switches = null;
         self::$documentRequestId = null;
+    }
+
+    public static function setDefaultSerializationMode($mode) {
+        self::$defaultSerializationMode = $mode;
     }
 
     public static function fromHTTPRequest(Request $request) {
@@ -185,10 +192,13 @@ class ServiceRequest {
         return $clone;
     }
 
-    public function serialize($format = self::FORMAT_QUERY) {
+    public function serialize($format = null) {
         $params = $this->getAllParams();
         if ($this->token) {
             $params['token'] = $this->token;
+        }
+        if (is_null($format)) {
+            $format = self::$defaultSerializationMode;
         }
         if ($format == self::FORMAT_PATH) {
             return $this->serializeToPathFormat($params);

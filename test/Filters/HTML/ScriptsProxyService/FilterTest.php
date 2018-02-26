@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Services\ServiceRequest;
 
 class FilterTest extends HTMLFilterTestCase {
 
@@ -26,6 +27,8 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function setUp() {
         parent::setUp();
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
+
         $this->modTime = false;
 
 

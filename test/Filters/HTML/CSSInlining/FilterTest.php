@@ -7,6 +7,7 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceFilter;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
@@ -36,6 +37,7 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function setUp() {
         parent::setUp();
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
 
         $this->retrieverLastModificationTime = false;
         $this->files = [];

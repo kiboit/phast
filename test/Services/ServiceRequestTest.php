@@ -207,7 +207,7 @@ class ServiceRequestTest extends TestCase {
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $url = $serviceRequest->withUrl(URL::fromString('phast.php?service=images'))
                 ->withParams(['k' => 'v'])
-                ->serialize();
+                ->serialize(ServiceRequest::FORMAT_QUERY);
         $this->assertContains('phast=s1.s2.-s3', $url);
     }
 
@@ -255,6 +255,16 @@ class ServiceRequestTest extends TestCase {
             ->withUrl($url)
             ->serialize();
         $this->assertContains('documentRequestId=', $url4);
+    }
+
+    public function testSettingDefaultSerializationMode() {
+        $url = URL::fromString('phast.php?p=v');
+        $pathSerialization = (new ServiceRequest())->withUrl($url)->serialize();
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
+        $querySerialization = (new ServiceRequest())->withUrl($url)->serialize();
+
+        $this->assertEquals('phast.php/p=v', $pathSerialization);
+        $this->assertEquals($url, $querySerialization);
     }
 
     
