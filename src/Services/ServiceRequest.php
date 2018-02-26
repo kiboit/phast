@@ -54,6 +54,12 @@ class ServiceRequest {
         }
     }
 
+    public static function resetRequestState() {
+        self::$propagatedSwitches = '';
+        self::$switches = null;
+        self::$documentRequestId = null;
+    }
+
     public static function fromHTTPRequest(Request $request) {
         $params = $request->getGet();
         $pathInfo = $request->getPathInfo();
@@ -82,6 +88,10 @@ class ServiceRequest {
             self::$documentRequestId = (string)mt_rand(0, 999999999);
         }
         return $instance;
+    }
+
+    public function hasRequestSwitchesSet() {
+        return !empty (self::$propagatedSwitches);
     }
 
     /**

@@ -19,6 +19,10 @@ class PhastDocumentFilters {
             ->getRuntimeConfig()
             ->toArray();
         Log::init($runtimeConfig['logging'], $request, 'dom-filters');
+        if ($request->hasRequestSwitchesSet()) {
+            Log::info('Request has switches set! Sending "noindex" header!');
+            header('X-Robots-Tag: noindex');
+        }
         if (!$runtimeConfig['switches']['phast']) {
             Log::info('Phast is off. Skipping document filter deployment!');
             return;

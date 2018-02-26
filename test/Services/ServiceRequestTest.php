@@ -10,6 +10,11 @@ use PHPUnit\Framework\TestCase;
 
 class ServiceRequestTest extends TestCase {
 
+    public function setUp() {
+        parent::setUp();
+        ServiceRequest::resetRequestState();
+    }
+
     /**
      * @dataProvider getSerializeParamsTestData
      */
@@ -155,6 +160,7 @@ class ServiceRequestTest extends TestCase {
             'diagnostics' => false
 
         ];
+        $this->assertTrue($serviceRequest->hasRequestSwitchesSet());
         $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
     }
 
@@ -162,8 +168,10 @@ class ServiceRequestTest extends TestCase {
         $cookie = ['phast' => 'images,-jpeg,diagnostics'];
         $get =    ['phast' => '-images,-webp'];
         $httpRequest = Request::fromArray($get, [], $cookie);
-        $switches = ServiceRequest::fromHTTPRequest($httpRequest)->getSwitches();
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $switches = $serviceRequest->getSwitches();
 
+        $this->assertTrue($serviceRequest->hasRequestSwitchesSet());
         $this->assertFalse($switches->isOn('jpeg'));
         $this->assertTrue($switches->isOn('diagnostics'));
         $this->assertFalse($switches->isOn('images'));
@@ -179,12 +187,15 @@ class ServiceRequestTest extends TestCase {
             'diagnostics' => true,
             'phast' => false,
         ];
+
+        $this->assertTrue($serviceRequest->hasRequestSwitchesSet());
         $this->assertEquals($expected, $serviceRequest->getSwitches()->toArray());
     }
 
     public function testGettingDefaultSwitches() {
         $httpRequest = Request::fromArray([], []);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $this->assertFalse($serviceRequest->hasRequestSwitchesSet());
         $this->assertEquals(
             ['phast' => true, 'diagnostics' => false],
             $serviceRequest->getSwitches()->toArray()
