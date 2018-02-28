@@ -60,14 +60,6 @@ class TagsFilterTest extends HTMLFilterTestCase {
                         ['src' => self::BASE_URL . '/img']);
     }
 
-    public function testNoRewriteForImagesWithInlineSource() {
-        $src = 'data:image/png;base64,iVBORw0KGgo';
-        $img = $this->makeImage($src, 20, 30);
-        $this->applyFilter();
-        $img = $this->getMatchingElement($img);
-        $this->assertEquals($src, $img->getAttribute('src'));
-    }
-
     public function testNoRewriteForImagesWithNoSrcAttrSet() {
         $img = $this->makeImage('src', 20, 30);
         $img->removeAttribute('src');
@@ -95,15 +87,6 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->assertEquals('6w', $sets[2][1]);
         $this->assertEquals('data:blah', $sets[3][0]);
         $this->assertEquals('53', $sets[3][1]);
-    }
-
-    public function testNotRewritingNonWhitelistHosts() {
-        $img = $this->makeImage('http://external.place/img.png');
-        $img->setAttribute('srcset', 'http://other.place/img.png, http://place3.place/img.png');
-        $this->applyFilter();
-        $img = $this->getMatchingElement($img);
-        $this->assertEquals('http://external.place/img.png', $img->getAttribute('src'));
-        $this->assertEquals('http://other.place/img.png, http://place3.place/img.png', $img->getAttribute('srcset'));
     }
 
     public function testRespectingBaseTagInSrc() {

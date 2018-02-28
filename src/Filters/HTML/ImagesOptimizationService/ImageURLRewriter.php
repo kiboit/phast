@@ -60,39 +60,25 @@ class ImageURLRewriter {
         $this->whitelist = $whitelist;
     }
 
-    public function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
-        $url = trim($url);
-        if (!$url || substr($url, 0, 5) === 'data:') {
-            return null;
+    /**
+     * @param string $url
+     * @param URL|null $baseUrl
+     * @param array $params
+     * @return string
+     */
+    public function rewriteUrl($url, URL $baseUrl = null, array $params = []) {
+        $absolute = $this->makeURLAbsoluteToBase($url, $baseUrl);
+        if ($this->shouldRewriteUrl($absolute)) {
+            $params['src'] = $absolute;
+            return $this->makeSignedUrl($params);
         }
-        $this->logger()->info('Rewriting img {url}', ['url' => $url]);
-        $baseUrl = is_null($baseUrl) ? $this->baseUrl : $baseUrl;
-        return URL::fromString($url)->withBase($baseUrl)->toString();
+        return $url;
     }
 
-    public function shouldRewriteUrl($url) {
-        if (!$url) {
-            return false;
-        }
-        foreach ($this->whitelist as $pattern) {
-            if (preg_match($pattern, $url)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function makeSignedUrl($params) {
-        $modTime = $this->retriever->getLastModificationTime(URL::fromString($params['src']));
-        if ($modTime) {
-            $params['cacheMarker'] = $modTime;
-        }
-        return (new ServiceRequest())->withParams($params)
-            ->withUrl($this->serviceUrl)
-            ->sign($this->signature)
-            ->serialize();
-    }
-    
+    /**
+     * @param $styleContent
+     * @return string
+     */
     public function rewriteStyle($styleContent) {
         return preg_replace_callback(
             '~
@@ -106,14 +92,55 @@ class ImageURLRewriter {
                 )
             ~xiS',
             function ($matches) {
-                $url = $this->makeURLAbsoluteToBase($matches[2]);
-                if ($this->shouldRewriteUrl($url)) {
-                    $params = ['src' => $url];
-                    return $matches[1] . $this->makeSignedUrl($params);
-                }
-                return $matches[1] . $matches[2];
+                return $matches[1] . $this->rewriteUrl($matches[2]);
             },
             $styleContent
         );
+    }
+
+    /**
+     * @param string $url
+     * @param URL|null $baseUrl
+     * @return null|string
+     */
+    private function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
+        $url = trim($url);
+        if (!$url || substr($url, 0, 5) === 'data:') {
+            return null;
+        }
+        $this->logger()->info('Rewriting img {url}', ['url' => $url]);
+        $baseUrl = is_null($baseUrl) ? $this->baseUrl : $baseUrl;
+        return URL::fromString($url)->withBase($baseUrl)->toString();
+    }
+
+    /**
+     * @param string $url
+     * @return bool
+     */
+    private function shouldRewriteUrl($url) {
+        if (!$url) {
+            return false;
+        }
+        foreach ($this->whitelist as $pattern) {
+            if (preg_match($pattern, $url)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param array $params
+     * @return string
+     */
+    private function makeSignedUrl(array $params) {
+        $modTime = $this->retriever->getLastModificationTime(URL::fromString($params['src']));
+        if ($modTime) {
+            $params['cacheMarker'] = $modTime;
+        }
+        return (new ServiceRequest())->withParams($params)
+            ->withUrl($this->serviceUrl)
+            ->sign($this->signature)
+            ->serialize();
     }
 }

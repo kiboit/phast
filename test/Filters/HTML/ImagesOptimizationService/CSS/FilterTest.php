@@ -4,103 +4,42 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
-use Kibo\Phast\Retrievers\Retriever;
-use Kibo\Phast\Security\ServiceSignature;
-use Kibo\Phast\Services\ServiceRequest;
-use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $rewriterMock;
+
     public function setUp() {
         parent::setUp();
-
-        $securityToken = $this->createMock(ServiceSignature::class);
-        $securityToken->method('sign')->willReturn('the-token');
-        $retriever = $this->createMock(Retriever::class);
-        $retriever->method('getLastModificationTime')->willReturn(false);
-
-        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
-
-        $this->filter = new Filter(new ImageURLRewriter(
-            $securityToken,
-            $retriever,
-            URL::fromString(self::BASE_URL . '/css/'),
-            URL::fromString(self::BASE_URL . '/images.php'),
-            ['~' . preg_quote(self::BASE_URL . '') . '~']
-        ));
+        $this->rewriterMock = $this->createMock(ImageURLRewriter::class);
+        $this->rewriterMock->method('rewriteStyle')
+            ->willReturn('rewritten-style');
+        $this->filter = new Filter($this->rewriterMock);
     }
 
-    /**
-     * @dataProvider caseProvider
-     */
-    public function testRewritingInTags($input, $expected) {
+    public function testRewritingInTags() {
         $style = $this->makeMarkedElement('style');
-        $style->textContent = "body { $input }";
+        $style->textContent = "the-original-style";
         $this->head->appendChild($style);
+
         $this->applyFilter();
+
         $style = $this->getMatchingElement($style);
-        $this->assertEquals("body { $expected }", $style->textContent);
+        $this->assertEquals("rewritten-style", $style->textContent);
     }
 
-    /**
-     * @dataProvider caseProvider
-     */
-    public function testRewritingInAttributes($input, $expected) {
+    public function testRewritingInAttributes() {
         $div = $this->makeMarkedElement('div');
-        $div->setAttribute('style', $input);
+        $div->setAttribute('style', 'the-original-style');
         $this->body->appendChild($div);
 
         $this->applyFilter();
 
         $div = $this->getMatchingElement($div);
-        $this->assertEquals($expected, $div->getAttribute('style'));
-    }
-
-    public function caseProvider() {
-        return [
-            [
-                'background: url("images/image1")',
-                'background: url("'
-                . self::BASE_URL . '/images.php?src='
-                . urlencode(self::BASE_URL . '/css/images/image1')
-                . '&token=the-token'
-                . '")'
-            ],
-            [
-                'background: url(" images/image1 ")',
-                'background: url("'
-                . self::BASE_URL . '/images.php?src='
-                . urlencode(self::BASE_URL . '/css/images/image1')
-                . '&token=the-token'
-                . '")'
-            ],
-            [
-                "border-image: url('/images/image2')",
-                'border-image: url(\''
-                . self::BASE_URL . '/images.php?src='
-                . urlencode(self::BASE_URL . '/images/image2')
-                . '&token=the-token'
-                . '\')'
-            ]
-        ];
-    }
-
-    public function testNotRewritingNonWhitelistedUrls() {
-        $css = 'background: url("http://somewhere.else/img.png")';
-        $style = $this->makeMarkedElement('style');
-        $style->textContent = $css;
-        $this->body->appendChild($style);
-
-        $div = $this->makeMarkedElement('div');
-        $div->setAttribute('style', $css);
-        $this->body->appendChild($div);
-
-        $this->applyFilter();
-
-        $style = $this->getMatchingElement($style);
-        $div = $this->getMatchingElement($div);
-        $this->assertEquals($css, $style->textContent);
-        $this->assertEquals($css, $div->getAttribute('style'));
+        $this->assertEquals('rewritten-style', $div->getAttribute('style'));
     }
 
 }

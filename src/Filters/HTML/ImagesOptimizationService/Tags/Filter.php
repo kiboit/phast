@@ -32,21 +32,18 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function rewriteSrc(Tag $img) {
-        $url = $this->rewriter->makeURLAbsoluteToBase($img->getAttribute('src'), $this->context->getBaseUrl());
-        if (!$this->rewriter->shouldRewriteUrl($url)) {
-            return;
-        }
-        $params = ['src' => $url];
+        $url = $img->getAttribute('src');
+        $params = [];
         foreach (['width', 'height'] as $attr) {
             $value = $img->getAttribute($attr);
             if (preg_match('/^[1-9][0-9]*$/', $value)) {
                 $params[$attr] = $value;
             }
         }
-        $img->setAttribute(
-            'src',
-            $this->rewriter->makeSignedUrl($params)
-        );
+        $newURL = $this->rewriter->rewriteUrl($url, $this->context->getBaseUrl(), $params);
+        if ($newURL != $url) {
+            $img->setAttribute('src', $newURL);
+        }
     }
 
     private function rewriteSrcset(Tag $img) {
@@ -55,18 +52,14 @@ class Filter extends BaseHTMLStreamFilter {
             return;
         }
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) {
-            $url = $this->rewriter->makeURLAbsoluteToBase($match[1], $this->context->getBaseUrl());
-            if ($this->rewriter->shouldRewriteUrl($url)) {
-                $params = ['src' => $url];
-                $url = $this->rewriter->makeSignedUrl($params);
-            } else {
-                $url = $match[1];
-            }
+            $url = $this->rewriter->rewriteUrl($match[1], $this->context->getBaseUrl());
             if (isset ($match[2])) {
                 return $url . $match[2];
             }
             return $url;
         }, $srcset);
-        $img->setAttribute('srcset', $rewritten);
+        if ($rewritten != $srcset) {
+            $img->setAttribute('srcset', $rewritten);
+        }
     }
 }
