@@ -7,13 +7,11 @@ use Kibo\Phast\Filters\HTML\BaseURLSetter;
 use Kibo\Phast\Filters\HTML\Composite;
 use Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 use Kibo\Phast\Filters\HTML\PhastScriptsCompiler\PhastJavaScriptCompiler;
+use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
-use PHPUnit\Framework\TestCase;
 
-class HTMLFilterTestCase extends TestCase {
-
-    const BASE_URL = 'http://phast.test';
+class HTMLFilterTestCase extends PhastTestCase {
 
     /**
      * @var \DOMDocument
