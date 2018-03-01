@@ -33,6 +33,9 @@ return [
 
             \Kibo\Phast\Filters\HTML\BaseURLSetter\Filter::class => [],
 
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [
+                'maxImageInliningSize' => 512
+            ],
             \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
@@ -47,7 +50,9 @@ return [
                 ]
             ],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [
+                'maxImageInliningSize' => 512
+            ],
 
             \Kibo\Phast\Filters\HTML\CSSDeferring\Filter::class => [],
 
@@ -119,7 +124,9 @@ return [
             \Kibo\Phast\Filters\CSS\ImportsStripper\Filter::class => [],
             \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
             \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => [],
-            \Kibo\Phast\Filters\CSS\ImageURLRewriter\Filter::class => []
+            \Kibo\Phast\Filters\CSS\ImageURLRewriter\Filter::class => [
+                'maxImageInliningSize' => 512
+            ]
         ]
     ],
 

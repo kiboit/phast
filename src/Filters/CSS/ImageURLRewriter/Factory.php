@@ -10,7 +10,7 @@ class Factory {
 
     public function make(array $config) {
         return new Filter(
-            (new ImageURLRewriterFactory())->make($config)
+            (new ImageURLRewriterFactory())->make($config, Filter::class)
         );
     }
 

@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
@@ -21,15 +22,18 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
             ->willReturn('the-token');
-        $retriever = $this->createMock(Retriever::class);
+        $retriever = $this->createMock(LocalRetriever::class);
         $retriever->method('getLastModificationTime')
             ->willReturn(12345678);
+        $retriever->method('getSize')
+            ->willReturn(100000);
         $this->filter = new Filter(new ImageURLRewriter(
             $signature,
             $retriever,
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
-            ['~' . preg_quote(self::BASE_URL) . '~']
+            ['~' . preg_quote(self::BASE_URL) . '~'],
+            512
         ));
     }
 

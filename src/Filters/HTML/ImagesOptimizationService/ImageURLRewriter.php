@@ -4,6 +4,7 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
 use Kibo\Phast\Logging\LoggingTrait;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
@@ -37,27 +38,31 @@ class ImageURLRewriter {
      */
     protected $whitelist;
 
+    protected $maxImageInliningSize;
+
     /**
-     * ImagesOptimizationServiceHTMLFilter constructor.
-     *
+     * ImageURLRewriter constructor.
      * @param ServiceSignature $signature
-     * @param Retriever $retriever
+     * @param LocalRetriever $retriever
      * @param URL $baseUrl
      * @param URL $serviceUrl
-     * @param string[] $whitelist
+     * @param array $whitelist
+     * @param int $maxImageInliningSize
      */
     public function __construct(
         ServiceSignature $signature,
-        Retriever $retriever,
+        LocalRetriever $retriever,
         URL $baseUrl,
         URL $serviceUrl,
-        array $whitelist
+        array $whitelist,
+        $maxImageInliningSize = 0
     ) {
         $this->signature = $signature;
         $this->retriever = $retriever;
         $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
         $this->whitelist = $whitelist;
+        $this->maxImageInliningSize = $maxImageInliningSize;
     }
 
     /**
@@ -68,11 +73,18 @@ class ImageURLRewriter {
      */
     public function rewriteUrl($url, URL $baseUrl = null, array $params = []) {
         $absolute = $this->makeURLAbsoluteToBase($url, $baseUrl);
-        if ($this->shouldRewriteUrl($absolute)) {
-            $params['src'] = $absolute;
-            return $this->makeSignedUrl($params);
+        if (!$this->shouldRewriteUrl($absolute)) {
+            return $url;
         }
-        return $url;
+        $size = $this->retriever->getSize($absolute);
+        if ($size !== false && $size < $this->maxImageInliningSize) {
+            $dataUrl = $this->makeDataUrl($absolute);
+            if ($dataUrl) {
+                return $dataUrl;
+            }
+        }
+        $params['src'] = $absolute->toString();
+        return $this->makeSignedUrl($params);
     }
 
     /**
@@ -101,7 +113,7 @@ class ImageURLRewriter {
     /**
      * @param string $url
      * @param URL|null $baseUrl
-     * @return null|string
+     * @return URL
      */
     private function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
         $url = trim($url);
@@ -110,7 +122,7 @@ class ImageURLRewriter {
         }
         $this->logger()->info('Rewriting img {url}', ['url' => $url]);
         $baseUrl = is_null($baseUrl) ? $this->baseUrl : $baseUrl;
-        return URL::fromString($url)->withBase($baseUrl)->toString();
+        return URL::fromString($url)->withBase($baseUrl);
     }
 
     /**
@@ -129,15 +141,22 @@ class ImageURLRewriter {
         return false;
     }
 
+    private function makeDataUrl(URL $url) {
+        $content = $this->retriever->retrieve($url);
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
+        if ($mime && substr($mime, 0, 6) == 'image/') {
+            return 'data:' . $mime . ';base64,' . base64_encode($content);
+        }
+        return false;
+    }
+
     /**
      * @param array $params
      * @return string
      */
     private function makeSignedUrl(array $params) {
         $modTime = $this->retriever->getLastModificationTime(URL::fromString($params['src']));
-        if ($modTime) {
-            $params['cacheMarker'] = $modTime;
-        }
+        $params['cacheMarker'] = $modTime;
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
             ->sign($this->signature)
