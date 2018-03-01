@@ -37,6 +37,19 @@ class LocalRetriever implements Retriever {
     }
 
     public function retrieve(URL $url) {
+        return $this->guard($url, function ($file) {
+            return @$this->funcs->file_get_contents($file);
+        });
+
+    }
+
+    public function getLastModificationTime(URL $url) {
+        return $this->guard($url, function ($file) {
+            return @$this->funcs->filemtime($file);
+        });
+    }
+
+    private function guard(URL $url, callable $cb) {
         if (!in_array($this->getExtensionForURL($url), self::getAllowedExtensions())) {
             return false;
         }
@@ -44,15 +57,7 @@ class LocalRetriever implements Retriever {
         if ($file === false) {
             return false;
         }
-        return @$this->funcs->file_get_contents($file);
-    }
-
-    public function getLastModificationTime(URL $url) {
-        $file = $this->getFileForURL($url);
-        if ($file === false) {
-            return false;
-        }
-        return @$this->funcs->filemtime($file);
+        return $cb($file);
     }
 
     private function getExtensionForURL(URL $url) {
