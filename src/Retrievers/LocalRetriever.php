@@ -49,6 +49,12 @@ class LocalRetriever implements Retriever {
         });
     }
 
+    public function getSize(URL $url) {
+        return $this->guard($url, function ($file) {
+            return @$this->funcs->filesize($file);
+        });
+    }
+
     private function guard(URL $url, callable $cb) {
         if (!in_array($this->getExtensionForURL($url), self::getAllowedExtensions())) {
             return false;

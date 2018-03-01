@@ -114,7 +114,8 @@ class LocalRetrieverTest extends TestCase {
     public function retrieverMethods() {
         return [
             ['retrieve', 'file_get_contents'],
-            ['getLastModificationTime', 'filemtime']
+            ['getLastModificationTime', 'filemtime'],
+            ['getSize', 'filesize']
         ];
     }
 
