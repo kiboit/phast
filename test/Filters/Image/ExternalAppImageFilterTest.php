@@ -42,7 +42,7 @@ class ExternalAppImageFilterTest extends TestCase {
     public function setUp() {
         parent::setUp();
         $this->shouldApply = true;
-        $this->binPath = '/usr/local/bin/php';
+        $this->binPath = PHP_BINARY;
         $this->defaultBin = 'php';
         $this->cmdArgs = ' -r "echo \"called\";"';
         $this->imageContent = 'test-image';
@@ -104,7 +104,7 @@ class ExternalAppImageFilterTest extends TestCase {
         $config = $this->binPath ? ['binpath' => $this->binPath] : [];
         $filter = $this->getMockBuilder(ExternalAppImageFilter::class)
             ->setConstructorArgs([$config])
-            ->setMethods(['shouldApply', 'getDefaultBinName', 'getCmdArgs'])
+            ->setMethods(['shouldApply', 'getDefaultBinName', 'getCmdArgs', 'getSearchPaths'])
             ->getMockForAbstractClass();
         $filter->method('shouldApply')
             ->willReturn($this->shouldApply);
@@ -112,6 +112,8 @@ class ExternalAppImageFilterTest extends TestCase {
             ->willReturn($this->defaultBin);
         $filter->method('getCmdArgs')
             ->willReturn($this->cmdArgs);
+        $filter->method('getSearchPaths')
+            ->willReturn([dirname(PHP_BINARY)]);
         $image = new DummyImage();
         $image->setImageString($this->imageContent);
         return $filter->transformImage($image, []);

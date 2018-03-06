@@ -102,15 +102,17 @@ abstract class ExternalAppImageFilter implements ImageFilter {
 
     private function findBinInEnv() {
         $defaultBin = $this->getDefaultBinName();
-        $paths = explode(':', getenv('PATH'));
-        $paths[] = '/usr/local/bin';
-        $paths[] = '/usr/bin';
+        $paths = array_merge(explode(':', getenv('PATH')), $this->getSearchPaths());
         foreach ($paths as $path) {
-            $bin = $path . '/' . $defaultBin;
-            if (file_exists($bin)) {
+            $bin = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $defaultBin;
+            if (@is_executable($bin)) {
                 return $bin;
             }
         }
         throw new ImageProcessingException("Executable not found: " . $defaultBin);
+    }
+
+    protected function getSearchPaths() {
+        return ['/usr/local/bin', '/usr/bin'];
     }
 }
