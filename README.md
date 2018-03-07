@@ -77,13 +77,13 @@ Test your site!
 
 ## Browser compatibility
 
-We support at least the following (and later) versions of the major browsers:
+Phast is tested to work on all browser versions equal or higher than the following:
 
-* Chrome 58
-* Edge
-* Firefox 52
+* Chrome 19
+* Edge (any version)
+* Firefox 20
 * IE 11
-* Safari 5.1 (on Snow Leopard)
+* Safari 5.1
 
 
 ## Thanks, BrowserStack!

@@ -27,7 +27,7 @@ if (!$caps) {
     }
 
     $caps['browserstack.local'] = true;
-    $caps['realMobile'] = !empty($caps['realMobile']);
+    $caps['real_mobile'] = !empty($caps['real_mobile']);
 
     while (true) {
         try {
@@ -105,8 +105,8 @@ function print_line() {
 
 function get_test_run_info(array $caps) {
     $result = "{$caps['browser']}";
-    if (isset ($caps['version'])) {
-        $result .= " {$caps['version']}";
+    if (isset ($caps['browser_version'])) {
+        $result .= " {$caps['browser_version']}";
     }
     $result .= " on {$caps['os']}";
     if (isset ($caps['os_version'])) {
