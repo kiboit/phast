@@ -10,7 +10,7 @@ PageSpeed Insights, and usually reach 100/100 with small adjustments.
 
 A free integration for WordPress is available as
 [PhastPress](https://wordpress.org/plugins/phastpress/)
-([Github](https://github.com/kiboit/phastpress)).
+([GitHub](https://github.com/kiboit/phastpress)).
 
 __[Contact Kibo IT](https://www.kiboit.com/contact)__
 ([email](mailto:info@kiboit.com)): We'd love your feedback. We can help you try out
@@ -79,11 +79,11 @@ Test your site!
 
 Phast is tested to work on all browser versions equal or higher than the following:
 
-* Chrome 19
+* Firefox 56
+* Chrome 62
 * Edge (any version)
-* Firefox 20
-* IE 11
 * Safari 5.1
+* IE 11
 
 
 ## Thanks, BrowserStack!

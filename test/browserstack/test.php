@@ -26,14 +26,15 @@ if (!$caps) {
         exit(255);
     }
 
-    $caps['browserstack.local'] = true;
-    $caps['real_mobile'] = !empty($caps['real_mobile']);
+    $options = $caps;
+    $options['browserstack.local'] = true;
+    $options['real_mobile'] = !empty($caps['real_mobile']);
 
     while (true) {
         try {
             $driver = RemoteWebDriver::create(
                 "https://$username:$access_key@hub-cloud.browserstack.com/wd/hub",
-                $caps,
+                $options,
                 30000,
                 120000
             );
@@ -82,37 +83,20 @@ function get_failed(RemoteWebDriver $driver) {
  */
 function print_errors(array $tests) {
     foreach ($tests as $test) {
-        print_line();
         $name = $test->findElements(WebDriverBy::cssSelector('.test-name'))[0]->getText();
-        echo "Test: $name\n";
-        print_line();
-        echo "Assertions:\n";
+        echo "    Test: $name\n";
         $assertions = $test->findElements(WebDriverBy::cssSelector('.qunit-assert-list .fail .test-message'));
         foreach ($assertions as $assertion) {
-            echo "\t" . $assertion->getText() . "\n";
+            echo "        - " . $assertion->getText() . "\n";
         }
-        print_line();
     }
 }
 
 function print_failed($error, array $caps) {
-    echo "Failed for " . get_test_run_info($caps) . ": $error\n";
-}
-
-function print_line() {
-    echo "-----------------------------------------\n";
-}
-
-function get_test_run_info(array $caps) {
-    $result = "{$caps['browser']}";
-    if (isset ($caps['browser_version'])) {
-        $result .= " {$caps['browser_version']}";
+    echo "Failed: " . generate_options($caps) . "\n";
+    if ($error) {
+        echo "$error\n";
     }
-    $result .= " on {$caps['os']}";
-    if (isset ($caps['os_version'])) {
-        $result .= " {$caps['os_version']}";
-    }
-    return $result;
 }
 
 function generate_options(array $options) {
