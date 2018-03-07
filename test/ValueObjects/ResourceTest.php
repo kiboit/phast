@@ -64,6 +64,22 @@ class ResourceTest extends TestCase {
         $this->assertSame($this->mimeType, $newResource->getMimeType());
     }
 
+    public function testDependenciesAdding() {
+        $resource = Resource::makeWithContent($this->url, $this->content);
+        $this->assertEmpty($resource->getDependencies());
+
+        $deps = [
+            Resource::makeWithContent($this->url, $this->content),
+            Resource::makeWithContent($this->url, $this->content)
+        ];
+        $new = $resource->withDependencies($deps);
+        $this->assertNotSame($resource, $new);
+        $actualDeps = $new->getDependencies();
+        $this->assertCount(2, $actualDeps);
+        $this->assertSame($deps[0], $actualDeps[0]);
+        $this->assertSame($deps[1], $actualDeps[1]);
+    }
+
     public function testContentAndMimeTypeModification() {
         $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
         $newResource = $resource->withContent('new-content', 'new-mime-type');

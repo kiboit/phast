@@ -23,9 +23,10 @@ class Filter implements ServiceFilter {
 
 
     public function apply(Resource $resource, array $request) {
-        return $resource->withContent(
-            $this->rewriter->rewriteStyle($resource->getContent())
-        );
+        $content = $this->rewriter->rewriteStyle($resource->getContent());
+        $dependencies = $this->rewriter->getInlinedResources();
+        return $resource->withContent($content)
+                        ->withDependencies($dependencies);
     }
 
 }

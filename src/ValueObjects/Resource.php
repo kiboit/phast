@@ -28,6 +28,11 @@ class Resource {
      */
     private $content;
 
+    /**
+     * @var Resource[]
+     */
+    private $dependencies = [];
+
     private function __construct() {}
 
     public static function makeWithContent(URL $url, $content, $mimeType = null) {
@@ -74,16 +79,41 @@ class Resource {
         return $this->content;
     }
 
+    /**
+     * @return Resource[]
+     */
+    public function getDependencies() {
+        return $this->dependencies;
+    }
+
+    /**
+     * @return bool|int
+     */
     public function getLastModificationTime() {
         return isset ($this->retriever) ? $this->retriever->getLastModificationTime($this->url) : 0;
     }
 
+    /**
+     * @param $content
+     * @param string|null $mimeType
+     * @return Resource
+     */
     public function withContent($content, $mimeType = null) {
         $new = clone $this;
         $new->content = $content;
         if (!is_null($mimeType)) {
             $new->mimeType = $mimeType;
         }
+        return $new;
+    }
+
+    /**
+     * @param Resource[] $dependencies
+     * @return Resource
+     */
+    public function withDependencies(array $dependencies) {
+        $new = clone $this;
+        $new->dependencies = $dependencies;
         return $new;
     }
 

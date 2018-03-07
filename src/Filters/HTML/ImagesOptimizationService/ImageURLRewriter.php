@@ -8,6 +8,7 @@ use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageURLRewriter {
@@ -38,7 +39,16 @@ class ImageURLRewriter {
      */
     protected $whitelist;
 
+    /**
+     * @var int
+     */
     protected $maxImageInliningSize;
+
+    /**
+     * @var Resource[]
+     */
+    protected $inlinedResources;
+
 
     /**
      * ImageURLRewriter constructor.
@@ -72,6 +82,7 @@ class ImageURLRewriter {
      * @return string
      */
     public function rewriteUrl($url, URL $baseUrl = null, array $params = []) {
+        $this->inlinedResources = [];
         $absolute = $this->makeURLAbsoluteToBase($url, $baseUrl);
         if (!$this->shouldRewriteUrl($absolute)) {
             return $url;
@@ -92,7 +103,8 @@ class ImageURLRewriter {
      * @return string
      */
     public function rewriteStyle($styleContent) {
-        return preg_replace_callback(
+        $allInlined = [];
+        $result = preg_replace_callback(
             '~
                 (
                     \b (?: image | background ):
@@ -103,11 +115,25 @@ class ImageURLRewriter {
                     [^\'")] ++
                 )
             ~xiS',
-            function ($matches) {
-                return $matches[1] . $this->rewriteUrl($matches[2]);
+            function ($matches) use (&$allInlined) {
+                $url = $matches[1] . $this->rewriteUrl($matches[2]);
+                if (!empty ($this->inlinedResources)) {
+                    $inlined = $this->inlinedResources[0];
+                    $allInlined[$inlined->getUrl()->toString()] = $inlined;
+                }
+                return $url;
             },
             $styleContent
         );
+        $this->inlinedResources = array_values($allInlined);
+        return $result;
+    }
+
+    /**
+     * @return Resource[]
+     */
+    public function getInlinedResources() {
+        return $this->inlinedResources;
     }
 
     /**
@@ -145,6 +171,7 @@ class ImageURLRewriter {
         $content = $this->retriever->retrieve($url);
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
         if ($mime && substr($mime, 0, 6) == 'image/') {
+            $this->inlinedResources = [Resource::makeWithRetriever($url, $this->retriever, $mime)];
             return 'data:' . $mime . ';base64,' . base64_encode($content);
         }
         return false;
