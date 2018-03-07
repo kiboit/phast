@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\Service;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
+use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
@@ -13,14 +14,11 @@ class CachingServiceFilterTest extends TestCase {
     const LAST_MODIFICATION_TIME = 123456789;
 
     /**
-     * @var array
-     */
-    private $resourceArr;
-
-    /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     private $cache;
+
+    private $cacheGetMethodConfig;
 
     /**
      * @var CachingServiceFilter
@@ -37,82 +35,69 @@ class CachingServiceFilterTest extends TestCase {
      */
     private $cachedServiceFilter;
 
-    public function setUp($modTime = null) {
+    /**
+     * @var int
+     */
+    private $modTime;
+
+    public function setUp() {
         parent::setUp();
-        $this->resourceArr = [
-            'url' => 'http://cache.phast.test',
-            'mimeType' => 'the-mime-type',
-            'blob' => base64_encode('the-blob'),
-            'dataType' => 'resource'
-        ];
+
         $this->cache = $this->createMock(Cache::class);
-        $this->resource = $this->createMock(Resource::class);
-        $this->resource
-            ->method('getLastModificationTime')
-            ->willReturn(is_null($modTime) ? self::LAST_MODIFICATION_TIME : $modTime);
+        $this->cacheGetMethodConfig = $this->cache->expects($this->any());
+        $this->cacheGetMethodConfig->method('get')
+            ->willReturnCallback(function ($key, callable $cb) {
+                return $cb();
+            });
+        $this->modTime = null;
+
+        $retriever = $this->createMock(Retriever::class);
+        $retriever->method('retrieve')
+            ->willReturn('the-blob');
+        $retriever->method('getLastModificationTime')
+            ->willReturnCallback(function () {
+                return is_null($this->modTime) ? self::LAST_MODIFICATION_TIME : $this->modTime;
+            });
+
+        $this->resource = Resource::makeWithRetriever(
+            URL::fromString('http://cache.phast.test'),
+            $retriever,
+            'the-mime-type'
+        );
+
         $this->cachedServiceFilter = $this->createMock(CachedResultServiceFilter::class);
-        $this->filter = new CachingServiceFilter($this->cache, $this->cachedServiceFilter);
-    }
-
-    public function testCorrectTimeToCache() {
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->willReturnCallback(function ($key, callable $cb, $ttl) {
-                $this->assertEquals(0, $ttl);
-                return $this->resourceArr;
+        $this->cachedServiceFilter->method('apply')
+            ->willReturnCallback(function (Resource $resource) {
+                return $resource->withContent($resource->getContent());
             });
-        $this->filter->apply($this->resource, []);
-
-        $this->setUp(0);
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->willReturnCallback(function ($key, callable $cb, $ttl) {
-                $this->assertEquals(86400, $ttl);
-                return $this->resourceArr;
-            });
-        $this->filter->apply($this->resource, []);
-    }
-
-    public function testCorrectHash() {
-        $this->cachedServiceFilter->expects($this->once())
-            ->method('getCacheHash')
+        $this->cachedServiceFilter->method('getCacheHash')
             ->with($this->resource, [])
             ->willReturn('the-hash');
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->willReturnCallback(function ($key) {
-                $this->assertEquals('the-hash', $key);
-                return $this->resourceArr;
-            });
+
+        $this->filter = $this->makeFilter();
+    }
+
+    /**
+     * @dataProvider correctTimeToCacheData
+     */
+    public function testCorrectCachingParameters($modTime, $expectedTtl) {
+        $this->modTime = $modTime;
+        $this->cacheGetMethodConfig->with('the-hash', $this->isType('callable'), $expectedTtl);
         $this->filter->apply($this->resource, []);
+    }
+
+    public function correctTimeToCacheData() {
+        return [
+            [null, 0],
+            [0, 86400]
+        ];
     }
 
     public function testReturningResourceFromCache() {
-        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content');
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->willReturn($this->resourceArr);
-        $actual = $this->filter->apply($originalResource, []);
-        $this->assertEquals($this->resourceArr['url'], $actual->getUrl());
-        $this->assertEquals($this->resourceArr['mimeType'], $actual->getMimeType());
-        $this->assertEquals(base64_decode($this->resourceArr['blob']), $actual->getContent());
-    }
-
-    public function testReturningFromFilter() {
-        $originalResource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content');
-        $this->cachedServiceFilter->expects($this->once())
-            ->method('apply')
-            ->with($originalResource, [])
-            ->willReturn($originalResource);
-        $this->cache->expects($this->once())
-            ->method('get')
-            ->willReturnCallback(function ($hash, callable $cb) {
-                return $cb();
-            });
-        $actual = $this->filter->apply($originalResource, []);
-        $this->assertSame($originalResource->getUrl()->toString(), $actual->getUrl()->toString());
-        $this->assertSame($originalResource->getMimeType(), $actual->getMimeType());
-        $this->assertSame($originalResource->getContent(), $actual->getContent());
+        $actual = $this->filter->apply($this->resource, []);
+        $this->assertEquals($this->resource->getUrl(), $actual->getUrl());
+        $this->assertEquals($this->resource->getMimeType(), $actual->getMimeType());
+        $this->assertEquals($this->resource->getContent(), $actual->getContent());
     }
 
     public function testCachingExceptions() {
@@ -120,6 +105,7 @@ class CachingServiceFilterTest extends TestCase {
             ->method('apply')
             ->willThrowException(new \RuntimeException());
         $cache = [];
+        $this->cache = $this->createMock(Cache::class);
         $this->cache->expects($this->exactly(2))
             ->method('get')
             ->willReturnCallback(function ($key, callable $cb) use (&$cache) {
@@ -130,6 +116,7 @@ class CachingServiceFilterTest extends TestCase {
             });
 
         $thrown = 0;
+        $this->filter = $this->makeFilter();
         try {
             $this->filter->apply($this->resource, []);
         } catch (CachedExceptionException $e) {
@@ -142,7 +129,10 @@ class CachingServiceFilterTest extends TestCase {
         }
 
         $this->assertEquals(2, $thrown);
+    }
 
+    private function makeFilter() {
+        return new CachingServiceFilter($this->cache, $this->cachedServiceFilter);
     }
 
 }
