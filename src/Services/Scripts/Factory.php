@@ -26,7 +26,8 @@ class Factory {
         );
         $filter = new CachingServiceFilter(
             new Cache($config['cache'], 'scripts-minified'),
-            new JSMinifierFilter(@$config['scripts']['removeLicenseHeaders'])
+            new JSMinifierFilter(@$config['scripts']['removeLicenseHeaders']),
+            new LocalRetriever($config['retrieverMap'])
         );
         return new Service(
             (new ServiceSignatureFactory())->make($config),

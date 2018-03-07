@@ -33,7 +33,8 @@ class Factory {
         if ($this->config['images']['enable-cache']) {
             return new CachingServiceFilter(
                 new Cache($this->config['cache'], 'images-1'),
-                $composite
+                $composite,
+                new LocalRetriever($this->config['retrieverMap'])
             );
         }
         return $composite;

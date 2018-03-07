@@ -17,6 +17,10 @@ class CachingServiceFilterTest extends TestCase {
 
     private $filterCallback;
 
+    private $retriever;
+
+    private $retrieverLastModTime;
+
     /**
      * @var CachingServiceFilter
      */
@@ -28,6 +32,7 @@ class CachingServiceFilterTest extends TestCase {
         $this->cachedData = [];
         $this->cacheKey = 'the-cache-key';
         $this->filterCallback = null;
+        $this->retrieverLastModTime = 123;
 
         $cache = $this->createMock(Cache::class);
         $cache->method('get')
@@ -62,7 +67,13 @@ class CachingServiceFilterTest extends TestCase {
                 return $resource->withContent($resource->getContent());
             });
 
-        $this->filter = new CachingServiceFilter($cache, $cachedFilter);
+        $this->retriever = $this->createMock(Retriever::class);
+        $this->retriever->method('getLastModificationTime')
+            ->willReturnCallback(function () {
+                return $this->retrieverLastModTime;
+            });
+
+        $this->filter = new CachingServiceFilter($cache, $cachedFilter, $this->retriever);
     }
 
     /**
@@ -102,6 +113,23 @@ class CachingServiceFilterTest extends TestCase {
         $this->filter->apply($resource, []);
         $actual = $this->filter->apply($resource, []);
         $this->assertEquals(1, $actual->getContent());
+    }
+
+    public function testIgnoringCacheWhenDependencyIsOld() {
+        $this->filterCallback = function (Resource $resource) {
+            static $timesCalled = 1;
+            return $resource->withContent($timesCalled++);
+        };
+
+        $dep1 = Resource::makeWithRetriever(URL::fromString('http://phast-test/dep1'), $this->retriever);
+        $dep2 = Resource::makeWithRetriever(URL::fromString('http://phast-test/dep2'), $this->retriever);
+        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content', 'the-mime')
+            ->withDependencies([$dep1, $dep2]);
+        $this->filter->apply($resource, []);
+
+        $this->retrieverLastModTime += 100;
+        $actual = $this->filter->apply($resource, []);
+        $this->assertEquals(2, $actual->getContent());
     }
 
     public function testCachingExceptions() {
