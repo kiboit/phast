@@ -43,13 +43,8 @@ class OutputBufferHandler {
     }
 
     public function install() {
-        $flags =
-            PHP_OUTPUT_HANDLER_STDFLAGS &
-            ~PHP_OUTPUT_HANDLER_REMOVABLE &
-            ~PHP_OUTPUT_HANDLER_CLEANABLE;
-
         while (@ob_end_flush());
-        ob_start([$this, 'handleChunk'], 2, $flags);
+        ob_start([$this, 'handleChunk'], 2);
         ob_implicit_flush(true);
     }
 
