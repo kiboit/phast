@@ -27,6 +27,7 @@ if (!$caps) {
     }
 
     $caps['browserstack.local'] = true;
+    $caps['realMobile'] = !empty($caps['realMobile']);
 
     while (true) {
         try {
@@ -41,7 +42,6 @@ if (!$caps) {
             if (!preg_match('/^All parallel tests are currently in use/', $e->getMessage())) {
                 throw $e;
             }
-            fwrite(STDERR, "Exhausted parallel tests. Waiting...\n");
             sleep(10);
         }
     }
@@ -58,7 +58,6 @@ if (!$caps) {
         $failed = get_failed($driver);
         if (empty ($failed)) {
             $status = 0;
-            print_success($caps);
         } else {
             print_failed('', $caps);
             print_errors($failed);
@@ -94,15 +93,6 @@ function print_errors(array $tests) {
         }
         print_line();
     }
-}
-
-function print_start(array $caps) {
-    echo "Starting " . get_test_run_info($caps) . "\n";
-
-}
-
-function print_success(array $caps) {
-    echo "Success for " . get_test_run_info($caps) . "\n";
 }
 
 function print_failed($error, array $caps) {
