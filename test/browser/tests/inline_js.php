@@ -3,9 +3,10 @@
 <html>
 <head></head>
 <body>
-<script>
+<script id="script">
     didLoad = true;
     var shouldBeGlobal = true;
+    srcWasEmpty = document.getElementById('script').src === '';
 </script>
 </body>
 </html>

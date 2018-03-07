@@ -30,8 +30,6 @@ class Filter extends BaseHTMLStreamFilter {
      */
     private $functions;
 
-    private $ids = [];
-
     /**
      * @var bool
      */
@@ -71,22 +69,12 @@ class Filter extends BaseHTMLStreamFilter {
             return;
         }
         $src = trim($element->getAttribute('src'));
-        $id = $this->getRewriteId($src);
-        $url = $this->rewriteURL($src, $id);
+        $url = $this->rewriteURL($src);
         $element->setAttribute('src', $url);
-        $element->setAttribute('data-phast-proxied-script', $id);
+        $element->setAttribute('data-phast-original-src', $src);
     }
 
-    private function getRewriteId($src) {
-        $hash = md5($src);
-        if (!isset ($this->ids[$hash])) {
-            $this->ids[$hash] = 0;
-        }
-        $id = "s-" . $hash . "-" . ++$this->ids[$hash];
-        return $id;
-    }
-
-    private function rewriteURL($src, $id) {
+    private function rewriteURL($src) {
         $url = URL::fromString($src)->withBase($this->context->getBaseUrl());
         if (!$this->shouldRewriteURL($url)) {
             $this->logger()->info('Not proxying {src}', ['src' => $src]);
@@ -96,7 +84,6 @@ class Filter extends BaseHTMLStreamFilter {
         $lastModTime = $this->retriever->getLastModificationTime($url);
         $params = [
             'src' => (string) $url,
-            'id' => $id,
             'cacheMarker' => $lastModTime
                              ? $lastModTime
                              : floor($this->functions->time() / $this->config['urlRefreshTime'])

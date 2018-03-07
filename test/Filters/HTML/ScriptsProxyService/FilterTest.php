@@ -97,29 +97,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
     }
 
-    public function testSettingDifferentIds() {
-        $urls = ['script-a', 'script-b', 'script-b'];
-        $scripts = [];
-        foreach ($urls as $url) {
-            $script = $this->makeMarkedElement('script');
-            $script->setAttribute('src', $url);
-            $this->head->appendChild($script);
-            $scripts[] = $script;
-        }
-        $this->applyFilter();
-        foreach ($scripts as $script) {
-            $script = $this->getMatchingElement($script);
-            list ($query) = $this->parseSrc($script);
-
-            $this->assertArrayHasKey('id', $query);
-            if (isset ($lastId)) {
-                $this->assertNotEquals($lastId, $query['id']);
-            }
-            $lastId = $query['id'];
-        }
-    }
-
-    public function testSettingSameIdForSameURLInDifferentDocs() {
+    public function testSettingSameSrcForSameURLInDifferentDocs() {
         $scriptA = $this->makeMarkedElement('script');
         $scriptA->setAttribute('src', 'url-a');
 

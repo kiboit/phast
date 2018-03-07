@@ -23,15 +23,10 @@ window.addEventListener('load', function () {
 var triggerLoad = false;
 
 function loadScripts() {
-    var scripts = document.querySelectorAll('script[type="phast-script"]');
+    var scripts = getScriptsInExecutionOrder();
     if (scripts.length === 0) {
         return;
     }
-    var deferreds = [];
-    var replace = function (original, rewritten) {
-        insertBefore.call(original.parentNode, rewritten, original);
-        original.parentNode.removeChild(original);
-    };
     var lastScript;
     try {
         Object.defineProperty(document, 'readyState', {
@@ -46,61 +41,59 @@ function loadScripts() {
     if (loadHappened) {
         triggerLoad = true;
     }
-    Array.prototype.forEach.call(scripts, function (el) {
+    scripts.forEach(function (el) {
         var script = document.createElement('script');
         Array.prototype.forEach.call(el.attributes, function (attr) {
+            if (/^data-phast-|^defer$/i.test(attr.nodeName)) {
+                return;
+            }
             script.setAttribute(attr.nodeName, attr.nodeValue);
         });
-        if (!el.hasAttribute('async')) {
-            script.async = false;
-        }
+        script.removeAttribute('type');
         if (el.hasAttribute('data-phast-original-type')) {
             script.setAttribute('type', el.getAttribute('data-phast-original-type'));
-            script.removeAttribute('data-phast-original-type');
-        } else {
-            script.removeAttribute('type');
         }
         if (!el.hasAttribute('src')) {
             script.setAttribute('src', 'data:,;');
-            try {
-                Object.defineProperty(script, 'src', {
-                    configurable: true,
-                    get: function() { return ''; }
-                });
-            } catch (e) {
-                window.console && console.error("Phast: Unable to override script.src on this browser: ", e);
-            }
             script.addEventListener('load', function () {
-                delete script['src'];
-                script.removeAttribute('src');
                 script.textContent = el.textContent;
                 // See: http://perfectionkills.com/global-eval-what-are-the-options/
                 (1,eval)(el.textContent);
             });
         }
+        if (!el.hasAttribute('async') || !el.hasAttribute('src')) {
+            script.async = false;
+        }
         if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
             fakeDocumentWrite(el, script);
         }
-        if (el.hasAttribute('src') && el.hasAttribute('defer')) {
-            deferreds.push({original: el, rewritten: script});
+        replaceElement(el, script);
+        script.removeAttribute('src');
+        if (el.hasAttribute('data-phast-original-src')) {
+            script.setAttribute('src', el.getAttribute('data-phast-original-src'));
+        }
+        lastScript = script;
+    });
+    lastScript.addEventListener('load',  restoreReadyState);
+    lastScript.addEventListener('error', restoreReadyState);
+}
+function getScriptsInExecutionOrder() {
+    var immediate = [];
+    var deferred = [];
+    phast.forEachSelectedElement('script[type="phast-script"]', function (script) {
+        if (script.hasAttribute('src') && script.hasAttribute('defer')) {
+            deferred.push(script);
         } else {
-            replace(el, script);
-            lastScript = script;
+            immediate.push(script);
         }
     });
-    deferreds.forEach(function (deferred) {
-        deferred.rewritten.removeAttribute('defer');
-        replace(deferred.original, deferred.rewritten);
-        lastScript = deferred.rewritten;
-    });
-    if (lastScript) {
-        lastScript.addEventListener('load',  restoreReadyState);
-        lastScript.addEventListener('error', restoreReadyState);
-    }
+    return immediate.concat(deferred);
+}
+function replaceElement(original, rewritten) {
+    insertBefore.call(original.parentNode, rewritten, original);
+    original.parentNode.removeChild(original);
 }
 function restoreReadyState() {
-    delete document['write'];
-
     delete document['readyState'];
 
     triggerEvent(document, 'readystatechange');
@@ -133,6 +126,11 @@ function fakeDocumentWrite(originalScript, newScript) {
     );
     beforeScript.setAttribute('data-phast-before-script', scriptId);
     originalScript.parentNode.insertBefore(beforeScript, originalScript);
+    var cleanup = phast.once(function () {
+        delete document['write'];
+    });
+    newScript.addEventListener('load',  cleanup);
+    newScript.addEventListener('error', cleanup);
 }
 function buildScript(body) {
     var script = document.createElement('script');
