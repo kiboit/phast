@@ -41,6 +41,8 @@ class PhastServices {
                 ->getRuntimeConfig()
                 ->toArray();
             Log::init($runtimeConfig['logging'], $serviceRequest, $service);
+            ServiceRequest::setDefaultSerializationMode($runtimeConfig['serviceRequestFormat']);
+
             Log::info('Starting service');
             $response = (new Factory())
                 ->make($service, $runtimeConfig)

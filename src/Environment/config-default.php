@@ -19,6 +19,8 @@ return [
 
     'servicesUrl' => '/phast.php',
 
+    'serviceRequestFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH,
+
     'documents' => [
         'maxBufferSizeToApply' => pow(1024, 3),
 

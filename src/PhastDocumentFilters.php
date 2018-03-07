@@ -19,6 +19,8 @@ class PhastDocumentFilters {
             ->getRuntimeConfig()
             ->toArray();
         Log::init($runtimeConfig['logging'], $request, 'dom-filters');
+        ServiceRequest::setDefaultSerializationMode($runtimeConfig['serviceRequestFormat']);
+
         if ($request->hasRequestSwitchesSet()) {
             Log::info('Request has switches set! Sending "noindex" header!');
             header('X-Robots-Tag: noindex');
