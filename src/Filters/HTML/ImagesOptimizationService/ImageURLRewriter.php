@@ -156,7 +156,9 @@ class ImageURLRewriter {
      */
     private function makeSignedUrl(array $params) {
         $modTime = $this->retriever->getLastModificationTime(URL::fromString($params['src']));
-        $params['cacheMarker'] = $modTime;
+        if ($modTime) {
+            $params['cacheMarker'] = $modTime;
+        }
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
             ->sign($this->signature)
