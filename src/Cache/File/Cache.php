@@ -116,8 +116,8 @@ class Cache implements CacheInterface {
             );
             return;
         }
+        @chmod($file, 0600);
         @rename($tmpFile, $file);
-        @chmod($file, 0700);
     }
 
     private function getFromCache($key) {
