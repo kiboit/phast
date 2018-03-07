@@ -96,7 +96,7 @@ class Filter {
         $log .= sprintf("% 43s % 4dms\n", '(total)', $timeDelta*1000);
 
         $output .= '<script>try{';
-        $output .= 'console.group(' . json_encode("[Phast] Server-side performance metrics") . ');';
+        $output .= 'console.groupCollapsed(' . json_encode("[Phast] Server-side performance metrics") . ');';
         $output .= 'console.log(' . json_encode($log) . ');console.groupEnd();';
         $output .= '}catch(e){}</script>';
         $this->logger()->info($log);
