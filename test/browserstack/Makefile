@@ -3,7 +3,7 @@
 all : browsers.json
 
 test : browsers.json
-	./test.php | parallel -j15 --bar --joblog joblog --resume-failed
+	./test.php | parallel -j15 --bar --joblog joblog --resume-failed | tee test.out
 
 clean :
 	rm -f browsers.json
