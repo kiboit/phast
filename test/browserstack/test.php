@@ -1,36 +1,54 @@
+#!/usr/bin/env php
 <?php
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Facebook\WebDriver\Exception\TimeOutException;
+use Facebook\WebDriver\Exception\UnknownServerException;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 
 $tests = require_once __DIR__ . '/tests_list.php';
 
-if (!isset ($argv[1])) {
-    die ("Argument 1 must be browserstack username!\n");
-}
-if (!isset ($argv[2])) {
-    die ("Argument 2 must be browserstack access key\n");
-}
+$caps = parse_options(array_slice($argv, 1));
 
-$username = $argv[1];
-$access_key = $argv[2];
+if (!$caps) {
+    foreach ($tests as $test) {
+        echo escapeshellcmd($argv[0]), " ", generate_options($test), "\n";
+    }
+} else {
+    $username = getenv('BROWSERSTACK_USERNAME');
+    $access_key = getenv('BROWSERSTACK_ACCESS_KEY');
 
-foreach ($tests as $caps) {
+    if (empty($username) || empty($access_key)) {
+        fwrite(STDERR, "Ensure that BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY are set.\n");
+        exit(255);
+    }
+
     $caps['browserstack.local'] = true;
 
-    print_start($caps);
+    while (true) {
+        try {
+            $driver = RemoteWebDriver::create(
+                "https://$username:$access_key@hub-cloud.browserstack.com/wd/hub",
+                $caps,
+                30000,
+                120000
+            );
+            break;
+        } catch (UnknownServerException $e) {
+            if (!preg_match('/^All parallel tests are currently in use/', $e->getMessage())) {
+                throw $e;
+            }
+            fwrite(STDERR, "Exhausted parallel tests. Waiting...\n");
+            sleep(10);
+        }
+    }
+
+    $status = 1;
 
     try {
-        $driver = RemoteWebDriver::create(
-            "https://$username:$access_key@hub-cloud.browserstack.com/wd/hub",
-            $caps,
-            30000,
-            120000
-        );
         $driver->get("http://phast-browser.test/");
         $driver->wait()->until(
             WebDriverExpectedCondition::not(
@@ -39,19 +57,21 @@ foreach ($tests as $caps) {
         );
         $failed = get_failed($driver);
         if (empty ($failed)) {
+            $status = 0;
             print_success($caps);
         } else {
             print_failed('', $caps);
             print_errors($failed);
         }
-        $driver->quit();
     } catch (TimeOutException $e) {
         print_failed("Timed out: " . $e->getMessage(), $caps);
-        $driver->quit();
     } catch (Exception $e) {
         print_failed("Unknown error: " . $e->getMessage(), $caps);
-        continue;
+    } finally {
+        $driver->quit();
     }
+
+    exit($status);
 }
 
 function get_failed(RemoteWebDriver $driver) {
@@ -103,4 +123,38 @@ function get_test_run_info(array $caps) {
         $result .= " {$caps['os_version']}";
     }
     return $result;
+}
+
+function generate_options(array $options) {
+    $output = [];
+    foreach ($options as $k => $v) {
+        $output[] = sprintf('--%s %s', escape_argument($k), escape_argument($v));
+    }
+    return implode(' ', $output);
+}
+
+function escape_argument($str) {
+    return preg_match('/^[a-z0-9_]+$/i', $str) ? $str : escapeshellarg($str);
+}
+
+function parse_options($args) {
+    $options = [];
+    for ($i = 0; $i < sizeof($args); $i++) {
+        if (!preg_match('/^--(.+)$/', $args[$i], $match)) {
+            fwrite(STDERR, "Unexpected argument value at position $i\n");
+            exit(1);
+        }
+        $name = $match[1];
+        if (isset($options[$name])) {
+            fwrite(STDERR, "Duplicate option --$name\n");
+            exit(1);
+        }
+        $i++;
+        if (!isset($args[$i])) {
+            fwrite(STDERR, "Missing value for option --$name\n");
+            exit(1);
+        }
+        $options[$name] = $args[$i];
+    }
+    return $options;
 }
