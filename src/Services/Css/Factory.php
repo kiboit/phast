@@ -27,7 +27,7 @@ class Factory {
 
         $composite = (new CSSCompositeFilterFactory())->make($config);
         $caching = new CachingServiceFilter(
-            new Cache($config['cache'], 'css-processing-1'),
+            new Cache($config['cache'], 'css-processing-2'),
             $composite
         );
 
