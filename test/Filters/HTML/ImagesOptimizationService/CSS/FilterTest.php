@@ -6,6 +6,7 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
@@ -17,6 +18,8 @@ class FilterTest extends HTMLFilterTestCase {
         $securityToken->method('sign')->willReturn('the-token');
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('getLastModificationTime')->willReturn(false);
+
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
 
         $this->filter = new Filter(new ImageURLRewriter(
             $securityToken,

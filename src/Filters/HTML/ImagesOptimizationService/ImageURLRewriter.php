@@ -38,11 +38,6 @@ class ImageURLRewriter {
     protected $whitelist;
 
     /**
-     * @var integer
-     */
-    protected $serviceRequestFormat;
-
-    /**
      * ImagesOptimizationServiceHTMLFilter constructor.
      *
      * @param ServiceSignature $signature
@@ -50,24 +45,19 @@ class ImageURLRewriter {
      * @param URL $baseUrl
      * @param URL $serviceUrl
      * @param string[] $whitelist
-     * @param null|int $serviceRequestFormat
      */
     public function __construct(
         ServiceSignature $signature,
         Retriever $retriever,
         URL $baseUrl,
         URL $serviceUrl,
-        array $whitelist,
-        $serviceRequestFormat = null
+        array $whitelist
     ) {
         $this->signature = $signature;
         $this->retriever = $retriever;
         $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
         $this->whitelist = $whitelist;
-        $this->serviceRequestFormat = $serviceRequestFormat == ServiceRequest::FORMAT_PATH
-            ? ServiceRequest::FORMAT_PATH
-            : ServiceRequest::FORMAT_QUERY;
     }
 
     public function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
@@ -100,7 +90,7 @@ class ImageURLRewriter {
         return (new ServiceRequest())->withParams($params)
             ->withUrl($this->serviceUrl)
             ->sign($this->signature)
-            ->serialize($this->serviceRequestFormat);
+            ->serialize();
     }
     
     public function rewriteStyle($styleContent) {

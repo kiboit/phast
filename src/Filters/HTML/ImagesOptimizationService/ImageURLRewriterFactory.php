@@ -21,8 +21,7 @@ class ImageURLRewriterFactory {
             new LocalRetriever($config['retrieverMap']),
             URL::fromString($config['documents']['baseUrl']),
             URL::fromString($serviceUrl),
-            $config['images']['whitelist'],
-            @$config['documents']['filters'][$filterClass]['rewriteFormat']
+            $config['images']['whitelist']
         );
         return $rewriter;
     }

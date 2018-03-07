@@ -13,8 +13,11 @@ class TagsFilterTest extends HTMLFilterTestCase {
 
     const SERVICE_URL = 'http://the-service.org/service.php';
 
-    public function setUp($rewriteFormat = null) {
+    public function setUp() {
         parent::setUp();
+
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
+
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
             ->willReturn('the-token');
@@ -26,8 +29,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
             $retriever,
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
-            ['~' . preg_quote(self::BASE_URL) . '~'],
-            $rewriteFormat
+            ['~' . preg_quote(self::BASE_URL) . '~']
         ));
     }
 
@@ -56,19 +58,6 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->applyFilter($html);
         $this->checkSrc($this->dom->getElementsByTagName('img')->item(0)->getAttribute('src'),
                         ['src' => self::BASE_URL . '/img']);
-    }
-
-    public function testUsingCorrectRewriteFormat() {
-        $this->makeImage('/img');
-        $this->applyFilter();
-        $queryFormat = $this->dom->getElementsByTagName('img')->item(0)->getAttribute('src');
-
-        $this->setUp(ServiceRequest::FORMAT_PATH);
-        $this->makeImage('/img');
-        $this->applyFilter();
-        $pathFormat = $this->dom->getElementsByTagName('img')->item(0)->getAttribute('src');
-
-        $this->assertNotEquals($queryFormat, $pathFormat);
     }
 
     public function testNoRewriteForImagesWithInlineSource() {

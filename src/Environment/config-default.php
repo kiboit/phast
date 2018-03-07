@@ -31,9 +31,7 @@ return [
 
             \Kibo\Phast\Filters\HTML\BaseURLSetter\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [
-                'rewriteFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH
-            ],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
                 'urlRefreshTime' => 7200,
