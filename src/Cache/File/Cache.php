@@ -72,6 +72,11 @@ class Cache implements CacheInterface {
         return $contents;
     }
 
+    public function set($key, $value, $expiresIn = 0) {
+        $this->storeCache($key, $value, $expiresIn);
+    }
+
+
     private function getCacheDir($key) {
         return $this->cacheRoot . '/' . ltrim($this->cacheNS, '/') . '/' . substr($this->getHashedKey($key), 0, 2);
     }
