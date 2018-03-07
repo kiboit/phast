@@ -15,9 +15,11 @@ phast.once = function (fn) {
     };
 };
 
-try {
-    document.addEventListener('DOMContentLoaded', phast.once(logTimings));
-} catch(e) {}
+document.addEventListener('DOMContentLoaded', phast.once(function() {
+    try {
+        logTimings();
+    } catch (e) {}
+}));
 
 function logTimings() {
     var t = performance.timing;
