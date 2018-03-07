@@ -19,7 +19,8 @@ function test(file, fn, withPhast) {
         fixture.appendChild(iframe);
 
         var error = 0;
-        iframe.contentWindow.addEventListener('error', function () {
+        iframe.contentWindow.addEventListener('error', function (e) {
+            console.log(e);
             error++;
         });
 
@@ -70,7 +71,12 @@ function test(file, fn, withPhast) {
                 assert.equal(logCount, 0, "No scripts should contain Phast's log message");
             }
 
-            assert.equal(error, 0, "No errors should be thrown");
+            // Remove this workaround if/when the Browserstack issue gets fixed.
+            if (navigator.userAgent === "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6") {
+                assert.equal(error, 1, "On High Sierra/Safari 11 on Browserstack, exactly one error should be thrown by Firebug");
+            } else {
+                assert.equal(error, 0, "No errors should be thrown");
+            }
 
             fn(assert, doc);
         }

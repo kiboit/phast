@@ -27,7 +27,7 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <script src="qunit.js"></script>
-<script src="tests.js"></script>
+<script src="tests.js?<?= uniqid(); ?>"></script>
 <?php foreach (preg_grep('/\..*\./', glob('tests/*.js'), PREG_GREP_INVERT) as $test): ?>
 <script src="<?= $test; ?>"></script>
 <?php endforeach; ?>
