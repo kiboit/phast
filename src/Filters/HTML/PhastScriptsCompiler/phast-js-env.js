@@ -41,7 +41,7 @@ function logTimings() {
         f.push(i.shift());
         p = p.concat(i);
     });
-    console.group("[Phast] Performance metrics")
+    console.groupCollapsed("[Phast] Client-side performance metrics")
     console.log.apply(console, [f.join("\n")].concat(p));
     console.groupEnd()
     function fmt(v) {
