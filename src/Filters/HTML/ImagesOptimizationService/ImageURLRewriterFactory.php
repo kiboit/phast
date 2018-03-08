@@ -21,7 +21,7 @@ class ImageURLRewriterFactory {
         }
 
         if (isset ($classConfig['serviceUrl'])) {
-            $serviceUrl = $config['documents']['filters'][$filterClass]['serviceUrl'];
+            $serviceUrl = $classConfig['serviceUrl'];
         } else {
             $serviceUrl = $config['servicesUrl'] . '?service=images';
         }
