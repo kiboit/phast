@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Retrievers\LocalRetriever;
-use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
