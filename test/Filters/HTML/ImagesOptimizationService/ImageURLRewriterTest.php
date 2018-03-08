@@ -29,7 +29,7 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->securityToken = $this->createMock(ServiceSignature::class);
         $this->securityToken->method('sign')->willReturn('the-token');
         $this->retriever = $this->createMock(LocalRetriever::class);
-        $this->retriever->method('getLastModificationTime')->willReturn(123);
+        $this->retriever->method('getCacheSalt')->willReturn(123);
         $this->retriever->method('getSize')->willReturn(1024);
     }
 
@@ -91,7 +91,7 @@ class ImageURLRewriterTest extends PhastTestCase {
             ->willReturn(strlen($svg));
         $this->retriever->method('retrieve')
             ->willReturn($svg);
-        $this->retriever->method('getLastModificationTime')
+        $this->retriever->method('getCacheSalt')
             ->willReturn($lastModificationTime);
 
         $expectedDataUrl = 'data:image/svg+xml;base64,' . base64_encode($svg);
@@ -104,7 +104,7 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->assertCount(1, $inlined);
         $this->assertInstanceOf(Resource::class, $inlined[0]);
         $this->assertContains('some-url', (string) $inlined[0]->getUrl());
-        $this->assertEquals($lastModificationTime, $inlined[0]->getLastModificationTime());
+        $this->assertEquals($lastModificationTime, $inlined[0]->getCacheSalt());
 
         $css = 'background: url("some-url-2"); background: url("some-url"); background: url("some-url-2");';
         $expectedCSS = str_replace(['some-url-2', 'some-url'], $expectedDataUrl, $css);
@@ -117,8 +117,8 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->assertInstanceOf(Resource::class, $inlined[1]);
         $this->assertContains('some-url-2', (string) $inlined[0]->getUrl());
         $this->assertContains('some-url', (string) $inlined[0]->getUrl());
-        $this->assertEquals($lastModificationTime, $inlined[0]->getLastModificationTime());
-        $this->assertEquals($lastModificationTime, $inlined[1]->getLastModificationTime());
+        $this->assertEquals($lastModificationTime, $inlined[0]->getCacheSalt());
+        $this->assertEquals($lastModificationTime, $inlined[1]->getCacheSalt());
 
         $rewriter->rewriteUrl('http://somewhere.else.test/image');
         $this->assertCount(0, $rewriter->getInlinedResources());

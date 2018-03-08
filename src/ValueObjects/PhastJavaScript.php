@@ -56,7 +56,7 @@ class PhastJavaScript {
     /**
      * @return int
      */
-    public function getLastModificationTime() {
+    public function getCacheSalt() {
         return $this->funcs->filemtime($this->filename);
     }
 

@@ -68,7 +68,7 @@ class CachingServiceFilterTest extends TestCase {
             });
 
         $this->retriever = $this->createMock(Retriever::class);
-        $this->retriever->method('getLastModificationTime')
+        $this->retriever->method('getCacheSalt')
             ->willReturnCallback(function () {
                 return $this->retrieverLastModTime;
             });
@@ -81,7 +81,7 @@ class CachingServiceFilterTest extends TestCase {
      */
     public function testCorrectCachingParameters($modTime, $expectedTtl) {
         $retriever = $this->createMock(Retriever::class);
-        $retriever->method('getLastModificationTime')
+        $retriever->method('getCacheSalt')
             ->willReturn($modTime);
         $resource = Resource::makeWithRetriever(URL::fromString('http://phast.test'), $retriever, 'the-mime-type');
         $this->filter->apply($resource, []);

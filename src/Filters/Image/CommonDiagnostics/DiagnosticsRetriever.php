@@ -26,7 +26,7 @@ class DiagnosticsRetriever implements Retriever {
         return file_get_contents($this->file);
     }
 
-    public function getLastModificationTime(URL $url) {
+    public function getCacheSalt(URL $url) {
         return '';
     }
 

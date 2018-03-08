@@ -43,7 +43,7 @@ class LocalRetriever implements Retriever {
 
     }
 
-    public function getLastModificationTime(URL $url) {
+    public function getCacheSalt(URL $url) {
         return $this->guard($url, function ($file) {
             return @$this->funcs->filemtime($file);
         });

@@ -182,7 +182,7 @@ class ImageURLRewriter {
      * @return string
      */
     private function makeSignedUrl(array $params) {
-        $modTime = $this->retriever->getLastModificationTime(URL::fromString($params['src']));
+        $modTime = $this->retriever->getCacheSalt(URL::fromString($params['src']));
         if ($modTime) {
             $params['cacheMarker'] = $modTime;
         }

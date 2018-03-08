@@ -35,7 +35,7 @@ class Filter implements CachedResultServiceFilter {
     }
 
     public function getCacheHash(Resource $resource, array $request) {
-        $lastModTime = $resource->getLastModificationTime();
+        $lastModTime = $resource->getCacheSalt();
         $filtersNames = array_map('get_class', $this->filters);
         sort($filtersNames);
         $key = array_merge([$lastModTime, (string)$resource->getUrl()], $filtersNames);

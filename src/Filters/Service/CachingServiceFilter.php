@@ -67,7 +67,7 @@ class CachingServiceFilter  implements ServiceFilter {
     private function checkDependencies(array $data) {
         foreach ((array) @$data['dependencies'] as $dep) {
             $url = URL::fromString($dep['url']);
-            if ($this->retriever->getLastModificationTime($url) >= $dep['cacheMarker']) {
+            if ($this->retriever->getCacheSalt($url) >= $dep['cacheMarker']) {
                 return false;
             }
         }
@@ -82,7 +82,7 @@ class CachingServiceFilter  implements ServiceFilter {
     }
 
     private  function getCacheTTL(Resource $resource) {
-        return $resource->getLastModificationTime() ? 0 : 86400;
+        return $resource->getCacheSalt() ? 0 : 86400;
     }
 
     private function serializeResource(Resource $resource) {
@@ -99,7 +99,7 @@ class CachingServiceFilter  implements ServiceFilter {
         return array_map(function (Resource $dep) {
             return [
                 'url' => $dep->getUrl()->toString(),
-                'cacheMarker' => $dep->getLastModificationTime()
+                'cacheMarker' => $dep->getCacheSalt()
             ];
         }, $resource->getDependencies());
     }

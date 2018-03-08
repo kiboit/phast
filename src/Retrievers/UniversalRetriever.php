@@ -17,9 +17,9 @@ class UniversalRetriever implements Retriever {
         });
     }
 
-    public function getLastModificationTime(URL $url) {
+    public function getCacheSalt(URL $url) {
         return $this->iterateRetrievers(function (Retriever $retriever) use ($url) {
-            return $retriever->getLastModificationTime($url);
+            return $retriever->getCacheSalt($url);
         });
     }
 

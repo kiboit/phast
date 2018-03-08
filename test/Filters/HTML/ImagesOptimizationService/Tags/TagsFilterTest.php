@@ -22,7 +22,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $signature->method('sign')
             ->willReturn('the-token');
         $retriever = $this->createMock(LocalRetriever::class);
-        $retriever->method('getLastModificationTime')
+        $retriever->method('getCacheSalt')
             ->willReturn(12345678);
         $retriever->method('getSize')
             ->willReturn(100000);

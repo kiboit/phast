@@ -33,7 +33,7 @@ class FilterTest extends HTMLFilterTestCase {
 
 
         $this->retriever = $this->createMock(Retriever::class);
-        $this->retriever->method('getLastModificationTime')
+        $this->retriever->method('getCacheSalt')
             ->willReturnCallback(function () {
                 return $this->modTime;
             });

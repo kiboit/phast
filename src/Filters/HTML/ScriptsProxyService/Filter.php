@@ -81,7 +81,7 @@ class Filter extends BaseHTMLStreamFilter {
             return $src;
         }
         $this->logger()->info('Proxying {src}', ['src' => $src]);
-        $lastModTime = $this->retriever->getLastModificationTime($url);
+        $lastModTime = $this->retriever->getCacheSalt($url);
         $params = [
             'src' => (string) $url,
             'cacheMarker' => $lastModTime

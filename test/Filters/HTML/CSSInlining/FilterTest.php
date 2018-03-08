@@ -495,7 +495,7 @@ class FilterTest extends HTMLFilterTestCase {
             ->willReturn('the-token');
 
         $retriever = $this->createMock(Retriever::class);
-        $retriever->method('getLastModificationTime')
+        $retriever->method('getCacheSalt')
             ->willReturnCallback(function () {
                 return $this->retrieverLastModificationTime;
             });

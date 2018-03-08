@@ -12,7 +12,7 @@ class PostDataRetriever implements Retriever {
         return file_get_contents('php://input');
     }
 
-    public function getLastModificationTime(URL $url) {
+    public function getCacheSalt(URL $url) {
         return false;
     }
 

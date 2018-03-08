@@ -96,7 +96,7 @@ class PhastJavaScriptCompiler {
      */
     private function getCacheKey(array $scripts) {
         return array_reduce($scripts, function ($carry, PhastJavaScript $script) {
-            $carry .= $script->getFilename() . '-' . $script->getLastModificationTime() . "\n";
+            $carry .= $script->getFilename() . '-' . $script->getCacheSalt() . "\n";
             return $carry;
         }, '');
     }

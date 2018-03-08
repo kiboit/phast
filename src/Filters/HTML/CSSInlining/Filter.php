@@ -341,7 +341,7 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function makeServiceURL(URL $originalLocation, $stripImports = false) {
-        $lastModTime = $this->retriever->getLastModificationTime($originalLocation);
+        $lastModTime = $this->retriever->getCacheSalt($originalLocation);
         $params = [
             'src' => (string) $originalLocation,
             'cacheMarker' => $lastModTime ? $lastModTime : floor(time() / $this->urlRefreshTime)

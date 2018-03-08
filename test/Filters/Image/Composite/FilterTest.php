@@ -122,7 +122,7 @@ class FilterTest extends TestCase {
         $url = URL::fromString($location);
         $retriever = $this->createMock(Retriever::class);
         $retriever->expects($this->once())
-            ->method('getLastModificationTime')
+            ->method('getCacheSalt')
             ->with($url)
             ->willReturn($modTime);
         $resource = Resource::makeWithRetriever($url, $retriever, 'mime');

@@ -89,8 +89,8 @@ class Resource {
     /**
      * @return bool|int
      */
-    public function getLastModificationTime() {
-        return isset ($this->retriever) ? $this->retriever->getLastModificationTime($this->url) : 0;
+    public function getCacheSalt() {
+        return isset ($this->retriever) ? $this->retriever->getCacheSalt($this->url) : 0;
     }
 
     /**

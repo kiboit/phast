@@ -40,20 +40,20 @@ class ResourceTest extends TestCase {
         $resource->getContent();
     }
 
-    public function testGetLastModificationTimeWithRetriever() {
+    public function testgetCacheSaltWithRetriever() {
         $retriever = $this->createMock(Retriever::class);
         $retriever->expects($this->once())
-            ->method('getLastModificationTime')
+            ->method('getCacheSalt')
             ->with($this->url)
             ->willReturn(123);
         $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType);
 
-        $this->assertEquals(123, $resource->getLastModificationTime());
+        $this->assertEquals(123, $resource->getCacheSalt());
     }
 
-    public function testGetLastModificationTimeWithoutRetriever() {
+    public function testgetCacheSaltWithoutRetriever() {
         $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
-        $this->assertSame(0, $resource->getLastModificationTime());
+        $this->assertSame(0, $resource->getCacheSalt());
     }
 
     public function testContentModification() {

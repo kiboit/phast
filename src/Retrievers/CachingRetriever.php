@@ -42,7 +42,7 @@ class CachingRetriever implements Retriever {
         return $this->getFromCacheOnly($url);
     }
 
-    public function getLastModificationTime(URL $url) {
+    public function getCacheSalt(URL $url) {
         return false;
     }
 

@@ -16,5 +16,5 @@ interface Retriever {
      * @param URL $url
      * @return integer|bool
      */
-    public function getLastModificationTime(URL $url);
+    public function getCacheSalt(URL $url);
 }

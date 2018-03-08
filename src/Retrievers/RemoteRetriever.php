@@ -25,7 +25,7 @@ class RemoteRetriever implements Retriever {
         return $response;
     }
 
-    public function getLastModificationTime(URL $url) {
+    public function getCacheSalt(URL $url) {
         return false;
     }
 
