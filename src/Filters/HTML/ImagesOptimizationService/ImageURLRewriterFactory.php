@@ -30,7 +30,7 @@ class ImageURLRewriterFactory {
             new LocalRetriever($config['retrieverMap']),
             URL::fromString($config['documents']['baseUrl']),
             URL::fromString($serviceUrl),
-            $config['images']['whitelist']
+            $config['images']['whitelist'],
             isset ($classConfig['maxImageInliningSize']) ? $classConfig['maxImageInliningSize'] : 0
         );
         return $rewriter;

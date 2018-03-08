@@ -21,13 +21,10 @@ class ImageURLRewriterTest extends PhastTestCase {
      */
     private $retriever;
 
-    /**
-     * @var ImageURLRewriter
-     */
-    private $rewriter;
-
     public function setUp($rewriteFormat = null) {
         parent::setUp();
+
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
 
         $this->securityToken = $this->createMock(ServiceSignature::class);
         $this->securityToken->method('sign')->willReturn('the-token');
@@ -79,12 +76,6 @@ class ImageURLRewriterTest extends PhastTestCase {
         $css = 'background: url("http://somewhere.else/img.png")';
         $actual = $this->getRewriter()->rewriteStyle($css);
         $this->assertEquals($css, $actual);
-    }
-
-    public function testUsingCorrectRewriteFormat() {
-        $queryFormat = $this->getRewriter()->rewriteUrl('/img');
-        $pathFormat = $this->getRewriter(ServiceRequest::FORMAT_PATH)->rewriteUrl('/img');
-        $this->assertNotEquals($queryFormat, $pathFormat);
     }
 
     public function testNoRewriteForImagesWithInlineSource() {
@@ -156,7 +147,6 @@ class ImageURLRewriterTest extends PhastTestCase {
             URL::fromString(self::BASE_URL . '/css/'),
             URL::fromString(self::BASE_URL . '/images.php'),
             ['~' . preg_quote(self::BASE_URL . '') . '~'],
-            $rewriteFormat,
             512
         );
     }
