@@ -12,9 +12,19 @@ use Kibo\Phast\Filters\CSS\CommentsRemoval;
 class Filter implements CachedResultServiceFilter {
     use LoggingTrait;
 
+    /**
+     * @var string
+     */
+    protected $serviceUrl;
+
     protected $filters = [];
 
-    public function __construct() {
+    /**
+     * Filter constructor.
+     * @param string $serviceUrl
+     */
+    public function __construct($serviceUrl) {
+        $this->serviceUrl = $serviceUrl;
         $this->filters[] = new CommentsRemoval\Filter();
     }
 
@@ -24,6 +34,7 @@ class Filter implements CachedResultServiceFilter {
 
     public function getCacheHash(Resource $resource, array $request) {
         $parts = array_map('get_class', $this->filters);
+        $parts[] = $this->serviceUrl;
         $parts[] = $resource->getUrl();
         $parts[] = md5($resource->getContent());
         if (isset ($request['strip-imports'])) {

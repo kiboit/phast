@@ -17,7 +17,7 @@ class FilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new Filter();
+        $this->filter = new Filter('service-url');
     }
 
     public function testReturnSameResourceWhenEmpty() {
@@ -49,8 +49,15 @@ class FilterTest extends TestCase {
     }
 
     public function testGetCacheHash() {
-        $hashes = [];
         $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content');
+
+        $this->assertNotEquals(
+            $this->filter->getCacheHash($resource, []),
+            (new Filter('new-service-url'))->getCacheHash($resource, []),
+            'Cache hash does not take service url into account'
+        );
+
+        $hashes = [];
         $hashes[] = $this->filter->getCacheHash($resource, []);
         $this->filter->addFilter($this->createMock(ServiceFilter::class));
         $hashes[] = $this->filter->getCacheHash($resource, []);

@@ -12,7 +12,14 @@ class Factory {
      * @return Filter
      */
     public function make(array $config) {
-        $filter = new Filter();
+        $class = \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class;
+        if (isset ($config['documents']['filters'][$class]['serviceUrl'])) {
+            $serviceUrl = $config['documents']['filters'][$class]['serviceUrl'];
+        } else {
+            $serviceUrl = $config['servicesUrl'] . '?service=images';
+        }
+
+        $filter = new Filter($serviceUrl);
         foreach (array_keys($config['styles']['filters']) as $filterClass) {
             $filter->addFilter(
                 Package::fromPackageClass($filterClass)
