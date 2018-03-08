@@ -33,6 +33,9 @@ class Filter extends BaseHTMLStreamFilter {
 
     private function rewriteSrc(Tag $img) {
         $url = $img->getAttribute('src');
+        if (!$url) {
+            return;
+        }
         $params = [];
         foreach (['width', 'height'] as $attr) {
             $value = $img->getAttribute($attr);
@@ -41,9 +44,7 @@ class Filter extends BaseHTMLStreamFilter {
             }
         }
         $newURL = $this->rewriter->rewriteUrl($url, $this->context->getBaseUrl(), $params);
-        if ($newURL != $url) {
-            $img->setAttribute('src', $newURL);
-        }
+        $img->setAttribute('src', $newURL);
     }
 
     private function rewriteSrcset(Tag $img) {
@@ -58,8 +59,6 @@ class Filter extends BaseHTMLStreamFilter {
             }
             return $url;
         }, $srcset);
-        if ($rewritten != $srcset) {
-            $img->setAttribute('srcset', $rewritten);
-        }
+        $img->setAttribute('srcset', $rewritten);
     }
 }

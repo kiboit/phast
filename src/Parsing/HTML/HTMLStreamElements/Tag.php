@@ -109,6 +109,9 @@ class Tag extends Element {
      * @param string $value
      */
     public function setAttribute($attrName, $value) {
+        if ($this->getAttribute($attrName) === $value) {
+            return;
+        }
         $this->dirty = true;
         $this->newAttributes[$attrName] = $value;
     }
