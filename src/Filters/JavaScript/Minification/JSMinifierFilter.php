@@ -17,11 +17,11 @@ class JSMinifierFilter implements CachedResultServiceFilter {
      * @param bool $removeLicenseHeaders
      */
     public function __construct($removeLicenseHeaders) {
-        $this->removeLicenseHeaders = $removeLicenseHeaders;
+        $this->removeLicenseHeaders = (bool) $removeLicenseHeaders;
     }
 
     public function getCacheHash(Resource $resource, array $request) {
-        return md5($resource->getContent());
+        return md5($resource->getContent()) . $this->removeLicenseHeaders;
     }
 
     public function apply(Resource $resource, array $request) {
