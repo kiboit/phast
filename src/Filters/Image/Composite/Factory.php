@@ -6,6 +6,7 @@ use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
+use Kibo\Phast\Retrievers\LocalRetriever;
 
 class Factory {
 
