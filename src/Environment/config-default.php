@@ -36,7 +36,6 @@ return [
             \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [
                 'maxImageInliningSize' => 512
             ],
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
                 'urlRefreshTime' => 7200,
