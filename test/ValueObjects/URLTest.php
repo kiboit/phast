@@ -2,9 +2,10 @@
 
 namespace Kibo\Phast\ValueObjects;
 
+use Kibo\Phast\PhastTestCase;
 use PHPUnit\Framework\TestCase;
 
-class URLTest extends TestCase {
+class URLTest extends PhastTestCase {
 
     public function testParsing() {
         $string = 'http://user:pass@test.com:8080/path/file.php?query#hash';
@@ -63,6 +64,30 @@ class URLTest extends TestCase {
             ['/path5', true],
             ['http://test.com/path1', false, '/path5'],
             ['http://example.com/path1', false]
+        ];
+    }
+
+    /**
+     * @dataProvider pathNormalisationData
+     */
+    public function testPathNormalisation($path, $expected) {
+        $url = URL::fromString($path);
+        $this->assertEquals($expected, (string) $url);
+        $this->assertEquals($expected, $url->getPath());
+    }
+
+    public function pathNormalisationData() {
+        return [
+            ['../some-path', '../some-path'],
+            ['some-path/../other-path', 'other-path'],
+            ['some-path/../../other-path', '../other-path'],
+            ['some-path/./sub-path', 'some-path/sub-path'],
+            ['some-path////go-home', 'some-path/go-home'],
+            ['some-path/0/go-home', 'some-path/0/go-home'],
+            ['/../some-path/', '/../some-path/'],
+            ['/some-path/../other/', '/other/'],
+            ['/some-path/../', '/'],
+            ['', '']
         ];
     }
 

@@ -59,7 +59,7 @@ class URL {
     public static function fromArray(array $arr) {
         $url = new self();
         foreach ($arr as $key => $value) {
-            $url->$key = $value;
+            $url->$key = $key == 'path' ? $url->normalizePath($value) : $value;
         }
         return $url;
     }
@@ -84,21 +84,6 @@ class URL {
         return $new;
     }
 
-    private function resolvePath($base, $requested) {
-        if (!$requested) {
-            return $base;
-        }
-        if ($requested[0] == '/') {
-            return $requested;
-        }
-        if (substr($base, -1, 1) == '/') {
-            $usedBase = $base;
-        } else {
-            $usedBase = dirname($base);
-        }
-        return rtrim($usedBase, '/') . '/' . $requested;
-    }
-
     /**
      * Tells whether $this can be interpreted as at the same host as $url
      *
@@ -119,10 +104,48 @@ class URL {
         $user     = isset($this->user) ? $this->user : '';
         $pass     = isset($this->pass) ? ':' . $this->pass  : '';
         $pass     = ($user || $pass) ? "$pass@" : '';
-        $path     = isset($this->path) ? $this->path : '';
+        $path     = isset($this->path) ? $this->getPath() : '';
         $query    = isset($this->query) ? '?' . $this->query : '';
         $fragment = isset($this->fragment) ? '#' . $this->fragment : '';
         return "$scheme$user$pass$host$port$path$query$fragment";
+    }
+
+    private function normalizePath($path) {
+        $stack = [];
+        $head = null;
+        foreach (explode('/', $path) as $part) {
+            if ($part == '.' || $part == '') {
+                continue;
+            }
+            if (!is_null($head) && $part == '..' && $head != '..') {
+                array_pop($stack);
+                $head = empty ($stack) ? null : $stack[count($stack) - 1];
+            } else {
+                $stack[] = $head = $part;
+            }
+        }
+
+        $normalized = substr($path, 0, 1) == '/' ? '/' : '';
+        if (!empty ($stack)) {
+            $normalized .= join('/', $stack);
+            $normalized .= substr($path, -1) == '/' ? '/' : '';
+        }
+        return $normalized;
+    }
+
+    private function resolvePath($base, $requested) {
+        if (!$requested) {
+            return $base;
+        }
+        if ($requested[0] == '/') {
+            return $requested;
+        }
+        if (substr($base, -1, 1) == '/') {
+            $usedBase = $base;
+        } else {
+            $usedBase = dirname($base);
+        }
+        return rtrim($usedBase, '/') . '/' . $requested;
     }
 
     /**
