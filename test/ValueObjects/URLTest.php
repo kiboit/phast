@@ -24,47 +24,46 @@ class URLTest extends TestCase {
         $this->assertEquals($string, (string)$url);
     }
 
-    public function testWithBase() {
-        $base = URL::fromString('http://test.com/path/index.php?query#hash');
-
-        $relative = URL::fromString('relative/path')->withBase($base);
-        $this->assertEquals('http://test.com/path/relative/path', (string)$relative);
-
-        $root = URL::fromString('/absolute/path')->withBase($base);
-        $this->assertEquals('http://test.com/absolute/path', (string)$root);
-
-        $absolute = URL::fromString('https://example.com')->withBase($base);
-        $this->assertEquals('https://example.com', (string)$absolute);
-
-        $query = URL::fromString('?q#f')->withBase($base);
-        $this->assertEquals('http://test.com/path/index.php?q#f', (string)$query);
-
-        $protocol = URL::fromString('//example.com')->withBase($base);
-        $this->assertEquals('http://example.com', (string)$protocol);
-
-        $baseInDir = URL::fromString('http://test.com/path/?query#hash');
-        $relativeToDir = URL::fromString('relative/path')->withBase($baseInDir);
-        $this->assertEquals('http://test.com/path/relative/path', (string)$relativeToDir);
-
-        $baseFileAsDir = URL::fromString('http://test.com/path/sub-path');
-        $relativeToFile = URL::fromString('relative/path')->withBase($baseFileAsDir);
-        $this->assertEquals('http://test.com/path/relative/path', (string)$relativeToFile);
+    /**
+     * @dataProvider withBaseData
+     */
+    public function testWithBase($relative, $expected, $base = 'http://test.com/path/index.php?query#hash') {
+        $base = URL::fromString($base);
+        $relative = URL::fromString($relative);
+        $result = $relative->withBase($base);
+        $this->assertEquals($expected, (string) $result);
     }
 
-    public function testIsLocalTo() {
-        $local = URL::fromString('http://test.com/path1');
-        $local2 = URL::fromString('http://test.com/path2');
-        $local3 = URL::fromString('https://test.com/path3');
-        $local4 = URL::fromString('//test.com/path4');
-        $local5 = URL::fromString('/path5');
-        $notLocal = URL::fromString('http://example.com/path1');
+    public function withBaseData() {
+        return [
+            ['relative/path', 'http://test.com/path/relative/path'],
+            ['/absolute/path', 'http://test.com/absolute/path'],
+            ['https://example.com', 'https://example.com'],
+            ['?q#f', 'http://test.com/path/index.php?q#f'],
+            ['//example.com', 'http://example.com'],
+            ['relative/path', 'http://test.com/path/relative/path', 'http://test.com/path/?query#hash'],
+            ['relative/path', 'http://test.com/path/relative/path', 'http://test.com/path/sub-path']
+        ];
+    }
 
-        $this->assertTrue($local->isLocalTo($local2));
-        $this->assertTrue($local->isLocalTo($local3));
-        $this->assertTrue($local->isLocalTo($local4));
-        $this->assertFalse($local->isLocalTo($local5));
-        $this->assertTrue($local5->isLocalTo($local));
-        $this->assertFalse($local->isLocalTo($notLocal));
+    /**
+     * @dataProvider isLocalToData
+     */
+    public function testIsLocalTo($tested, $expected, $referred = 'http://test.com/path1') {
+        $referred = URL::fromString($referred);
+        $tested = URL::fromString($tested);
+        $this->assertEquals($expected, $tested->isLocalTo($referred));
+    }
+
+    public function isLocalToData() {
+        return [
+            ['http://test.com/path2', true],
+            ['https://test.com/path3', true],
+            ['//test.com/path4', true],
+            ['/path5', true],
+            ['http://test.com/path1', false, '/path5'],
+            ['http://example.com/path1', false]
+        ];
     }
 
 }
