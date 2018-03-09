@@ -12,13 +12,24 @@ class Filter extends BaseHTMLStreamFilter {
 
     protected $addScript = false;
 
+    private $ignoredUrlPattern = '~
+        ^about: |
+        ^data:
+    ~ix';
+
     protected function isTagOfInterest(Tag $tag) {
-        return $tag->getTagName() == 'iframe' && $tag->hasAttribute('src');
+        return $tag->getTagName() == 'iframe'
+               && $tag->hasAttribute('src');
     }
 
     protected function handleTag(Tag $iframe) {
-        $this->logger()->info('Delaying iframe {src}', ['src' => $iframe->getAttribute('src')]);
-        $iframe->setAttribute('data-phast-src', $iframe->getAttribute('src'));
+        $src = trim($iframe->getAttribute('src'));
+        if (preg_match($this->ignoredUrlPattern, $src)) {
+            yield $iframe;
+            return;
+        }
+        $this->logger()->info('Delaying iframe {src}', ['src' => $src]);
+        $iframe->setAttribute('data-phast-src', $src);
         $iframe->setAttribute('src', 'about:blank');
         $this->addScript = true;
         yield $iframe;
