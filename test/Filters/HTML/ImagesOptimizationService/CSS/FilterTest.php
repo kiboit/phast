@@ -20,17 +20,6 @@ class FilterTest extends HTMLFilterTestCase {
         $this->filter = new Filter($this->rewriterMock);
     }
 
-    public function testRewritingInTags() {
-        $style = $this->makeMarkedElement('style');
-        $style->textContent = "the-original-style";
-        $this->head->appendChild($style);
-
-        $this->applyFilter();
-
-        $style = $this->getMatchingElement($style);
-        $this->assertEquals("rewritten-style", $style->textContent);
-    }
-
     public function testRewritingInAttributes() {
         $div = $this->makeMarkedElement('div');
         $div->setAttribute('style', 'the-original-style');

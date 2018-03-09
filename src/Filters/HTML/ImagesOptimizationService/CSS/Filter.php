@@ -22,11 +22,7 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function handleTag(Tag $tag) {
-        if ($tag->getTagName() == 'style') {
-            $tag->setTextContent(
-                $this->rewriter->rewriteStyle($tag->getTextContent())
-            );
-        } else if ($tag->hasAttribute('style')) {
+        if ($tag->hasAttribute('style')) {
             $tag->setAttribute(
                 'style',
                 $this->rewriter->rewriteStyle($tag->getAttribute('style'))
