@@ -90,10 +90,12 @@ abstract class BaseService {
      * @return Response
      */
     protected function makeResponse(Resource $resource, array $request) {
+        $maxAge = 86400 * 365;
         $response = new Response();
         $response->setContent($resource->getContent());
         $response->setHeader('Content-Length', strlen($resource->getContent()));
-        $response->setHeader('Cache-Control', 'max-age=' . (86400 * 365));
+        $response->setHeader('Cache-Control', 'max-age=' . $maxAge);
+        $response->setHeader('X-Accel-Expires', $maxAge);
         return $response;
     }
 
