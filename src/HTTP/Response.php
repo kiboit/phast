@@ -69,7 +69,7 @@ class Response {
     }
 
     private function generateETag() {
-        return md5(http_build_query($this->headers) . "\0" . $this->content);
+        return '"' . md5(http_build_query($this->headers) . "\0" . $this->content) . '"';
     }
 
 }
