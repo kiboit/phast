@@ -3,11 +3,15 @@
 namespace Kibo\Phast\Filters\Service\Compression;
 
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class DecompressingFilterTest extends PhastTestCase {
+
+    private $funcs;
 
     /**
      * @var DecompressingFilter
@@ -19,7 +23,8 @@ class DecompressingFilterTest extends PhastTestCase {
         if (!function_exists('gzdecode')) {
             $this->markTestSkipped('gzdecode function does not exist');
         }
-        $this->filter = new DecompressingFilter();
+        $this->funcs = new ObjectifiedFunctions();
+        $this->filter = new DecompressingFilter($this->funcs);
     }
 
     public function testDoNothingOnNonCompressedResource() {
@@ -41,6 +46,8 @@ class DecompressingFilterTest extends PhastTestCase {
         $result = $this->filter->apply($resource, ['accept-encoding' => [$header]]);
         if ($shouldDecompress) {
             $this->assertEquals('the-content', $result->getContent());
+            $this->assertEquals('text/text', $result->getMimeType());
+            $this->assertEquals('identity', $result->getEncoding());
         } else {
             $this->assertSame($result, $resource);
         }
@@ -52,6 +59,18 @@ class DecompressingFilterTest extends PhastTestCase {
             ['gzip', false],
             ['*', false]
         ];
+    }
+
+    public function testExceptionOnMissingFunction() {
+        $this->funcs->function_exists = function ($name) {
+            if ($name == 'gzdecode') {
+                return false;
+            }
+            return true;
+        };
+        $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), 'the-content', 'text/text');
+        $this->expectException(RuntimeException::class);
+        $result = $this->filter->apply($resource, []);
     }
 
 }
