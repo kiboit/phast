@@ -52,7 +52,7 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         $proc = proc_open($command, [['pipe', 'r'], ['pipe', 'w']], $pipes);
 
         if (!is_resource($proc)) {
-            throw new ImageProcessingException("Could open process for $command");
+            throw new ImageProcessingException("Could not open process for $command");
         }
 
         fwrite($pipes[0], $image->getAsString());
