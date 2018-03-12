@@ -10,7 +10,7 @@ use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
-class CachingServiceFilter  implements ServiceFilter {
+class CachingServiceFilter implements ServiceFilter {
     use LoggingTrait;
 
     /**
@@ -90,6 +90,7 @@ class CachingServiceFilter  implements ServiceFilter {
             'dataType' => 'resource',
             'url' => $resource->getUrl()->toString(),
             'mimeType' => $resource->getMimeType(),
+            'encoding' => $resource->getEncoding(),
             'blob' => base64_encode($resource->getContent()),
             'dependencies' => $this->serializeDependencies($resource)
         ];
@@ -105,11 +106,15 @@ class CachingServiceFilter  implements ServiceFilter {
     }
 
     private function deserializeResource(array $data) {
-        return Resource::makeWithContent(
+        $params = [
             URL::fromString($data['url']),
             base64_decode($data['blob']),
             $data['mimeType']
-        );
+        ];
+        if (isset ($data['encoding'])) {
+            $params['encoding'] = $data['encoding'];
+        }
+        return call_user_func_array([Resource::class, 'makeWithContent'], $params);
     }
 
     private function serializeException(\Exception $e) {

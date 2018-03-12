@@ -94,6 +94,8 @@ abstract class BaseService {
         $response = new Response();
         $response->setContent($resource->getContent());
         $response->setHeader('Content-Length', strlen($resource->getContent()));
+        $response->setHeader('Content-Encoding', $resource->getEncoding());
+        $response->setHeader('Vary', 'Accept-Encoding');
         $response->setHeader('Cache-Control', 'max-age=' . $maxAge);
         $response->setHeader('X-Accel-Expires', $maxAge);
         return $response;
