@@ -70,7 +70,7 @@ class DecompressingFilterTest extends PhastTestCase {
         };
         $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), 'the-content', 'text/text');
         $this->expectException(RuntimeException::class);
-        $result = $this->filter->apply($resource, []);
+        $this->filter->apply($resource, []);
     }
 
 }

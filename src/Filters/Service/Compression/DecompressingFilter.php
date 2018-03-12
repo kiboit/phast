@@ -6,10 +6,12 @@ namespace Kibo\Phast\Filters\Service\Compression;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\RuntimeException;
+use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
 class DecompressingFilter implements ServiceFilter {
+    use LoggingTrait;
 
     /**
      * @var ObjectifiedFunctions
@@ -27,6 +29,8 @@ class DecompressingFilter implements ServiceFilter {
         if (!$this->isCompressed($resource)  || $this->acceptsCompressed($request)) {
             return $resource;
         }
+
+        $this->logger()->info('Decompressing {url}', ['url' => (string) $resource->getUrl()]);
         return $resource->withContent(
             gzdecode($resource->getContent()),
             $resource->getMimeType(),
