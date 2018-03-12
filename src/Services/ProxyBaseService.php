@@ -5,6 +5,17 @@ namespace Kibo\Phast\Services;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 
 class ProxyBaseService extends BaseService {
+    
+    protected function getParams(ServiceRequest $request) {
+        $params = parent::getParams($request);
+        $compression = $request->getHTTPRequest()->getHeader('Accept-Encoding');
+        if ($compression) {
+            $matches = [];
+            preg_match_all('/([a-z*]+)(?:;q=[\d.]*)?(?:,\s*|$)/i', $compression, $matches);
+            $params['accept-encoding'] = $matches[1];
+        }
+        return $params;
+    }
 
     protected function validateRequest(ServiceRequest $request) {
         $this->validateIntegrity($request);

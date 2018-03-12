@@ -125,7 +125,8 @@ return [
             \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => [],
             \Kibo\Phast\Filters\CSS\ImageURLRewriter\Filter::class => [
                 'maxImageInliningSize' => 512
-            ]
+            ],
+            \Kibo\Phast\Filters\Service\Compression\CompressingFilter::class => []
         ]
     ],
 
