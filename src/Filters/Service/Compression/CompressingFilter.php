@@ -6,11 +6,11 @@ namespace Kibo\Phast\Filters\Service\Compression;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\RuntimeException;
+use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
-use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
-class CompressingFilter implements ServiceFilter {
+class CompressingFilter implements CachedResultServiceFilter {
     use LoggingTrait;
 
     private $funcs;
@@ -19,8 +19,13 @@ class CompressingFilter implements ServiceFilter {
         $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
 
+    public function getCacheHash(Resource $resource, array $request) {
+        return $this->canApply() ? 'gzip' : 'identity';
+    }
+
+
     public function apply(Resource $resource, array $request) {
-        if (!$this->funcs->function_exists('gzencode')) {
+        if (!$this->canApply()) {
             throw new RuntimeException('Function gzencode() does not exist');
         }
 
@@ -30,6 +35,10 @@ class CompressingFilter implements ServiceFilter {
             null,
             'gzip'
         );
+    }
+
+    private function canApply() {
+        return $this->funcs->function_exists('gzencode');
     }
 
 }
