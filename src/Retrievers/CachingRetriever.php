@@ -43,6 +43,7 @@ class CachingRetriever implements Retriever {
     }
 
     public function getCacheSalt(URL $url) {
+        //  TODO: What should we have here?
         return false;
     }
 

@@ -26,7 +26,8 @@ class RemoteRetriever implements Retriever {
     }
 
     public function getCacheSalt(URL $url) {
-        return false;
+        // TODO: Have this configurable
+        return md5($url->toString()) . '-' . floor(time() / 7200);
     }
 
 }
