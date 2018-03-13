@@ -40,6 +40,14 @@ class ServiceSignature {
         }
     }
 
+    /**
+     * @return string
+     */
+    public function getCacheSalt() {
+        $identities = $this->getIdentities();
+        return md5(join('=>', array_merge(array_keys($identities), array_values($identities))));
+    }
+
     public function sign($value) {
         $identities = $this->getIdentities();
         $users = array_keys($identities);
@@ -59,6 +67,14 @@ class ServiceSignature {
         return $signature === $signer->sign($value);
     }
 
+    public static function generateToken() {
+        $token = '';
+        for ($i = 0; $i < self::AUTO_TOKEN_SIZE; $i++) {
+            $token .= chr(mt_rand(33, 126));
+        }
+        return $token;
+    }
+
     private function getIdentities() {
         if (!isset ($this->identities)) {
             $token = $this->cache->get('security-token', function () {
@@ -67,14 +83,6 @@ class ServiceSignature {
             $this->identities = ['' => $token];
         }
         return $this->identities;
-    }
-
-    public static function generateToken() {
-        $token = '';
-        for ($i = 0; $i < self::AUTO_TOKEN_SIZE; $i++) {
-            $token .= chr(mt_rand(33, 126));
-        }
-        return $token;
     }
 
 }

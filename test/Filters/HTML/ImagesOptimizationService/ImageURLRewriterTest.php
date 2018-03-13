@@ -135,6 +135,50 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->assertStringStartsWith(self::BASE_URL, $url);
     }
 
+    /**
+     * @dataProvider cacheSaltData
+     */
+    public function testGetCacheSalt(array $params) {
+        static $lastSalt, $called = false;
+
+        $this->securityToken->method('getCacheSalt')
+            ->willReturn($params['token']);
+        $inliner = new ImageURLRewriter(
+            $this->securityToken,
+            $this->retriever,
+            URL::fromString($params['baseUrl']),
+            URL::fromString($params['serviceUrl']),
+            $params['whitelist'],
+            $params['maxImageSize']
+        );
+        $salt = $inliner->getCacheSalt();
+        if ($called) {
+            $this->assertNotEquals($lastSalt, $salt);
+        }
+        $called = true;
+        $lastSalt = $salt;
+    }
+
+    public function cacheSaltData() {
+        $params = [
+            'token' => 'the-token',
+            'baseUrl' => self::BASE_URL . '/base-url',
+            'serviceUrl' => self::BASE_URL . '/service-url',
+            'whitelist' => ['key' => 'val'],
+            'maxImageSize' => 512
+        ];
+        yield [$params];
+        foreach ($params as $key => $val) {
+            $new = $params;
+            if ($key == 'whitelist') {
+                $new[$key] = ['key1' => 'val1'];
+            } else {
+                $new[$key] .= '1';
+            }
+            yield [$new];
+        }
+    }
+
 
     /**
      * @param int|null $rewriteFormat

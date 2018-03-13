@@ -9,7 +9,7 @@ use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
-class CompositeFilter implements ServiceFilter {
+class CompositeFilter implements CachedResultServiceFilter {
     use LoggingTrait;
 
     /**
@@ -19,6 +19,19 @@ class CompositeFilter implements ServiceFilter {
 
     public function addFilter(ServiceFilter $filter) {
         $this->filters[] = $filter;
+    }
+
+    public function getCacheHash(Resource $resource, array $request) {
+        $classes = array_map('get_class', $this->filters);
+
+        $cached = array_filter($this->filters, function (ServiceFilter $filter) {
+            return $filter instanceof CachedResultServiceFilter;
+        });
+
+        $salts = array_map(function (CachedResultServiceFilter $filter) use ($resource, $request) {
+            return $filter->getCacheHash($resource, $request);
+        }, $cached);
+        return join("\n", array_merge($classes, $salts, [$resource->getCacheSalt()]));
     }
 
     public function apply(Resource $resource, array $request) {
@@ -47,6 +60,4 @@ class CompositeFilter implements ServiceFilter {
         $this->logger()->info('Done filtering for resource {url}', ['url' => $resource->getUrl()]);
         return $result;
     }
-
-
 }

@@ -22,8 +22,9 @@ selector { rule: value }
 ';
 
     public function testStrippingImports() {
-        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), $this->css);
-        $result = (new Filter())->apply($resource, ['strip-imports' => 1])->getContent();
+        $result = (new Filter())
+            ->apply($this->makeResource(), ['strip-imports' => 1])
+            ->getContent();
 
         $this->assertNotContains('@import \'custom.css\';', $result);
         $this->assertNotContains('@import url("chrome://communicator/skin/");', $result);
@@ -33,9 +34,23 @@ selector { rule: value }
     }
 
     public function testNotStrippingWhenNotRequired() {
-        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), $this->css);
-        $result = (new Filter())->apply($resource, [])->getContent();
+        $result = (new Filter())
+            ->apply($this->makeResource(), [])
+            ->getContent();
         $this->assertEquals($this->css, $result);
+    }
+
+    public function testCacheSalt() {
+        $filter = new Filter();
+        $resource = $this->makeResource();
+        $this->assertNotEquals(
+            $filter->getCacheHash($resource, []),
+            $filter->getCacheHash($resource, ['strip-imports' => 1])
+        );
+    }
+
+    private function makeResource() {
+        return Resource::makeWithContent(URL::fromString('http://phast.test'), $this->css);
     }
 
 }

@@ -93,6 +93,16 @@ class ServiceSignatureTest extends TestCase {
         $this->assertTrue($this->signature->verify($signature, 'something'));
     }
 
+    public function testDifferentCacheSaltForDifferentIdentities() {
+        $this->signature->setIdentities('key');
+        $salt1 = $this->signature->getCacheSalt();
+        $this->signature->setIdentities(['user' => 'key1']);
+        $salt2 = $this->signature->getCacheSalt();
+        $this->signature->setIdentities(['user2' => 'key2']);
+        $salt3 = $this->signature->getCacheSalt();
 
+        $this->assertNotEquals($salt1, $salt2);
+        $this->assertNotEquals($salt2, $salt3);
+    }
 
 }

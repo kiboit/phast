@@ -3,10 +3,10 @@
 namespace Kibo\Phast\Filters\CSS\ImageURLRewriter;
 
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
-use Kibo\Phast\Services\ServiceFilter;
+use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
-class Filter implements ServiceFilter {
+class Filter implements CachedResultServiceFilter {
 
     /**
      * @var ImageURLRewriter
@@ -19,6 +19,10 @@ class Filter implements ServiceFilter {
      */
     public function __construct(ImageURLRewriter $rewriter) {
         $this->rewriter = $rewriter;
+    }
+
+    public function getCacheHash(Resource $resource, array $request) {
+        return $this->rewriter->getCacheSalt();
     }
 
 

@@ -137,6 +137,19 @@ class ImageURLRewriter {
     }
 
     /**
+     * @return string
+     */
+    public function getCacheSalt() {
+        $parts = array_merge([
+            $this->signature->getCacheSalt(),
+            $this->baseUrl->toString(),
+            $this->serviceUrl->toString(),
+            $this->maxImageInliningSize
+        ], array_keys($this->whitelist), array_values($this->whitelist));
+        return join('-', $parts);
+    }
+
+    /**
      * @param string $url
      * @param URL|null $baseUrl
      * @return URL
