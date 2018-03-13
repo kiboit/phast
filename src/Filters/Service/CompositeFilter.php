@@ -21,7 +21,7 @@ class CompositeFilter implements CachedResultServiceFilter {
         $this->filters[] = $filter;
     }
 
-    public function getCacheHash(Resource $resource, array $request) {
+    public function getCacheSalt(Resource $resource, array $request) {
         $classes = array_map('get_class', $this->filters);
 
         $cached = array_filter($this->filters, function (ServiceFilter $filter) {
@@ -29,7 +29,7 @@ class CompositeFilter implements CachedResultServiceFilter {
         });
 
         $salts = array_map(function (CachedResultServiceFilter $filter) use ($resource, $request) {
-            return $filter->getCacheHash($resource, $request);
+            return $filter->getCacheSalt($resource, $request);
         }, $cached);
         return join("\n", array_merge($classes, $salts, [$resource->getUrl(), $resource->getCacheSalt()]));
     }

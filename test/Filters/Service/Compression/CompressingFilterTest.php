@@ -40,8 +40,8 @@ class CompressingFilterTest extends PhastTestCase {
         $filter1 = new CompressingFilter();
         $filter2 = new CompressingFilter($this->gzencodeWillNotExist());
         $this->assertNotEquals(
-            $filter1->getCacheHash($this->resource, []),
-            $filter2->getCacheHash($this->resource, [])
+            $filter1->getCacheSalt($this->resource, []),
+            $filter2->getCacheSalt($this->resource, [])
         );
     }
 

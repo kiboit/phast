@@ -70,15 +70,14 @@ class CompositeFilterTest extends PhastTestCase {
         $this->assertEquals('content01', $result->getContent());
     }
 
-    public function testGetCacheHash() {
-
+    public function testGetCacheSalt() {
         $retriever1 = $this->createMock(Retriever::class);
         $retriever1->method('getCacheSalt')
             ->willReturn('the-content');
         $resource = Resource::makeWithRetriever(URL::fromString('http://phast.test'), $retriever1);
 
         $cachedFilter = $this->createMock(CachedResultServiceFilter::class);
-        $cachedFilter->method('getCacheHash')
+        $cachedFilter->method('getCacheSalt')
             ->willReturnCallback(function () {
                 static $calls = 0;
                 if ($calls == 0) {
@@ -89,24 +88,24 @@ class CompositeFilterTest extends PhastTestCase {
             });
 
         $hashes = [];
-        $hashes[] = $this->filter->getCacheHash($resource, []);
+        $hashes[] = $this->filter->getCacheSalt($resource, []);
 
         $this->filter->addFilter($cachedFilter);
-        $hashes[] = $this->filter->getCacheHash($resource, []);
-        $hashes[] = $this->filter->getCacheHash($resource, []);
+        $hashes[] = $this->filter->getCacheSalt($resource, []);
+        $hashes[] = $this->filter->getCacheSalt($resource, []);
 
         $notCachedFilter = $this->createMock(ServiceFilter::class);
         $this->filter->addFilter($notCachedFilter);
-        $hashes[] = $this->filter->getCacheHash($resource, []);
+        $hashes[] = $this->filter->getCacheSalt($resource, []);
 
         $retriever2 = $this->createMock(Retriever::class);
         $retriever2->method('getCacheSalt')
             ->willReturn('other-content');
         $resource2 = Resource::makeWithRetriever(URL::fromString('http://phast.test'), $retriever2);
-        $hashes[] = $this->filter->getCacheHash($resource2, []);
+        $hashes[] = $this->filter->getCacheSalt($resource2, []);
 
         $resource3 = Resource::makeWithContent(URL::fromString('http://phast.test/other-url.css'), $retriever1);
-        $hashes[] = $this->filter->getCacheHash($resource3, []);
+        $hashes[] = $this->filter->getCacheSalt($resource3, []);
 
         foreach ($hashes as $idx => $hash) {
             $this->assertTrue(is_string($hash), "Hash $idx is not string");

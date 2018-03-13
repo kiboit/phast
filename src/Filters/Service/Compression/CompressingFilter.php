@@ -19,7 +19,7 @@ class CompressingFilter implements CachedResultServiceFilter {
         $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
 
-    public function getCacheHash(Resource $resource, array $request) {
+    public function getCacheSalt(Resource $resource, array $request) {
         return $this->canApply() ? 'gzip' : 'identity';
     }
 

@@ -47,7 +47,7 @@ class CachingServiceFilter implements ServiceFilter {
      * @throws CachedExceptionException
      */
     public function apply(Resource $resource, array $request) {
-        $key = $this->cachedFilter->getCacheHash($resource, $request);
+        $key = $this->cachedFilter->getCacheSalt($resource, $request);
         $this->logger()->info('Trying to get {url} from cache', ['url' => (string)$resource->getUrl()]);
         $result = $this->cache->get($key);
         if ($result && $this->checkDependencies($result)) {

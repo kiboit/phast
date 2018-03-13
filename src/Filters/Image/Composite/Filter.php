@@ -34,7 +34,7 @@ class Filter implements CachedResultServiceFilter {
         $this->filters[] = $filter;
     }
 
-    public function getCacheHash(Resource $resource, array $request) {
+    public function getCacheSalt(Resource $resource, array $request) {
         $filters = array_map('get_class', $this->filters);
         $salts = array_map(function (ImageFilter $filter) use ($request) {
             return $filter->getCacheSalt($request);

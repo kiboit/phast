@@ -139,7 +139,7 @@ class FilterTest extends TestCase {
                 ->willReturn($filterSalt);
         }
 
-        $result = $this->filter->getCacheHash($resource, []);
+        $result = $this->filter->getCacheSalt($resource, []);
         $this->assertNotEmpty($result);
         $this->assertTrue(is_string($result));
         $this->assertNotContains($result, $previousResults);

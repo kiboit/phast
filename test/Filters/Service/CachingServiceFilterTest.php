@@ -54,7 +54,7 @@ class CachingServiceFilterTest extends TestCase {
 
 
         $cachedFilter = $this->createMock(CachedResultServiceFilter::class);
-        $cachedFilter->method('getCacheHash')
+        $cachedFilter->method('getCacheSalt')
             ->willReturnCallback(function () {
                 return $this->cacheKey;
             });

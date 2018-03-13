@@ -14,6 +14,6 @@ interface CachedResultServiceFilter extends ServiceFilter {
      * @param array $request
      * @return string
      */
-    public function getCacheHash(Resource $resource, array $request);
+    public function getCacheSalt(Resource $resource, array $request);
 
 }

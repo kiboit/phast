@@ -21,7 +21,7 @@ class Filter implements CachedResultServiceFilter {
         $this->rewriter = $rewriter;
     }
 
-    public function getCacheHash(Resource $resource, array $request) {
+    public function getCacheSalt(Resource $resource, array $request) {
         return $this->rewriter->getCacheSalt();
     }
 

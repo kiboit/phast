@@ -12,7 +12,7 @@ use Kibo\Phast\ValueObjects\Resource;
 class Filter implements CachedResultServiceFilter {
     use LoggingTrait;
 
-    public function getCacheHash(Resource $resource, array $request) {
+    public function getCacheSalt(Resource $resource, array $request) {
         return $this->shouldStripImports($request) ? 'strip-imports' : 'no-strip-imports';
     }
 

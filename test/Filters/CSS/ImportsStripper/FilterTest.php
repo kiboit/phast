@@ -44,8 +44,8 @@ selector { rule: value }
         $filter = new Filter();
         $resource = $this->makeResource();
         $this->assertNotEquals(
-            $filter->getCacheHash($resource, []),
-            $filter->getCacheHash($resource, ['strip-imports' => 1])
+            $filter->getCacheSalt($resource, []),
+            $filter->getCacheSalt($resource, ['strip-imports' => 1])
         );
     }
 

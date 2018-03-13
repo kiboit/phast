@@ -13,7 +13,7 @@ class JSMinifierFilterTest extends PhastTestCase {
         $filter1 = new JSMinifierFilter(false);
         $filter2 = new JSMinifierFilter(true);
         $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), 'the-content');
-        $this->assertNotEquals($filter1->getCacheHash($resource, []), $filter2->getCacheHash($resource, []));
+        $this->assertNotEquals($filter1->getCacheSalt($resource, []), $filter2->getCacheSalt($resource, []));
     }
 
 }

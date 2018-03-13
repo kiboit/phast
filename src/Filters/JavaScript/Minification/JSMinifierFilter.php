@@ -20,7 +20,7 @@ class JSMinifierFilter implements CachedResultServiceFilter {
         $this->removeLicenseHeaders = (bool) $removeLicenseHeaders;
     }
 
-    public function getCacheHash(Resource $resource, array $request) {
+    public function getCacheSalt(Resource $resource, array $request) {
         return $this->removeLicenseHeaders ? 'license-headers-off' : 'license-headers-on';
     }
 
