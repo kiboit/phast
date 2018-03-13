@@ -97,10 +97,32 @@ class ExternalAppImageFilterTest extends TestCase {
         $this->assertEmpty(getenv('PATH'));
     }
 
+    public function testGeneratingCacheSalt() {
+        $filter1 = $this->getFilter();
+        $this->cmdArgs .= ' some-more';
+        $filter2 = $this->getFilter();
+        $phpdir = dirname(PHP_BINARY);
+        $this->binPath = $phpdir . '/../' . basename($phpdir) . '/' . basename(PHP_BINARY);
+        $filter3= $this->getFilter();
+
+        $this->assertNotEquals($filter1->getCacheSalt([]), $filter2->getCacheSalt([]));
+        $this->assertNotEquals($filter2->getCacheSalt([]), $filter3->getCacheSalt([]));
+    }
+
     /**
      * @return DummyImage
      */
     private function performTest() {
+        $filter = $this->getFilter();
+        $image = new DummyImage();
+        $image->setImageString($this->imageContent);
+        return $filter->transformImage($image, []);
+    }
+
+    /**
+     * @return ExternalAppImageFilter
+     */
+    private function getFilter() {
         $config = $this->binPath ? ['binpath' => $this->binPath] : [];
         $filter = $this->getMockBuilder(ExternalAppImageFilter::class)
             ->setConstructorArgs([$config])
@@ -114,9 +136,7 @@ class ExternalAppImageFilterTest extends TestCase {
             ->willReturn($this->cmdArgs);
         $filter->method('getSearchPaths')
             ->willReturn([dirname(PHP_BINARY)]);
-        $image = new DummyImage();
-        $image->setImageString($this->imageContent);
-        return $filter->transformImage($image, []);
+        return $filter;
     }
 
 

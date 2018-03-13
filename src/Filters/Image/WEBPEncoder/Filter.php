@@ -15,6 +15,14 @@ class Filter implements ImageFilter {
         $this->compression = $config['compression'];
     }
 
+    public function getCacheSalt(array $request) {
+        $salt = 'webp-compression-' . $this->compression;
+        if (isset ($request['preferredType'])) {
+            $salt .= '-type-' . $request['preferredType'];
+        }
+        return $salt;
+    }
+
     public function transformImage(Image $image, array $request) {
         $encode = isset ($request['preferredType'])
                   && $request['preferredType'] == Image::TYPE_WEBP

@@ -30,6 +30,10 @@ class Filter implements ImageFilter {
         $this->maxHeight = (int)$defaultMaxHeight;
     }
 
+    public function getCacheSalt(array $request) {
+        return join('x', $this->getMaxSize($request));
+    }
+
     /**
      * Resizes image, keeping its original proportions,
      * to a maximum width ot height, set at construction time or passed in the request.
@@ -41,14 +45,7 @@ class Filter implements ImageFilter {
      * @return Image
      */
     public function transformImage(Image $image, array $request) {
-        if (isset ($request['width']) || isset ($request['height'])) {
-            $maxWidth  = isset ($request['width'])  ? (int)$request['width']  : 0;
-            $maxHeight = isset ($request['height']) ? (int)$request['height'] : 0;
-            $this->logger()->info('Resizing to params set in request');
-        } else {
-            $maxWidth = $this->maxWidth;
-            $maxHeight = $this->maxHeight;
-        }
+        list ($maxWidth, $maxHeight) = $this->getMaxSize($request);
 
         $hasBiggerWidth  = $maxWidth  && $image->getWidth()  > $maxWidth;
         $hasBiggerHeight = $maxHeight && $image->getHeight() > $maxHeight;
@@ -70,6 +67,24 @@ class Filter implements ImageFilter {
             ['width' => $image->getWidth(), 'height' => $image->getHeight()]
         );
         return $image;
+    }
+
+    /**
+     * Decide the maximum width and height to which to resize
+     *
+     * @param array $request
+     * @return array
+     */
+    private function getMaxSize(array $request) {
+        if (isset ($request['width']) || isset ($request['height'])) {
+            $maxWidth  = isset ($request['width'])  ? (int)$request['width']  : 0;
+            $maxHeight = isset ($request['height']) ? (int)$request['height'] : 0;
+            $this->logger()->info('Resizing to params set in request');
+        } else {
+            $maxWidth = $this->maxWidth;
+            $maxHeight = $this->maxHeight;
+        }
+        return [$maxWidth, $maxHeight];
     }
 
     /**

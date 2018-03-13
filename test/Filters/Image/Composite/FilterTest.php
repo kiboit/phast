@@ -117,7 +117,7 @@ class FilterTest extends TestCase {
     /**
      * @dataProvider correctHashData
      */
-    public function testCorrectHash($location, $modTime, array $params) {
+    public function testCorrectHash($location, $modTime, $filtersCount = 2, $filterSalt = null) {
         static $previousResults = [];
         $url = URL::fromString($location);
         $retriever = $this->createMock(Retriever::class);
@@ -126,14 +126,20 @@ class FilterTest extends TestCase {
             ->with($url)
             ->willReturn($modTime);
         $resource = Resource::makeWithRetriever($url, $retriever, 'mime');
-        $filters = [
-            $this->createMock(ImageFilter::class),
-            $this->createMock(ImageFilter::class)
-        ];
-        $this->filter->addImageFilter($filters[1]);
-        $this->filter->addImageFilter($filters[0]);
 
-        $result = $this->filter->getCacheHash($resource, $params);
+        $filters = [];
+        for ($i = 0; $i < $filtersCount; $i++) {
+            $filter = $this->createMock(ImageFilter::class);
+            $this->filter->addImageFilter($filter);
+            $filters[] = $filter;
+        }
+
+        if ($filterSalt) {
+            $filters[0]->method('getCacheSalt')
+                ->willReturn($filterSalt);
+        }
+
+        $result = $this->filter->getCacheHash($resource, []);
         $this->assertNotEmpty($result);
         $this->assertTrue(is_string($result));
         $this->assertNotContains($result, $previousResults);
@@ -142,29 +148,13 @@ class FilterTest extends TestCase {
 
     public function correctHashData() {
         return [
-            ['http://phast.test', 123, []],
-            ['http://phast.test', 234, []],
-            ['http://phast-1.test', 123, []],
-            ['http://phast-1.test', 234, []],
-            ['http://phast-1.test', 234, ['height' => 'the-height']],
-            ['http://phast-1.test', 234, ['height' => 'the-height', 'width' => 'the-width']],
-            [
-                'http://phast-1.test',
-                234,
-                ['height' => 'the-height', 'width' => 'the-width', 'preferredType' => 'the-type']
-            ],
-            [
-                'http://phast-1.test',
-                234,
-                ['height' => 'the-height-1', 'width' => 'the-width-1', 'preferredType' => 'the-type-1']
-            ]
+            ['http://phast.test', 123, 1],
+            ['http://phast.test', 123],
+            ['http://phast.test', 234],
+            ['http://phast-1.test', 123],
+            ['http://phast-1.test', 234],
+            ['http://phast-1.test', 234, 2, 'some-salt']
         ];
-    }
-
-    private function checkHashKey($key) {
-        static $lastKey = null;
-        $this->assertNotEquals($lastKey, $key);
-        $lastKey = $key;
     }
 
     private function getMockFilter(Image $returnImage = null) {

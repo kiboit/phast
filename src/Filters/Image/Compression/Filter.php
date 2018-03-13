@@ -23,6 +23,10 @@ class Filter implements ImageFilter {
         $this->compressions = $compressions;
     }
 
+    public function getCacheSalt(array $request) {
+        return join('-', array_merge(array_keys($this->compressions), array_values($this->compressions)));
+    }
+
     public function transformImage(Image $image, array $request) {
         if (isset ($this->compressions[$image->getType()])) {
             $compression = $this->compressions[$image->getType()];

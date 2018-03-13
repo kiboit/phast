@@ -39,13 +39,18 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         $this->config = $config;
     }
 
+    public function getCacheSalt(array $request) {
+        return md5($this->getFullCommand());
+    }
+
+
     public function transformImage(Image $image, array $request) {
         if (!$this->shouldApply($image)) {
             $this->logger()->info('Will not apply');
             return $image;
         }
 
-        $command = $this->getBin() . $this->getCmdArgs();
+        $command = $this->getFullCommand();
 
         $this->logger()->info('Applying {command}', ['command' => $command]);
 
@@ -80,6 +85,10 @@ abstract class ExternalAppImageFilter implements ImageFilter {
         $newImage->setType($image->getType());
 
         return $newImage;
+    }
+
+    private function getFullCommand() {
+        return $this->getBin() . $this->getCmdArgs();
     }
 
     private function getBin() {

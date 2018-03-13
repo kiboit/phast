@@ -55,7 +55,6 @@ class FilterTest extends TestCase {
         $this->checkResizing('75x150', '50x100', '100x300', '50x300');
     }
 
-
     private function checkResizing($imageSize, $expectedSize, $defaultMaxSize, $priorityMaxSize = null) {
         list ($imageWidth, $imageHeight) = explode('x', $imageSize);
         @list ($expectedWidth, $expectedHeight) = explode('x', $expectedSize);
@@ -73,6 +72,44 @@ class FilterTest extends TestCase {
         $actual = $resizer->transformImage($image, $request);
         $this->assertEquals($expectedWidth, $actual->getWidth());
         $this->assertEquals($expectedHeight, $actual->getHeight());
+    }
+
+    /**
+     * @dataProvider generatingCacheSaltData
+     */
+    public function testGeneratingCacheSalt($constructorSize, $requestSize = null) {
+        static $lastSalt, $called = false;
+        list ($defaultWidth, $defaultHeight) = explode('x', $constructorSize);
+        $params = [];
+        if ($requestSize) {
+            @list ($requestWidth, $requestHeight) = explode('x', $requestSize);
+            if ($requestWidth) {
+                $params['width'] = $requestWidth;
+            }
+            if ($requestHeight) {
+                $params['height'] = $requestHeight;
+            }
+        }
+        $filter = new Filter($defaultWidth, $defaultHeight);
+        $salt = $filter->getCacheSalt($params);
+        if ($called) {
+            $this->assertNotEquals($lastSalt, $salt);
+        }
+        $called = true;
+        $lastSalt = $salt;
+    }
+
+    public function generatingCacheSaltData() {
+        return [
+            ['100x200'],
+            ['100x300'],
+            ['300x100'],
+            ['300x100', '150x250'],
+            ['300x100', '250x150'],
+            ['300x100', '250'],
+            ['300x100', '250x150'],
+            ['300x100', 'x150'],
+        ];
     }
 
 }

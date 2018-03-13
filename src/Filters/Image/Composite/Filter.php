@@ -35,20 +35,11 @@ class Filter implements CachedResultServiceFilter {
     }
 
     public function getCacheHash(Resource $resource, array $request) {
-        $lastModTime = $resource->getCacheSalt();
-        $filtersNames = array_map('get_class', $this->filters);
-        sort($filtersNames);
-        $key = array_merge([$lastModTime, (string)$resource->getUrl()], $filtersNames);
-        if (isset ($request['width'])) {
-            $key[] = $request['width'];
-        }
-        if (isset ($request['height'])) {
-            $key[] = $request['height'];
-        }
-        if (isset ($request['preferredType'])) {
-            $key[] = $request['preferredType'];
-        }
-        $key = implode("\n", $key);
+        $filters = array_map('get_class', $this->filters);
+        $salts = array_map(function (ImageFilter $filter) use ($request) {
+            return $filter->getCacheSalt($request);
+        }, $this->filters);
+        $key = implode("\n", array_merge($filters, $salts, [$resource->getUrl(), $resource->getCacheSalt()]));
         return $key;
     }
 

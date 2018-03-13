@@ -27,7 +27,11 @@ class FilterTest extends TestCase {
         $image->setType('not-existing');
         $actual = $filter->transformImage($image, []);
         $this->assertSame($image, $actual);
-
     }
 
+    public function testGeneratingCacheSalt() {
+        $filter1 = new Filter(['type1' => 20, 'type2' => 30]);
+        $filter2 = new Filter(['type1' => 20, 'type2' => 31]);
+        $this->assertNotEquals($filter1->getCacheSalt([]), $filter2->getCacheSalt([]));
+    }
 }

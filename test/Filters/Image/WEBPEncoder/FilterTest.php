@@ -72,6 +72,14 @@ class FilterTest extends TestCase {
         $this->assertSame($image, $this->filter->transformImage($image, $this->request));
     }
 
+    public function testGeneratingCacheSalt() {
+        $filter1 = $this->getFilter();
+        $this->config['compression'] = 85;
+        $filter2 = $this->getFilter();
+        $this->assertNotEquals($filter1->getCacheSalt([]), $filter2->getCacheSalt([]));
+        $this->assertNotEquals($filter2->getCacheSalt([]), $filter2->getCacheSalt(['preferredType' => 'webp']));
+    }
+
     private function getFilter() {
         return new Filter($this->config);
     }
