@@ -6,7 +6,6 @@ use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter;
 use Kibo\Phast\Filters\JavaScript\Minification\JSMinifierFilter;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
-use Kibo\Phast\Filters\JavaScript\Composite;
 use Kibo\Phast\Filters\Service\CompositeFilter;
 use Kibo\Phast\Filters\Service\Compression\CompressingFilter;
 use Kibo\Phast\Filters\Service\Compression\DecompressingFilter;
@@ -29,7 +28,7 @@ class Factory {
             )
         );
 
-        $cachedComposite = new Composite\Filter(@$config['scripts']['removeLicenseHeaders']);
+        $cachedComposite = new CompositeFilter();
         $cachedComposite->addFilter(new JSMinifierFilter(@$config['scripts']['removeLicenseHeaders']));
         $cachedComposite->addFilter(new CompressingFilter());
 
