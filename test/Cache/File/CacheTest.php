@@ -161,6 +161,6 @@ class CacheTest extends CacheTestCase {
         for ($i = 0; $i < $shardingDepth * 2; $i += 2) {
             $dirs[] = substr($hashedKey, $i, 2);
         }
-        return join('/', array_merge($dirs, [$this->nameSpace . '-' . $hashedKey]));
+        return join('/', array_merge($dirs, [$hashedKey . '-' . $this->nameSpace]));
     }
 }

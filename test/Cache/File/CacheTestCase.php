@@ -27,6 +27,12 @@ class CacheTestCase extends PhastTestCase {
                 'probability' => 0,
                 'maxItems' => 100,
                 'maxAge' => 20
+            ],
+            'diskCleanup' => [
+                'maxSize' => 10000,
+                'probability' => 0,
+                'sampleFilesCount' => 10,
+                'portionToFree' => 0.5
             ]
         ];
         $this->rmDir($this->config['cacheRoot']);

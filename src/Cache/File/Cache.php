@@ -93,7 +93,7 @@ class Cache implements CacheInterface {
     }
 
     private function getCacheFilename($key) {
-        return $this->getCacheDir($key) . '/' . ltrim($this->cacheNS, '/') . '-' . $this->getHashedKey($key);
+        return $this->getCacheDir($key) . '/' . $this->getHashedKey($key) . '-' . ltrim($this->cacheNS, '/');
     }
 
     private function getHashedKey($key) {
