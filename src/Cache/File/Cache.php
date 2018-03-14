@@ -32,16 +32,6 @@ class Cache implements CacheInterface {
     private $gcMaxAge;
 
     /**
-     * @var float
-     */
-    private $gcProbability;
-
-    /**
-     * @var integer
-     */
-    private $gcMaxItems;
-
-    /**
      * @var ObjectifiedFunctions
      */
     private $functions;
@@ -49,8 +39,6 @@ class Cache implements CacheInterface {
     public function __construct(array $config, $cacheNamespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = $config['cacheRoot'];
         $this->gcMaxAge = $config['garbageCollection']['maxAge'];
-        $this->gcProbability = $config['garbageCollection']['probability'];
-        $this->gcMaxItems = $config['garbageCollection']['maxItems'];
         $this->cacheNS = $cacheNamespace;
 
         if ($functions) {
