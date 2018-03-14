@@ -54,9 +54,7 @@ class Cache implements CacheInterface {
             $this->functions = new ObjectifiedFunctions();
         }
 
-        if ($this->shouldCollectGarbage()) {
-            $this->collectGarbage();
-        }
+        new GarbageCollector($config, $this->functions);
     }
 
     public function get($key, callable $cached = null, $expiresIn = 0) {
@@ -149,66 +147,4 @@ class Cache implements CacheInterface {
         }
         return null;
     }
-
-    private function shouldCollectGarbage() {
-        if (!$this->functions->file_exists($this->cacheRoot)) {
-            return false;
-        }
-        if ($this->gcProbability <= 0) {
-            return false;
-        }
-        if ($this->gcProbability >= 1) {
-            return true;
-        }
-        return $this->functions->mt_rand(1, round(1 /  $this->gcProbability)) == 1;
-    }
-
-    private function collectGarbage() {
-        $dirs = $this->getDirectoryIterator($this->cacheRoot);
-        $fileIterators = [];
-        foreach ($dirs as $dir) {
-            $fileIterators[] = $this->getOldFiles($this->getDirectoryIterator($dir));
-        }
-        shuffle($fileIterators);
-        $deleted = 0;
-        while ($deleted < $this->gcMaxItems && count($fileIterators)) {
-            foreach ($fileIterators as $idx => $iterator) {
-                $file = $iterator->current();
-                if ($file) {
-                    $this->functions->unlink($file);
-                    $iterator->next();
-                    $deleted++;
-                } else {
-                    unset ($fileIterators[$idx]);
-                }
-            }
-        }
-    }
-
-    private function getDirectoryIterator($path) {
-        $dir = @$this->functions->opendir($path);
-        if (!$dir) {
-            return;
-        }
-        while (($item = $this->functions->readdir($dir)) !== false) {
-            if ($item == '.' || $item == '..') {
-                continue;
-            }
-            $full = $path . '/' . $item;
-            yield $full;
-        }
-    }
-
-    private function getOldFiles($files) {
-        $maxModificationTime = $this->functions->time() - $this->gcMaxAge;
-        foreach ($files as $file) {
-            if (@$this->functions->is_dir($file)) {
-                continue;
-            }
-            if (@$this->functions->filemtime($file) < $maxModificationTime) {
-                yield $file;
-            }
-        }
-    }
-
 }
