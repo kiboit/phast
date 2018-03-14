@@ -12,6 +12,11 @@ class Cache implements CacheInterface {
     const VERSION = "2";
 
     /**
+     * @var GarbageCollector
+     */
+    private static $gc;
+
+    /**
      * @var string
      */
     private $cacheRoot;
@@ -54,7 +59,9 @@ class Cache implements CacheInterface {
             $this->functions = new ObjectifiedFunctions();
         }
 
-        new GarbageCollector($config, $this->functions);
+        if (!isset (self::$gc)) {
+            self::$gc = new GarbageCollector($config, $this->functions);
+        }
     }
 
     public function get($key, callable $cached = null, $expiresIn = 0) {
@@ -72,6 +79,13 @@ class Cache implements CacheInterface {
 
     public function set($key, $value, $expiresIn = 0) {
         $this->storeCache($key, $value, $expiresIn);
+    }
+
+    /**
+     * @return GarbageCollector
+     */
+    public function getGC() {
+        return self::$gc;
     }
 
 

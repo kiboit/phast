@@ -130,6 +130,13 @@ class CacheTest extends CacheTestCase {
 
     }
 
+    public function testCreatingASingleGarbageCollectorForAllInstances() {
+        $gc1 = $this->cache->getGC();
+        $gc2 = $this->cache->getGC();
+        $this->assertNotNull($gc1);
+        $this->assertSame($gc1, $gc2);
+    }
+
     private function rebuildCache() {
         $this->cache = new Cache(
             $this->config,
