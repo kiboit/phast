@@ -5,7 +5,7 @@ namespace Kibo\Phast\Cache\File;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use PHPUnit\Framework\TestCase;
 
-class FileCacheTest extends TestCase {
+class CacheTest extends TestCase {
 
     /**
      * @var array
