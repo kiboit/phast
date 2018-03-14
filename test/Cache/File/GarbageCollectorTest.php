@@ -5,6 +5,12 @@ namespace Kibo\Phast\Cache\File;
 
 class GarbageCollectorTest extends CacheTestCase {
 
+    public function setUp() {
+        parent::setUp();
+        $this->config['garbageCollection']['probability'] = 1;
+        $this->config['garbageCollection']['maxAge'] = 60;
+    }
+
     public function testGarbageCollectionRunCalculation() {
         $actualMin = $actualMax = null;
         $this->functions->mt_rand = function ($min, $max) use (&$actualMin, &$actualMax) {
@@ -21,7 +27,6 @@ class GarbageCollectorTest extends CacheTestCase {
     }
 
     public function testNotExplodingWhenGarbageCollectingOnMissingCacheRoot() {
-        $this->config['garbageCollection']['probability'] = 1;
         $this->makeGC();
     }
 
@@ -62,9 +67,22 @@ class GarbageCollectorTest extends CacheTestCase {
         $this->assertContains('a-dir', $dir2);
     }
 
+    public function testGarbageCollectionOnGCDestruction() {
+        $this->setUpCacheContents();
+        $contents = $this->getCacheContents();
+        $gc = $this->makeGC();
+        $this->assertEquals($contents, $this->getCacheContents());
+        unset ($gc);
+        $this->assertNotEquals($contents, $this->getCacheContents());
+    }
+
     private function executeCacheTest() {
-        $this->config['garbageCollection']['probability'] = 1;
-        $this->config['garbageCollection']['maxAge'] = 60;
+        $this->setUpCacheContents();
+        $this->makeGC();
+        return $this->getCacheContents();
+    }
+
+    private function setUpCacheContents() {
         $items = [
             'dir1' => [
                 'item1' => 30,
@@ -88,9 +106,9 @@ class GarbageCollectorTest extends CacheTestCase {
                 touch($filename, time() - $time);
             }
         }
+    }
 
-        $this->makeGC();
-
+    private function getCacheContents() {
         $getDirItems = function ($path) {
             return array_filter(scandir($path), function ($item) {
                 return !in_array($item, ['.', '..']);
@@ -106,7 +124,6 @@ class GarbageCollectorTest extends CacheTestCase {
         $this->assertCount(2, $results);
         $this->assertArrayHasKey('dir1', $results);
         $this->assertArrayHasKey('dir2', $results);
-
         return $results;
     }
 

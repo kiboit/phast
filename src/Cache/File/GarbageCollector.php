@@ -43,7 +43,9 @@ class GarbageCollector {
         } else {
             $this->functions = new ObjectifiedFunctions();
         }
+    }
 
+    public function __destruct() {
         if ($this->shouldCollectGarbage()) {
             $this->collectGarbage();
         }
