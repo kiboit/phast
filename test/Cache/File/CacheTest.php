@@ -66,6 +66,15 @@ class CacheTest extends CacheTestCase {
         $this->assertContains($value, file_get_contents($expectedFilename));
     }
 
+    public function testShardingDepth() {
+        $this->config['shardingDepth'] = 3;
+        $this->rebuildCache();
+        $key = 'the-key-we-have';
+        $this->cache->set($key, 'the-pirate-cache');
+        $expectedFilename = $this->getCacheFileName($key);
+        $this->assertFileExists($expectedFilename);
+    }
+
     public function testExpiration() {
         $calledTimes = 0;
         $cached = function () use (&$calledTimes) {
@@ -147,6 +156,11 @@ class CacheTest extends CacheTestCase {
 
     private function getCacheFileName($key) {
         $hashedKey = md5($key);
-        return join('/', [$this->config['cacheRoot'], substr($hashedKey, 0, 2), $this->nameSpace . '-' . $hashedKey]);
+        $shardingDepth = $this->config['shardingDepth'];
+        $dirs = [$this->config['cacheRoot']];
+        for ($i = 0; $i < $shardingDepth * 2; $i += 2) {
+            $dirs[] = substr($hashedKey, $i, 2);
+        }
+        return join('/', array_merge($dirs, [$this->nameSpace . '-' . $hashedKey]));
     }
 }

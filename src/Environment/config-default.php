@@ -10,6 +10,7 @@ return [
 
     'cache' => [
         'cacheRoot'   => sys_get_temp_dir() . '/phast-cache-' . posix_geteuid(),
+        'shardingDepth' => 1,
         'garbageCollection' => [
             'maxItems'    => 100,
             'probability' => 0.1,

@@ -22,6 +22,7 @@ class CacheTestCase extends PhastTestCase {
         parent::setUp();
         $this->config = [
             'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir-' . posix_geteuid(),
+            'shardingDepth' => 1,
             'garbageCollection' => [
                 'probability' => 0,
                 'maxItems' => 100,

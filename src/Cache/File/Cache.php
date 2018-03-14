@@ -29,6 +29,11 @@ class Cache implements CacheInterface {
     /**
      * @var integer
      */
+    private $shardingDepth;
+
+    /**
+     * @var integer
+     */
     private $gcMaxAge;
 
     /**
@@ -38,6 +43,7 @@ class Cache implements CacheInterface {
 
     public function __construct(array $config, $cacheNamespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = $config['cacheRoot'];
+        $this->shardingDepth = $config['shardingDepth'];
         $this->gcMaxAge = $config['garbageCollection']['maxAge'];
         $this->cacheNS = $cacheNamespace;
 
@@ -78,7 +84,12 @@ class Cache implements CacheInterface {
 
 
     private function getCacheDir($key) {
-        return $this->cacheRoot . '/' . substr($this->getHashedKey($key), 0, 2);
+        $hashedKey = $this->getHashedKey($key);
+        $parts = [$this->cacheRoot];
+        for ($i = 0; $i < $this->shardingDepth * 2; $i += 2) {
+            $parts[] = substr($hashedKey, $i, 2);
+        }
+        return join('/', $parts);
     }
 
     private function getCacheFilename($key) {

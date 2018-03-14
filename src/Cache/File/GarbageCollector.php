@@ -104,9 +104,10 @@ class GarbageCollector {
         $maxModificationTime = $this->functions->time() - $this->gcMaxAge;
         foreach ($files as $file) {
             if (@$this->functions->is_dir($file)) {
-                continue;
-            }
-            if (@$this->functions->filemtime($file) < $maxModificationTime) {
+                foreach ($this->getOldFiles($this->getDirectoryIterator($file)) as $dirFile) {
+                    yield $dirFile;
+                }
+            } else if (@$this->functions->filemtime($file) < $maxModificationTime) {
                 yield $file;
             }
         }

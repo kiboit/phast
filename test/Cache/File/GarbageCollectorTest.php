@@ -76,6 +76,15 @@ class GarbageCollectorTest extends CacheTestCase {
         $this->assertNotEquals($contents, $this->getCacheContents());
     }
 
+    public function testCollectingInDeepSharding() {
+        $this->config['shardingDepth'] = 3;
+        $filename = $this->config['cacheRoot'] . '/ab/cd/ef/abcdefghtij';
+        mkdir(dirname($filename), 0700, true);
+        touch($filename, time() - $this->config['garbageCollection']['maxAge'] - 10);
+        $this->makeGC();
+        $this->assertFileNotExists($filename);
+    }
+
     private function executeCacheTest() {
         $this->setUpCacheContents();
         $this->makeGC();
