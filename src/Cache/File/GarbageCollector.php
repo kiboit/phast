@@ -33,8 +33,8 @@ class GarbageCollector extends ProbabilisticExecutor {
 
     protected function execute() {
         $files = $this->getFiles($this->cacheRoot);
-        shuffle($files);
         $deleted = 0;
+        /** @var \SplFileInfo $file */
         foreach ($this->getOldFiles($files) as $file) {
             @$this->functions->unlink($file->getRealPath());
             $deleted++;
@@ -45,24 +45,25 @@ class GarbageCollector extends ProbabilisticExecutor {
     }
 
     private function getFiles($path) {
-        $files = [];
         /** @var \SplFileInfo $item */
         foreach ($this->makeFileSystemIterator($path) as $item) {
             if ($this->isShard($item)) {
-                $files = array_merge($files, $this->getFiles($item->getRealPath()));
+                foreach ($this->getFiles($item->getRealPath()) as $item) {
+                    yield $item;
+                }
             } else if ($this->isCacheEntry($item)) {
-                $files[] = $item;
+                yield $item;
             }
         }
-        return $files;
     }
 
     /**
-     * @param \SplFileInfo[] $files
+     * @param \Iterator $files
      * @return \Generator
      */
-    private function getOldFiles(array $files) {
+    private function getOldFiles($files) {
         $maxTimeModified = time() - $this->gcMaxAge;
+        /** @var \SplFileInfo $file */
         foreach ($files as $file) {
             if ($file->getMTime() < $maxTimeModified) {
                 yield $file;
@@ -75,7 +76,9 @@ class GarbageCollector extends ProbabilisticExecutor {
      */
     private function makeFileSystemIterator($path) {
         try {
-            return new \FilesystemIterator($path);
+            $items = iterator_to_array(new \FilesystemIterator($path));
+            shuffle($items);
+            return new \ArrayIterator($items);
         } catch (\Exception $e) {
             return new \ArrayIterator([]);
         }
