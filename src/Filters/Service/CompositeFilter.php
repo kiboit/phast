@@ -4,6 +4,7 @@
 namespace Kibo\Phast\Filters\Service;
 
 
+use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
@@ -26,7 +27,20 @@ class CompositeFilter implements ServiceFilter {
             $this->filters,
             function (Resource $resource, ServiceFilter $filter) use ($request) {
                 $this->logger()->info('Starting {filter}', ['filter' => get_class($filter)]);
-                return $filter->apply($resource, $request);
+                try {
+                    return $filter->apply($resource, $request);
+                } catch (RuntimeException $e) {
+                    $message = 'Phast RuntimeException: Filter: {filter} Exception: {exceptionClass} Msg: {message} Code: {code} File: {file} Line: {line}';
+                    $this->logger()->critical($message, [
+                        'filter' => get_class($filter),
+                        'exceptionClass' => get_class($e),
+                        'message' => $e->getMessage(),
+                        'code' => $e->getCode(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]);
+                    return $resource;
+                }
             },
             $resource
         );

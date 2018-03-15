@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\Service;
 
 
+use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
@@ -46,6 +47,26 @@ class CompositeFilterTest extends PhastTestCase {
         $returned = $this->filter->apply($resource0, []);
 
         $this->assertEquals($resource2->getContent(), $returned->getContent());
+    }
+
+    public function testNotBreakingOnExceptionInFilter() {
+        $filter = $this->createMock(ServiceFilter::class);
+        $filter->method('apply')
+            ->willReturnCallback(function (Resource $resource) {
+                static $calls = 0;
+                return $resource->withContent($resource->getContent() . ($calls++));
+            });
+
+        $throwingFilter = $this->createMock(ServiceFilter::class);
+        $throwingFilter->method('apply')
+            ->willThrowException(new RuntimeException());
+        $this->filter->addFilter($filter);
+        $this->filter->addFilter($throwingFilter);
+        $this->filter->addFilter($filter);
+        $resource = $this->makeResource();
+
+        $result = $this->filter->apply($resource, []);
+        $this->assertEquals('content01', $result->getContent());
     }
 
     protected function makeResource() {
