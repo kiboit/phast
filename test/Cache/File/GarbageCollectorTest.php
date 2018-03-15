@@ -14,43 +14,43 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
     public function testGarbageCollection() {
         $results = $this->executeCacheTest();
 
-        $dir1 = $results['dir1'];
+        $dir1 = $results['ab'];
         $this->assertCount(2, $dir1);
-        $this->assertContains('item1', $dir1);
+        $this->assertContains($this->getCacheFilename('item1'), $dir1);
         $this->assertContains('a-dir', $dir1);
-        $this->assertNotContains('item2', $dir1);
-        $this->assertNotContains('item3', $dir1);
-        $this->assertNotContains('item4', $dir1);
+        $this->assertNotContains($this->getCacheFilename('item2'), $dir1);
+        $this->assertNotContains($this->getCacheFilename('item3'), $dir1);
+        $this->assertNotContains($this->getCacheFilename('item4'), $dir1);
 
-        $dir2 = $results['dir2'];
+        $dir2 = $results['cd'];
         $this->assertCount(3, $dir2);
-        $this->assertContains('item4', $dir2);
-        $this->assertContains('item5', $dir2);
+        $this->assertContains($this->getCacheFilename('item4'), $dir2);
+        $this->assertContains($this->getCacheFilename('item5'), $dir2);
         $this->assertContains('a-dir', $dir2);
-        $this->assertNotContains('item6', $dir2);
-        $this->assertNotContains('item7', $dir2);
+        $this->assertNotContains($this->getCacheFilename('item6'), $dir2);
+        $this->assertNotContains($this->getCacheFilename('item7'), $dir2);
     }
 
     public function testGarbageCollectionLimit() {
         $this->config['garbageCollection']['maxItems'] = 2;
         $result = $this->executeCacheTest();
 
-        $totalCount = count($result['dir1']) + count($result['dir2']);
+        $totalCount = count($result['ab']) + count($result['cd']);
         $this->assertEquals(7, $totalCount);
 
-        $dir1 = $result['dir1'];
-        $this->assertContains('item1', $dir1);
+        $dir1 = $result['ab'];
+        $this->assertContains($this->getCacheFilename('item1'), $dir1);
         $this->assertContains('a-dir', $dir1);
 
-        $dir2 = $result['dir2'];
-        $this->assertContains('item4', $dir2);
-        $this->assertContains('item5', $dir2);
+        $dir2 = $result['cd'];
+        $this->assertContains($this->getCacheFilename('item4'), $dir2);
+        $this->assertContains($this->getCacheFilename('item5'), $dir2);
         $this->assertContains('a-dir', $dir2);
     }
 
     public function testCollectingInDeepSharding() {
         $this->config['shardingDepth'] = 3;
-        $filename = $this->config['cacheRoot'] . '/ab/cd/ef/abcdefghtij';
+        $filename = $this->config['cacheRoot'] . '/ab/cd/ef/' . md5('key') . '-ns';
         mkdir(dirname($filename), 0700, true);
         touch($filename, time() - $this->config['garbageCollection']['maxAge'] - 10);
         $this->makeExecutor();
@@ -65,16 +65,16 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
 
     protected function setUpCacheContents() {
         $items = [
-            'dir1' => [
-                'item1' => 30,
-                'item2' => 100,
-                'item3' => 200
+            'ab' => [
+                $this->getCacheFilename('item1') => 30,
+                $this->getCacheFilename('item2') => 100,
+                $this->getCacheFilename('item3') => 200
             ],
-            'dir2' => [
-                'item4' => 40,
-                'item5' => 45,
-                'item6' => 90,
-                'item7' => 70
+            'cd' => [
+                $this->getCacheFilename('item4') => 40,
+                $this->getCacheFilename('item5') => 45,
+                $this->getCacheFilename('item6') => 90,
+                $this->getCacheFilename('item7') => 70
             ]
         ];
 
@@ -110,8 +110,8 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
         }
 
         $this->assertCount(3, $results);
-        $this->assertArrayHasKey('dir1', $results);
-        $this->assertArrayHasKey('dir2', $results);
+        $this->assertArrayHasKey('ab', $results);
+        $this->assertArrayHasKey('cd', $results);
         $this->assertArrayHasKey('nope', $results);
         return $results;
     }
@@ -122,6 +122,10 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
 
     protected function setProbability($probability) {
         $this->config['garbageCollection']['probability'] = $probability;
+    }
+
+    private function getCacheFilename($key) {
+        return md5($key) . '-ns';
     }
 
 }

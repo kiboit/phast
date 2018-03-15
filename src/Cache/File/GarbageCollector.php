@@ -48,9 +48,9 @@ class GarbageCollector extends ProbabilisticExecutor {
         $files = [];
         /** @var \SplFileInfo $item */
         foreach ($this->makeFileSystemIterator($path) as $item) {
-            if ($item->isDir() && !$item->isLink()) {
+            if ($this->isShard($item)) {
                 $files = array_merge($files, $this->getFiles($item->getRealPath()));
-            } else if ($item->isFile()) {
+            } else if ($this->isCacheEntry($item)) {
                 $files[] = $item;
             }
         }
@@ -79,6 +79,16 @@ class GarbageCollector extends ProbabilisticExecutor {
         } catch (\Exception $e) {
             return new \ArrayIterator([]);
         }
+    }
+
+    private function isShard(\SplFileInfo $item) {
+        return $item->isDir()
+                && !$item->isLink()
+                && preg_match('/^[a-f\d]{2}$/', $item->getFilename());
+    }
+
+    private function isCacheEntry(\SplFileInfo $item) {
+        return $item->isFile() && preg_match('/^[a-f\d]{32}-.*$/', $item->getFilename());
     }
 
 }
