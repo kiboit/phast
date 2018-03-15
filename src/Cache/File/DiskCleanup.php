@@ -55,7 +55,7 @@ class DiskCleanup {
             return $deletedBytes < $bytesToDelete;
         };
         $callback = function (\SplFileInfo $file) use (&$deletedBytes) {
-            $deletedBytes = $file->getSize();
+            $deletedBytes += $file->getSize();
             unlink($file->getRealPath());
         };
         $this->walkDirectory($condition, $callback);
@@ -63,26 +63,15 @@ class DiskCleanup {
 
     private function calculateUsedSpace() {
         $size = 0;
-        $lastShard = null;
-        $filesCount = 0;
-        $shardsCount = 0;
-
         $condition = function () use (&$size, &$filesCount) {
-            return $size < $this->maxSize && $filesCount < $this->sampleFilesCount;
+            return true;
         };
 
-        $callback = function (\SplFileInfo $file) use (&$size, &$filesCount, &$shardsCount) {
-            static $lastShard = null;
+        $callback = function (\SplFileInfo $file) use (&$size) {
             $size += $file->getSize();
-            $filesCount++;
-            $shard = substr($file->getFilename(), 0, $this->shardingDepth * 2);
-            if ($shard != $lastShard) {
-                $shardsCount++;
-                $lastShard = $shard;
-            }
         };
         $this->walkDirectory($condition, $callback);
-        return ($size / $shardsCount) * (255 * $this->shardingDepth);
+        return $size;
     }
 
     private function walkDirectory(callable $condition, callable $callback) {
@@ -91,11 +80,9 @@ class DiskCleanup {
         while ($iterator->valid() && $condition()) {
             /** @var \SplFileInfo $file */
             $file = $iterator->current();
-            if ($file->isDir()) {
-                $iterator->next();
-                continue;
+            if (!$file->isDir()) {
+                $callback($file);
             }
-            $callback($file);
             $iterator->next();
         }
     }

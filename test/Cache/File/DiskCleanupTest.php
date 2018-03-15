@@ -22,9 +22,10 @@ class DiskCleanupTest extends CacheTestCase {
             if ($file->isDir()) {
                 continue;
             }
-            $sum += $files->getSize();
+            $sum += $file->getSize();
         }
-        $this->assertEquals(5000, $sum);
+        $this->assertLessThan(5000, $sum);
+        $this->assertGreaterThan(0, $sum);
     }
 
 }
