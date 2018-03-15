@@ -76,26 +76,6 @@ class CachingServiceFilterTest extends TestCase {
         $this->filter = new CachingServiceFilter($cache, $cachedFilter, $this->retriever);
     }
 
-    /**
-     * @dataProvider correctTimeToCacheData
-     */
-    public function testCorrectCachingParameters($modTime, $expectedTtl) {
-        $retriever = $this->createMock(Retriever::class);
-        $retriever->method('getCacheSalt')
-            ->willReturn($modTime);
-        $resource = Resource::makeWithRetriever(URL::fromString('http://phast.test'), $retriever, 'the-mime-type');
-        $this->filter->apply($resource, []);
-        $this->assertArrayHasKey($this->cacheKey, $this->cachedData);
-        $this->assertEquals($expectedTtl, $this->cachedData[$this->cacheKey]['ttl']);
-    }
-
-    public function correctTimeToCacheData() {
-        return [
-            [123, 0],
-            [0, 86400]
-        ];
-    }
-
     public function testReturningResourceFromFilter() {
         $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content', 'the-mime');
         $actual = $this->filter->apply($resource, []);

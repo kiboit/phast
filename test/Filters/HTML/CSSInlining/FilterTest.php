@@ -167,6 +167,7 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testRedirectingToProxyServiceOnReadError() {
+        $this->retrieverLastModificationTime = 123;
         $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
         unset ($this->files[self::BASE_URL . '/the-css.css']);
 
@@ -182,7 +183,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $expectedQuery = [
             'src' => self::BASE_URL . '/the-css.css',
-            'cacheMarker' => floor(time() / self::URL_REFRESH_TIME),
+            'cacheMarker' => 123,
             'token' => 'the-token'
         ];
         $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);

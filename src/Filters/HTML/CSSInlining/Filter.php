@@ -64,11 +64,6 @@ class Filter extends BaseHTMLStreamFilter {
     /**
      * @var int
      */
-    private $urlRefreshTime;
-
-    /**
-     * @var int
-     */
     private $optimizerSizeDiffThreshold;
 
     /**
@@ -102,7 +97,6 @@ class Filter extends BaseHTMLStreamFilter {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
         $this->serviceUrl = URL::fromString((string)$config['serviceUrl']);
-        $this->urlRefreshTime = (int)$config['urlRefreshTime'];
         $this->optimizerSizeDiffThreshold = (int)$config['optimizerSizeDiffThreshold'];
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;
@@ -341,10 +335,9 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function makeServiceURL(URL $originalLocation, $stripImports = false) {
-        $lastModTime = $this->retriever->getCacheSalt($originalLocation);
         $params = [
             'src' => (string) $originalLocation,
-            'cacheMarker' => $lastModTime ? $lastModTime : floor(time() / $this->urlRefreshTime)
+            'cacheMarker' => $this->retriever->getCacheSalt($originalLocation)
         ];
         if ($stripImports) {
             $params['strip-imports'] = 1;

@@ -55,11 +55,11 @@ class CachingServiceFilter implements ServiceFilter {
         }
         try {
             $result = $this->cachedFilter->apply($resource, $request);
-            $this->cache->set($key, $this->serializeResource($result), $this->getCacheTTL($resource));
+            $this->cache->set($key, $this->serializeResource($result));
             return $result;
         } catch (\Exception $e) {
             $cachingException = $this->serializeException($e);
-            $this->cache->set($key, $cachingException, $this->getCacheTTL($resource));
+            $this->cache->set($key, $cachingException);
             throw $this->deserializeException($cachingException);
         }
     }
@@ -79,10 +79,6 @@ class CachingServiceFilter implements ServiceFilter {
             throw $this->deserializeException($data);
         }
         return $this->deserializeResource($data);
-    }
-
-    private  function getCacheTTL(Resource $resource) {
-        return $resource->getCacheSalt() ? 0 : 86400;
     }
 
     private function serializeResource(Resource $resource) {

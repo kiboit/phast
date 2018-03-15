@@ -50,6 +50,7 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testRewrite() {
+        $this->modTime = 2;
         $urls = [
             'http://example.com/script.js',
             'http://test.com/script.js',
@@ -164,6 +165,7 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testRespectingBaseTag() {
+        $this->modTime = 2;
         $this->addBaseTag('/new-root/');
         $script = $this->makeMarkedElement('script');
         $script->setAttribute('src', 'the-script.js');

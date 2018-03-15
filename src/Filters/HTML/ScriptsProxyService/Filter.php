@@ -81,12 +81,9 @@ class Filter extends BaseHTMLStreamFilter {
             return $src;
         }
         $this->logger()->info('Proxying {src}', ['src' => $src]);
-        $lastModTime = $this->retriever->getCacheSalt($url);
         $params = [
             'src' => (string) $url,
-            'cacheMarker' => $lastModTime
-                             ? $lastModTime
-                             : floor($this->functions->time() / $this->config['urlRefreshTime'])
+            'cacheMarker' => $this->retriever->getCacheSalt($url)
         ];
         return (new ServiceRequest())
             ->withUrl(URL::fromString($this->config['serviceUrl']))
