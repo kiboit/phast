@@ -55,33 +55,37 @@ class GarbageCollector extends ProbabilisticExecutor {
         }
         $iterators = [];
         $localFiles = [];
-        try {
-            /** @var \SplFileInfo $item */
-            foreach (new \FilesystemIterator($path) as $item) {
-                if ($item->isDir() && !$item->isLink()) {
-                    $iterators = array_merge(
-                        $iterators,
-                        $this->getOldFilesIterators($item->getRealPath(), $depth + 1)
-                    );
-                } else if ($item->isFile()) {
-                    $localFiles[] = $item;
-                }
+        /** @var \SplFileInfo $item */
+        foreach ($this->makeFileSystemIterator($path) as $item) {
+            if ($item->isDir() && !$item->isLink()) {
+                $iterators = array_merge(
+                    $iterators,
+                    $this->getOldFilesIterators($item->getRealPath(), $depth + 1)
+                );
+            } else if ($item->isFile()) {
+                $localFiles[] = $item;
             }
-        } catch (\Exception $e) {}
+        }
         $iterators[] = new \ArrayIterator($localFiles);
         return $iterators;
     }
 
     private function makeOldFilesIterator($path) {
-        try {
-            $entries = new \FilesystemIterator($path);
-        } catch (\Exception $e) {
-            $entries = [];
-        }
-        foreach ($entries as $file) {
+        foreach ($this->makeFileSystemIterator($path) as $file) {
             if ($file->isFile() && $file->getMTime() < $this->functions->time() - $this->gcMaxAge) {
                 yield $file;
             }
+        }
+    }
+
+    /**
+     * @return \Iterator
+     */
+    private function makeFileSystemIterator($path) {
+        try {
+            return new \FilesystemIterator($path);
+        } catch (\Exception $e) {
+            return new \ArrayIterator([]);
         }
     }
 
