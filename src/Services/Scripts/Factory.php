@@ -23,8 +23,7 @@ class Factory {
         $retriever->addRetriever(
             new CachingRetriever(
                 new Cache($config['cache'], 'scripts'),
-                new RemoteRetriever(),
-                7200
+                new RemoteRetriever()
             )
         );
 

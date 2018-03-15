@@ -6,6 +6,9 @@ use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\ValueObjects\URL;
 
 class CachingRetriever implements Retriever {
+    use DynamicCacheSaltTrait {
+        getCacheSalt as getDynamicCacheSalt;
+    }
 
     /**
      * @var Cache
@@ -18,11 +21,6 @@ class CachingRetriever implements Retriever {
     private $retriever;
 
     /**
-     * @var int
-     */
-    private $defaultCacheTime;
-
-    /**
      * CachingRetriever constructor.
      *
      * @param Retriever $retriever
@@ -30,9 +28,8 @@ class CachingRetriever implements Retriever {
      * @param int $defaultCacheTime
      */
     public function __construct(Cache $cache, Retriever $retriever = null, $defaultCacheTime = 0) {
-        $this->retriever = $retriever;
         $this->cache = $cache;
-        $this->defaultCacheTime = $defaultCacheTime;
+        $this->retriever = $retriever;
     }
 
     public function retrieve(URL $url) {
@@ -46,21 +43,25 @@ class CachingRetriever implements Retriever {
         if ($this->retriever) {
             return $this->retriever->getCacheSalt($url);
         }
-        return '';
+        return $this->getDynamicCacheSalt($url);
     }
 
     private function getCachedWithRetriever(URL $url) {
-        return $this->cache->get((string)$url, function () use ($url) {
+        return $this->cache->get($this->getCacheKey($url), function () use ($url) {
             return $this->retriever->retrieve($url);
-        }, $this->defaultCacheTime);
+        });
     }
 
     private function getFromCacheOnly(URL $url) {
-        $cached = $this->cache->get((string)$url);
+        $cached = $this->cache->get($this->getCacheKey($url));
         if (!$cached) {
             return false;
         }
         return $cached;
+    }
+
+    private function getCacheKey(URL $url) {
+        return $url . '-' . $this->getCacheSalt($url);
     }
 
 }

@@ -5,6 +5,7 @@ namespace Kibo\Phast\Retrievers;
 use Kibo\Phast\ValueObjects\URL;
 
 class RemoteRetriever implements Retriever {
+    use DynamicCacheSaltTrait;
 
     public function retrieve(URL $url) {
         $ch = curl_init((string)$url);
@@ -24,10 +25,4 @@ class RemoteRetriever implements Retriever {
         }
         return $response;
     }
-
-    public function getCacheSalt(URL $url) {
-        // TODO: Have this configurable
-        return md5($url->toString()) . '-' . floor(time() / 7200);
-    }
-
 }
