@@ -15,6 +15,11 @@ return [
             'maxItems'    => 100,
             'probability' => 0.1,
             'maxAge' => 86400 * 365
+        ],
+        'diskCleanup' => [
+            'maxSize' => 100 * pow(1024, 3),
+            'probability' => 0.02,
+            'portionToFree' => 0.5
         ]
     ],
 

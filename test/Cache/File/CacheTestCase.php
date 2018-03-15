@@ -31,7 +31,6 @@ class CacheTestCase extends PhastTestCase {
             'diskCleanup' => [
                 'maxSize' => 10000,
                 'probability' => 0,
-                'sampleFilesCount' => 10,
                 'portionToFree' => 0.5
             ]
         ];
