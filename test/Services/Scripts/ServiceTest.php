@@ -96,12 +96,13 @@ class ServiceTest extends TestCase {
     }
 
     public function testParsingAcceptEncoding() {
+        $encoding = 'deflate, gzip;q=1.0, *;q=0.5';
         $httpRequest = Request::fromArray(
             ['src' => 'http://allowed.com/the-script'],
-            ['HTTP_ACCEPT_ENCODING' => 'deflate, gzip;q=1.0, *;q=0.5']
+            ['HTTP_ACCEPT_ENCODING' => $encoding]
         );
         $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
-        $this->assertEquals(['deflate', 'gzip', '*'], $this->calledWithParams['accept-encoding']);
+        $this->assertEquals($encoding, $this->calledWithParams['accept-encoding']);
     }
 
 }

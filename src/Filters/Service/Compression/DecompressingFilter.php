@@ -43,7 +43,7 @@ class DecompressingFilter implements ServiceFilter {
     }
 
     private function acceptsCompressed(array $request) {
-        return count(array_intersect(['gzip', '*'], (array) @$request['accept-encoding'])) > 0;
+        return strpos(@$request['accept-encoding'], 'gzip') !== false;
     }
 
 

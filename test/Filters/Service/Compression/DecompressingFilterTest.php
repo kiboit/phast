@@ -43,7 +43,7 @@ class DecompressingFilterTest extends PhastTestCase {
             'text/text',
             'gzip'
         );
-        $result = $this->filter->apply($resource, ['accept-encoding' => [$header]]);
+        $result = $this->filter->apply($resource, ['accept-encoding' => $header]);
         if ($shouldDecompress) {
             $this->assertEquals('the-content', $result->getContent());
             $this->assertEquals('text/text', $result->getMimeType());
@@ -56,8 +56,8 @@ class DecompressingFilterTest extends PhastTestCase {
     public function respectingHeadersData() {
         return [
             ['identity', true],
-            ['gzip', false],
-            ['*', false]
+            ['identity, gzip', false],
+            ['*', true]
         ];
     }
 
