@@ -32,47 +32,39 @@ class GarbageCollector extends ProbabilisticExecutor {
     }
 
     protected function execute() {
-        $fileIterators = $this->getOldFilesIterators($this->cacheRoot);
-        shuffle($fileIterators);
+        $files = $this->getFiles($this->cacheRoot);
+        shuffle($files);
         $deleted = 0;
-        while ($deleted < $this->gcMaxItems && count($fileIterators)) {
-            foreach ($fileIterators as $idx => $iterator) {
-                $file = $iterator->current();
-                if ($file) {
-                    $this->functions->unlink($file->getRealPath());
-                    $iterator->next();
-                    $deleted++;
-                } else {
-                    unset ($fileIterators[$idx]);
-                }
+        foreach ($this->getOldFiles($files) as $file) {
+            @$this->functions->unlink($file->getRealPath());
+            $deleted++;
+            if ($deleted == $this->gcMaxItems) {
+                break;
             }
         }
     }
 
-    private function getOldFilesIterators($path, $depth = 0) {
-        if ($depth == $this->shardingDepth) {
-            return [$this->makeOldFilesIterator($path)];
-        }
-        $iterators = [];
-        $localFiles = [];
+    private function getFiles($path) {
+        $files = [];
         /** @var \SplFileInfo $item */
         foreach ($this->makeFileSystemIterator($path) as $item) {
             if ($item->isDir() && !$item->isLink()) {
-                $iterators = array_merge(
-                    $iterators,
-                    $this->getOldFilesIterators($item->getRealPath(), $depth + 1)
-                );
+                $files = array_merge($files, $this->getFiles($item->getRealPath()));
             } else if ($item->isFile()) {
-                $localFiles[] = $item;
+                $files[] = $item;
             }
         }
-        $iterators[] = new \ArrayIterator($localFiles);
-        return $iterators;
+        return $files;
     }
 
-    private function makeOldFilesIterator($path) {
-        foreach ($this->makeFileSystemIterator($path) as $file) {
-            if ($file->isFile() && $file->getMTime() < $this->functions->time() - $this->gcMaxAge) {
+    /**
+     * @param \SplFileInfo[] $files
+     * @return \Generator
+     */
+    private function getOldFiles(array $files) {
+        $maxTimeModified = time() - $this->gcMaxAge;
+        foreach ($files as $file) {
+            if ($file->getMTime() < $maxTimeModified) {
                 yield $file;
             }
         }
