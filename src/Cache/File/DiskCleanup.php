@@ -26,45 +26,29 @@ class DiskCleanup extends ProbabilisticExecutor {
     }
 
     protected function execute() {
-        $usedSpace = $this->calculateUsedSpace();
+        list ($usedSpace, $files) = $this->calculateUsedSpace();
         $neededSpace = round($this->portionToFree * $this->maxSize);
         $bytesToDelete = $usedSpace - $this->maxSize + $neededSpace;
         $deletedBytes = 0;
-        $condition = function () use (&$deletedBytes, $bytesToDelete) {
-            return $deletedBytes < $bytesToDelete;
-        };
-        $callback = function (\SplFileInfo $file) use (&$deletedBytes) {
+        /** @var \SplFileInfo $file */
+        foreach ($files as $file) {
             $deletedBytes += $file->getSize();
             @unlink($file->getRealPath());
-        };
-        $this->walkDirectory($condition, $callback);
+            if ($deletedBytes >= $bytesToDelete) {
+                break;
+            }
+        }
     }
 
     private function calculateUsedSpace() {
         $size = 0;
-        $condition = function () use (&$size, &$filesCount) {
-            return true;
-        };
-
-        $callback = function (\SplFileInfo $file) use (&$size) {
+        $files = [];
+        /** @var \SplFileInfo $file */
+        foreach ($this->getCacheFiles($this->cacheRoot) as $file) {
             $size += $file->getSize();
-        };
-        $this->walkDirectory($condition, $callback);
-        return $size;
-    }
-
-    private function walkDirectory(callable $condition, callable $callback) {
-        $dirsIterator = new \RecursiveDirectoryIterator($this->cacheRoot);
-        $iterator = new \RecursiveIteratorIterator($dirsIterator);
-        while ($iterator->valid() && $condition()) {
-            /** @var \SplFileInfo $file */
-            $file = $iterator->current();
-            if (!$file->isDir()) {
-                $callback($file);
-            }
-            $iterator->next();
+            $files[] = $file;
         }
+        return [$size, $files];
     }
-
 
 }

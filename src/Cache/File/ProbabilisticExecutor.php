@@ -48,4 +48,40 @@ abstract class ProbabilisticExecutor {
         }
         return $this->functions->mt_rand(1, round(1 /  $this->probability)) == 1;
     }
+
+    protected function getCacheFiles($path) {
+        /** @var \SplFileInfo $item */
+        foreach ($this->makeFileSystemIterator($path) as $item) {
+            if ($this->isShard($item)) {
+                foreach ($this->getCacheFiles($item->getRealPath()) as $item) {
+                    yield $item;
+                }
+            } else if ($this->isCacheEntry($item)) {
+                yield $item;
+            }
+        }
+    }
+
+    /**
+     * @return \Iterator
+     */
+    protected function makeFileSystemIterator($path) {
+        try {
+            $items = iterator_to_array(new \FilesystemIterator($path));
+            shuffle($items);
+            return new \ArrayIterator($items);
+        } catch (\Exception $e) {
+            return new \ArrayIterator([]);
+        }
+    }
+
+    protected function isShard(\SplFileInfo $item) {
+        return $item->isDir()
+            && !$item->isLink()
+            && preg_match('/^[a-f\d]{2}$/', $item->getFilename());
+    }
+
+    protected function isCacheEntry(\SplFileInfo $item) {
+        return $item->isFile() && preg_match('/^[a-f\d]{32}-.*$/', $item->getFilename());
+    }
 }
