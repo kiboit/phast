@@ -9,6 +9,7 @@ use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
@@ -29,12 +30,22 @@ class ServiceTest extends TestCase {
      */
     private $service;
 
+    /**
+     * @var array
+     */
+    private $calledWithParams;
+
     public function setUp() {
         parent::setUp();
+        $this->calledWithParams = [];
+
         $this->retriever = $this->createMock(Retriever::class);
         $this->filter = $this->createMock(ServiceFilter::class);
         $this->filter->method('apply')
-            ->willReturnArgument(0);
+            ->willReturnCallback(function (Resource $resource, array $params = null) {
+                $this->calledWithParams = $params;
+                return $resource;
+            });
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('verify')
             ->willReturnCallback(function ($token) {
@@ -82,6 +93,16 @@ class ServiceTest extends TestCase {
             ->willReturn(false);
         $this->expectException(ItemNotFoundException::class);
         $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
+    }
+
+    public function testParsingAcceptEncoding() {
+        $encoding = 'deflate, gzip;q=1.0, *;q=0.5';
+        $httpRequest = Request::fromArray(
+            ['src' => 'http://allowed.com/the-script'],
+            ['HTTP_ACCEPT_ENCODING' => $encoding]
+        );
+        $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
+        $this->assertEquals($encoding, $this->calledWithParams['accept-encoding']);
     }
 
 }

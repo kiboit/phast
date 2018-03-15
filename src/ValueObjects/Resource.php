@@ -14,11 +14,6 @@ class Resource {
     private $url;
 
     /**
-     * @var string
-     */
-    private $mimeType;
-
-    /**
      * @var Retriever
      */
     private $retriever;
@@ -29,25 +24,37 @@ class Resource {
     private $content;
 
     /**
+     * @var string
+     */
+    private $mimeType;
+
+    /**
+     * @var string
+     */
+    private $encoding;
+
+    /**
      * @var Resource[]
      */
     private $dependencies = [];
 
     private function __construct() {}
 
-    public static function makeWithContent(URL $url, $content, $mimeType = null) {
+    public static function makeWithContent(URL $url, $content, $mimeType = null, $encoding = 'identity') {
         $instance = new self();
         $instance->url = $url;
         $instance->mimeType = $mimeType;
         $instance->content = $content;
+        $instance->encoding = $encoding;
         return $instance;
     }
 
-    public static function makeWithRetriever(URL $url, Retriever $retriever, $mimeType = null) {
+    public static function makeWithRetriever(URL $url, Retriever $retriever, $mimeType = null, $encoding = 'identity') {
         $instance = new self();
         $instance->url = $url;
         $instance->mimeType = $mimeType;
         $instance->retriever = $retriever;
+        $instance->encoding = $encoding;
         return $instance;
     }
 
@@ -56,13 +63,6 @@ class Resource {
      */
     public function getUrl() {
         return $this->url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMimeType() {
-        return $this->mimeType;
     }
 
     /**
@@ -77,6 +77,20 @@ class Resource {
             }
         }
         return $this->content;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMimeType() {
+        return $this->mimeType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEncoding() {
+        return $this->encoding;
     }
 
     /**
@@ -95,14 +109,18 @@ class Resource {
 
     /**
      * @param $content
-     * @param string|null $mimeType
+     * @param null $mimeType
+     * @param null $encoding
      * @return Resource
      */
-    public function withContent($content, $mimeType = null) {
+    public function withContent($content, $mimeType = null, $encoding = null) {
         $new = clone $this;
         $new->content = $content;
         if (!is_null($mimeType)) {
             $new->mimeType = $mimeType;
+        }
+        if (!is_null($encoding)) {
+            $new->encoding = $encoding;
         }
         return $new;
     }
@@ -116,5 +134,4 @@ class Resource {
         $new->dependencies = $dependencies;
         return $new;
     }
-
 }

@@ -9,6 +9,7 @@ use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\Environment\Exceptions\PackageHasNoDiagnosticsException;
 use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Exceptions\RuntimeException;
+use Kibo\Phast\Filters\Service\Compression\CompressingFilter;
 
 class SystemDiagnostics {
 
@@ -68,6 +69,12 @@ class SystemDiagnostics {
             ],
             'Cache' => [
                 'items' => [Cache::class],
+                'enabled' => function () {
+                    return true;
+                }
+            ],
+            'Compression' => [
+                'items' => [CompressingFilter::class],
                 'enabled' => function () {
                     return true;
                 }

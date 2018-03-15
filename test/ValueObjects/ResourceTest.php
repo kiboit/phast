@@ -13,9 +13,11 @@ class ResourceTest extends TestCase {
      */
     private $url;
 
+    private $content = 'the-content';
+
     private $mimeType = 'text/css';
 
-    private $content = 'the-content';
+    private $encoding = 'gzip';
 
     public function setUp() {
         parent::setUp();
@@ -23,13 +25,13 @@ class ResourceTest extends TestCase {
     }
 
     public function testMakeWithContent() {
-        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
+        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType, $this->encoding);
         $this->checkResource($resource);
     }
 
     public function testMakeWithRetriever() {
         $retriever = $this->makeContentRetriever();
-        $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType);
+        $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType, $this->encoding);
         $this->checkResource($resource);
     }
 
@@ -40,7 +42,7 @@ class ResourceTest extends TestCase {
         $resource->getContent();
     }
 
-    public function testgetCacheSaltWithRetriever() {
+    public function testGetCacheSaltWithRetriever() {
         $retriever = $this->createMock(Retriever::class);
         $retriever->expects($this->once())
             ->method('getCacheSalt')
@@ -51,7 +53,7 @@ class ResourceTest extends TestCase {
         $this->assertEquals(123, $resource->getCacheSalt());
     }
 
-    public function testgetCacheSaltWithoutRetriever() {
+    public function testGetCacheSaltWithoutRetriever() {
         $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
         $this->assertSame(0, $resource->getCacheSalt());
     }
@@ -62,6 +64,23 @@ class ResourceTest extends TestCase {
         $this->assertNotSame($newResource, $resource);
         $this->assertSame('new-content', $newResource->getContent());
         $this->assertSame($this->mimeType, $newResource->getMimeType());
+    }
+
+    public function testContentAndMimeTypeModification() {
+        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
+        $newResource = $resource->withContent('new-content', 'new-mime-type');
+        $this->assertSame('new-content', $newResource->getContent());
+        $this->assertSame('new-mime-type', $newResource->getMimeType());
+        $this->assertEquals('identity', $newResource->getEncoding());
+    }
+
+    public function testEncodingModification() {
+        $resource = Resource::makeWithContent($this->url, $this->content, 'the-mime-type');
+        $this->assertEquals('identity', $resource->getEncoding());
+        $new = $resource->withContent($resource->getContent(), null, 'new-encoding');
+        $this->assertEquals($resource->getContent(), $new->getContent());
+        $this->assertEquals('the-mime-type', $new->getMimeType());
+        $this->assertEquals('new-encoding', $new->getEncoding());
     }
 
     public function testDependenciesAdding() {
@@ -78,13 +97,6 @@ class ResourceTest extends TestCase {
         $this->assertCount(2, $actualDeps);
         $this->assertSame($deps[0], $actualDeps[0]);
         $this->assertSame($deps[1], $actualDeps[1]);
-    }
-
-    public function testContentAndMimeTypeModification() {
-        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
-        $newResource = $resource->withContent('new-content', 'new-mime-type');
-        $this->assertSame('new-content', $newResource->getContent());
-        $this->assertSame('new-mime-type', $newResource->getMimeType());
     }
 
     public function testExceptionOnNotFoundResource() {
@@ -115,6 +127,7 @@ class ResourceTest extends TestCase {
         $this->assertSame($this->url, $resource->getUrl());
         $this->assertSame($this->mimeType, $resource->getMimeType());
         $this->assertSame($this->content, $resource->getContent());
+        $this->assertSame($this->encoding, $resource->getEncoding());
     }
 
 }
