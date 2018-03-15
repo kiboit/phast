@@ -35,7 +35,7 @@ class DiskCleanup extends ProbabilisticExecutor {
         };
         $callback = function (\SplFileInfo $file) use (&$deletedBytes) {
             $deletedBytes += $file->getSize();
-            unlink($file->getRealPath());
+            @unlink($file->getRealPath());
         };
         $this->walkDirectory($condition, $callback);
     }
