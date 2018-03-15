@@ -3,18 +3,34 @@
 namespace Kibo\Phast\Cache\File;
 
 
-class DiskCleanupTest extends CacheTestCase {
+class DiskCleanupTest extends ProbabilisticExecutorTestCase {
 
     public function testDiskCleanup() {
+        $this->setUpCacheContents();
+        $this->setProbability(1);
+        $this->makeExecutor();
+        $sum = $this->getCacheContents();
+        $this->assertLessThan(5000, $sum);
+        $this->assertGreaterThan(0, $sum);
+    }
+
+    protected function makeExecutor() {
+        return new DiskCleanup($this->config, $this->functions);
+    }
+
+    protected function setProbability($probability) {
+        $this->config['diskCleanup']['probability'] = $probability;
+    }
+
+    protected function setUpCacheContents() {
         $this->config['shardingDepth'] = 3;
         $cache = new Cache($this->config, 'test');
         for ($i = 0; $i < 20; $i++) {
             $cache->set('key-' . $i, str_repeat('a', 1000));
         }
-        $this->config['diskCleanup']['probability'] = 1;
+    }
 
-        new DiskCleanup($this->config);
-
+    protected function getCacheContents() {
         $files = new \RecursiveDirectoryIterator($this->config['cacheRoot']);
         $sum = 0;
         /** @var \SplFileInfo $file */
@@ -24,8 +40,8 @@ class DiskCleanupTest extends CacheTestCase {
             }
             $sum += $file->getSize();
         }
-        $this->assertLessThan(5000, $sum);
-        $this->assertGreaterThan(0, $sum);
+        return $sum;
     }
+
 
 }

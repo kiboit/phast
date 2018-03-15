@@ -3,31 +3,12 @@
 namespace Kibo\Phast\Cache\File;
 
 
-class GarbageCollectorTest extends CacheTestCase {
+class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
 
     public function setUp() {
         parent::setUp();
         $this->config['garbageCollection']['probability'] = 1;
         $this->config['garbageCollection']['maxAge'] = 60;
-    }
-
-    public function testGarbageCollectionRunCalculation() {
-        $actualMin = $actualMax = null;
-        $this->functions->mt_rand = function ($min, $max) use (&$actualMin, &$actualMax) {
-            $actualMin = $min;
-            $actualMax = $max;
-        };
-        $this->functions->file_exists = function () {
-            return true;
-        };
-        $this->config['garbageCollection']['probability'] = 0.5;
-        $this->makeGC();
-        $this->assertEquals(1, $actualMin);
-        $this->assertEquals(2, $actualMax);
-    }
-
-    public function testNotExplodingWhenGarbageCollectingOnMissingCacheRoot() {
-        $this->makeGC();
     }
 
     public function testGarbageCollection() {
@@ -67,31 +48,22 @@ class GarbageCollectorTest extends CacheTestCase {
         $this->assertContains('a-dir', $dir2);
     }
 
-    public function testGarbageCollectionOnGCDestruction() {
-        $this->setUpCacheContents();
-        $contents = $this->getCacheContents();
-        $gc = $this->makeGC();
-        $this->assertEquals($contents, $this->getCacheContents());
-        unset ($gc);
-        $this->assertNotEquals($contents, $this->getCacheContents());
-    }
-
     public function testCollectingInDeepSharding() {
         $this->config['shardingDepth'] = 3;
         $filename = $this->config['cacheRoot'] . '/ab/cd/ef/abcdefghtij';
         mkdir(dirname($filename), 0700, true);
         touch($filename, time() - $this->config['garbageCollection']['maxAge'] - 10);
-        $this->makeGC();
+        $this->makeExecutor();
         $this->assertFileNotExists($filename);
     }
 
     private function executeCacheTest() {
         $this->setUpCacheContents();
-        $this->makeGC();
+        $this->makeExecutor();
         return $this->getCacheContents();
     }
 
-    private function setUpCacheContents() {
+    protected function setUpCacheContents() {
         $items = [
             'dir1' => [
                 'item1' => 30,
@@ -117,7 +89,7 @@ class GarbageCollectorTest extends CacheTestCase {
         }
     }
 
-    private function getCacheContents() {
+    protected function getCacheContents() {
         $getDirItems = function ($path) {
             return array_filter(scandir($path), function ($item) {
                 return !in_array($item, ['.', '..']);
@@ -136,7 +108,12 @@ class GarbageCollectorTest extends CacheTestCase {
         return $results;
     }
 
-    private function makeGC() {
+    protected function makeExecutor() {
         return new GarbageCollector($this->config, $this->functions);
     }
+
+    protected function setProbability($probability) {
+        $this->config['garbageCollection']['probability'] = $probability;
+    }
+
 }

@@ -4,17 +4,9 @@
 namespace Kibo\Phast\Cache\File;
 
 
-class DiskCleanup {
+use Kibo\Phast\Common\ObjectifiedFunctions;
 
-    /**
-     * @var string
-     */
-    private $cacheRoot;
-
-    /**
-     * @var integer
-     */
-    private $shardingDepth;
+class DiskCleanup extends ProbabilisticExecutor {
 
     /**
      * @var integer
@@ -24,29 +16,16 @@ class DiskCleanup {
     /**
      * @var float
      */
-    private $probability;
-
-    /**
-     * @var integer
-     */
-    private $sampleFilesCount;
-
-    /**
-     * @var float
-     */
     private $portionToFree;
 
-    public function __construct(array $config) {
-        $this->cacheRoot = $config['cacheRoot'];
-        $this->shardingDepth = $config['shardingDepth'];
+    public function __construct(array $config, ObjectifiedFunctions $functions = null) {
         $this->maxSize = $config['diskCleanup']['maxSize'];
         $this->probability = $config['diskCleanup']['probability'];
-        $this->sampleFilesCount = $config['diskCleanup']['sampleFilesCount'];
         $this->portionToFree = $config['diskCleanup']['portionToFree'];
-        $this->cleanup();
+        parent::__construct($config, $functions);
     }
 
-    private function cleanup() {
+    protected function execute() {
         $usedSpace = $this->calculateUsedSpace();
         $neededSpace = round($this->portionToFree * $this->maxSize);
         $bytesToDelete = $usedSpace - $this->maxSize + $neededSpace;

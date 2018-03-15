@@ -5,12 +5,7 @@ namespace Kibo\Phast\Cache\File;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 
-class GarbageCollector {
-
-    /**
-     * @var string
-     */
-    private $cacheRoot;
+class GarbageCollector extends ProbabilisticExecutor {
 
     /**
      * @var integer
@@ -18,53 +13,19 @@ class GarbageCollector {
     private $gcMaxAge;
 
     /**
-     * @var float
-     */
-    private $gcProbability;
-
-    /**
      * @var integer
      */
     private $gcMaxItems;
 
-    /**
-     * @var ObjectifiedFunctions
-     */
-    private $functions;
 
     public function __construct(array $config, ObjectifiedFunctions $functions = null) {
-        $this->cacheRoot = $config['cacheRoot'];
         $this->gcMaxAge = $config['garbageCollection']['maxAge'];
-        $this->gcProbability = $config['garbageCollection']['probability'];
         $this->gcMaxItems = $config['garbageCollection']['maxItems'];
-
-        if ($functions) {
-            $this->functions = $functions;
-        } else {
-            $this->functions = new ObjectifiedFunctions();
-        }
+        $this->probability = $config['garbageCollection']['probability'];
+        parent::__construct($config, $functions);
     }
 
-    public function __destruct() {
-        if ($this->shouldCollectGarbage()) {
-            $this->collectGarbage();
-        }
-    }
-
-    private function shouldCollectGarbage() {
-        if (!$this->functions->file_exists($this->cacheRoot)) {
-            return false;
-        }
-        if ($this->gcProbability <= 0) {
-            return false;
-        }
-        if ($this->gcProbability >= 1) {
-            return true;
-        }
-        return $this->functions->mt_rand(1, round(1 /  $this->gcProbability)) == 1;
-    }
-
-    private function collectGarbage() {
+    protected function execute() {
         $dirs = $this->getDirectoryIterator($this->cacheRoot);
         $fileIterators = [];
         foreach ($dirs as $dir) {
