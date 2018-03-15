@@ -140,10 +140,17 @@ class CacheTest extends CacheTestCase {
     }
 
     public function testCreatingASingleGarbageCollectorForAllInstances() {
-        $gc1 = $this->cache->getGC();
-        $gc2 = $this->cache->getGC();
+        $gc1 = $this->cache->getGarbageCollector();
+        $gc2 = $this->cache->getGarbageCollector();
         $this->assertNotNull($gc1);
         $this->assertSame($gc1, $gc2);
+    }
+
+    public function testCreatingASingleDiskCleanupForAllInstances() {
+        $dc1 = $this->cache->getDiskCleanup();
+        $dc2 = $this->cache->getDiskCleanup();
+        $this->assertNotNull($dc1);
+        $this->assertSame($dc1, $dc2);
     }
 
     private function rebuildCache() {

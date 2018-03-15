@@ -14,7 +14,12 @@ class Cache implements CacheInterface {
     /**
      * @var GarbageCollector
      */
-    private static $gc;
+    private static $garbageCollector;
+
+    /**
+     * @var DiskCleanup
+     */
+    private static $diskCleanup;
 
     /**
      * @var string
@@ -53,8 +58,9 @@ class Cache implements CacheInterface {
             $this->functions = new ObjectifiedFunctions();
         }
 
-        if (!isset (self::$gc)) {
-            self::$gc = new GarbageCollector($config, $this->functions);
+        if (!isset (self::$garbageCollector)) {
+            self::$garbageCollector = new GarbageCollector($config, $this->functions);
+            self::$diskCleanup = new DiskCleanup($config, $this->functions);
         }
     }
 
@@ -78,8 +84,15 @@ class Cache implements CacheInterface {
     /**
      * @return GarbageCollector
      */
-    public function getGC() {
-        return self::$gc;
+    public function getGarbageCollector() {
+        return self::$garbageCollector;
+    }
+
+    /**
+     * @return DiskCleanup
+     */
+    public function getDiskCleanup() {
+        return self::$diskCleanup;
     }
 
 
