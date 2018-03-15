@@ -112,9 +112,9 @@ class CachingServiceFilter implements ServiceFilter {
             $data['mimeType']
         ];
         if (isset ($data['encoding'])) {
-            $params['encoding'] = $data['encoding'];
+            $params[] = $data['encoding'];
         }
-        return call_user_func_array([Resource::class, 'makeWithContent'], $params);
+        return Resource::makeWithContent(...$params);
     }
 
     private function serializeException(\Exception $e) {
