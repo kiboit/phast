@@ -46,9 +46,7 @@ class CachingRetriever implements Retriever {
         if ($this->retriever) {
             return $this->retriever->getCacheSalt($url);
         }
-        // TODO: Have this configurable
-        // TODO: Consider not  copy/pasting from RemoteRetriever
-        return md5($url->toString()) . '-' . floor(time() / 7200);
+        return '';
     }
 
     private function getCachedWithRetriever(URL $url) {
