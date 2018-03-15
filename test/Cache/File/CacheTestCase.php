@@ -44,7 +44,11 @@ class CacheTestCase extends PhastTestCase {
         if (!file_exists($dir)) {
             return;
         }
-        foreach (scandir($dir) as $item) {
+        $entries = @scandir($dir);
+        if (!$entries) {
+            $entries = [];
+        }
+        foreach ($entries as $item) {
             if ($item == '.' || $item == '..') {
                 continue;
             }

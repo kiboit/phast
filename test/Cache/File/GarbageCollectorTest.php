@@ -87,11 +87,18 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
                 touch($filename, time() - $time);
             }
         }
+
+        mkdir($this->config['cacheRoot'] . '/nope');
+        chmod($this->config['cacheRoot'] . '/nope', 0);
     }
 
     protected function getCacheContents() {
         $getDirItems = function ($path) {
-            return array_filter(scandir($path), function ($item) {
+            $entries = @scandir($path);
+            if (!$entries) {
+                $entries = [];
+            }
+            return array_filter($entries, function ($item) {
                 return !in_array($item, ['.', '..']);
             });
         };
@@ -102,9 +109,10 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
             $results[$dir] = $getDirItems($path);
         }
 
-        $this->assertCount(2, $results);
+        $this->assertCount(3, $results);
         $this->assertArrayHasKey('dir1', $results);
         $this->assertArrayHasKey('dir2', $results);
+        $this->assertArrayHasKey('nope', $results);
         return $results;
     }
 

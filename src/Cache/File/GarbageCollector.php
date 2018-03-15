@@ -50,28 +50,26 @@ class GarbageCollector extends ProbabilisticExecutor {
     }
 
     private function getOldFilesIterators($path, $depth = 0) {
-        $dir = @opendir($path);
         $iterators = [];
-        if (!$dir) {
-            return $iterators;
-        }
         if ($depth == $this->shardingDepth) {
             return [$this->makeOldFilesIterator($path)];
         }
-        while (($item = readdir($dir)) !== false) {
-            if ($item == '.' || $item == '..') {
-                continue;
+        try {
+            foreach (new \FilesystemIterator($path) as $item) {
+                if ($item->isDir() && !$item->isLink()) {
+                    $iterators = array_merge($iterators, $this->getOldFilesIterators($item->getRealPath(), $depth + 1));
+                }
             }
-            $fullPath = $path . '/' . $item;
-            if (is_dir($fullPath)) {
-                $iterators = array_merge($iterators, $this->getOldFilesIterators($fullPath, $depth + 1));
-            }
-        }
+        } catch (\Exception $e) {}
         return $iterators;
     }
 
     private function makeOldFilesIterator($path) {
-        $entries = new \FilesystemIterator($path);
+        try {
+            $entries = new \FilesystemIterator($path);
+        } catch (\Exception $e) {
+            $entries = [];
+        }
         foreach ($entries as $file) {
             if ($file->isFile() && $file->getMTime() < $this->functions->time() - $this->gcMaxAge) {
                 yield $file;
