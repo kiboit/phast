@@ -32,11 +32,11 @@ class DiskCleanup extends ProbabilisticExecutor {
         $deletedBytes = 0;
         /** @var \SplFileInfo $file */
         foreach ($files as $file) {
-            $deletedBytes += $file->getSize();
-            @unlink($file->getRealPath());
             if ($deletedBytes >= $bytesToDelete) {
                 break;
             }
+            $deletedBytes += $file->getSize();
+            @unlink($file->getRealPath());
         }
     }
 
