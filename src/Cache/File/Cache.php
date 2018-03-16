@@ -115,10 +115,11 @@ class Cache implements CacheInterface {
                 'Phast: FileCache: Error writing to file {filename}. {written} of {total} bytes written!',
                 [
                     'filename' => $tmpFile,
-                    'written' => (int)$result,
+                    'written' => json_encode($result),
                     'total' => strlen($serialized)
                 ]
             );
+            @unlink($tmpFile);
             return;
         }
         @chmod($tmpFile, 0400);
