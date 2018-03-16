@@ -26,7 +26,7 @@ class DiskCleanup extends ProbabilisticExecutor {
     }
 
     protected function execute() {
-        $usedSpace= $this->calculateUsedSpace();
+        $usedSpace = $this->calculateUsedSpace();
         $neededSpace = round($this->portionToFree * $this->maxSize);
         $bytesToDelete = $usedSpace - $this->maxSize + $neededSpace;
         $deletedBytes = 0;
@@ -42,11 +42,9 @@ class DiskCleanup extends ProbabilisticExecutor {
 
     private function calculateUsedSpace() {
         $size = 0;
-        $files = [];
         /** @var \SplFileInfo $file */
         foreach ($this->getCacheFiles($this->cacheRoot) as $file) {
             $size += $file->getSize();
-            $files[] = $file;
         }
         return $size;
     }
