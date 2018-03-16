@@ -26,12 +26,12 @@ class DiskCleanup extends ProbabilisticExecutor {
     }
 
     protected function execute() {
-        list ($usedSpace, $files) = $this->calculateUsedSpace();
+        $usedSpace= $this->calculateUsedSpace();
         $neededSpace = round($this->portionToFree * $this->maxSize);
         $bytesToDelete = $usedSpace - $this->maxSize + $neededSpace;
         $deletedBytes = 0;
         /** @var \SplFileInfo $file */
-        foreach ($files as $file) {
+        foreach ($this->getCacheFiles($this->cacheRoot) as $file) {
             if ($deletedBytes >= $bytesToDelete) {
                 break;
             }
@@ -48,7 +48,7 @@ class DiskCleanup extends ProbabilisticExecutor {
             $size += $file->getSize();
             $files[] = $file;
         }
-        return [$size, $files];
+        return $size;
     }
 
 }
