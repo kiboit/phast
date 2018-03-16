@@ -15,7 +15,7 @@ class CompositeFilter implements CachedResultServiceFilter {
     /**
      * @var ServiceFilter[]
      */
-    protected $filters = [];
+    private $filters = [];
 
     public function addFilter(ServiceFilter $filter) {
         $this->filters[] = $filter;

@@ -10,7 +10,7 @@ use Kibo\Phast\Filters\Service\CompositeFilter;
 class Filter extends CompositeFilter implements CachedResultServiceFilter {
 
     public function __construct() {
-        $this->filters[] = new CommentsRemoval\Filter();
+        $this->addFilter(new CommentsRemoval\Filter());
     }
 
 }
