@@ -1,7 +1,7 @@
 RUN = docker run -it -v $(shell pwd):/data -w /data $(shell cat .docker-image-id)
 
 
-.PHONY : all test test-local update docker
+.PHONY : all test test-local update docker dist
 
 
 all : vendor/autoload.php
@@ -16,6 +16,9 @@ update : all
 	vendor/composer.phar update
 
 docker : .docker-image-id
+
+dist : all
+	bin/package
 
 
 vendor/autoload.php : vendor/composer.phar composer.json composer.lock
