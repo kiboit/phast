@@ -96,8 +96,8 @@ class Service {
     private function getParams(ServiceRequest $request) {
         $result = [];
         foreach ($request->getParams() as $name => $value) {
-            if (strpos($name, '.') !== false) {
-                list ($name, $key) = explode('.', $name);
+            if (strpos($name, '_') !== false) {
+                list ($name, $key) = explode('_', $name, 2);
                 $result[$key][$name] = $value;
             }
         }

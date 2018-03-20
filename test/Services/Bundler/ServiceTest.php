@@ -72,9 +72,9 @@ class ServiceTest extends PhastTestCase {
             $this->assertTrue(is_object($item));
             $this->assertEquals(200, $item->status);
 
-            $expectedContent = $params['src.' . $idx] . '-content-filtered';
-            if (isset ($params['p1.' . $idx])) {
-                $expectedContent .= '-' . $params['p1.' . $idx];
+            $expectedContent = $params['src_' . $idx] . '-content-filtered';
+            if (isset ($params['p1_' . $idx])) {
+                $expectedContent .= '-' . $params['p1_' . $idx];
             }
             $this->assertEquals($expectedContent, $item->content);
         }
@@ -87,8 +87,8 @@ class ServiceTest extends PhastTestCase {
             ['src' => 'will-not-pass', 'd' => 'q']
         ]);
 
-        $params['token.1'] = 'nonsence';
-        unset ($params['token.2']);
+        $params['token_1'] = 'nonsence';
+        unset ($params['token_2']);
 
         $content = $this->doRequest($params);
 
@@ -156,7 +156,7 @@ class ServiceTest extends PhastTestCase {
         $output = [];
         foreach ($input as $idx => $items) {
             foreach ($items as $key => $value) {
-                $output["$key.$idx"] = $value;
+                $output["{$key}_$idx"] = $value;
             }
         }
         return $output;
