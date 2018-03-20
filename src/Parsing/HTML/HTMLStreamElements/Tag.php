@@ -179,7 +179,7 @@ class Tag extends Element {
     private function generateOpeningTag() {
         $parts = ['<' . $this->tagName];
         $this->readUntilAttribute(null);
-        $attributes = array_merge($this->newAttributes, array_diff_key($this->attributes, $this->newAttributes));
+        $attributes = $this->newAttributes + $this->attributes;
         foreach ($attributes as $name => $value) {
             if ($value !== null) {
                 $parts[] = $this->generateAttribute($name, $value);
