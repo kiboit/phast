@@ -7,8 +7,8 @@ use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\Bundler\ServiceParams;
 use Kibo\Phast\Services\ServiceFilter;
-use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
@@ -340,9 +340,8 @@ class Filter extends BaseHTMLStreamFilter {
         if ($stripImports) {
             $params['strip-imports'] = 1;
         }
-        return (new ServiceRequest())->withParams($params)
-            ->withUrl($this->serviceUrl)
-            ->sign($this->signature)
-            ->serialize();
+        return ServiceParams::fromArray($params)
+                ->sign($this->signature)
+                ->serialize();
     }
 }

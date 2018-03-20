@@ -87,12 +87,16 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertTrue($styles[0]->hasAttribute('data-phast-href'));
         $this->assertTrue($styles[1]->hasAttribute('data-phast-href'));
 
-        $expectedUrl1 = self::SERVICE_URL . '?src=' . urlencode(self::BASE_URL . '/the-file-1.css');
-        $expectedUrl2 = self::SERVICE_URL . '?src=' . urlencode(self::BASE_URL . '/the-file-2.css');
-        $this->assertStringStartsWith($expectedUrl1, $styles[0]->getAttribute('data-phast-href'));
-        $this->assertStringStartsWith($expectedUrl2, $styles[1]->getAttribute('data-phast-href'));
-        $this->assertContains('&strip-imports', $styles[0]->getAttribute('data-phast-href'));
-        $this->assertContains('&strip-imports', $styles[1]->getAttribute('data-phast-href'));
+        $params1 = json_decode($styles[0]->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+        $params2 = json_decode($styles[1]->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+
+        $this->assertEquals(self::BASE_URL . '/the-file-1.css', $params1['src']);
+        $this->assertEquals(self::BASE_URL . '/the-file-2.css', $params2['src']);
+        foreach ([$params1, $params2] as $params) {
+            $this->assertEquals(1, $params['strip-imports']);
+            $this->assertArrayHasKey('cacheMarker', $params);
+            $this->assertArrayHasKey('token', $params);
+        }
 
         $this->assertHasCompiled('CSSInlining/inlined-css-retriever.js');
     }
@@ -173,21 +177,19 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->applyFilter();
 
-        //$this->assertEmpty($this->getTheStyles());
-
         $headElements = $this->head->childNodes;
         $this->assertEquals(1, $headElements->length);
 
         $newStyle = $headElements->item(0);
         $this->assertEquals('style', $newStyle->tagName);
 
-        $expectedQuery = [
+        $expectedParams = [
             'src' => self::BASE_URL . '/the-css.css',
             'cacheMarker' => 123,
             'token' => 'the-token'
         ];
-        $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);
-        $this->assertEquals($expectedUrl, $newStyle->getAttribute('data-phast-href'));
+        $actualParams = json_decode($newStyle->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+        $this->assertEquals($expectedParams, $actualParams);
     }
 
     public function testSettingRightCacheMarkerOnLocalScripts() {
@@ -196,9 +198,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
 
         $style = $this->head->getElementsByTagName('style')->item(0);
-        $url = parse_url($style->getAttribute('data-phast-href'));
-        $query = [];
-        parse_str($url['query'], $query);
+        $query = json_decode($style->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
         $this->assertEquals(123, $query['cacheMarker']);
     }
 
@@ -383,8 +383,8 @@ class FilterTest extends HTMLFilterTestCase {
 
         $importStyle = array_shift($elements);
         $this->assertEquals('style', $importStyle->tagName);
-        $this->assertContains('service.php', $importStyle->getAttribute('data-phast-href'));
-        $this->assertContains($importUrl, urldecode($importStyle->getAttribute('data-phast-href')));
+        $params = json_decode($importStyle->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+        $this->assertStringEndsWith($importUrl, $params['src']);
 
         $contentsStyle = array_shift($elements);
         $this->assertEquals('style', $contentsStyle->tagName);

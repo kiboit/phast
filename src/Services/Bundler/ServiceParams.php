@@ -67,6 +67,10 @@ class ServiceParams {
         return $params;
     }
 
+    public function serialize() {
+        return json_encode($this->toArray());
+    }
+
     private function makeToken(ServiceSignature $signature) {
         $params = $this->params;
         ksort($params);
