@@ -179,13 +179,22 @@ class Tag extends Element {
     private function generateOpeningTag() {
         $parts = ['<' . $this->tagName];
         $this->readUntilAttribute(null);
-        $attributes = array_merge($this->attributes, $this->newAttributes);
+        $attributes = array_merge($this->newAttributes, array_diff_key($this->attributes, $this->newAttributes));
         foreach ($attributes as $name => $value) {
             if ($value !== null) {
-                $parts[] = $name . '="' . htmlspecialchars($value) . '"';
+                $parts[] = $this->generateAttribute($name, $value);
             }
         }
         return join(' ', $parts) . '>';
+    }
+
+    private function generateAttribute($name, $value) {
+        $result = $name;
+
+        if ($value != '')
+            $result .= '="' . htmlspecialchars($value) . '"';
+
+        return $result;
     }
 
     private function mustHaveClosing() {

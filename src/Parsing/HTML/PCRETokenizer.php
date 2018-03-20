@@ -122,13 +122,6 @@ class PCRETokenizer {
         $matches = $this->repeatMatch($this->attributePattern, $str);
 
         foreach ($matches as $match) {
-            if ($match['attr_name'][0] != ''
-                && ltrim($match['attr_name'][0], '/') == ''
-                && !isset($match['attr_value'][0])
-            ) {
-                continue;
-            }
-
             yield
                 $match['attr_name'][0] =>
                 isset($match['attr_value'][0]) ? html_entity_decode($match['attr_value'][0], ENT_QUOTES, 'UTF-8') : '';
