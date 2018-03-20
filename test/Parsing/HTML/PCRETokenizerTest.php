@@ -64,6 +64,26 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('`7`', $tag->getAttribute('f'));
     }
 
+    /** @dataProvider selfClosingTagData */
+    public function testSelfClosingTag($html) {
+        $tag = $this->tokenizeSingleTag($html);
+        $this->assertEquals('hello', $tag->getAttribute('src'));
+        $this->assertFalse($tag->hasAttribute('/'));
+        $this->assertFalse($tag->hasAttribute('//'));
+    }
+
+    public function selfClosingTagData() {
+        yield ['<img src=hello />'];
+        yield ['<img src=hello //>'];
+        yield ['<img / src=hello />'];
+    }
+
+    public function testSlashAttribute() {
+        $html = '<img /=hey>';
+        $tag = $this->tokenizeSingleTag($html);
+        $this->assertEquals('hey', $tag->getAttribute('/'));
+    }
+
     public function testJoinedAttributes() {
         $html = '<div a="1"b=2>';
 
