@@ -37,11 +37,9 @@ class ServiceParams {
      * @return ServiceParams
      */
     public function sign(ServiceSignature $signature) {
-        $params = $this->params;
-        ksort($params);
         $new = new self();
-        $new->token = $signature->sign(json_encode($params));
-        $new->params = $params;
+        $new->token = $this->makeToken($signature);
+        $new->params = $this->params;
         return $new;
     }
 
