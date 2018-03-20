@@ -173,13 +173,13 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->applyFilter();
 
-        $this->assertEmpty($this->getTheStyles());
+        //$this->assertEmpty($this->getTheStyles());
 
         $headElements = $this->head->childNodes;
         $this->assertEquals(1, $headElements->length);
 
-        $newLink = $headElements->item(0);
-        $this->assertEquals('link', $newLink->tagName);
+        $newStyle = $headElements->item(0);
+        $this->assertEquals('style', $newStyle->tagName);
 
         $expectedQuery = [
             'src' => self::BASE_URL . '/the-css.css',
@@ -187,7 +187,7 @@ class FilterTest extends HTMLFilterTestCase {
             'token' => 'the-token'
         ];
         $expectedUrl = self::SERVICE_URL . '?' . http_build_query($expectedQuery);
-        $this->assertEquals($expectedUrl, $newLink->getAttribute('href'));
+        $this->assertEquals($expectedUrl, $newStyle->getAttribute('data-phast-href'));
     }
 
     public function testSettingRightCacheMarkerOnLocalScripts() {
@@ -381,15 +381,15 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertCount(2, $elements);
 
 
-        $link = array_shift($elements);
-        $this->assertEquals('link', $link->tagName);
-        $this->assertContains('service.php', $link->getAttribute('href'));
-        $this->assertContains($importUrl, urldecode($link->getAttribute('href')));
+        $importStyle = array_shift($elements);
+        $this->assertEquals('style', $importStyle->tagName);
+        $this->assertContains('service.php', $importStyle->getAttribute('data-phast-href'));
+        $this->assertContains($importUrl, urldecode($importStyle->getAttribute('data-phast-href')));
 
-        $style = array_shift($elements);
-        $this->assertEquals('style', $style->tagName);
-        $this->assertNotContains($importUrl, $style->textContent);
-        $this->assertContains('red', $style->textContent);
+        $contentsStyle = array_shift($elements);
+        $this->assertEquals('style', $contentsStyle->tagName);
+        $this->assertNotContains($importUrl, $contentsStyle->textContent);
+        $this->assertContains('red', $contentsStyle->textContent);
     }
 
     public function whitelistedImportProvider() {

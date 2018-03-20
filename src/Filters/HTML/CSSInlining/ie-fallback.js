@@ -4,18 +4,6 @@
         return;
     }
 
-    document.addEventListener('readystatechange', function () {
-        Array.prototype.forEach.call(
-            document.querySelectorAll('link[data-phast-ie-fallback-url]'),
-            function (el) {
-                console.log(el);
-                el.getAttribute('data-phast-ie-fallback-url');
-                el.setAttribute('href', el.getAttribute('data-phast-ie-fallback-url'));
-            }
-        );
-    });
-
-
     Array.prototype.forEach.call(
         document.querySelectorAll('style[data-phast-ie-fallback-url]'),
         function (el) {

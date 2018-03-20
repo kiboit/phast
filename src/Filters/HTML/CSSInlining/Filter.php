@@ -216,7 +216,10 @@ class Filter extends BaseHTMLStreamFilter {
         $content = $this->retriever->retrieve($url);
         if ($content === false) {
             $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
-            return $this->addIEFallback($ieFallbackUrl, [$this->makeServiceLink($url, $media)]);
+            return $this->addIEFallback(
+                $ieFallbackUrl,
+                [$this->makeStyle($url, '', $media, true, false)]
+            );
         }
 
 
@@ -269,11 +272,6 @@ class Filter extends BaseHTMLStreamFilter {
         return $elements;
     }
 
-    private function makeServiceLink(URL $location, $media) {
-        $url = $this->makeServiceURL($location);
-        return $this->makeLink(URL::fromString($url), $media);
-    }
-
     private function addIEFallback(URL $fallbackUrl = null, array $elements = null) {
         if ($fallbackUrl === null || !$elements) {
             return $elements;
@@ -314,13 +312,13 @@ class Filter extends BaseHTMLStreamFilter {
         return $matches;
     }
 
-    private function makeStyle(URL $url, $content, $media, $optimized) {
+    private function makeStyle(URL $url, $content, $media, $optimized, $stripImports = true) {
         $style = new Tag('style');
         if ($media !== '') {
             $style->setAttribute('media', $media);
         }
         if ($optimized) {
-            $style->setAttribute('data-phast-href', $this->makeServiceURL($url, true));
+            $style->setAttribute('data-phast-href', $this->makeServiceURL($url, $stripImports));
         }
         $style->setTextContent($content);
         return $style;
