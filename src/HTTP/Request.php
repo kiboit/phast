@@ -56,7 +56,18 @@ class Request {
     }
 
     public function getPathInfo() {
-        return $this->getEnvValue('PATH_INFO');
+        $pathInfo = $this->getEnvValue('PATH_INFO');
+        if ($pathInfo) {
+            return $pathInfo;
+        }
+        $script = $this->getEnvValue('PHP_SELF');
+        $uri = $this->getEnvValue('DOCUMENT_URI');
+        if ($script !== null
+            && $uri !== null
+            && strpos($uri, $script . '/') === 0
+        ) {
+            return substr($uri, strlen($script));
+        }
     }
 
     public function getCookie($name) {
