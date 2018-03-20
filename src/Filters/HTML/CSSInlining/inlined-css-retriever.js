@@ -1,10 +1,10 @@
 phast.stylesLoading = 0;
 
-phast.forEachSelectedElement('style[data-phast-href]', function (style) {
+phast.forEachSelectedElement('style[data-phast-params]', function (style) {
     phast.stylesLoading++;
-    retrieve(style.getAttribute('data-phast-href'), function (css) {
+    retrieve(style.getAttribute('data-phast-params'), function (css) {
         style.textContent = css;
-        style.removeAttribute('data-phast-href');
+        style.removeAttribute('data-phast-params');
     }, phast.once(function () {
         phast.stylesLoading--;
         if (phast.stylesLoading === 0 && phast.onStylesLoaded) {

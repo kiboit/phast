@@ -84,11 +84,11 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertSame($this->head, $styles[0]->parentNode);
         $this->assertSame($this->body->firstChild, $styles[1]);
 
-        $this->assertTrue($styles[0]->hasAttribute('data-phast-href'));
-        $this->assertTrue($styles[1]->hasAttribute('data-phast-href'));
+        $this->assertTrue($styles[0]->hasAttribute('data-phast-params'));
+        $this->assertTrue($styles[1]->hasAttribute('data-phast-params'));
 
-        $params1 = json_decode($styles[0]->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
-        $params2 = json_decode($styles[1]->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+        $params1 = json_decode($styles[0]->getAttribute('data-phast-params'), JSON_OBJECT_AS_ARRAY);
+        $params2 = json_decode($styles[1]->getAttribute('data-phast-params'), JSON_OBJECT_AS_ARRAY);
 
         $this->assertEquals(self::BASE_URL . '/the-file-1.css', $params1['src']);
         $this->assertEquals(self::BASE_URL . '/the-file-2.css', $params2['src']);
@@ -108,12 +108,12 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals(2, $this->cssFilterCalledTimes);
     }
 
-    public function testNotAddingPhastHrefToExistingStyleTags() {
+    public function testNotAddingPhastParamsToExistingStyleTags() {
         $style = $this->makeMarkedElement('style');
         $this->head->appendChild($style);
         $this->applyFilter();
         $styles = $this->dom->getElementsByTagName('style');
-        $this->assertFalse($styles->item(0)->hasAttribute('data-phast-href'));
+        $this->assertFalse($styles->item(0)->hasAttribute('data-phast-params'));
         $this->assertHasNotCompiledScripts();
     }
 
@@ -145,7 +145,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
         $style = $this->head->getElementsByTagName('style')->item(0);
         $this->assertEquals($originalContent, $style->textContent);
-        $this->assertFalse($style->hasAttribute('data-phast-href'));
+        $this->assertFalse($style->hasAttribute('data-phast-params'));
     }
 
     public function testInliningWithCorrectRel() {
@@ -188,7 +188,7 @@ class FilterTest extends HTMLFilterTestCase {
             'cacheMarker' => 123,
             'token' => 'the-token'
         ];
-        $actualParams = json_decode($newStyle->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+        $actualParams = json_decode($newStyle->getAttribute('data-phast-params'), JSON_OBJECT_AS_ARRAY);
         $this->assertEquals($expectedParams, $actualParams);
     }
 
@@ -198,7 +198,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
 
         $style = $this->head->getElementsByTagName('style')->item(0);
-        $query = json_decode($style->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+        $query = json_decode($style->getAttribute('data-phast-params'), JSON_OBJECT_AS_ARRAY);
         $this->assertEquals(123, $query['cacheMarker']);
     }
 
@@ -383,7 +383,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $importStyle = array_shift($elements);
         $this->assertEquals('style', $importStyle->tagName);
-        $params = json_decode($importStyle->getAttribute('data-phast-href'), JSON_OBJECT_AS_ARRAY);
+        $params = json_decode($importStyle->getAttribute('data-phast-params'), JSON_OBJECT_AS_ARRAY);
         $this->assertStringEndsWith($importUrl, $params['src']);
 
         $contentsStyle = array_shift($elements);

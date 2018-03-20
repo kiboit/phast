@@ -318,7 +318,7 @@ class Filter extends BaseHTMLStreamFilter {
             $style->setAttribute('media', $media);
         }
         if ($optimized) {
-            $style->setAttribute('data-phast-href', $this->makeServiceURL($url, $stripImports));
+            $style->setAttribute('data-phast-params', $this->makeServiceURL($url, $stripImports));
         }
         $style->setTextContent($content);
         return $style;
