@@ -50,10 +50,12 @@ class Service {
         $results = [];
         foreach ($this->getParams($request) as $key => $params) {
             if (!isset ($params['src'])) {
+                $this->logger()->error('No src found for set {key}', ['key' => $key]);
                 $results[$key] = ['status' => 404];
                 continue;
             }
             if (!$this->verifyParams($params)) {
+                $this->logger()->error('Params verification failed for set {key}', ['key' => $key]);
                 $results[$key] = ['status' => 401];
                 continue;
             }
@@ -62,11 +64,26 @@ class Service {
                 $this->retriever
             );
             try {
+                $this->logger()->info('Applying for set {key}', ['key' => $key]);
                 $filtered = $this->filter->apply($resource, $params);
                 $results[$key] = ['status' => 200, 'content' => $filtered->getContent()];
             } catch (ItemNotFoundException $e) {
+                $this->logger()->error(
+                    'Could not find {url} for set {key}',
+                    ['url' => $params['src'], 'key' => $key]
+                );
                 $results[$key] = ['status' => 404];
             } catch (\Exception $e) {
+                $this->logger()->critical(
+                    'Unhandled exception for set {key}: {type} Message: {message} File: {file} Line: {line}',
+                    [
+                        'key' => $key,
+                        'type' => get_class($e),
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                );
                 $results[$key] = ['status' => 500];
             }
         }
