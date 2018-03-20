@@ -318,7 +318,7 @@ class Filter extends BaseHTMLStreamFilter {
             $style->setAttribute('media', $media);
         }
         if ($optimized) {
-            $style->setAttribute('data-phast-params', $this->makeServiceURL($url, $stripImports));
+            $style->setAttribute('data-phast-params', $this->makeServiceParams($url, $stripImports));
         }
         $style->setTextContent($content);
         return $style;
@@ -332,7 +332,7 @@ class Filter extends BaseHTMLStreamFilter {
         return $link;
     }
 
-    protected function makeServiceURL(URL $originalLocation, $stripImports = false) {
+    protected function makeServiceParams(URL $originalLocation, $stripImports = false) {
         $params = [
             'src' => (string) $originalLocation,
             'cacheMarker' => $this->retriever->getCacheSalt($originalLocation)
