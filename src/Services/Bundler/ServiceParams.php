@@ -72,6 +72,9 @@ class ServiceParams {
     private function makeToken(ServiceSignature $signature) {
         $params = $this->params;
         ksort($params);
+        array_walk($params, function (&$item) {
+            $item = (string) $item;
+        });
         return $signature->sign(json_encode($params));
     }
 }
