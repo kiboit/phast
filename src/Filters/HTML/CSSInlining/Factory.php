@@ -3,8 +3,8 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\File\Cache;
-use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFactory;
+use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
@@ -25,7 +25,7 @@ class Factory implements HTMLFilterFactory {
         if (!isset ($config['documents']['filters'][Filter::class]['serviceUrl'])) {
             $url = $config['servicesUrl'];
             $config['documents']['filters'][Filter::class]['serviceUrl']
-            = strpos($url, '?') === false ? $url . '?service=css' : $url;
+            = strpos($url, '?') === false ? $url . '?service=bundler' : $url;
         }
 
         return new Filter(
