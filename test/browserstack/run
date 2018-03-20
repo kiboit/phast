@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -euo pipefail
+cd "$(dirname "$0")"
+
+browsers_json=data/browsers.json
+env_file=data/credentials
+
+need_env=(
+    BROWSERSTACK_USERNAME
+    BROWSERSTACK_ACCESS_KEY
+)
+
+
+# Load environment variables
+if [[ ! -f $env_file ]]; then
+    read -e -p "BrowserStack username: " BROWSERSTACK_USERNAME
+    read -e -p "BrowserStack access key: " BROWSERSTACK_ACCESS_KEY
+
+    read -e -p "Save credentials: [y] " -n 1 x
+    if [[ $x = "" ]] || [[ $x = "y" ]]; then
+        touch $env_file
+        chmod 600 $env_file
+        for env in "${need_env[@]}"; do
+            echo "$env='${!env}'" >> $env_file
+        done
+    fi
+fi
+
+source $env_file
+
+for env in "${need_env[@]}"; do
+    export $env
+done
+
+
+# Download browser list
+if [[ ! -f $browsers_json ]]; then
+    curl -fSs -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+        https://api.browserstack.com/automate/browsers.json > $browsers_json~
+    mv $browsers_json{~,}
+fi
+
+
+# Run tests
+mkdir -p output
+./test.php | parallel -j9 --bar --joblog output/joblog --resume-failed | tee output/test.out

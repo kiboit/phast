@@ -26,49 +26,76 @@ if (!$caps) {
         exit(255);
     }
 
-    $options = $caps;
-    $options['browserstack.local'] = true;
-    $options['real_mobile'] = !empty($caps['real_mobile']);
-
-    while (true) {
-        try {
-            $driver = RemoteWebDriver::create(
-                "https://$username:$access_key@hub-cloud.browserstack.com/wd/hub",
-                $options,
-                30000,
-                120000
-            );
-            break;
-        } catch (UnknownServerException $e) {
-            if (!preg_match('/^All parallel tests are currently in use/', $e->getMessage())) {
-                throw $e;
-            }
-            sleep(10);
-        }
+    $pipes = [];
+    $proxy_proc = proc_open(
+        'BrowserStackLocal --key ' . escapeshellarg($access_key) . ' ' .
+            '--local-identifier ' . escapeshellarg($proxy_id = uniqid()) . ' ' .
+            '>/dev/null',
+        [
+            0 => STDIN,
+            1 => STDOUT,
+            2 => STDERR
+        ],
+        $pipes
+    );
+    if (!$proxy_proc) {
+        fwrite(STDERR, "Failed to start BrowserStackLocal!\n");
+        exit(1);
     }
 
-    $status = 1;
+    $options = $caps;
+    $options['browserstack.local'] = true;
+    $options['browserstack.localIdentifier'] = $proxy_id;
+    $options['real_mobile'] = !empty($caps['real_mobile']);
+
+    $proxy_retry = 1;
 
     try {
-        $driver->get("http://phast-browser.test/");
-        $driver->wait()->until(
-            WebDriverExpectedCondition::not(
-                WebDriverExpectedCondition::titleIs('Phast Unit Tests')
-            )
-        );
-        $failed = get_failed($driver);
-        if (empty ($failed)) {
-            $status = 0;
-        } else {
-            print_failed('', $caps);
-            print_errors($failed);
+        while (true) {
+            try {
+                $driver = RemoteWebDriver::create(
+                    "https://$username:$access_key@hub-cloud.browserstack.com/wd/hub",
+                    $options,
+                    30000,
+                    120000
+                );
+                break;
+            } catch (UnknownServerException $e) {
+                if (preg_match('/^\[browserstack.local\] is set to true but local testing/', $e->getMessage()) && $proxy_retry) {
+                    $proxy_retry--;
+                } elseif (!preg_match('/^All parallel tests are currently in use/', $e->getMessage())
+                ) {
+                    throw $e;
+                }
+                sleep(10);
+            }
         }
-    } catch (TimeOutException $e) {
-        print_failed("Timed out: " . $e->getMessage(), $caps);
-    } catch (Exception $e) {
-        print_failed("Unknown error: " . $e->getMessage(), $caps);
+
+        $status = 1;
+
+        try {
+            $driver->get("http://phast-browser.test/");
+            $driver->wait()->until(
+                WebDriverExpectedCondition::not(
+                    WebDriverExpectedCondition::titleIs('Phast Unit Tests')
+                )
+            );
+            $failed = get_failed($driver);
+            if (empty ($failed)) {
+                $status = 0;
+            } else {
+                print_failed('', $caps);
+                print_errors($failed);
+            }
+        } catch (TimeOutException $e) {
+            print_failed("Timed out: " . $e->getMessage(), $caps);
+        } catch (Exception $e) {
+            print_failed("Unknown error: " . $e->getMessage(), $caps);
+        } finally {
+            $driver->quit();
+        }
     } finally {
-        $driver->quit();
+        proc_terminate($proxy_proc, 9);
     }
 
     exit($status);

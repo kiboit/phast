@@ -1,7 +1,7 @@
 <?php
 
 return call_user_func(function () {
-    $all_caps = json_decode(file_get_contents(__DIR__ . '/browsers.json'), true);
+    $all_caps = json_decode(file_get_contents(__DIR__ . '/data/browsers.json'), true);
 
     $min_browser_versions = [
         'chrome' => '62',
