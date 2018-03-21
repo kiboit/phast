@@ -13,7 +13,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Kibo\\Phast\\": ["src/", "test/php"]
+            "Kibo\\Phast\\": ["src/"]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kibo\\Phast\\": ["test/php/"]
         }
     },
     "config": {
