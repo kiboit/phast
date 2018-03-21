@@ -144,7 +144,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function makeRequest(pack) {
         var query = packToQuery(pack);
-        var xhr = new XMLHttpRequest();
         var errorHandler = function () {
             handleError(pack);
         };
@@ -155,6 +154,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 handleError(pack);
             }
         };
+        var xhr = new XMLHttpRequest();
         xhr.open('GET', query);
         xhr.addEventListener('error', errorHandler);
         xhr.addEventListener('abort', errorHandler);
