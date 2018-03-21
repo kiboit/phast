@@ -4,7 +4,7 @@ test('stylesheet_import.php', function (assert, document) {
     var done = assert.async();
     wait();
     function wait() {
-        if (document.querySelectorAll('style[data-phast-href]').length > 0) {
+        if (document.querySelectorAll('style[data-phast-params]').length > 0) {
             return setTimeout(wait);
         }
         done();
