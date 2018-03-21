@@ -1,0 +1,1 @@
+../../../src/Filters/HTML/CSSInlining/resources-loader.js

@@ -87,12 +87,16 @@ function async(assert, fn) {
     return fn(assert.async());
 }
 
-function retrieve(url, fn) {
+function retrieve(url, fn, always) {
     var req = new XMLHttpRequest();
-    req.addEventListener('load', load);
     req.open('GET', url);
     req.overrideMimeType('text/plain; charset=x-user-defined');
     req.send();
+
+    req.addEventListener('load', load);
+    if (always) {
+        req.addEventListener('loadend', always);
+    }
     function load() {
         fn(this.responseText);
     }
@@ -113,3 +117,31 @@ function wait(assert, predicate, fn) {
         }
     });
 }
+
+function loadPhastJS(url, done) {
+
+    QUnit.config.autostart = false;
+    loadPhastJS.awaitingScriptsCount++;
+
+    retrieve(
+        url,
+        function (responseText) {
+            var phast = {
+                scripts: []
+            };
+            var document = {
+                addEventListener: function () {}
+            };
+            (function (done) {
+                eval(responseText);
+            })();
+            done(phast);
+        },
+        function () {
+            loadPhastJS.awaitingScriptsCount--;
+            if (!loadPhastJS.awaitingScriptsCount) {
+                QUnit.start();
+            }
+        });
+}
+loadPhastJS.awaitingScriptsCount = 0;
