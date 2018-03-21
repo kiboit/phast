@@ -149,7 +149,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 })
             });
 
-            QUnit.test('Test fetching from service in separate file', function (assert) {
+            QUnit.test('Test fetching from dedicated service file', function (assert) {
                 var done = assert.async();
                 var client = new phast.ResourceLoader.BundlerServiceClient('bundler.php');
                 var request = client.get(documentParams[0]);

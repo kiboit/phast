@@ -83,13 +83,35 @@ phast.ResourceLoader.RequestParams.fromObject = function (parsed) {
 
 phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
+    var timeoutHandler;
+    var accumulatingPack = [];
+
     this.get = function (params) {
         var request = new phast.ResourceLoader.Request();
         if (params.isFaulty()) {
             request.error();
             return request;
         }
-        var url = paramsToQuery(params);
+        accumulatingPack.push(new PackItem(request, params));
+        clearTimeout(timeoutHandler);
+        timeoutHandler = setTimeout(this.flush);
+        return request;
+    };
+
+    this.flush = function () {
+        var pack = accumulatingPack;
+        accumulatingPack = [];
+        clearTimeout(timeoutHandler);
+        makeRequest(pack);
+    };
+
+    this._get = function (params) {
+        var request = new phast.ResourceLoader.Request();
+        if (params.isFaulty()) {
+            request.error();
+            return request;
+        }
+        var url = packToQuery(params);
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.addEventListener('error', request.error);
@@ -105,31 +127,66 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         return request;
     };
 
-    function paramsToQuery(params) {
+    function packToQuery(pack) {
         var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
         var parts = [];
-        for (var key in params) {
-            if (key === 'isFaulty') {
-                continue;
+        pack.forEach(function (item, idx) {
+            for (var key in item.params) {
+                if (key === 'isFaulty') {
+                    continue;
+                }
+                parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(item.params[key]));
             }
-            parts.push(encodeURIComponent(key) + '_0=' + encodeURIComponent(params[key]));
-        }
+        });
         return serviceUrl + glue + parts.join('&');
     }
 
-    function handleResponse(responseText, request) {
-        try {
-            var response = JSON.parse(responseText);
-            if (response[0] && response[0].status === 200) {
-                request.success(response[0].content);
+    function makeRequest(pack) {
+        var query = packToQuery(pack);
+        var xhr = new XMLHttpRequest();
+        var errorHandler = function () {
+            handleError(pack);
+        };
+        var successHandler = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                handleResponse(xhr.responseText, pack);
             } else {
-                request.error();
+                handleError(pack);
             }
-        } catch (e) {
-            request.error();
-        }
+        };
+        xhr.open('GET', query);
+        xhr.addEventListener('error', errorHandler);
+        xhr.addEventListener('abort', errorHandler);
+        xhr.addEventListener('load', successHandler);
+        xhr.send();
     }
 
+    function handleError(pack) {
+        pack.forEach(function (item) {
+            item.request.error();
+        });
+    }
+
+    function handleResponse(responseText, pack) {
+        try {
+            var responses = JSON.parse(responseText);
+        } catch (e) {
+            handleError(pack);
+            return;
+        }
+        responses.forEach(function (response, idx) {
+            if (response.status === 200) {
+                pack[idx].request.success(response.content);
+            } else {
+                pack[idx].request.error();
+            }
+        });
+    }
+
+    function PackItem(request, params) {
+        this.request = request;
+        this.params = params;
+    }
 
 };
 
