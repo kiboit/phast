@@ -4,6 +4,7 @@ phast.ResourceLoader.Request = function () {
 
     var onsuccess,
         onerror,
+        onend,
         successText,
         success,
         resolved = false,
@@ -18,7 +19,7 @@ phast.ResourceLoader.Request = function () {
         set: function (func) {
             onsuccess = func;
             if (resolved && success) {
-                func(successText);
+                this.success(successText);
             }
         }
     });
@@ -32,6 +33,20 @@ phast.ResourceLoader.Request = function () {
         set: function (func) {
             onerror = func;
             if (resolved && !success) {
+                this.error();
+            }
+        }
+    });
+
+    Object.defineProperty(this, 'onend', {
+
+        get: function () {
+            return onend;
+        },
+
+        set: function (func) {
+            onend = func;
+            if (resolved) {
                 func();
             }
         }
@@ -45,6 +60,7 @@ phast.ResourceLoader.Request = function () {
             onsuccess(responseText);
             called = true;
         }
+        end();
     };
 
     this.error = function () {
@@ -54,7 +70,14 @@ phast.ResourceLoader.Request = function () {
             onerror();
             called = true;
         }
+        end();
     };
+
+    function end() {
+        if (!called && onend) {
+            onend();
+        }
+    }
 };
 
 phast.ResourceLoader.RequestParams = function (faulty) {

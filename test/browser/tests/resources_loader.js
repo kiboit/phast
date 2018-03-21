@@ -101,6 +101,24 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 rejected.success('');
             });
 
+            QUnit.test('Check calling onend on resolving', function (assert) {
+                assert.expect(0);
+                var done = assert.async();
+                request.onend = function () {
+                    done();
+                };
+                request.success('');
+            });
+
+            QUnit.test('Check calling onend on error', function (assert) {
+                assert.expect(0);
+                var done = assert.async();
+                request.onend = function () {
+                    done();
+                };
+                request.error();
+            });
+
         });
 
         QUnit.module('RequestParams', function () {
