@@ -128,28 +128,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         makeRequest(pack);
     };
 
-    this._get = function (params) {
-        var request = new phast.ResourceLoader.Request();
-        if (params.isFaulty()) {
-            request.error();
-            return request;
-        }
-        var url = packToQuery(params);
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        xhr.addEventListener('error', request.error);
-        xhr.addEventListener('abort', request.error);
-        xhr.addEventListener('load', function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                handleResponse(xhr.responseText, request);
-            } else {
-                request.error();
-            }
-        });
-        xhr.send();
-        return request;
-    };
-
     function packToQuery(pack) {
         var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
         var parts = [];
