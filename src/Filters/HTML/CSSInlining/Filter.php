@@ -300,6 +300,7 @@ class Filter extends BaseHTMLStreamFilter {
     private function addInlinedRetrieverScript() {
         $this->logger()->info('Adding inlined retriever script');
         $this->hasDoneInlining = false;
+        $this->context->addPhastJavascript(new PhastJavaScript(__DIR__ . '/resources-loader.js'));
         $script = new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js');
         $script->setConfig('serviceUrl', (string) $this->serviceUrl);
         $this->context->addPhastJavaScript($script);
