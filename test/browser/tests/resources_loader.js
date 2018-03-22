@@ -1,6 +1,20 @@
 loadPhastJS('public/resources-loader.js', function (phast) {
 
-    QUnit.module('ResourcesLoader', function () {
+    QUnit.module('ResourcesLoader', function (hooks) {
+
+        var client,
+            documentParams = [];
+
+        hooks.before(function () {
+            document.querySelectorAll('[data-phast-params]').forEach(function (el) {
+                var params = phast.ResourceLoader.RequestParams.fromString(el.dataset.phastParams);
+                documentParams.push(params);
+            });
+        });
+
+        hooks.beforeEach(function () {
+            client = new phast.ResourceLoader.BundlerServiceClient('phast.php?service=bundler');
+        });
 
         QUnit.module('Request', function (hooks) {
             var request;
@@ -137,34 +151,10 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             });
         });
 
-        QUnit.module('BundlerServiceClient', function (hooks) {
-            var client,
-                documentParams = [];
-
-            hooks.before(function () {
-                document.querySelectorAll('[data-phast-params]').forEach(function (el) {
-                    var params = phast.ResourceLoader.RequestParams.fromString(el.dataset.phastParams);
-                    documentParams.push(params);
-                });
-            });
-
-            hooks.beforeEach(function () {
-                client = new phast.ResourceLoader.BundlerServiceClient('phast.php?service=bundler');
-            });
+        QUnit.module('BundlerServiceClient', function () {
 
             QUnit.test('Test fetching files', function (assert) {
-                var done = assert.async(3),
-                    i = 1;
-                documentParams.forEach(function (params) {
-                    var request = client.get(params);
-                    request.onsuccess = (function () {
-                        var expectedContents = 'text-' + (i++) + '-contents';
-                        return function (responseText) {
-                            assert.equal(expectedContents, responseText, 'Response matches');
-                            done();
-                        };
-                    })();
-                })
+                checkFetchingFiles(assert, client);
             });
 
             QUnit.test('Test fetching from dedicated service file', function (assert) {
@@ -247,6 +237,55 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 };
             });
         });
+
+        QUnit.module('IndexedDBResourceCache', function () {
+
+            QUnit.test('Check fetching files with client', function (assert) {
+                var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
+                checkFetchingFiles(assert, cache);
+            });
+
+            QUnit.test('Check retrieval from cache', function (assert) {
+                var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
+                var done = assert.async(documentParams.length);
+                var filesFetched = 0;
+                documentParams.forEach(function (params) {
+                    var request = cache.get(params);
+                    request.onsuccess = function () {
+                        filesFetched++;
+                    };
+                });
+                wait(
+                    assert,
+                    function () {
+                        return filesFetched === 3;
+                    },
+                    function () {
+                        var cache = new phast.ResourceLoader.IndexedDBResourceCache({
+                            get: function () {}
+                        });
+                        checkFetchingFiles(assert, cache, done);
+                    }
+                );
+            });
+
+            QUnit.todo('Check cache cleanup', function (assert) {
+
+            });
+
+        });
+
+        function checkFetchingFiles(assert, client, done) {
+            done = done || assert.async(documentParams.length);
+            assert.expect(3);
+            documentParams.forEach(function (params, idx) {
+                var request = client.get(params);
+                request.onsuccess = function (responseText) {
+                    assert.equal('text-' + (idx + 1) + '-contents', responseText, 'Contents are correct');
+                    done();
+                };
+            });
+        }
 
     });
 

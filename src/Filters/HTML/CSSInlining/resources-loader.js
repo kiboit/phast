@@ -195,6 +195,86 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
 };
 
+phast.ResourceLoader.IndexedDBResourceCache = function (client) {
+
+    var storeName = 'resources';
+
+    this.get = function (params) {
+        var request = new phast.ResourceLoader.Request();
+        var cacheRequest = getFromCache(params);
+        cacheRequest.onsuccess = request.success;
+        cacheRequest.onerror = function () {
+            getFromClient(params, request);
+        };
+        return request;
+    };
+
+    function getFromCache(params) {
+        var request = new phast.ResourceLoader.Request();
+        var dbOpenRequest = openDB();
+        dbOpenRequest.onerror = function () {
+            request.error();
+        };
+        dbOpenRequest.onsuccess = function () {
+            var db = dbOpenRequest.result;
+            var storeRequest = db
+                .transaction(storeName)
+                .objectStore(storeName)
+                .get(params.token);
+            storeRequest.onerror = function () {
+                request.error();
+            };
+            storeRequest.onsuccess = function () {
+                if (storeRequest.result) {
+                    request.success(storeRequest.result.content);
+                } else {
+                    request.error();
+                }
+                db.close();
+            };
+        };
+        return request;
+    }
+
+    function getFromClient(params, request) {
+        var clientRequest = client.get(params);
+        clientRequest.onerror = request.error;
+        clientRequest.onsuccess = function (responseText) {
+            storeInCacheAndFinishRequest(params, responseText);
+            request.success(responseText);
+        };
+    }
+
+    function storeInCacheAndFinishRequest(params, responseText) {
+        var dbOpenRequest = openDB();
+        dbOpenRequest.onsuccess = function () {
+            var db = dbOpenRequest.result;
+            var putRequest = db.transaction(storeName, 'readwrite')
+                .objectStore(storeName)
+                .put({token: params.token, content: responseText});
+            putRequest.onerror = function () {
+                db.close();
+            };
+            putRequest.onsuccess = function () {
+                db.close();
+            };
+        };
+    }
+
+    function openDB() {
+        var dbOpenRequest = indexedDB.open('phastResourcesCache', 1);
+        dbOpenRequest.onupgradeneeded = function () {
+            createDB(dbOpenRequest.result);
+        };
+        return dbOpenRequest;
+    }
+
+    function createDB(db) {
+        db.createObjectStore(storeName, {keyPath: 'token'});
+    }
+
+};
+
 
 
 
