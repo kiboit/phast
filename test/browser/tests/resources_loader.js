@@ -246,27 +246,33 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             });
 
             QUnit.test('Check retrieval from cache', function (assert) {
-                var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
                 var done = assert.async(documentParams.length);
-                var filesFetched = 0;
-                documentParams.forEach(function (params) {
-                    var request = cache.get(params);
-                    request.onsuccess = function () {
-                        filesFetched++;
-                    };
-                });
-                wait(
-                    assert,
-                    function () {
-                        return filesFetched === 3;
-                    },
-                    function () {
-                        var cache = new phast.ResourceLoader.IndexedDBResourceCache({
-                            get: function () {}
-                        });
-                        checkFetchingFiles(assert, cache, done);
-                    }
-                );
+                var deleteRequest = indexedDB.deleteDatabase('phastResourcesCache');
+                deleteRequest.onerror = performTest;
+                deleteRequest.onsuccess = performTest;
+
+                function performTest() {
+                    var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
+                    var filesFetched = 0;
+                    documentParams.forEach(function (params) {
+                        var request = cache.get(params);
+                        request.onsuccess = function () {
+                            filesFetched++;
+                        };
+                    });
+                    wait(
+                        assert,
+                        function () {
+                            return filesFetched === 3;
+                        },
+                        function () {
+                            var cache = new phast.ResourceLoader.IndexedDBResourceCache({
+                                get: function () {}
+                            });
+                            checkFetchingFiles(assert, cache, done);
+                        }
+                    );
+                }
             });
 
             QUnit.todo('Check cache cleanup', function (assert) {
