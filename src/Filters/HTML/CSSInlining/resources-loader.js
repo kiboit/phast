@@ -211,12 +211,11 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
     function getFromCache(params) {
         var request = new phast.ResourceLoader.Request();
-        var dbOpenRequest = openDB();
+        var dbOpenRequest = getDB();
         dbOpenRequest.onerror = function () {
             request.error();
         };
-        dbOpenRequest.onsuccess = function () {
-            var db = dbOpenRequest.result;
+        dbOpenRequest.onsuccess = function (db) {
             var storeRequest = db
                 .transaction(storeName)
                 .objectStore(storeName)
@@ -230,7 +229,6 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
                 } else {
                     request.error();
                 }
-                db.close();
             };
         };
         return request;
@@ -240,39 +238,75 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
         var clientRequest = client.get(params);
         clientRequest.onerror = request.error;
         clientRequest.onsuccess = function (responseText) {
-            storeInCacheAndFinishRequest(params, responseText);
+            storeInCache(params, responseText);
             request.success(responseText);
         };
     }
 
-    function storeInCacheAndFinishRequest(params, responseText) {
-        var dbOpenRequest = openDB();
-        dbOpenRequest.onsuccess = function () {
-            var db = dbOpenRequest.result;
+    function storeInCache(params, responseText) {
+        var dbOpenRequest = getDB();
+        dbOpenRequest.onsuccess = function (db) {
             var putRequest = db.transaction(storeName, 'readwrite')
                 .objectStore(storeName)
                 .put({token: params.token, content: responseText});
-            putRequest.onerror = function () {
-                db.close();
-            };
-            putRequest.onsuccess = function () {
-                db.close();
-            };
         };
     }
 
+    function getDB() {
+        var request = new phast.ResourceLoader.Request();
+        if (phast.ResourceLoader.IndexedDBResourceCache.dbConnection) {
+            request.success(phast.ResourceLoader.IndexedDBResourceCache.dbConnection);
+        } else {
+            phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests.push(request);
+            if (phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests.length === 1) {
+                openDB();
+            }
+        }
+        return request;
+    }
+
     function openDB() {
-        var dbOpenRequest = indexedDB.open('phastResourcesCache', 1);
+        var dbOpenRequest = indexedDB.open(
+            phast.ResourceLoader.IndexedDBResourceCache.dbName,
+            phast.ResourceLoader.IndexedDBResourceCache.dbVersion
+        );
         dbOpenRequest.onupgradeneeded = function () {
             createDB(dbOpenRequest.result);
         };
-        return dbOpenRequest;
+        dbOpenRequest.onsuccess = function () {
+            phast.ResourceLoader.IndexedDBResourceCache.dbConnection = dbOpenRequest.result;
+            callStoredConnectionRequests(function (request) {
+                request.success(dbOpenRequest.result);
+            });
+        };
+        dbOpenRequest.onerror = function () {
+            callStoredConnectionRequests(function (request) {
+                request.error();
+            });
+        }
+    }
+
+    function callStoredConnectionRequests(cb) {
+        var requests = phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests;
+        while (requests.length) {
+            cb(requests.shift());
+        }
     }
 
     function createDB(db) {
         db.createObjectStore(storeName, {keyPath: 'token'});
     }
+};
 
+phast.ResourceLoader.IndexedDBResourceCache.dbName = 'phastResourcesCache';
+phast.ResourceLoader.IndexedDBResourceCache.dbVersion = 1;
+phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
+phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests = [];
+phast.ResourceLoader.IndexedDBResourceCache.close = function () {
+    if (phast.ResourceLoader.IndexedDBResourceCache.dbConnection) {
+        phast.ResourceLoader.IndexedDBResourceCache.dbConnection.close();
+        phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
+    }
 };
 
 

@@ -240,18 +240,26 @@ loadPhastJS('public/resources-loader.js', function (phast) {
 
         QUnit.module('IndexedDBResourceCache', function () {
 
+            function cleanupDB(cb) {
+                phast.ResourceLoader.IndexedDBResourceCache.close();
+                var deleteRequest = indexedDB.deleteDatabase(
+                    phast.ResourceLoader.IndexedDBResourceCache.dbName
+                );
+                deleteRequest.onerror = cb;
+                deleteRequest.onsuccess = cb;
+            }
+
             QUnit.test('Check fetching files with client', function (assert) {
-                var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
-                checkFetchingFiles(assert, cache);
+                var done = assert.async(documentParams.length);
+                cleanupDB(function () {
+                    var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
+                    checkFetchingFiles(assert, cache, done);
+                })
             });
 
             QUnit.test('Check retrieval from cache', function (assert) {
                 var done = assert.async(documentParams.length);
-                var deleteRequest = indexedDB.deleteDatabase('phastResourcesCache');
-                deleteRequest.onerror = performTest;
-                deleteRequest.onsuccess = performTest;
-
-                function performTest() {
+                cleanupDB(function () {
                     var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
                     var filesFetched = 0;
                     documentParams.forEach(function (params) {
@@ -272,7 +280,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                             checkFetchingFiles(assert, cache, done);
                         }
                     );
-                }
+                })
             });
 
             QUnit.todo('Check cache cleanup', function (assert) {
