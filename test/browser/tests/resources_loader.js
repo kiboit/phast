@@ -211,6 +211,41 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                     };
                 }
             });
+
+            QUnit.test('Test ignoring exceptions while dispatching responses', function (assert) {
+                var done = assert.async();
+                assert.expect(0);
+                var badParams = {
+                    src: 'some-url',
+                    token: 'some-token'
+                };
+                var request1 = client.get(documentParams[0]);
+                var request2 = client.get(phast.ResourceLoader.RequestParams.fromObject(badParams));
+                var request3 = client.get(documentParams[1]);
+                request1.onsuccess = function () {
+                    throw 'an error';
+                };
+                request2.onerror = function () {
+                    throw 'another error';
+                };
+                request3.onsuccess = function () {
+                    done();
+                };
+            });
+
+            QUnit.test('Test ignoring exceptions while dispatching network error', function (assert) {
+                var done = assert.async();
+                assert.expect(0);
+                var client = new phast.ResourceLoader.BundlerServiceClient('bad-url');
+                var request1 = client.get(documentParams[0]);
+                var request2 = client.get(documentParams[1]);
+                request1.onerror = function () {
+                    throw 'an error';
+                };
+                request2.onerror = function () {
+                    done();
+                };
+            });
         });
 
     });

@@ -164,7 +164,9 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function handleError(pack) {
         pack.forEach(function (item) {
-            item.request.error();
+            try {
+                item.request.error();
+            } catch (e) {}
         });
     }
 
@@ -176,11 +178,13 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
             return;
         }
         responses.forEach(function (response, idx) {
-            if (response.status === 200) {
-                pack[idx].request.success(response.content);
-            } else {
-                pack[idx].request.error();
-            }
+            try {
+                if (response.status === 200) {
+                    pack[idx].request.success(response.content);
+                } else {
+                    pack[idx].request.error();
+                }
+            } catch (e) {};
         });
     }
 
