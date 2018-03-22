@@ -1,6 +1,6 @@
 phast.stylesLoading = 0;
 
-var resourceLoader = new phast.ResourceLoader.BundlerServiceClient(phast.config.serviceUrl);
+var resourceLoader = new phast.ResourceLoader.make(phast.config.serviceUrl);
 
 phast.forEachSelectedElement('style[data-phast-params]', function (style) {
     phast.stylesLoading++;
