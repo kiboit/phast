@@ -197,10 +197,11 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
 phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
-    var storeName = 'resources';
+    var Request = phast.ResourceLoader.Request;
+    var Cache = phast.ResourceLoader.IndexedDBResourceCache;
 
     this.get = function (params) {
-        var request = new phast.ResourceLoader.Request();
+        var request = new Request();
         var cacheRequest = getFromCache(params);
         cacheRequest.onsuccess = request.success;
         cacheRequest.onerror = function () {
@@ -210,15 +211,15 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
     };
 
     function getFromCache(params) {
-        var request = new phast.ResourceLoader.Request();
-        var dbOpenRequest = getDB();
-        dbOpenRequest.onerror = function () {
+        var request = new Request();
+        var dbRequest = getDB();
+        dbRequest.onerror = function () {
             request.error();
         };
-        dbOpenRequest.onsuccess = function (db) {
+        dbRequest.onsuccess = function (db) {
             var storeRequest = db
-                .transaction(storeName)
-                .objectStore(storeName)
+                .transaction(Cache.storeName)
+                .objectStore(Cache.storeName)
                 .get(params.token);
             storeRequest.onerror = function () {
                 request.error();
@@ -244,21 +245,21 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
     }
 
     function storeInCache(params, responseText) {
-        var dbOpenRequest = getDB();
-        dbOpenRequest.onsuccess = function (db) {
-            var putRequest = db.transaction(storeName, 'readwrite')
-                .objectStore(storeName)
+        var dbRequest = getDB();
+        dbRequest.onsuccess = function (db) {
+            var putRequest = db.transaction(Cache.storeName, 'readwrite')
+                .objectStore(Cache.storeName)
                 .put({token: params.token, content: responseText});
         };
     }
 
     function getDB() {
-        var request = new phast.ResourceLoader.Request();
-        if (phast.ResourceLoader.IndexedDBResourceCache.dbConnection) {
-            request.success(phast.ResourceLoader.IndexedDBResourceCache.dbConnection);
+        var request = new Request();
+        if (Cache.dbConnection) {
+            request.success(Cache.dbConnection);
         } else {
-            phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests.push(request);
-            if (phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests.length === 1) {
+            Cache.dbConnectionRequests.push(request);
+            if (Cache.dbConnectionRequests.length === 1) {
                 openDB();
             }
         }
@@ -267,14 +268,14 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
     function openDB() {
         var dbOpenRequest = indexedDB.open(
-            phast.ResourceLoader.IndexedDBResourceCache.dbName,
-            phast.ResourceLoader.IndexedDBResourceCache.dbVersion
+            Cache.dbName,
+            Cache.dbVersion
         );
         dbOpenRequest.onupgradeneeded = function () {
             createDB(dbOpenRequest.result);
         };
         dbOpenRequest.onsuccess = function () {
-            phast.ResourceLoader.IndexedDBResourceCache.dbConnection = dbOpenRequest.result;
+            Cache.dbConnection = dbOpenRequest.result;
             callStoredConnectionRequests(function (request) {
                 request.success(dbOpenRequest.result);
             });
@@ -287,18 +288,19 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
     }
 
     function callStoredConnectionRequests(cb) {
-        var requests = phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests;
+        var requests = Cache.dbConnectionRequests;
         while (requests.length) {
             cb(requests.shift());
         }
     }
 
     function createDB(db) {
-        db.createObjectStore(storeName, {keyPath: 'token'});
+        db.createObjectStore(Cache.storeName, {keyPath: 'token'});
     }
 };
 
 phast.ResourceLoader.IndexedDBResourceCache.dbName = 'phastResourcesCache';
+phast.ResourceLoader.IndexedDBResourceCache.storeName = 'resources';
 phast.ResourceLoader.IndexedDBResourceCache.dbVersion = 1;
 phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
 phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests = [];

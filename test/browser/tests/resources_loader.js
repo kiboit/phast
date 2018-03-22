@@ -240,8 +240,10 @@ loadPhastJS('public/resources-loader.js', function (phast) {
 
         QUnit.module('IndexedDBResourceCache', function () {
 
+            var Cache = phast.ResourceLoader.IndexedDBResourceCache;
+
             function cleanupDB(cb) {
-                phast.ResourceLoader.IndexedDBResourceCache.close();
+                Cache.close();
                 var deleteRequest = indexedDB.deleteDatabase(
                     phast.ResourceLoader.IndexedDBResourceCache.dbName
                 );
@@ -252,7 +254,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             QUnit.test('Check fetching files with client', function (assert) {
                 var done = assert.async(documentParams.length);
                 cleanupDB(function () {
-                    var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
+                    var cache = new Cache(client);
                     checkFetchingFiles(assert, cache, done);
                 })
             });
@@ -260,7 +262,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             QUnit.test('Check retrieval from cache', function (assert) {
                 var done = assert.async(documentParams.length);
                 cleanupDB(function () {
-                    var cache = new phast.ResourceLoader.IndexedDBResourceCache(client);
+                    var cache = new Cache(client);
                     var filesFetched = 0;
                     documentParams.forEach(function (params) {
                         var request = cache.get(params);
@@ -274,7 +276,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                             return filesFetched === 3;
                         },
                         function () {
-                            var cache = new phast.ResourceLoader.IndexedDBResourceCache({
+                            var cache = new Cache({
                                 get: function () {}
                             });
                             checkFetchingFiles(assert, cache, done);
