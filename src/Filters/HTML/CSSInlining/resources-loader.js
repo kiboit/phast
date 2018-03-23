@@ -204,6 +204,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     var dbVersion = 1;
     var dbConnection = null;
     var dbConnectionRequests = [];
+    var itemTTL = 7 * 86400000;
+    var cleanupProbability = 0.05;
 
     phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
@@ -265,7 +267,11 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
             dbRequest.onsuccess = function (db) {
                 db.transaction(storeName, 'readwrite')
                     .objectStore(storeName)
-                    .put({token: params.token, content: responseText});
+                    .put({
+                        token: params.token,
+                        content: responseText,
+                        lastUsed: Date.now()
+                    });
             };
         } catch (e) {}
     }
@@ -315,7 +321,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     }
 
     function createDB(db) {
-        db.createObjectStore(storeName, {keyPath: 'token'});
+        var store = db.createObjectStore(storeName, {keyPath: 'token'});
+        store.createIndex('lastUsed', 'lastUsed');
     }
 
     function dropDB() {
@@ -330,6 +337,33 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         }
     }
 
+    function cleanUp(itemTTL) {
+        var maxTime = Date.now() - itemTTL;
+        getDB().onsuccess = function (db) {
+            var store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+            var cursorRequest = store.index('lastUsed')
+                .openCursor(IDBKeyRange.upperBound(maxTime, true));
+            cursorRequest.onsuccess = function (ev) {
+                var cursor = ev.target.result;
+                if (cursor) {
+                    store.delete(cursor.value.token);
+                    cursor.continue();
+                }
+            };
+        };
+    }
+
+    function maybeCleanup (itemTTL, cleanupProbability) {
+        if (Math.random() < cleanupProbability) {
+            try {
+                cleanUp(itemTTL);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    }
+
+    maybeCleanup(itemTTL, cleanupProbability);
 
     Cache.getDB = getDB;
 
@@ -338,6 +372,9 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     Cache.closeDB = closeDB;
 
     Cache.dropDB = dropDB;
+
+    Cache.maybeCleanup = maybeCleanup;
+
 
 })();
 

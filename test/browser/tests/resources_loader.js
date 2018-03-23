@@ -243,6 +243,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
         QUnit.module('IndexedDBResourceCache', function () {
 
             var Cache = phast.ResourceLoader.IndexedDBResourceCache;
+            var Request = phast.ResourceLoader.Request;
 
             function cleanupDB(cb) {
                 Cache.closeDB();
@@ -300,8 +301,51 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 });
             });
 
-            QUnit.todo('Check cache cleanup', function (assert) {
+            QUnit.test('Check cache cleanup', function (assert) {
+                assert.timeout(2000);
+                assert.expect(0);
+                var done = assert.async(3);
+                cleanupDB(function () {
+                    var slowClient = {
+                        multiplier: 1,
+                        get: function (params) {
+                            var request = new Request();
+                            setTimeout(function () {
+                                request.success('Token: ' + params.token);
+                            }, this.multiplier++ * 100);
+                            return request;
+                        }
+                    };
+                    var caching = new Cache(slowClient);
 
+                    var fetchedCnt = 0;
+                    function fetched() {
+                        fetchedCnt++;
+                    }
+
+                    caching.get({token: 1}).onsuccess = fetched;
+                    caching.get({token: 2}).onsuccess = fetched;
+                    caching.get({token: 3}).onsuccess = fetched;
+
+                    wait(assert, function () { return fetchedCnt === 3; }, function () {
+                        Cache.maybeCleanup(90, 1);
+
+                        setTimeout(function () {
+                            var dummyClient = {
+                                get: function () {
+                                    var request = new Request();
+                                    request.error();
+                                    return request;
+                                }
+                            };
+                            var nonCaching = new Cache(dummyClient);
+                            nonCaching.get({token: 1}).onerror = done;
+                            nonCaching.get({token: 2}).onerror = done;
+                            nonCaching.get({token: 3}).onsuccess = done;
+                        }, 200);
+
+                    });
+                });
             });
 
         });
