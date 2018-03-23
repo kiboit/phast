@@ -299,10 +299,11 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
     }
 };
 
-phast.ResourceLoader.make = function (serviceUrl) {
-    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl);
-    var cached = new phast.ResourceLoader.IndexedDBResourceCache(client);
-    return cached;
+phast.ResourceLoader.IndexedDBResourceCache.close = function () {
+    if (phast.ResourceLoader.IndexedDBResourceCache.dbConnection) {
+        phast.ResourceLoader.IndexedDBResourceCache.dbConnection.close();
+        phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
+    }
 };
 
 phast.ResourceLoader.IndexedDBResourceCache.dbName = 'phastResourcesCache';
@@ -310,11 +311,11 @@ phast.ResourceLoader.IndexedDBResourceCache.storeName = 'resources';
 phast.ResourceLoader.IndexedDBResourceCache.dbVersion = 1;
 phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
 phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests = [];
-phast.ResourceLoader.IndexedDBResourceCache.close = function () {
-    if (phast.ResourceLoader.IndexedDBResourceCache.dbConnection) {
-        phast.ResourceLoader.IndexedDBResourceCache.dbConnection.close();
-        phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
-    }
+
+phast.ResourceLoader.make = function (serviceUrl) {
+    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl);
+    var cached = new phast.ResourceLoader.IndexedDBResourceCache(client);
+    return cached;
 };
 
 
