@@ -247,7 +247,7 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
     function storeInCache(params, responseText) {
         var dbRequest = getDB();
         dbRequest.onsuccess = function (db) {
-            var putRequest = db.transaction(Cache.storeName, 'readwrite')
+            db.transaction(Cache.storeName, 'readwrite')
                 .objectStore(Cache.storeName)
                 .put({token: params.token, content: responseText});
         };
@@ -314,8 +314,7 @@ phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests = [];
 
 phast.ResourceLoader.make = function (serviceUrl) {
     var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl);
-    var cached = new phast.ResourceLoader.IndexedDBResourceCache(client);
-    return cached;
+    return new phast.ResourceLoader.IndexedDBResourceCache(client);
 };
 
 
