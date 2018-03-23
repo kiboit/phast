@@ -118,6 +118,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             QUnit.test('Check calling onend on resolving', function (assert) {
                 assert.expect(0);
                 var done = assert.async();
+                request.onsuccess = function () {};
                 request.onend = function () {
                     done();
                 };
@@ -127,6 +128,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             QUnit.test('Check calling onend on error', function (assert) {
                 assert.expect(0);
                 var done = assert.async();
+                request.onerror = function() {};
                 request.onend = function () {
                     done();
                 };

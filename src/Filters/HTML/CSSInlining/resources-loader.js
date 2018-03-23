@@ -19,7 +19,7 @@ phast.ResourceLoader.Request = function () {
         set: function (func) {
             onsuccess = func;
             if (resolved && success) {
-                this.success(successText);
+                onsuccess(successText);
             }
         }
     });
@@ -33,7 +33,7 @@ phast.ResourceLoader.Request = function () {
         set: function (func) {
             onerror = func;
             if (resolved && !success) {
-                this.error();
+                onerror();
             }
         }
     });
@@ -47,7 +47,7 @@ phast.ResourceLoader.Request = function () {
         set: function (func) {
             onend = func;
             if (resolved) {
-                func();
+                onend();
             }
         }
     });
@@ -58,9 +58,9 @@ phast.ResourceLoader.Request = function () {
         success = true;
         if (!called && onsuccess) {
             onsuccess(responseText);
-            called = true;
         }
         end();
+        called = true;
     };
 
     this.error = function () {
@@ -68,9 +68,9 @@ phast.ResourceLoader.Request = function () {
         success = false;
         if (!called && onerror) {
             onerror();
-            called = true;
         }
         end();
+        called = true;
     };
 
     function end() {
