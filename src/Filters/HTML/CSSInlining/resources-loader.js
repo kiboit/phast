@@ -249,6 +249,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 storeRequest.onsuccess = function () {
                     if (storeRequest.result) {
                         request.success(storeRequest.result.content);
+                        storeInCache(storeRequest.result, storeRequest.result.content);
                     } else {
                         request.error();
                     }
