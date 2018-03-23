@@ -199,6 +199,12 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     var Request = phast.ResourceLoader.Request;
 
+    var dbName = 'phastResourcesCache';
+    var storeName = 'resources';
+    var dbVersion = 1;
+    var dbConnection = null;
+    var dbConnectionRequests = [];
+
     phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
         this.get = function (params) {
@@ -223,12 +229,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     var Cache = phast.ResourceLoader.IndexedDBResourceCache;
 
-    Cache.dbName = 'phastResourcesCache';
-    Cache.storeName = 'resources';
-    Cache.dbVersion = 1;
-    Cache.dbConnection = null;
-    Cache.dbConnectionRequests = [];
-
     function getFromCache(params) {
         var request = new Request();
         var dbRequest = getDB();
@@ -238,8 +238,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         dbRequest.onsuccess = function (db) {
             try {
                 var storeRequest = db
-                    .transaction(Cache.storeName)
-                    .objectStore(Cache.storeName)
+                    .transaction(storeName)
+                    .objectStore(storeName)
                     .get(params.token);
                 storeRequest.onerror = function () {
                     request.error();
@@ -263,8 +263,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         var dbRequest = getDB();
         try {
             dbRequest.onsuccess = function (db) {
-                db.transaction(Cache.storeName, 'readwrite')
-                    .objectStore(Cache.storeName)
+                db.transaction(storeName, 'readwrite')
+                    .objectStore(storeName)
                     .put({token: params.token, content: responseText});
             };
         } catch (e) {}
@@ -272,11 +272,11 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function getDB() {
         var request = new Request();
-        if (Cache.dbConnection) {
-            request.success(Cache.dbConnection);
+        if (dbConnection) {
+            request.success(dbConnection);
         } else {
-            Cache.dbConnectionRequests.push(request);
-            if (Cache.dbConnectionRequests.length === 1) {
+            dbConnectionRequests.push(request);
+            if (dbConnectionRequests.length === 1) {
                 openDB(true);
             }
         }
@@ -285,19 +285,16 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function openDB(createSchema) {
         var request = new Request();
-        Cache.dbConnectionRequests.push(request);
+        dbConnectionRequests.push(request);
 
-        var dbOpenRequest = indexedDB.open(
-            Cache.dbName,
-            Cache.dbVersion
-        );
+        var dbOpenRequest = indexedDB.open(dbName, dbVersion);
         if (createSchema) {
             dbOpenRequest.onupgradeneeded = function () {
                 createDB(dbOpenRequest.result);
             };
         }
         dbOpenRequest.onsuccess = function () {
-            Cache.dbConnection = dbOpenRequest.result;
+            dbConnection = dbOpenRequest.result;
             callStoredConnectionRequests(function (request) {
                 request.success(dbOpenRequest.result);
             });
@@ -306,30 +303,30 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
             callStoredConnectionRequests(function (request) {
                 request.error();
             });
-        }
+        };
         return request;
     }
 
     function callStoredConnectionRequests(cb) {
-        var requests = Cache.dbConnectionRequests;
+        var requests = dbConnectionRequests;
         while (requests.length) {
             cb(requests.shift());
         }
     }
 
     function createDB(db) {
-        db.createObjectStore(Cache.storeName, {keyPath: 'token'});
+        db.createObjectStore(storeName, {keyPath: 'token'});
     }
 
     function dropDB() {
         Cache.closeDB();
-        return indexedDB.deleteDatabase(Cache.dbName);
+        return indexedDB.deleteDatabase(dbName);
     }
 
     function closeDB() {
-        if (Cache.dbConnection) {
-            Cache.dbConnection.close();
-            Cache.dbConnection = null;
+        if (dbConnection) {
+            dbConnection.close();
+            dbConnection = null;
         }
     }
 
