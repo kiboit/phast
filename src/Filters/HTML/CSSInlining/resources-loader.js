@@ -210,27 +210,31 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
         return request;
     };
 
-    function getFromCache(params) {
+    function getFromCache(params, noRetry) {
         var request = new Request();
         var dbRequest = getDB();
         dbRequest.onerror = function () {
             request.error();
         };
         dbRequest.onsuccess = function (db) {
-            var storeRequest = db
-                .transaction(Cache.storeName)
-                .objectStore(Cache.storeName)
-                .get(params.token);
-            storeRequest.onerror = function () {
-                request.error();
-            };
-            storeRequest.onsuccess = function () {
-                if (storeRequest.result) {
-                    request.success(storeRequest.result.content);
-                } else {
+            try {
+                var storeRequest = db
+                    .transaction(Cache.storeName)
+                    .objectStore(Cache.storeName)
+                    .get(params.token);
+                storeRequest.onerror = function () {
                     request.error();
-                }
-            };
+                };
+                storeRequest.onsuccess = function () {
+                    if (storeRequest.result) {
+                        request.success(storeRequest.result.content);
+                    } else {
+                        request.error();
+                    }
+                };
+            } catch (e) {
+                request.error();
+            }
         };
         return request;
     }
@@ -246,11 +250,13 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
     function storeInCache(params, responseText) {
         var dbRequest = getDB();
-        dbRequest.onsuccess = function (db) {
-            db.transaction(Cache.storeName, 'readwrite')
-                .objectStore(Cache.storeName)
-                .put({token: params.token, content: responseText});
-        };
+        try {
+            dbRequest.onsuccess = function (db) {
+                db.transaction(Cache.storeName, 'readwrite')
+                    .objectStore(Cache.storeName)
+                    .put({token: params.token, content: responseText});
+            };
+        } catch (e) {}
     }
 
     function getDB() {

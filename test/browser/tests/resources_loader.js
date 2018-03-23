@@ -287,6 +287,21 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 })
             });
 
+            QUnit.test('Check handling missing store when retrieving from', function (assert) {
+                var done = assert.async();
+                cleanupDB(function () {
+                    var dbOpenRequest = indexedDB.open(Cache.dbName, Cache.dbVersion);
+                    dbOpenRequest.onsuccess = function () {
+                        dbOpenRequest.result.close();
+                        var request = new Cache(client).get(documentParams[0]);
+                        request.onsuccess = function (responseText) {
+                            assert.equal('text-1-contents', responseText);
+                            done();
+                        };
+                    };
+                });
+            });
+
             QUnit.todo('Check cache cleanup', function (assert) {
 
             });
