@@ -233,6 +233,7 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
                     }
                 };
             } catch (e) {
+                dropDB();
                 request.error();
             }
         };
@@ -302,6 +303,11 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
     function createDB(db) {
         db.createObjectStore(Cache.storeName, {keyPath: 'token'});
+    }
+
+    function dropDB() {
+        Cache.close();
+        indexedDB.deleteDatabase(Cache.dbName);
     }
 };
 
