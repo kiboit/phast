@@ -128,20 +128,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         makeRequest(pack);
     };
 
-    function packToQuery(pack) {
-        var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
-        var parts = [];
-        pack.forEach(function (item, idx) {
-            for (var key in item.params) {
-                if (key === 'isFaulty') {
-                    continue;
-                }
-                parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(item.params[key]));
-            }
-        });
-        return serviceUrl + glue + parts.join('&');
-    }
-
     function makeRequest(pack) {
         var query = packToQuery(pack);
         var errorHandler = function () {
@@ -160,6 +146,20 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         xhr.addEventListener('abort', errorHandler);
         xhr.addEventListener('load', successHandler);
         xhr.send();
+    }
+
+    function packToQuery(pack) {
+        var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
+        var parts = [];
+        pack.forEach(function (item, idx) {
+            for (var key in item.params) {
+                if (key === 'isFaulty') {
+                    continue;
+                }
+                parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(item.params[key]));
+            }
+        });
+        return serviceUrl + glue + parts.join('&');
     }
 
     function handleError(pack) {
@@ -195,22 +195,41 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
 };
 
-phast.ResourceLoader.IndexedDBResourceCache = function (client) {
+(function () {
 
     var Request = phast.ResourceLoader.Request;
-    var Cache = phast.ResourceLoader.IndexedDBResourceCache;
 
-    this.get = function (params) {
-        var request = new Request();
-        var cacheRequest = getFromCache(params);
-        cacheRequest.onsuccess = request.success;
-        cacheRequest.onerror = function () {
-            getFromClient(params, request);
+    phast.ResourceLoader.IndexedDBResourceCache = function (client) {
+
+        this.get = function (params) {
+            var request = new Request();
+            var cacheRequest = getFromCache(params);
+            cacheRequest.onsuccess = request.success;
+            cacheRequest.onerror = function () {
+                getFromClient(params, request);
+            };
+            return request;
         };
-        return request;
+
+        function getFromClient(params, request) {
+            var clientRequest = client.get(params);
+            clientRequest.onerror = request.error;
+            clientRequest.onsuccess = function (responseText) {
+                storeInCache(params, responseText);
+                request.success(responseText);
+            };
+        }
     };
 
-    function getFromCache(params, noRetry) {
+    var Cache = phast.ResourceLoader.IndexedDBResourceCache;
+
+    Cache.dbName = 'phastResourcesCache';
+    Cache.storeName = 'resources';
+    Cache.dbVersion = 1;
+    Cache.dbConnection = null;
+    Cache.dbConnectionRequests = [];
+
+    function getFromCache(params) {
         var request = new Request();
         var dbRequest = getDB();
         dbRequest.onerror = function () {
@@ -240,15 +259,6 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
         return request;
     }
 
-    function getFromClient(params, request) {
-        var clientRequest = client.get(params);
-        clientRequest.onerror = request.error;
-        clientRequest.onsuccess = function (responseText) {
-            storeInCache(params, responseText);
-            request.success(responseText);
-        };
-    }
-
     function storeInCache(params, responseText) {
         var dbRequest = getDB();
         try {
@@ -267,20 +277,25 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
         } else {
             Cache.dbConnectionRequests.push(request);
             if (Cache.dbConnectionRequests.length === 1) {
-                openDB();
+                openDB(true);
             }
         }
         return request;
     }
 
-    function openDB() {
+    function openDB(createSchema) {
+        var request = new Request();
+        Cache.dbConnectionRequests.push(request);
+
         var dbOpenRequest = indexedDB.open(
             Cache.dbName,
             Cache.dbVersion
         );
-        dbOpenRequest.onupgradeneeded = function () {
-            createDB(dbOpenRequest.result);
-        };
+        if (createSchema) {
+            dbOpenRequest.onupgradeneeded = function () {
+                createDB(dbOpenRequest.result);
+            };
+        }
         dbOpenRequest.onsuccess = function () {
             Cache.dbConnection = dbOpenRequest.result;
             callStoredConnectionRequests(function (request) {
@@ -292,6 +307,7 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
                 request.error();
             });
         }
+        return request;
     }
 
     function callStoredConnectionRequests(cb) {
@@ -306,23 +322,27 @@ phast.ResourceLoader.IndexedDBResourceCache = function (client) {
     }
 
     function dropDB() {
-        Cache.close();
-        indexedDB.deleteDatabase(Cache.dbName);
+        Cache.closeDB();
+        return indexedDB.deleteDatabase(Cache.dbName);
     }
-};
 
-phast.ResourceLoader.IndexedDBResourceCache.close = function () {
-    if (phast.ResourceLoader.IndexedDBResourceCache.dbConnection) {
-        phast.ResourceLoader.IndexedDBResourceCache.dbConnection.close();
-        phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
+    function closeDB() {
+        if (Cache.dbConnection) {
+            Cache.dbConnection.close();
+            Cache.dbConnection = null;
+        }
     }
-};
 
-phast.ResourceLoader.IndexedDBResourceCache.dbName = 'phastResourcesCache';
-phast.ResourceLoader.IndexedDBResourceCache.storeName = 'resources';
-phast.ResourceLoader.IndexedDBResourceCache.dbVersion = 1;
-phast.ResourceLoader.IndexedDBResourceCache.dbConnection = null;
-phast.ResourceLoader.IndexedDBResourceCache.dbConnectionRequests = [];
+
+    Cache.getDB = getDB;
+
+    Cache.opendDB = openDB;
+
+    Cache.closeDB = closeDB;
+
+    Cache.dropDB = dropDB;
+
+})();
 
 phast.ResourceLoader.make = function (serviceUrl) {
     var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl);

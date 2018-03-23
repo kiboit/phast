@@ -245,10 +245,8 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             var Cache = phast.ResourceLoader.IndexedDBResourceCache;
 
             function cleanupDB(cb) {
-                Cache.close();
-                var deleteRequest = indexedDB.deleteDatabase(
-                    phast.ResourceLoader.IndexedDBResourceCache.dbName
-                );
+                Cache.closeDB();
+                var deleteRequest = Cache.dropDB();
                 deleteRequest.onerror = cb;
                 deleteRequest.onsuccess = cb;
             }
@@ -290,9 +288,9 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             QUnit.test('Check handling missing store when retrieving from', function (assert) {
                 var done = assert.async();
                 cleanupDB(function () {
-                    var dbOpenRequest = indexedDB.open(Cache.dbName, Cache.dbVersion);
-                    dbOpenRequest.onsuccess = function () {
-                        dbOpenRequest.result.close();
+                    var dbOpenRequest = Cache.opendDB(false);
+                    dbOpenRequest.onsuccess = function (db) {
+                        db.close();
                         var request = new Cache(client).get(documentParams[0]);
                         request.onsuccess = function (responseText) {
                             assert.equal('text-1-contents', responseText);
