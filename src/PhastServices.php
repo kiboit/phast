@@ -2,10 +2,12 @@
 
 namespace Kibo\Phast;
 
+use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Services\Factory;
 use Kibo\Phast\Services\ServiceRequest;
@@ -69,13 +71,43 @@ class PhastServices {
 
         header_remove('Location');
         header_remove('Cache-Control');
-        http_response_code($response->getCode());
-        foreach ($response->getHeaders() as $name => $value) {
-            header($name . ': ' . $value);
+        self::output($response);
+
+    }
+
+    public static function output(Response $response, ObjectifiedFunctions $funcs = null) {
+        if (is_null($funcs)) {
+            $funcs = new ObjectifiedFunctions();
         }
 
-        echo $response->getContent();
+        $headers = $response->getHeaders();
+        $content = $response->getContent();
 
+        if (!isset($headers['ETag']) && !self::isIterable($content)) {
+            $headers['ETag'] = self::generateETag($response);
+        }
+        if (!self::isIterable($content)) {
+            $content = [$content];
+        }
+
+        $funcs->http_response_code($response->getCode());
+        foreach ($headers as $name => $value) {
+            $funcs->header($name . ': ' . $value);
+        }
+
+        $fp = fopen('php://output', 'wb');
+        foreach ($content as $part) {
+            fwrite($fp, $part);
+        }
+        fclose($fp);
+    }
+
+    private static function generateETag(Response $response) {
+        return '"' . md5(http_build_query($response->getHeaders()) . "\0" . $response->getContent()) . '"';
+    }
+
+    private static function isIterable($thing) {
+        return is_array($thing) || ($thing instanceof \Iterator) || ($thing instanceof \Generator);
     }
 
 }

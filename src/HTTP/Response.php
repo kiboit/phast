@@ -15,7 +15,7 @@ class Response {
     private $headers = [];
 
     /**
-     * @var string
+     * @var string|iterable
      */
     private $content;
 
@@ -37,13 +37,7 @@ class Response {
      * @return array
      */
     public function getHeaders() {
-        $headers = $this->headers;
-
-        if (!isset($headers['ETag'])) {
-            $headers['ETag'] = $this->generateETag();
-        }
-
-        return $headers;
+        return $this->headers;
     }
 
     /**
@@ -55,7 +49,7 @@ class Response {
     }
 
     /**
-     * @return string
+     * @return string|iterable
      */
     public function getContent() {
         return $this->content;
@@ -66,10 +60,6 @@ class Response {
      */
     public function setContent($content) {
         $this->content = $content;
-    }
-
-    private function generateETag() {
-        return '"' . md5(http_build_query($this->headers) . "\0" . $this->content) . '"';
     }
 
 }
