@@ -45,7 +45,8 @@ class ServiceTest extends PhastTestCase {
 
         $this->retriever->method('retrieve')
             ->willReturnCallback(function (URL $url) {
-                return $url->toString() . '-content' . chr(200);
+                $invalidUTFChar = chr(200);
+                return $url->toString() . '-content' . $invalidUTFChar;
             });
 
         $this->filter->method('apply')
