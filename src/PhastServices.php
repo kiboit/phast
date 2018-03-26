@@ -82,9 +82,6 @@ class PhastServices {
         $headers = $response->getHeaders();
         $content = $response->getContent();
 
-        if (!isset($headers['ETag']) && !self::isIterable($content)) {
-            $headers['ETag'] = self::generateETag($response);
-        }
         if (!self::isIterable($content)) {
             $content = [$content];
         }
@@ -100,6 +97,10 @@ class PhastServices {
             if ($zipping) {
                 $headers['Content-Encoding'] = 'gzip';
             }
+        }
+
+        if (!isset($headers['ETag'])) {
+            $headers['ETag'] = self::generateETag($headers, $content);
         }
 
         $funcs->http_response_code($response->getCode());
@@ -120,8 +121,10 @@ class PhastServices {
         return !isset ($headers['Content-Encoding']) || $headers['Content-Encoding'] == 'identity';
     }
 
-    private static function generateETag(Response $response) {
-        return '"' . md5(http_build_query($response->getHeaders()) . "\0" . $response->getContent()) . '"';
+    private static function generateETag(array $headers, $content) {
+        $headersPart = http_build_query($headers);
+        $contentPart = self::isIterable($content) ? uniqid() : $content;
+        return '"' . md5($headersPart . "\0" . $contentPart) . '"';
     }
 
     private static function isIterable($thing) {

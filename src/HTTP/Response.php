@@ -56,7 +56,7 @@ class Response {
     }
 
     /**
-     * @param string $content
+     * @param string|iterable $content
      */
     public function setContent($content) {
         $this->content = $content;

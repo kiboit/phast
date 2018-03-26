@@ -92,6 +92,14 @@ class PhastServicesTest extends PhastTestCase {
         $withContent = $this->getETagHeaderValue();
         $this->assertRegExp($pattern, $withContent);
         $this->assertNotEquals($withHeader, $withContent);
+
+        $streamableContent = [self::EXAMPLE_CONTENT];
+        $response->setContent($streamableContent);
+        $this->executeTest($response);
+        $withStreamable1 = $this->getETagHeaderValue();
+        $this->executeTest($response);
+        $withStreamable2 = $this->getETagHeaderValue();
+        $this->assertNotEquals($withStreamable1, $withStreamable2);
     }
 
     public function testStreamingContent() {
@@ -103,7 +111,6 @@ class PhastServicesTest extends PhastTestCase {
         $response = new Response();
         $response->setContent($stream());
         $this->executeTest($response);
-        $this->assertFalse($this->getETagHeaderValue());
         $this->assertEquals(
             str_replace(' ', '', self::EXAMPLE_CONTENT),
             $this->responseContent
