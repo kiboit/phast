@@ -148,6 +148,15 @@ class PhastServicesTest extends PhastTestCase {
         $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
     }
 
+    public function testNotZippingWhenImage() {
+        $response = new Response();
+        $response->setHeader('Content-Type', 'image/png');
+        $response->setContent(self::EXAMPLE_CONTENT);
+        $this->executeTest($response);
+        $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
+        $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
+    }
+
     private function executeTest(Response $response) {
         $this->responseCode = null;
         $this->responseHeaders = [];

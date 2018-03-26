@@ -118,6 +118,9 @@ class PhastServices {
             return false;
         }
         $headers = $response->getHeaders();
+        if (isset ($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') === 0) {
+            return false;
+        }
         return !isset ($headers['Content-Encoding']) || $headers['Content-Encoding'] == 'identity';
     }
 
