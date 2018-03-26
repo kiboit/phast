@@ -47,16 +47,24 @@ class Service {
      * @return Response
      */
     public function serve(ServiceRequest $request) {
-        $results = [];
+        $response = new Response();
+        $response->setHeader('Content-Type', 'application/json');
+        $response->setContent($this->streamResponse($request));
+        return $response;
+    }
+
+    private function streamResponse(ServiceRequest $request) {
+        yield '[';
+        $firstRow = true;
         foreach ($this->getParams($request) as $key => $params) {
             if (!isset ($params['src'])) {
                 $this->logger()->error('No src found for set {key}', ['key' => $key]);
-                $results[$key] = ['status' => 404];
+                yield $this->generateJSONRow(['status' => 404], $firstRow);
                 continue;
             }
             if (!$this->verifyParams($params)) {
                 $this->logger()->error('Params verification failed for set {key}', ['key' => $key]);
-                $results[$key] = ['status' => 401];
+                yield $this->generateJSONRow(['status' => 401], $firstRow);
                 continue;
             }
             $resource = Resource::makeWithRetriever(
@@ -66,13 +74,16 @@ class Service {
             try {
                 $this->logger()->info('Applying for set {key}', ['key' => $key]);
                 $filtered = $this->filter->apply($resource, $params);
-                $results[$key] = ['status' => 200, 'content' => $this->cleanUTF8($filtered->getContent())];
+                yield $this->generateJSONRow([
+                    'status' => 200,
+                    'content' => $this->cleanUTF8($filtered->getContent())
+                ], $firstRow);
             } catch (ItemNotFoundException $e) {
                 $this->logger()->error(
                     'Could not find {url} for set {key}',
                     ['url' => $params['src'], 'key' => $key]
                 );
-                $results[$key] = ['status' => 404];
+                yield $this->generateJSONRow(['status' => 404], $firstRow);
             } catch (\Exception $e) {
                 $this->logger()->critical(
                     'Unhandled exception for set {key}: {type} Message: {message} File: {file} Line: {line}',
@@ -84,13 +95,10 @@ class Service {
                         'line' => $e->getLine()
                     ]
                 );
-                $results[$key] = ['status' => 500];
+                yield $this->generateJSONRow(['status' => 500], $firstRow);
             }
         }
-        $response = new Response();
-        $response->setHeader('Content-Type', 'application/json');
-        $response->setContent(json_encode($results));
-        return $response;
+        yield ']';
     }
 
     private function getParams(ServiceRequest $request) {
@@ -130,6 +138,16 @@ class Service {
             },
             $buffer
         );
+    }
+
+    private function generateJSONRow(array $content, &$firstRow) {
+        if (!$firstRow) {
+            $prepend = ',';
+        } else {
+            $prepend = '';
+            $firstRow = false;
+        }
+        return $prepend . json_encode($content);
     }
 
 }
