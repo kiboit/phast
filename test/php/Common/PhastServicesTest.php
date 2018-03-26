@@ -32,6 +32,11 @@ class PhastServicesTest extends PhastTestCase {
     private $request;
 
     /**
+     * @var Response
+     */
+    private $response;
+
+    /**
      * @var ObjectifiedFunctions
      */
     private $functions;
@@ -40,6 +45,8 @@ class PhastServicesTest extends PhastTestCase {
         parent::setUp();
 
         $this->request = Request::fromArray([], ['HTTP_ACCEPT_ENCODING' => 'gzip, deflate']);
+        $this->response = new Response();
+        $this->response->setContent(self::EXAMPLE_CONTENT);
         $this->functions = new ObjectifiedFunctions();
         $this->functions->http_response_code = function ($code) {
             $this->responseCode = $code;
@@ -51,53 +58,51 @@ class PhastServicesTest extends PhastTestCase {
 
 
     public function testOutputString() {
-        $response = new Response();
-        $response->setCode(201);
-        $response->setHeader('X-Test-running', 'it-is-running');
-        $response->setHeader('X-Test-running-2', 'it-is-still-running');
-        $response->setContent(self::EXAMPLE_CONTENT);
+        $this->response->setCode(201);
+        $this->response->setHeader('X-Test-running', 'it-is-running');
+        $this->response->setHeader('X-Test-running-2', 'it-is-still-running');
 
-        $this->executeTest($response);
+        $this->executeTest();
 
         $this->assertEquals(201, $this->responseCode);
-
         $this->assertContains('X-Test-running: it-is-running', $this->responseHeaders);
         $this->assertContains('X-Test-running-2: it-is-still-running', $this->responseHeaders);
         $this->assertNotEmpty($this->getETagHeaderValue());
-        if (!function_exists('gzencode')) {
+        if (function_exists('gzencode')) {
             $this->assertContains('Content-Encoding: gzip', $this->responseHeaders);
+        } else {
+            $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
         }
 
         $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
     }
 
     public function testETagGeneration() {
-        $response = new Response();
 
         $pattern = '/^"[a-f0-9]{32}"$/';
 
-        $this->executeTest($response);
+        $this->executeTest();
 
         $empty = $this->getETagHeaderValue();
         $this->assertRegExp($pattern, $empty);
 
-        $response->setHeader('Hello', 'World');
-        $this->executeTest($response);
+        $this->response->setHeader('Hello', 'World');
+        $this->executeTest();
         $withHeader = $this->getETagHeaderValue();
         $this->assertRegExp($pattern, $withHeader);
         $this->assertNotEquals($empty, $withHeader);
 
-        $response->setContent('Hey!');
-        $this->executeTest($response);
+        $this->response->setContent('Hey!');
+        $this->executeTest();
         $withContent = $this->getETagHeaderValue();
         $this->assertRegExp($pattern, $withContent);
         $this->assertNotEquals($withHeader, $withContent);
 
         $streamableContent = [self::EXAMPLE_CONTENT];
-        $response->setContent($streamableContent);
-        $this->executeTest($response);
+        $this->response->setContent($streamableContent);
+        $this->executeTest();
         $withStreamable1 = $this->getETagHeaderValue();
-        $this->executeTest($response);
+        $this->executeTest();
         $withStreamable2 = $this->getETagHeaderValue();
         $this->assertNotEquals($withStreamable1, $withStreamable2);
     }
@@ -108,9 +113,8 @@ class PhastServicesTest extends PhastTestCase {
                 yield $value;
             }
         };
-        $response = new Response();
-        $response->setContent($stream());
-        $this->executeTest($response);
+        $this->response->setContent($stream());
+        $this->executeTest();
         $this->assertEquals(
             str_replace(' ', '', self::EXAMPLE_CONTENT),
             $this->responseContent
@@ -121,10 +125,9 @@ class PhastServicesTest extends PhastTestCase {
         if (!function_exists('gzencode')) {
             $this->markTestSkipped('gzencode() does not exist');
         }
-        $response = new Response();
-        $response->setContent(gzencode(self::EXAMPLE_CONTENT));
-        $response->setHeader('Content-Encoding', 'gzip');
-        $this->executeTest($response);
+        $this->response->setContent(gzencode(self::EXAMPLE_CONTENT));
+        $this->response->setHeader('Content-Encoding', 'gzip');
+        $this->executeTest();
         $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
     }
 
@@ -132,37 +135,33 @@ class PhastServicesTest extends PhastTestCase {
         $this->functions->stream_filter_append = function () {
             return false;
         };
-        $response = new Response();
-        $response->setContent(self::EXAMPLE_CONTENT);
-        $this->executeTest($response);
-        $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
-        $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
+        $this->executeTest();
+        $this->assertNotZipped();
     }
 
     public function testNotZippingWhenNotRequested() {
         $this->request = Request::fromArray();
-        $response = new Response();
-        $response->setContent(self::EXAMPLE_CONTENT);
-        $this->executeTest($response);
-        $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
-        $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
+        $this->executeTest();
+        $this->assertNotZipped();
     }
 
     public function testNotZippingWhenImage() {
-        $response = new Response();
-        $response->setHeader('Content-Type', 'image/png');
-        $response->setContent(self::EXAMPLE_CONTENT);
-        $this->executeTest($response);
+        $this->response->setHeader('Content-Type', 'image/png');
+        $this->executeTest();
+        $this->assertNotZipped();
+    }
+
+    private function assertNotZipped() {
         $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
         $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
     }
 
-    private function executeTest(Response $response) {
+    private function executeTest() {
         $this->responseCode = null;
         $this->responseHeaders = [];
         $this->responseContent = null;
         ob_start();
-        PhastServices::output($this->request, $response, $this->functions);
+        PhastServices::output($this->request, $this->response, $this->functions);
         if (in_array('Content-Encoding: gzip', $this->responseHeaders)) {
             $this->responseContent = gzdecode(ob_get_contents());
         } else {
