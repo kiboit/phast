@@ -352,7 +352,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
 
         function checkFetchingFiles(assert, client, done) {
             done = done || assert.async(documentParams.length);
-            assert.expect(3);
+            assert.expect(documentParams.length);
             documentParams.forEach(function (params, idx) {
                 var request = client.get(params);
                 request.onsuccess = function (responseText) {
