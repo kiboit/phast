@@ -11,7 +11,6 @@ phast.ResourceLoader.Request = function () {
         called = false;
 
     Object.defineProperty(this, 'onsuccess', {
-
         get: function () {
             return onsuccess;
         },
@@ -25,7 +24,6 @@ phast.ResourceLoader.Request = function () {
     });
 
     Object.defineProperty(this, 'onerror', {
-
         get: function () {
             return onerror;
         },
@@ -39,7 +37,6 @@ phast.ResourceLoader.Request = function () {
     });
 
     Object.defineProperty(this, 'onend', {
-
         get: function () {
             return onend;
         },
@@ -49,6 +46,12 @@ phast.ResourceLoader.Request = function () {
             if (resolved) {
                 onend();
             }
+        }
+    });
+
+    Object.defineProperty(this, 'resolved', {
+        get: function () {
+            return resolved;
         }
     });
 
@@ -244,6 +247,12 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function getFromCache(params) {
         var request = new Request();
+        setTimeout(function () {
+            if (!request.resolved) {
+                console.error(logPrefix, "getFromCache timed out (that should never happen)");
+                request.error();
+            }
+        }, 250);
         var dbRequest = getDB();
         dbRequest.onerror = function (e) {
             console.error(logPrefix, 'Error while opening database:', e);
@@ -269,12 +278,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 };
             } catch (e) {
                 console.error(logPrefix, 'Exception while trying to read from cache:', e);
-                var drop = dropDB();
-                drop.onsuccess = callError;
-                drop.onerror = callError;
-                function callError() {
-                    request.error();
-                }
+                setTimeout(request.error);
+                dropDB();
             }
         };
         return request;
