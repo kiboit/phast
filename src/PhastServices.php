@@ -15,9 +15,8 @@ use Kibo\Phast\Services\ServiceRequest;
 class PhastServices {
 
     public static function serve(callable $getConfig) {
-        $serviceRequest = ServiceRequest::fromHTTPRequest(
-            Request::fromGlobals()
-        );
+        $httpRequest = Request::fromGlobals();
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $serviceParams = $serviceRequest->getParams();
 
         if (defined('PHAST_SERVICE')) {
@@ -71,11 +70,11 @@ class PhastServices {
 
         header_remove('Location');
         header_remove('Cache-Control');
-        self::output($response);
+        self::output($httpRequest, $response);
 
     }
 
-    public static function output(Response $response, ObjectifiedFunctions $funcs = null) {
+    public static function output(Request $request, Response $response, ObjectifiedFunctions $funcs = null) {
         if (is_null($funcs)) {
             $funcs = new ObjectifiedFunctions();
         }
@@ -90,16 +89,35 @@ class PhastServices {
             $content = [$content];
         }
 
+        $fp = fopen('php://output', 'wb');
+        if (self::shouldZip($request, $response)) {
+            $zipping = $funcs->stream_filter_append(
+                $fp,
+                'zlib.deflate',
+                STREAM_FILTER_WRITE,
+                ['level' => 9, 'window' => 31]
+            );
+            if ($zipping) {
+                $headers['Content-Encoding'] = 'gzip';
+            }
+        }
+
         $funcs->http_response_code($response->getCode());
         foreach ($headers as $name => $value) {
             $funcs->header($name . ': ' . $value);
         }
-
-        $fp = fopen('php://output', 'wb');
         foreach ($content as $part) {
             fwrite($fp, $part);
         }
         fclose($fp);
+    }
+
+    private static function shouldZip(Request $request, Response $response) {
+        if (strpos($request->getHeader('Accept-Encoding'), 'gzip') === false) {
+            return false;
+        }
+        $headers = $response->getHeaders();
+        return !isset ($headers['Content-Encoding']) || $headers['Content-Encoding'] == 'identity';
     }
 
     private static function generateETag(Response $response) {

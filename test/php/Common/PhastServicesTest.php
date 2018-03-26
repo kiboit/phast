@@ -4,6 +4,7 @@ namespace Kibo\Phast;
 
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\Response;
 
 class PhastServicesTest extends PhastTestCase {
@@ -26,6 +27,11 @@ class PhastServicesTest extends PhastTestCase {
     private $responseContent;
 
     /**
+     * @var Request
+     */
+    private $request;
+
+    /**
      * @var ObjectifiedFunctions
      */
     private $functions;
@@ -33,6 +39,7 @@ class PhastServicesTest extends PhastTestCase {
     public function setUp() {
         parent::setUp();
 
+        $this->request = Request::fromArray([], ['HTTP_ACCEPT_ENCODING' => 'gzip, deflate']);
         $this->functions = new ObjectifiedFunctions();
         $this->functions->http_response_code = function ($code) {
             $this->responseCode = $code;
@@ -57,6 +64,9 @@ class PhastServicesTest extends PhastTestCase {
         $this->assertContains('X-Test-running: it-is-running', $this->responseHeaders);
         $this->assertContains('X-Test-running-2: it-is-still-running', $this->responseHeaders);
         $this->assertNotEmpty($this->getETagHeaderValue());
+        if (!function_exists('gzencode')) {
+            $this->assertContains('Content-Encoding: gzip', $this->responseHeaders);
+        }
 
         $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
     }
@@ -94,7 +104,41 @@ class PhastServicesTest extends PhastTestCase {
         $response->setContent($stream());
         $this->executeTest($response);
         $this->assertFalse($this->getETagHeaderValue());
-        $this->assertEquals(str_replace(' ', '', self::EXAMPLE_CONTENT), $this->responseContent);
+        $this->assertEquals(
+            str_replace(' ', '', self::EXAMPLE_CONTENT),
+            $this->responseContent
+        );
+    }
+
+    public function testNotZippingAlreadyZipped() {
+        if (!function_exists('gzencode')) {
+            $this->markTestSkipped('gzencode() does not exist');
+        }
+        $response = new Response();
+        $response->setContent(gzencode(self::EXAMPLE_CONTENT));
+        $response->setHeader('Content-Encoding', 'gzip');
+        $this->executeTest($response);
+        $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
+    }
+
+    public function testNotSettingContentEncodingIfNoGzipLib() {
+        $this->functions->stream_filter_append = function () {
+            return false;
+        };
+        $response = new Response();
+        $response->setContent(self::EXAMPLE_CONTENT);
+        $this->executeTest($response);
+        $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
+        $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
+    }
+
+    public function testNotZippingWhenNotRequested() {
+        $this->request = Request::fromArray();
+        $response = new Response();
+        $response->setContent(self::EXAMPLE_CONTENT);
+        $this->executeTest($response);
+        $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
+        $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
     }
 
     private function executeTest(Response $response) {
@@ -102,8 +146,12 @@ class PhastServicesTest extends PhastTestCase {
         $this->responseHeaders = [];
         $this->responseContent = null;
         ob_start();
-        PhastServices::output($response, $this->functions);
-        $this->responseContent = ob_get_contents();
+        PhastServices::output($this->request, $response, $this->functions);
+        if (in_array('Content-Encoding: gzip', $this->responseHeaders)) {
+            $this->responseContent = gzdecode(ob_get_contents());
+        } else {
+            $this->responseContent = ob_get_contents();
+        }
         ob_end_clean();
     }
 
