@@ -117,8 +117,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
 (function () {
 
-    var Request = phast.ResourceLoader.Request;
-
     var logPrefix = "[Phast] Resource loader:";
     var storeName = 'resources';
     var dbVersion = 1;
