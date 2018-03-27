@@ -254,7 +254,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             });
         });
 
-        QUnit.skip('IndexedDBResourceCache', function (hooks) {
+        QUnit.module('IndexedDBResourceCache', function (hooks) {
 
             var Cache = phast.ResourceLoader.IndexedDBResourceCache;
             var Request = phast.ResourceLoader.Request;
@@ -287,9 +287,9 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                     var filesFetched = 0;
                     documentParams.forEach(function (params) {
                         var request = cache.get(params);
-                        request.onsuccess = function () {
+                        request.then(function () {
                             filesFetched++;
-                        };
+                        });
                     });
                     wait(
                         assert,
@@ -313,14 +313,14 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 var done = assert.async();
                 cleanupDB(function () {
                     var dbOpenRequest = Cache.openDB(false);
-                    dbOpenRequest.onsuccess = function (db) {
+                    dbOpenRequest.then(function (db) {
                         db.close();
                         var request = new Cache(client).get(documentParams[0]);
-                        request.onsuccess = function (responseText) {
+                        request.then(function (responseText) {
                             assert.equal('text-1-contents', responseText);
                             done();
-                        };
-                    };
+                        });
+                    });
                 });
             });
 
@@ -332,11 +332,13 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                     var slowClient = {
                         multiplier: 1,
                         get: function (params) {
-                            var request = new Request();
-                            setTimeout(function () {
-                                request.success('Token: ' + params.token);
-                            }, this.multiplier++ * 100);
-                            return request;
+                            var _this = this;
+                            return new Promise(function (resolve) {
+                                setTimeout(function () {
+                                    console.log('Token:', params.token);
+                                    resolve('Token: ' + params.token);
+                                }, _this.multiplier++ * 100);
+                            })
                         }
                     };
                     var caching = new Cache(slowClient);
@@ -346,9 +348,9 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                         fetchedCnt++;
                     }
 
-                    caching.get({token: 1}).onsuccess = fetched;
-                    caching.get({token: 2}).onsuccess = fetched;
-                    caching.get({token: 3}).onsuccess = fetched;
+                    caching.get({token: 1}).then(fetched);
+                    caching.get({token: 2}).then(fetched);
+                    caching.get({token: 3}).then(fetched);
 
                     wait(assert, function () { return fetchedCnt === 3; }, function () {
                         Cache.maybeCleanup(90, 1);
@@ -356,15 +358,13 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                         setTimeout(function () {
                             var dummyClient = {
                                 get: function () {
-                                    var request = new Request();
-                                    request.error();
-                                    return request;
+                                    return Promise.reject();
                                 }
                             };
                             var nonCaching = new Cache(dummyClient);
-                            nonCaching.get({token: 1}).onerror = done;
-                            nonCaching.get({token: 2}).onerror = done;
-                            nonCaching.get({token: 3}).onsuccess = done;
+                            nonCaching.get({token: 1}).catch(done);
+                            nonCaching.get({token: 2}).catch(done);
+                            nonCaching.get({token: 3}).then(done);
                         }, 200);
 
                     });

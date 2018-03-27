@@ -212,22 +212,21 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
         this.get = function (params) {
-            var request = new Request();
-            var cacheRequest = getFromCache(params);
-            cacheRequest.onsuccess = request.success;
-            cacheRequest.onerror = function () {
-                getFromClient(params, request);
-            };
-            return request;
+            return new Promise(function (resolve, reject) {
+                var cacheRequest = getFromCache(params);
+                cacheRequest.then(resolve);
+                cacheRequest.catch(function () {
+                    getFromClient(params).then(resolve, reject)
+                });
+            });
         };
 
-        function getFromClient(params, request) {
+        function getFromClient(params) {
             var clientRequest = client.get(params);
-            clientRequest.onerror = request.error;
-            clientRequest.onsuccess = function (responseText) {
+            return clientRequest.then(function (responseText) {
                 storeInCache(params, responseText);
-                request.success(responseText);
-            };
+                return responseText;
+            });
         }
 
         maybeCleanup(itemTTL, Cache.cleanupProbability);
@@ -246,49 +245,47 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     Cache.dbName = 'phastResourcesCache';
 
     function getFromCache(params) {
-        var request = new Request();
-        setTimeout(function () {
-            if (!request.resolved) {
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
                 console.error(logPrefix, "getFromCache timed out (that should never happen)");
-                request.error();
-            }
-        }, 250);
-        var dbRequest = getDB();
-        dbRequest.onerror = function (e) {
-            console.error(logPrefix, 'Error while opening database:', e);
-            request.error();
-        };
-        dbRequest.onsuccess = function (db) {
-            try {
-                var storeRequest = db
-                    .transaction(storeName)
-                    .objectStore(storeName)
-                    .get(params.token);
-                storeRequest.onerror = function (e) {
-                    console.error(logPrefix, 'Error while trying to read from cache:', e);
-                    request.error();
-                };
-                storeRequest.onsuccess = function () {
-                    if (storeRequest.result) {
-                        request.success(storeRequest.result.content);
-                        storeInCache(storeRequest.result, storeRequest.result.content);
-                    } else {
-                        request.error();
-                    }
-                };
-            } catch (e) {
-                console.error(logPrefix, 'Exception while trying to read from cache:', e);
-                setTimeout(request.error);
-                dropDB();
-            }
-        };
-        return request;
+                reject();
+            }, 250);
+            var dbRequest = getDB();
+            dbRequest.catch(function (e) {
+                console.error(logPrefix, 'Error while opening database:', e);
+                reject();
+            });
+            dbRequest.then(function (db) {
+                try {
+                    var storeRequest = db
+                        .transaction(storeName)
+                        .objectStore(storeName)
+                        .get(params.token);
+                    storeRequest.onerror = function (e) {
+                        console.error(logPrefix, 'Error while trying to read from cache:', e);
+                        reject();
+                    };
+                    storeRequest.onsuccess = function () {
+                        if (storeRequest.result) {
+                            resolve(storeRequest.result.content);
+                            storeInCache(storeRequest.result, storeRequest.result.content);
+                        } else {
+                            console.log('Cache miss');
+                            reject();
+                        }
+                    };
+                } catch (e) {
+                    console.error(logPrefix, 'Exception while trying to read from cache:', e);
+                    setTimeout(reject);
+                    dropDB();
+                }
+            });
+        });
     }
 
     function storeInCache(params, responseText) {
-        var dbRequest = getDB();
-        try {
-            dbRequest.onsuccess = function (db) {
+        getDB().then(function (db) {
+            try {
                 db.transaction(storeName, 'readwrite')
                     .objectStore(storeName)
                     .put({
@@ -296,48 +293,49 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                         content: responseText,
                         lastUsed: Date.now()
                     });
-            };
-        } catch (e) {
-            console.error(logPrefix, 'Exception while trying to write to cache:', e);
-        }
+            } catch (e) {
+                console.error(logPrefix, 'Exception while trying to write to cache:', e);
+            }
+        });
     }
 
+    var dbPromise;
     function getDB() {
-        var request = new Request();
-        if (dbConnection) {
-            request.success(dbConnection);
-        } else {
-            dbConnectionRequests.push(request);
-            if (dbConnectionRequests.length === 1) {
-                openDB(true);
-            }
+        if (!dbPromise) {
+            dbPromise = openDB(true);
         }
-        return request;
+        return dbPromise;
     }
 
     function openDB(createSchema) {
-        var request = new Request();
-        dbConnectionRequests.push(request);
+        return new Promise(function (resolve, reject) {
+            //dbConnectionRequests.push(request);
 
-        var dbOpenRequest = indexedDB.open(Cache.dbName, dbVersion);
-        if (createSchema) {
-            dbOpenRequest.onupgradeneeded = function () {
-                createDB(dbOpenRequest.result);
+            if (dbConnection) {
+                resolve(dbConnection);
+            }
+
+            var dbOpenRequest = indexedDB.open(Cache.dbName, dbVersion);
+            if (createSchema) {
+                dbOpenRequest.onupgradeneeded = function () {
+                    createDB(dbOpenRequest.result);
+                };
+            }
+            dbOpenRequest.onsuccess = function () {
+                dbConnection = dbOpenRequest.result;
+                resolve(dbConnection);
+                // callStoredConnectionRequests(function (request) {
+                //     request.success(dbOpenRequest.result);
+                // });
             };
-        }
-        dbOpenRequest.onsuccess = function () {
-            dbConnection = dbOpenRequest.result;
-            callStoredConnectionRequests(function (request) {
-                request.success(dbOpenRequest.result);
-            });
-        };
-        dbOpenRequest.onerror = function () {
-            console.error(logPrefix, "Error while opening database:", dbOpenRequest.error);
-            callStoredConnectionRequests(function (request) {
-                request.error();
-            });
-        };
-        return request;
+            dbOpenRequest.onerror = function () {
+                console.error(logPrefix, "Error while opening database:", dbOpenRequest.error);
+                reject();
+                // callStoredConnectionRequests(function (request) {
+                //     request.error();
+                // });
+            };
+        });
     }
 
     function callStoredConnectionRequests(cb) {
@@ -361,13 +359,14 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         if (dbConnection) {
             dbConnection.close();
             dbConnection = null;
+            dbPromise = null;
         }
     }
 
     function cleanUp(itemTTL) {
         console.debug(logPrefix, "Cleaning up...");
         var maxTime = Date.now() - itemTTL;
-        getDB().onsuccess = function (db) {
+        getDB().then(function (db) {
             var store = db.transaction(storeName, 'readwrite').objectStore(storeName);
             var cursorRequest = store.index('lastUsed')
                 .openCursor(IDBKeyRange.upperBound(maxTime, true));
@@ -378,7 +377,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                     cursor.continue();
                 }
             };
-        };
+        });
     }
 
     function maybeCleanup(itemTTL, cleanupProbability) {
