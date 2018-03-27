@@ -241,16 +241,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function getFromCache(params) {
         return new Promise(function (resolve, reject) {
-            setTimeout(function () {
-                console.error(logPrefix, "getFromCache timed out (that should never happen)");
-                reject();
-            }, 250);
-            var dbRequest = getDB();
-            dbRequest.catch(function (e) {
-                console.error(logPrefix, 'Error while opening database:', e);
-                reject();
-            });
-            dbRequest.then(function (db) {
+            setTimeout(reject, 250);
+            getDB().then(function (db) {
                 try {
                     var storeRequest = db
                         .transaction(storeName)
@@ -274,6 +266,9 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                     setTimeout(reject);
                     dropDB();
                 }
+            }).catch(function (e) {
+                console.error(logPrefix, 'Error while opening database:', e);
+                reject();
             });
         });
     }
