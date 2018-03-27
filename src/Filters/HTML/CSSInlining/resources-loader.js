@@ -206,24 +206,19 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     var storeName = 'resources';
     var dbVersion = 1;
     var dbConnection = null;
-    var dbConnectionRequests = [];
+    var dbPromise = null;
     var itemTTL = 7 * 86400000;
 
     phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
         this.get = function (params) {
-            return new Promise(function (resolve, reject) {
-                var cacheRequest = getFromCache(params);
-                cacheRequest.then(resolve);
-                cacheRequest.catch(function () {
-                    getFromClient(params).then(resolve, reject)
-                });
+            return getFromCache(params).catch(function () {
+                return getFromClient(params);
             });
         };
 
         function getFromClient(params) {
-            var clientRequest = client.get(params);
-            return clientRequest.then(function (responseText) {
+            return client.get(params).then(function (responseText) {
                 storeInCache(params, responseText);
                 return responseText;
             });
@@ -285,21 +280,18 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function storeInCache(params, responseText) {
         getDB().then(function (db) {
-            try {
-                db.transaction(storeName, 'readwrite')
-                    .objectStore(storeName)
-                    .put({
-                        token: params.token,
-                        content: responseText,
-                        lastUsed: Date.now()
-                    });
-            } catch (e) {
-                console.error(logPrefix, 'Exception while trying to write to cache:', e);
-            }
+            db.transaction(storeName, 'readwrite')
+                .objectStore(storeName)
+                .put({
+                    token: params.token,
+                    content: responseText,
+                    lastUsed: Date.now()
+                });
+        }).catch(function (e) {
+            console.error(logPrefix, 'Exception while trying to write to cache:', e);
         });
     }
 
-    var dbPromise;
     function getDB() {
         if (!dbPromise) {
             dbPromise = openDB(true);
@@ -309,7 +301,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     function openDB(createSchema) {
         return new Promise(function (resolve, reject) {
-            //dbConnectionRequests.push(request);
 
             if (dbConnection) {
                 resolve(dbConnection);
@@ -324,25 +315,12 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
             dbOpenRequest.onsuccess = function () {
                 dbConnection = dbOpenRequest.result;
                 resolve(dbConnection);
-                // callStoredConnectionRequests(function (request) {
-                //     request.success(dbOpenRequest.result);
-                // });
             };
             dbOpenRequest.onerror = function () {
                 console.error(logPrefix, "Error while opening database:", dbOpenRequest.error);
                 reject();
-                // callStoredConnectionRequests(function (request) {
-                //     request.error();
-                // });
             };
         });
-    }
-
-    function callStoredConnectionRequests(cb) {
-        var requests = dbConnectionRequests;
-        while (requests.length) {
-            cb(requests.shift());
-        }
     }
 
     function createDB(db) {
