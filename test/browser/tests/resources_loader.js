@@ -264,6 +264,10 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 Cache.dbName = 'test' + Date.now();
             });
 
+            hooks.afterEach(function () {
+                indexedDB.deleteDatabase(Cache.dbName);
+            });
+
             QUnit.test('Check fetching files with client', function (assert) {
                 assert.timeout(2000);
                 var done = assert.async(documentParams.length);
