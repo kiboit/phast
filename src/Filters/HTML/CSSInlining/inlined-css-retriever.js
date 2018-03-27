@@ -17,7 +17,7 @@ phast.forEachSelectedElement('style[data-phast-params]', function (style) {
 
 function retrieveFromBundler(textParams, done, always) {
     var params = phast.ResourceLoader.RequestParams.fromString(textParams);
-    var request = resourceLoader.get(params);
-    request.onsuccess = done;
-    request.onend = always;
+    resourceLoader.get(params)
+        .then(done)
+        .finally(always);
 }
