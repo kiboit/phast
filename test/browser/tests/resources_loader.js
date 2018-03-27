@@ -257,13 +257,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
         QUnit.module('IndexedDBResourceCache', function (hooks) {
 
             var Cache = phast.ResourceLoader.IndexedDBResourceCache;
-            var Request = phast.ResourceLoader.Request;
-
             Cache.cleanupProbability = 0;
-
-            function cleanupDB(cb) {
-                cb();
-            }
 
             hooks.beforeEach(function () {
                 Cache.closeDB();
@@ -273,101 +267,84 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             QUnit.test('Check fetching files with client', function (assert) {
                 assert.timeout(2000);
                 var done = assert.async(documentParams.length);
-                cleanupDB(function () {
-                    var cache = new Cache(client);
-                    checkFetchingFiles(assert, cache, done);
-                });
+                var cache = new Cache(client);
+                checkFetchingFiles(assert, cache, done);
             });
 
             QUnit.test('Check retrieval from cache', function (assert) {
                 assert.timeout(2000);
                 var done = assert.async(documentParams.length);
-                cleanupDB(function () {
-                    var cache = new Cache(client);
-                    var filesFetched = 0;
-                    documentParams.forEach(function (params) {
-                        var request = cache.get(params);
-                        request.then(function () {
-                            filesFetched++;
-                        });
+                var cache = new Cache(client);
+                var filesFetched = 0;
+                documentParams.map(function (params) {
+                    var request = cache.get(params);
+                    request.then(function () {
+                        filesFetched++;
                     });
-                    wait(
-                        assert,
-                        function () {
-                            return filesFetched === documentParams.length;
-                        },
-                        function () {
-                            var cache = new Cache({
-                                get: function () {
-                                    throw 'Calling client when should have fetched from cache';
-                                }
-                            });
-                            checkFetchingFiles(assert, cache, done);
-                        }
-                    );
-                })
+                });
+                wait(
+                    assert,
+                    function () {
+                        return filesFetched === documentParams.length;
+                    },
+                    function () {
+                        var cache = new Cache({
+                            get: function () {
+                                throw 'Calling client when should have fetched from cache';
+                            }
+                        });
+                        checkFetchingFiles(assert, cache, done);
+                    }
+                );
             });
 
             QUnit.test('Check handling missing store when retrieving from', function (assert) {
                 assert.timeout(2000);
                 var done = assert.async();
-                cleanupDB(function () {
-                    var dbOpenRequest = Cache.openDB(false);
-                    dbOpenRequest.then(function (db) {
-                        db.close();
-                        var request = new Cache(client).get(documentParams[0]);
-                        request.then(function (responseText) {
-                            assert.equal('text-1-contents', responseText);
-                            done();
-                        });
-                    });
-                });
+                var dbOpenRequest = Cache.openDB(false);
+                dbOpenRequest.then(function (db) {
+                    db.close();
+                    return new Cache(client).get(documentParams[0]);
+                }).then(function (responseText) {
+                    assert.equal('text-1-contents', responseText);
+                    done();
+                });;
             });
 
             QUnit.test('Check cache cleanup', function (assert) {
                 assert.timeout(2000);
                 assert.expect(0);
                 var done = assert.async(3);
-                cleanupDB(function () {
-                    var slowClient = {
-                        multiplier: 1,
-                        get: function (params) {
-                            var _this = this;
-                            return new Promise(function (resolve) {
-                                setTimeout(function () {
-                                    console.log('Token:', params.token);
-                                    resolve('Token: ' + params.token);
-                                }, _this.multiplier++ * 100);
-                            })
-                        }
-                    };
-                    var caching = new Cache(slowClient);
-
-                    var fetchedCnt = 0;
-                    function fetched() {
-                        fetchedCnt++;
+                var slowClient = {
+                    get: function (params) {
+                        return new Promise(function (resolve) {
+                            setTimeout(function () {
+                                console.log('Token:', params.token);
+                                resolve('Token: ' + params.token);
+                            }, 100);
+                        })
                     }
+                };
+                var dummyClient = {
+                    get: function () {
+                        return Promise.reject();
+                    }
+                };
 
-                    caching.get({token: 1}).then(fetched);
-                    caching.get({token: 2}).then(fetched);
-                    caching.get({token: 3}).then(fetched);
+                var caching = new Cache(slowClient);
+                caching.get({token: 1}).then(function () {
+                    return caching.get({token: 2});
+                }).then(function () {
+                    return caching.get({token: 3});
+                }).then(function () {
+                    Cache.maybeCleanup(90, 1);
 
-                    wait(assert, function () { return fetchedCnt === 3; }, function () {
-                        Cache.maybeCleanup(90, 1);
-
-                        setTimeout(function () {
-                            var dummyClient = {
-                                get: function () {
-                                    return Promise.reject();
-                                }
-                            };
-                            var nonCaching = new Cache(dummyClient);
-                            nonCaching.get({token: 1}).catch(done);
-                            nonCaching.get({token: 2}).catch(done);
-                            nonCaching.get({token: 3}).then(done);
-                        }, 200);
-
-                    });
+                    setTimeout(function () {
+                        var nonCaching = new Cache(dummyClient);
+                        nonCaching.get({token: 1}).catch(done);
+                        nonCaching.get({token: 2}).catch(done);
+                        nonCaching.get({token: 3}).then(done);
+                    }, 200);
                 });
             });
 
