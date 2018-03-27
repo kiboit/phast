@@ -174,7 +174,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                             resolve(storeRequest.result.content);
                             storeInCache(storeRequest.result, storeRequest.result.content);
                         } else {
-                            console.log('Cache miss');
                             reject();
                         }
                     };

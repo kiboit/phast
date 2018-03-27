@@ -191,7 +191,6 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                     get: function (params) {
                         return new Promise(function (resolve) {
                             setTimeout(function () {
-                                console.log('Token:', params.token);
                                 resolve('Token: ' + params.token);
                             }, 100);
                         })
