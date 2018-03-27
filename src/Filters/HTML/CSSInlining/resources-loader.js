@@ -118,9 +118,9 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 (function () {
 
     var logPrefix = "[Phast] Resource loader:";
+    var dbName = 'phastResourcesCache';
     var storeName = 'resources';
     var dbVersion = 1;
-    var dbConnection = null;
     var dbPromise = null;
     var itemTTL = 7 * 86400000;
 
@@ -147,12 +147,11 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     Cache.getDB = getDB;
     Cache.openDB = openDB;
-    Cache.closeDB = closeDB;
     Cache.dropDB = dropDB;
     Cache.maybeCleanup = maybeCleanup;
+    Cache.setDBName = setDBName;
 
     Cache.cleanupProbability = 0.05;
-    Cache.dbName = 'phastResourcesCache';
 
     function getFromCache(params) {
         return new Promise(function (resolve, reject) {
@@ -209,27 +208,16 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     }
 
     function openDB(createSchema) {
-        return new Promise(function (resolve, reject) {
-
-            if (dbConnection) {
-                resolve(dbConnection);
-            }
-
-            var dbOpenRequest = indexedDB.open(Cache.dbName, dbVersion);
-            if (createSchema) {
-                dbOpenRequest.onupgradeneeded = function () {
-                    createDB(dbOpenRequest.result);
-                };
-            }
-            dbOpenRequest.onsuccess = function () {
-                dbConnection = dbOpenRequest.result;
-                resolve(dbConnection);
+        var dbOpenRequest = indexedDB.open(dbName, dbVersion);
+        if (createSchema) {
+            dbOpenRequest.onupgradeneeded = function () {
+                createDB(dbOpenRequest.result);
             };
-            dbOpenRequest.onerror = function () {
+        }
+        return requestToPromise(dbOpenRequest)
+            .catch(function (error) {
                 console.error(logPrefix, "Error while opening database:", dbOpenRequest.error);
-                reject();
-            };
-        });
+            });
     }
 
     function createDB(db) {
@@ -238,16 +226,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     }
 
     function dropDB() {
-        Cache.closeDB();
-        return indexedDB.deleteDatabase(Cache.dbName);
-    }
-
-    function closeDB() {
-        if (dbConnection) {
-            dbConnection.close();
-            dbConnection = null;
-            dbPromise = null;
-        }
+        return indexedDB.deleteDatabase(dbName);
     }
 
     function cleanUp(itemTTL) {
@@ -275,6 +254,22 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 console.error(logPrefix, "Error while cleaning up:", e);
             }
         }
+    }
+
+    function requestToPromise(request) {
+        return new Promise(function (resolve, reject) {
+            request.onerror = function () {
+                reject(request.error);
+            };
+            request.onsuccess = function () {
+                resolve(request.result);
+            };
+        });
+    }
+
+    function setDBName(name) {
+        dbName = name;
+        dbPromise = null;
     }
 
 })();

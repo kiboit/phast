@@ -139,12 +139,11 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             Cache.cleanupProbability = 0;
 
             hooks.beforeEach(function () {
-                Cache.closeDB();
-                Cache.dbName = 'test' + Date.now();
+                Cache.setDBName('test' + Date.now())
             });
 
             hooks.afterEach(function () {
-                indexedDB.deleteDatabase(Cache.dbName);
+                Cache.dropDB();
             });
 
             QUnit.test('Check fetching files with client', function (assert) {
