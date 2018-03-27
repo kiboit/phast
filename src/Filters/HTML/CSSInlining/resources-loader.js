@@ -113,23 +113,23 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     var accumulatingPack = [];
 
     this.get = function (params) {
-        var request = new phast.ResourceLoader.Request();
-        if (params.isFaulty()) {
-            request.error();
-            return request;
-        }
-        accumulatingPack.push(new PackItem(request, params));
-        clearTimeout(timeoutHandler);
-        timeoutHandler = setTimeout(this.flush);
-        return request;
+        return new Promise(function (resolve, reject) {
+            if (params.isFaulty()) {
+                reject();
+            } else {
+                accumulatingPack.push(new PackItem({success: resolve, error: reject}, params));
+                clearTimeout(timeoutHandler);
+                timeoutHandler = setTimeout(flush);
+            }
+        });
     };
 
-    this.flush = function () {
+    function flush () {
         var pack = accumulatingPack;
         accumulatingPack = [];
         clearTimeout(timeoutHandler);
         makeRequest(pack);
-    };
+    }
 
     function makeRequest(pack) {
         var query = packToQuery(pack);
