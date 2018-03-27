@@ -279,27 +279,16 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 assert.timeout(2000);
                 var done = assert.async(documentParams.length);
                 var cache = new Cache(client);
-                var filesFetched = 0;
-                documentParams.map(function (params) {
-                    var request = cache.get(params);
-                    request.then(function () {
-                        filesFetched++;
+                Promise.all(documentParams.map(function (params) {
+                    return cache.get(params);
+                })).then(function () {
+                    var cache = new Cache({
+                        get: function () {
+                            throw 'Calling client when should have fetched from cache';
+                        }
                     });
+                    checkFetchingFiles(assert, cache, done);
                 });
-                wait(
-                    assert,
-                    function () {
-                        return filesFetched === documentParams.length;
-                    },
-                    function () {
-                        var cache = new Cache({
-                            get: function () {
-                                throw 'Calling client when should have fetched from cache';
-                            }
-                        });
-                        checkFetchingFiles(assert, cache, done);
-                    }
-                );
             });
 
             QUnit.test('Check handling missing store when retrieving from', function (assert) {
@@ -312,7 +301,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                 }).then(function (responseText) {
                     assert.equal('text-1-contents', responseText);
                     done();
-                });;
+                });
             });
 
             QUnit.test('Check cache cleanup', function (assert) {
