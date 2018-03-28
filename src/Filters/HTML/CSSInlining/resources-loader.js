@@ -149,7 +149,9 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
             });
         }
 
-        maybeCleanup(itemTTL, Cache.cleanupProbability);
+        setTimeout(function () {
+            maybeCleanup(itemTTL, Cache.cleanupProbability);
+        }, 5000);
 
     };
 
@@ -177,18 +179,19 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 dropDB();
                 throw e;
             }
-            return requestToPromise(storeRequest).then(
-                function (result) {
+            return requestToPromise(storeRequest)
+                .then(function (result) {
                     if (result) {
-                        storeInCache(result, result.content);
+                        setTimeout(function () {
+                            storeInCache(result, result.content);
+                        }, 1000);
                         return result.content;
                     }
-                },
-                function (e) {
+                })
+                .catch(function (e) {
                     console.error(logPrefix, 'Error while trying to read from cache:', e);
                     throw e;
-                }
-            );
+                });
         }
 
         function connectionError(e) {
