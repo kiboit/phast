@@ -223,10 +223,22 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 createDB(dbOpenRequest.result);
             };
         }
-        return requestToPromise(dbOpenRequest)
-            .catch(function (error) {
+        return requestToPromise(dbOpenRequest).then(
+            function (db) {
+                db.onversionchange = function () {
+                    console.debug(logPrefix, 'Closing DB');
+                    db.close();
+                    if (dbPromise) {
+                        dbPromise = null;
+                    }
+                };
+                return db;
+            },
+            function () {
                 console.error(logPrefix, "Error while opening database:", dbOpenRequest.error);
-            });
+                throw dbOpenRequest.error;
+            }
+        );
     }
 
     function createDB(db) {
