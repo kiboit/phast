@@ -35,6 +35,7 @@
         height: 300px;
     }
 </style>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script>
 </head>
 <body>
 

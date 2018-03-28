@@ -233,8 +233,11 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         console.debug(logPrefix, "Cleaning up...");
         var maxTime = Date.now() - itemTTL;
         getDB().then(function (db) {
-            var store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-            var cursorRequest = store.index('lastUsed')
+            var store = db
+                .transaction(storeName, 'readwrite')
+                .objectStore(storeName);
+            var cursorRequest = store
+                .index('lastUsed')
                 .openCursor(IDBKeyRange.upperBound(maxTime, true));
             cursorRequest.onsuccess = function (ev) {
                 var cursor = ev.target.result;

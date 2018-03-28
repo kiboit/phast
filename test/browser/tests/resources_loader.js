@@ -6,10 +6,13 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             documentParams = [];
 
         hooks.before(function () {
-            document.querySelectorAll('[data-phast-params]').forEach(function (el) {
-                var params = phast.ResourceLoader.RequestParams.fromString(el.dataset.phastParams);
-                documentParams.push(params);
-            });
+            Array.prototype.forEach.call(
+                window.document.querySelectorAll('[data-phast-params]'),
+                function (el) {
+                    var params = phast.ResourceLoader.RequestParams.fromString(el.dataset.phastParams);
+                    documentParams.push(params);
+                }
+            );
         });
 
         hooks.beforeEach(function () {
@@ -143,18 +146,18 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             });
 
             hooks.afterEach(function () {
-                Cache.dropDB();
+                //Cache.dropDB();
             });
 
             QUnit.test('Check fetching files with client', function (assert) {
-                assert.timeout(2000);
+                assert.timeout(5000);
                 var done = assert.async(documentParams.length);
                 var cache = new Cache(client);
                 checkFetchingFiles(assert, cache, done);
             });
 
             QUnit.test('Check retrieval from cache', function (assert) {
-                assert.timeout(2000);
+                assert.timeout(5000);
                 var done = assert.async(documentParams.length);
                 var cache = new Cache(client);
                 Promise.all(documentParams.map(function (params) {
@@ -170,7 +173,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             });
 
             QUnit.test('Check handling missing store when retrieving from', function (assert) {
-                assert.timeout(2000);
+                assert.timeout(5000);
                 var done = assert.async();
                 var dbOpenRequest = Cache.openDB(false);
                 dbOpenRequest.then(function (db) {
@@ -183,8 +186,8 @@ loadPhastJS('public/resources-loader.js', function (phast) {
             });
 
             QUnit.test('Check cache cleanup', function (assert) {
-                assert.timeout(2000);
-                assert.expect(0);
+                assert.timeout(5000);
+                assert.expect(3);
                 var done = assert.async(3);
                 var slowClient = {
                     get: function (params) {
@@ -211,9 +214,36 @@ loadPhastJS('public/resources-loader.js', function (phast) {
 
                     setTimeout(function () {
                         var nonCaching = new Cache(dummyClient);
-                        nonCaching.get({token: 1}).catch(done);
-                        nonCaching.get({token: 2}).catch(done);
-                        nonCaching.get({token: 3}).then(done);
+                        nonCaching.get({token: 1}).then(
+                            function () {
+                                assert.ok(false, 'Token 1 is missing')
+                                done();
+                            },
+                            function () {
+                                assert.ok(true, 'Token 1 is missing');
+                                done();
+                            }
+                        );
+                        nonCaching.get({token: 2}).then(
+                            function () {
+                                assert.ok(false, 'Token 2 is missing');
+                                done();
+                            },
+                            function () {
+                                assert.ok(true, 'Token 2 is missing');
+                                done();
+                            }
+                            );
+                        nonCaching.get({token: 3}).then(
+                            function () {
+                                assert.ok(true, 'Token 3 is not missing');
+                                done();
+                            },
+                            function (e) {
+                                assert.ok(false, 'Got error for token 3: ' + e);
+                                done();
+                            }
+                        );
                     }, 200);
                 });
             });
