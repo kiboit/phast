@@ -255,30 +255,46 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     function cleanUp(itemTTL) {
         console.debug(logPrefix, "Cleaning up...");
         var maxTime = Date.now() - itemTTL;
-        getDB().then(function (db) {
-            var store = db
-                .transaction(storeName, 'readwrite')
-                .objectStore(storeName);
-            var cursorRequest = store
-                .index('lastUsed')
-                .openCursor(IDBKeyRange.upperBound(maxTime, true));
-            cursorRequest.onsuccess = function (ev) {
-                var cursor = ev.target.result;
-                if (cursor) {
-                    store.delete(cursor.value.token);
-                    cursor.continue();
-                }
-            };
-        });
+        return getDB()
+            .then(function (db) {
+                var store = db
+                    .transaction(storeName)
+                    .objectStore(storeName);
+                var cursorRequest = store
+                    .index('lastUsed')
+                    .openCursor(IDBKeyRange.upperBound(maxTime, true));
+                return new Promise(function (resolve, reject) {
+                    var deletes = [];
+                    cursorRequest.onsuccess = function (ev) {
+                        var cursor = ev.target.result;
+                        if (cursor) {
+                            deletes.push(requestToPromise(
+                                db
+                                    .transaction(storeName, 'readwrite')
+                                    .objectStore(storeName)
+                                    .delete(cursor.value.token)
+                            ));
+                            cursor.continue();
+                        } else {
+                            resolve(deletes);
+                        }
+                    };
+                    cursorRequest.onerror = reject;
+                });
+            })
+            .then(function (deletes) {
+                return Promise.all(deletes);
+            })
+            .catch(function (e) {
+                console.error(logPrefix, "Got error while cleaning up", e);
+            });
     }
 
     function maybeCleanup(itemTTL, cleanupProbability) {
         if (Math.random() < cleanupProbability) {
-            try {
-                cleanUp(itemTTL);
-            } catch (e) {
-                console.error(logPrefix, "Error while cleaning up:", e);
-            }
+            return cleanUp(itemTTL);
+        } else {
+            return Promise.resolve();
         }
     }
 

@@ -188,7 +188,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             });
 
             QUnit.test('Check cache cleanup', function (assert) {
-                assert.timeout(5000);
+                assert.timeout(20000);
                 assert.expect(3);
                 var done = assert.async(3);
                 var slowClient = {
@@ -197,7 +197,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                             setTimeout(function () {
                                 resolve('Token: ' + params.token);
                             }, 100);
-                        })
+                        });
                     }
                 };
                 var dummyClient = {
@@ -206,48 +206,51 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     }
                 };
 
+                var t0 = Date.now();
                 var caching = new Cache(slowClient);
-                caching.get({token: 1}).then(function () {
-                    return caching.get({token: 2});
-                }).then(function () {
-                    return caching.get({token: 3});
-                }).then(function () {
-                    Cache.maybeCleanup(90, 1);
-
-                    setTimeout(function () {
+                caching.get({token: 1})
+                    .then(function () {
+                        console.log("Got result 1 at", Date.now() - t0);
+                        return caching.get({token: 2});
+                    })
+                    .then(function () {
+                        console.log("Got result 2 at", Date.now() - t0);
+                        return caching.get({token: 3});
+                    })
+                    .then(function () {
+                        console.log("Got result 3 at", Date.now() - t0);
+                        return Cache.maybeCleanup(90, 1);
+                    })
+                    .then(function () {
+                        console.log("Finished cleanup at", Date.now() - t0);
                         var nonCaching = new Cache(dummyClient);
-                        nonCaching.get({token: 1}).then(
-                            function () {
-                                assert.ok(false, 'Token 1 is missing');
-                                done();
-                            },
-                            function () {
-                                assert.ok(true, 'Token 1 is missing');
-                                done();
-                            }
-                        );
-                        nonCaching.get({token: 2}).then(
-                            function () {
-                                assert.ok(false, 'Token 2 is missing');
-                                done();
-                            },
-                            function () {
-                                assert.ok(true, 'Token 2 is missing');
-                                done();
-                            }
+                        addAssert(1, false);
+                        addAssert(2, false);
+                        addAssert(3, true);
+                        function addAssert(n, expectResult) {
+                            var message = "Token " + n + " should" + (expectResult ? " NOT" : "") + " be missing";
+                            nonCaching.get({token: n}).then(
+                                function () {
+                                    done();
+                                    if (expectResult) {
+                                        console.log("Got result for token " + n + "; OK");
+                                    } else {
+                                        console.error("Got unexpected result for token " + n);
+                                    }
+                                    assert.ok(expectResult, message);
+                                },
+                                function () {
+                                    done();
+                                    if (!expectResult) {
+                                        console.log("Got no result for token " + n + "; OK");
+                                    } else {
+                                        console.error("Got no result for token " + n);
+                                    }
+                                    assert.ok(!expectResult, message);
+                                }
                             );
-                        nonCaching.get({token: 3}).then(
-                            function () {
-                                assert.ok(true, 'Token 3 is not missing');
-                                done();
-                            },
-                            function (e) {
-                                assert.ok(false, 'Got error for token 3: ' + e);
-                                done();
-                            }
-                        );
-                    }, 200);
-                });
+                        }
+                    });
             });
 
         });
