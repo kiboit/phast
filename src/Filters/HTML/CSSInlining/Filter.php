@@ -9,6 +9,7 @@ use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\Bundler\ServiceParams;
 use Kibo\Phast\Services\ServiceFilter;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
@@ -96,7 +97,9 @@ class Filter extends BaseHTMLStreamFilter {
     ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
-        $this->serviceUrl = URL::fromString((string)$config['serviceUrl']);
+        $this->serviceUrl = (new ServiceRequest())->withUrl(
+            URL::fromString((string)$config['serviceUrl'])
+        )->serialize(ServiceRequest::FORMAT_QUERY);
         $this->optimizerSizeDiffThreshold = (int)$config['optimizerSizeDiffThreshold'];
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;

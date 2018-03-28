@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../src/html-filters.php';
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="css/stylesheet_large.css">
         <link rel="stylesheet" href="css/styles.css">
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet">
