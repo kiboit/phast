@@ -40,6 +40,7 @@ class PhastJavaScriptCompiler {
      * @return string
      */
     public function compileScripts(array $scripts) {
+        array_unshift($scripts, new PhastJavaScript(__DIR__ . '/es6-promise.js'));
         array_unshift($scripts, new PhastJavaScript(__DIR__ . '/phast-js-env.js'));
         return $this->cache->get($this->getCacheKey($scripts), function () use ($scripts) {
             return $this->performCompilation($scripts);

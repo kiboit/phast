@@ -118,7 +118,38 @@ function wait(assert, predicate, fn) {
     });
 }
 
-function loadPhastJS(url, done) {
+function loadPhastJS(urls, done) {
+    QUnit.config.autostart = false;
+    loadPhastJS.awaitingScriptsCount++;
+
+    var loaded = [];
+    var loadedCnt = 0;
+    urls.forEach(function (url, idx) {
+        retrieve(url, function (responseText) {
+            loaded[idx] = responseText;
+            loadedCnt++;
+            if (loadedCnt === urls.length) {
+                finish();
+            }
+        });
+    });
+
+    function finish() {
+        var phast = {
+            scripts: []
+        };
+        loaded.forEach(function (script) {
+            eval(script);
+        });
+        done(phast);
+        loadPhastJS.awaitingScriptsCount--;
+        if (!loadPhastJS.awaitingScriptsCount) {
+            QUnit.start();
+        }
+    }
+}
+
+function _loadPhastJS(url, done) {
 
     QUnit.config.autostart = false;
     loadPhastJS.awaitingScriptsCount++;

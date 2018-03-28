@@ -1,4 +1,6 @@
-loadPhastJS('public/resources-loader.js', function (phast) {
+loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (phast) {
+
+    var Promise = phast.ES6Promise.Promise;
 
     QUnit.module('ResourcesLoader', function (hooks) {
 
@@ -216,7 +218,7 @@ loadPhastJS('public/resources-loader.js', function (phast) {
                         var nonCaching = new Cache(dummyClient);
                         nonCaching.get({token: 1}).then(
                             function () {
-                                assert.ok(false, 'Token 1 is missing')
+                                assert.ok(false, 'Token 1 is missing');
                                 done();
                             },
                             function () {

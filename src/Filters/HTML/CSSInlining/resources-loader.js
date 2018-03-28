@@ -1,3 +1,5 @@
+var Promise = phast.ES6Promise.Promise;
+
 phast.ResourceLoader = {};
 
 phast.ResourceLoader.RequestParams = function (faulty) {
