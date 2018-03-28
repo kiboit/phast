@@ -149,30 +149,4 @@ function loadPhastJS(urls, done) {
     }
 }
 
-function _loadPhastJS(url, done) {
-
-    QUnit.config.autostart = false;
-    loadPhastJS.awaitingScriptsCount++;
-
-    retrieve(
-        url,
-        function (responseText) {
-            var phast = {
-                scripts: []
-            };
-            var document = {
-                addEventListener: function () {}
-            };
-            (function (done) {
-                eval(responseText);
-            })();
-            done(phast);
-        },
-        function () {
-            loadPhastJS.awaitingScriptsCount--;
-            if (!loadPhastJS.awaitingScriptsCount) {
-                QUnit.start();
-            }
-        });
-}
 loadPhastJS.awaitingScriptsCount = 0;
