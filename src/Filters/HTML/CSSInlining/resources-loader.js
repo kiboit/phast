@@ -127,9 +127,17 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     phast.ResourceLoader.IndexedDBResourceCache = function (client) {
 
         this.get = function (params) {
-            return getFromCache(params).catch(function () {
-                return getFromClient(params);
-            });
+            return getFromCache(params).then(
+                function (responseText) {
+                    if (responseText) {
+                        return responseText;
+                    }
+                    return getFromClient(params);
+                },
+                function () {
+                    return getFromClient(params);
+                }
+            );
         };
 
         function getFromClient(params) {
@@ -154,36 +162,37 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     Cache.cleanupProbability = 0.05;
 
     function getFromCache(params) {
-        return new Promise(function (resolve, reject) {
-            setTimeout(reject, 250);
-            getDB().then(function (db) {
-                try {
-                    var storeRequest = db
-                        .transaction(storeName)
-                        .objectStore(storeName)
-                        .get(params.token);
-                    storeRequest.onerror = function (e) {
-                        console.error(logPrefix, 'Error while trying to read from cache:', e);
-                        reject();
-                    };
-                    storeRequest.onsuccess = function () {
-                        if (storeRequest.result) {
-                            resolve(storeRequest.result.content);
-                            storeInCache(storeRequest.result, storeRequest.result.content);
-                        } else {
-                            reject();
-                        }
-                    };
-                } catch (e) {
-                    console.error(logPrefix, 'Exception while trying to read from cache:', e);
-                    setTimeout(reject);
-                    dropDB();
+        return getDB().then(readFromStore, connectionError);
+
+        function readFromStore(db) {
+            try {
+                var storeRequest = db
+                    .transaction(storeName)
+                    .objectStore(storeName)
+                    .get(params.token);
+            } catch (e) {
+                console.error(logPrefix, 'Exception while trying to read from cache:', e);
+                dropDB();
+                throw e;
+            }
+            return requestToPromise(storeRequest).then(
+                function (result) {
+                    if (result) {
+                        storeInCache(result, result.content);
+                        return result.content;
+                    }
+                },
+                function (e) {
+                    console.error(logPrefix, 'Error while trying to read from cache:', e);
+                    throw e;
                 }
-            }).catch(function (e) {
-                console.error(logPrefix, 'Error while opening database:', e);
-                reject();
-            });
-        });
+            );
+        }
+
+        function connectionError(e) {
+            console.error(logPrefix, 'Error while opening database:', e);
+            throw e;
+        }
     }
 
     function storeInCache(params, responseText) {
