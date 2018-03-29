@@ -147,10 +147,6 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                 Cache.setDBName('test' + Date.now())
             });
 
-            hooks.afterEach(function () {
-                //Cache.dropDB();
-            });
-
             QUnit.test('Check fetching files with client', function (assert) {
                 assert.timeout(5000);
                 var done = assert.async(documentParams.length);
