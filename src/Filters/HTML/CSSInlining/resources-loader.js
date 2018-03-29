@@ -29,19 +29,32 @@ phast.ResourceLoader.RequestParams.fromObject = function (parsed) {
 phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     var timeoutHandler;
-    var accumulatingPack = [];
+    var accumulatingPack = {};
 
     this.get = function (params) {
         return new Promise(function (resolve, reject) {
             if (params.isFaulty()) {
                 reject();
             } else {
-                accumulatingPack.push(new PackItem({success: resolve, error: reject}, params));
+                addToPack(new PackItem({success: resolve, error: reject}, params));
                 clearTimeout(timeoutHandler);
                 timeoutHandler = setTimeout(flush);
             }
         });
     };
+
+    function addToPack(packItem) {
+        if (!accumulatingPack[packItem.params.token]) {
+            accumulatingPack[packItem.params.token] = {
+                params: packItem.params,
+                requests: [packItem.request]
+            };
+        } else {
+            accumulatingPack[packItem.params.token]
+                .requests
+                .push(packItem.request);
+        }
+    }
 
     function flush () {
         var pack = accumulatingPack;
@@ -73,22 +86,22 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     function packToQuery(pack) {
         var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
         var parts = [];
-        pack.forEach(function (item, idx) {
-            for (var key in item.params) {
+        getSortedTokens(pack).forEach(function (token, idx) {
+            for (var key in pack[token].params) {
                 if (key === 'isFaulty') {
                     continue;
                 }
-                parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(item.params[key]));
+                parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(pack[token].params[key]));
             }
         });
         return serviceUrl + glue + parts.join('&');
     }
 
     function handleError(pack) {
-        pack.forEach(function (item) {
-            try {
-                item.request.error();
-            } catch (e) {}
+        Object.values(pack).forEach(function (item) {
+            item.requests.forEach(function (request) {
+                request.error();
+            });
         });
     }
 
@@ -99,15 +112,23 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
             handleError(pack);
             return;
         }
+
+        var tokens = getSortedTokens(pack);
         responses.forEach(function (response, idx) {
-            try {
-                if (response.status === 200) {
-                    pack[idx].request.success(response.content);
-                } else {
-                    pack[idx].request.error();
-                }
-            } catch (e) {}
+            if (response.status === 200) {
+                pack[tokens[idx]].requests.forEach(function (request) {
+                    request.success(response.content)
+                });
+            } else {
+                pack[tokens[idx]].requests.forEach(function (request) {
+                    request.error();
+                });
+            }
         });
+    }
+
+    function getSortedTokens(pack) {
+        return Object.keys(pack).sort();
     }
 
     function PackItem(request, params) {

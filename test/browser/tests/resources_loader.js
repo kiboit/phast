@@ -136,6 +136,22 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     done();
                 });
             });
+
+            QUnit.test('Test fetching the same resource twice', function (assert) {
+                assert.timeout(2000);
+                var done = assert.async(2);
+                for (var i in [0, 1]) {
+                    client.get(documentParams[0])
+                        .then(function (responseText) {
+                            assert.equal('text-1-contents', responseText, 'Contents are correct');
+                            done();
+                        })
+                        .catch(function (e) {
+                            assert.ok(false, 'Does not throw error: ' + e);
+                            done();
+                        });
+                }
+            });
         });
 
         QUnit.module('IndexedDBResourceCache', function (hooks) {
