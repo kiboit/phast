@@ -106,7 +106,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 } else {
                     pack[idx].request.error();
                 }
-            } catch (e) {};
+            } catch (e) {}
         });
     }
 
@@ -296,9 +296,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     function maybeCleanup(itemTTL, cleanupProbability) {
         if (Math.random() < cleanupProbability) {
             return cleanUp(itemTTL);
-        } else {
-            return Promise.resolve();
         }
+        return Promise.resolve();
     }
 
     function requestToPromise(request) {
