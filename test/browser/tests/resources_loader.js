@@ -535,13 +535,13 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             });
 
             QUnit.test('Get from client', function (assert) {
-                var done = assert.async(documentParams.length);
+                var done = getDoneCB(assert, 2000, documentParams.length);
                 var loader = new phast.ResourceLoader(client, fakeCache);
                 checkFetchingFiles(assert, loader, done);
             });
 
             QUnit.test('Get from cache', function (assert) {
-                var done = assert.async(documentParams.length);
+                var done = getDoneCB(assert, 2000, documentParams.length);
                 var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
                 var cache = new Cache(cacheParams, storage);
                 var loader = new phast.ResourceLoader(client, cache);
@@ -575,10 +575,11 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             });
         }
 
-        function getDoneCB(assert, timeout) {
+        function getDoneCB(assert, timeout, callsCount) {
             timeout = timeout || 2000;
+            callsCount = callsCount || 1;
             assert.timeout(timeout);
-            return assert.async();
+            return assert.async(callsCount);
         }
 
         function wait(time) {

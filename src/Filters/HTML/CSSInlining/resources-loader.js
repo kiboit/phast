@@ -2,7 +2,57 @@ var Promise = phast.ES6Promise.Promise;
 
 phast.ResourceLoader = function (client, cache) {
 
-    this.get = get;
+    this.get = addToRequested;
+
+    var requested = [];
+    var executionTimeout;
+
+    function addToRequested(params) {
+        return new Promise(function (resolve, reject) {
+            requested.push({resolve: resolve, reject: reject, params: params});
+            clearTimeout(executionTimeout);
+            setTimeout(getFromCache);
+        });
+    }
+
+    function getFromCache() {
+        var totalCnt = requested.length;
+        var hitsCnt = 0;
+        var misses = [];
+
+        requested.forEach(function (request) {
+            cache.get(request.params.token)
+                .then(function (content) {
+                    if (content) {
+                        hitsCnt++;
+                        request.resolve(content);
+                    } else {
+                        return Promise.reject();
+                    }
+
+                })
+                .catch(function () {
+                    misses.push(request);
+                })
+                .finally(function () {
+                    if (misses.length > 0 && misses.length + hitsCnt === totalCnt) {
+                        getFromClient(misses);
+                    }
+                });
+        });
+        requested = [];
+    }
+
+    function getFromClient(requests) {
+        requests.forEach(function (request) {
+            client.get(request.params)
+                .then(function (responseText) {
+                    cache.set(request.params.token, responseText);
+                    request.resolve(responseText);
+                })
+                .catch(request.reject);
+        });
+    }
 
     function get(params) {
         return cache.get(params.token)
@@ -317,7 +367,7 @@ phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
 
     function dropDB() {
         return get().then(function (db) {
-            console.log(logPrefix, 'Dropping DB');
+            console.error(logPrefix, 'Dropping DB');
             db.close();
             dbPromise = null;
             return r2p(indexedDB.deleteDatabase(params.dbName));
