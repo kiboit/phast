@@ -8,6 +8,7 @@ phast.ResourceLoader = function (client, cache) {
         return cache.get(params.token)
             .then(function (content) {
                 if (content) {
+                    cache.set(params.token, content);
                     return content;
                 }
                 return client.get(params)
@@ -372,6 +373,8 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
         return storage.get(token)
             .then(function (item) {
                 if (item) {
+                    item.lastUsed = Date.now();
+                    storage.store(item);
                     return Promise.resolve(item.content);
                 }
                 return Promise.resolve();

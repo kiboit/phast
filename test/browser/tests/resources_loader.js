@@ -404,7 +404,6 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             QUnit.test('Test cleanup', function (assert) {
                 cacheParams.itemTTL = 90;
                 cacheParams.cleanupProbability = 1;
-                cacheParams.autoCleanup = false;
 
                 var done = getDoneCB(assert);
                 var cache = new Cache(cacheParams, storage);
@@ -434,6 +433,33 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     .then(function (item) {
                         assert.ok(item, 'Found t3');
                         assert.equal('content-3', item);
+                    })
+                    .catch(function (e) {
+                        assert.ok(false, 'Got error: ' + e);
+                    })
+                    .finally(done);
+            });
+
+            QUnit.test('Test not cleaning used stuff', function (assert) {
+                cacheParams.itemTTL = 90;
+                cacheParams.cleanupProbability = 1;
+                cacheParams.autoCleanup = false;
+
+                var done = getDoneCB(assert);
+                var cache = new Cache(cacheParams, storage);
+                cache.set('t1', 'content')
+                    .then(wait(200))
+                    .then(function () {
+                        return cache.get('t1');
+                    })
+                    .then(function () {
+                        return cache.maybeCleanup();
+                    })
+                    .then(function () {
+                        return cache.get('t1');
+                    })
+                    .then(function (content) {
+                        assert.equal(content, 'content');
                     })
                     .catch(function (e) {
                         assert.ok(false, 'Got error: ' + e);
