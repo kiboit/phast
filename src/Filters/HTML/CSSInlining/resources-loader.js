@@ -167,11 +167,11 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     }
 
     function handleError(pack) {
-        Object.values(pack).forEach(function (item) {
-            item.requests.forEach(function (request) {
+        for (var k in pack) {
+            pack[k].requests.forEach(function (request) {
                 request.error();
             });
-        });
+        }
     }
 
     function handleResponse(responseText, pack) {
