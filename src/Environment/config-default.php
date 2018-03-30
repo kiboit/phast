@@ -68,7 +68,7 @@ return [
                 'urlRefreshTime' => 7200,
                 'match' => [
                     '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
-                    '~^https?://(ssl|www)\.google-analytics\.com/~',
+                    '~^https?://(ssl|www)\.google-analytics\.com/analytics\.js~',
                     '~^https?://www\.googletagmanager\.com/~',
                     '~^https?://www\.googleadservices\.com/~',
                     '~^https?://pixel\.adcrowd\.com/~',
