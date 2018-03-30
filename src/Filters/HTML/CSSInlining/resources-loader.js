@@ -1,6 +1,24 @@
 var Promise = phast.ES6Promise.Promise;
 
-phast.ResourceLoader = {};
+phast.ResourceLoader = function (client, cache) {
+
+    this.get = get;
+
+    function get(params) {
+        return cache.get(params.token)
+            .then(function (content) {
+                if (content) {
+                    return content;
+                }
+                return client.get(params)
+                    .then(function (responseText) {
+                        cache.set(params.token, responseText);
+                        return responseText;
+                    });
+            })
+    }
+
+};
 
 phast.ResourceLoader.RequestParams = function (faulty) {
 
@@ -138,119 +156,181 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
 };
 
-(function () {
+phast.ResourceLoader.IndexedDBStorage = function (params) {
 
-    var logPrefix = "[Phast] Resource loader:";
-    var dbName = 'phastResourcesCache';
-    var storeName = 'resources';
-    var dbVersion = 1;
-    var dbPromise = null;
-    var itemTTL = 7 * 86400000;
+    var Storage = phast.ResourceLoader.IndexedDBStorage;
+    var logPrefix = Storage.logPrefix;
+    var r2p = Storage.requestToPromise;
 
-    phast.ResourceLoader.IndexedDBResourceCache = function (client) {
+    var con;
 
-        this.get = function (params) {
-            return getFromCache(params).then(
-                function (responseText) {
-                    if (responseText) {
-                        return responseText;
-                    }
-                    return getFromClient(params);
-                },
-                function () {
-                    return getFromClient(params);
-                }
-            );
-        };
+    connect();
 
-        function getFromClient(params) {
-            return client.get(params).then(function (responseText) {
-                storeInCache(params, responseText);
-                return responseText;
+    this.get = function (key) {
+        return con.get()
+            .then(function (db) {
+                return r2p(getStore(db).get(key));
+            })
+            .catch(function (e) {
+                console.error(logPrefix, 'Error reading from store:', e);
+                resetConnection();
+                throw e;
             });
-        }
-
-        setTimeout(function () {
-            maybeCleanup(itemTTL, Cache.cleanupProbability);
-        }, 5000);
-
     };
 
-    var Cache = phast.ResourceLoader.IndexedDBResourceCache;
-
-    Cache.getDB = getDB;
-    Cache.openDB = openDB;
-    Cache.dropDB = dropDB;
-    Cache.maybeCleanup = maybeCleanup;
-    Cache.setDBName = setDBName;
-
-    Cache.cleanupProbability = 0.05;
-
-    function getFromCache(params) {
-        return getDB().then(readFromStore, connectionError);
-
-        function readFromStore(db) {
-            try {
-                var storeRequest = db
-                    .transaction(storeName)
-                    .objectStore(storeName)
-                    .get(params.token);
-            } catch (e) {
-                console.error(logPrefix, 'Exception while trying to read from cache:', e);
-                dropDB();
+    this.store = function (item) {
+        return con.get()
+            .then(function (db) {
+                return r2p(getStore(db, 'readwrite').put(item));
+            })
+            .catch(function (e) {
+                console.error(logPrefix, 'Error writing to store:', e);
+                resetConnection();
                 throw e;
-            }
-            return requestToPromise(storeRequest)
-                .then(function (result) {
-                    if (result) {
-                        setTimeout(function () {
-                            storeInCache(result, result.content);
-                        }, 1000);
-                        return result.content;
-                    }
-                })
-                .catch(function (e) {
-                    console.error(logPrefix, 'Error while trying to read from cache:', e);
-                    throw e;
-                });
-        }
+            });
+    };
 
-        function connectionError(e) {
-            console.error(logPrefix, 'Error while opening database:', e);
-            throw e;
-        }
-    }
+    this.delete = function (item) {
+        return con.get()
+            .then(function (db) {
+                return r2p(getStore(db, 'readwrite').delete(item.token));
+            })
+            .catch(function (e) {
+                console.error(logPrefix, 'Error deleting from store:', e);
+                resetConnection();
+                throw e;
+            });
+    };
 
-    function storeInCache(params, responseText) {
-        getDB().then(function (db) {
-            db.transaction(storeName, 'readwrite')
-                .objectStore(storeName)
-                .put({
-                    token: params.token,
-                    content: responseText,
-                    lastUsed: Date.now()
-                });
-        }).catch(function (e) {
-            console.error(logPrefix, 'Exception while trying to write to cache:', e);
+    this.iterateOnAll = function (callback) {
+        return con.get()
+            .then(function (db) {
+                return iterateOnRequest(callback, getStore(db).openCursor());
+            })
+            .catch(function (e) {
+                console.error(logPrefix, 'Error iterating on all:', e);
+                resetConnection();
+                throw e;
+            });
+    };
+
+    this.iterateOnLastUsedBefore = function (callback, time) {
+        return con.get()
+            .then(function (db) {
+                var request = getStore(db)
+                    .index('lastUsed')
+                    .openCursor(IDBKeyRange.upperBound(time, true));
+                return iterateOnRequest(callback, request);
+            })
+            .catch(function (e) {
+                console.error(logPrefix, 'Error iterating on used before: ', e);
+                resetConnection();
+                throw e;
+            });
+    };
+
+    function iterateOnRequest(callback, request) {
+        return new Promise(function (resolve, reject) {
+            request.onsuccess = function (ev) {
+                var cursor = ev.target.result;
+                if (cursor) {
+                    callback(cursor.value);
+                    cursor.continue();
+                } else {
+                    resolve();
+                }
+            };
+            request.onerror = reject;
         });
     }
 
-    function getDB() {
+    function getStore(db, mode) {
+        mode = mode || 'readonly';
+        return db
+            .transaction(params.storeName, mode)
+            .objectStore(params.storeName);
+    }
+
+    function resetConnection() {
+        var dropPromise = con.dropDB().then(connect);
+        con = {
+            get: function () {
+                return Promise.reject(new Error('Resetting DB'))
+            },
+
+            dropDB: function () {
+                return dropPromise;
+            }
+        };
+
+    }
+
+    function connect() {
+        con = new phast.ResourceLoader.IndexedDBStorage.Connection(params);
+    }
+
+};
+
+phast.ResourceLoader.IndexedDBStorage.logPrefix = '[Phast] Resource loader:';
+
+phast.ResourceLoader.IndexedDBStorage.requestToPromise = function (request) {
+    return new Promise(function (resolve, reject) {
+        request.onsuccess = function () {
+            resolve(request.result);
+        };
+        request.onerror = function () {
+            reject(request.error);
+        };
+    });
+};
+
+phast.ResourceLoader.IndexedDBStorage.ConnectionParams = function () {
+    this.dbName = 'phastResourcesCache';
+    this.dbVersion = 1;
+    this.storeName = 'resources';
+};
+
+phast.ResourceLoader.IndexedDBStorage.StoredResource = function (token, content) {
+    this.token = token;
+    this.content = content;
+    this.lastUsed = Date.now();
+};
+
+phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
+
+    var logPrefix = phast.ResourceLoader.IndexedDBStorage.logPrefix;
+    var r2p = phast.ResourceLoader.IndexedDBStorage.requestToPromise;
+
+    var dbPromise;
+
+    this.get = get;
+
+    this.dropDB = dropDB;
+
+    function get() {
         if (!dbPromise) {
-            dbPromise = openDB(true);
+            dbPromise = openDB(params);
         }
         return dbPromise;
     }
 
-    function openDB(createSchema) {
-        var dbOpenRequest = indexedDB.open(dbName, dbVersion);
-        if (createSchema) {
-            dbOpenRequest.onupgradeneeded = function () {
-                createDB(dbOpenRequest.result);
-            };
-        }
-        return requestToPromise(dbOpenRequest).then(
-            function (db) {
+    function dropDB() {
+        return get().then(function (db) {
+            console.log(logPrefix, 'Dropping DB');
+            db.close();
+            dbPromise = null;
+            return r2p(indexedDB.deleteDatabase(params.dbName));
+        });
+    }
+
+    function openDB(params) {
+        var request = indexedDB.open(params.dbName, params.dbVersion);
+        request.onupgradeneeded = function (db) {
+            createSchema(request.result, params);
+        };
+
+        return r2p(request)
+            .then(function (db) {
                 db.onversionchange = function () {
                     console.debug(logPrefix, 'Closing DB');
                     db.close();
@@ -259,89 +339,110 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                     }
                 };
                 return db;
-            },
-            function () {
-                console.error(logPrefix, "Error while opening database:", dbOpenRequest.error);
-                throw dbOpenRequest.error;
+            })
+            .catch(function (e) {
+                console.error(logPrefix, "Error while opening database:", e);
+                throw e;
             }
         );
     }
 
-    function createDB(db) {
-        var store = db.createObjectStore(storeName, {keyPath: 'token'});
+    function createSchema(db, params) {
+        var store = db.createObjectStore(params.storeName, {keyPath: 'token'});
         store.createIndex('lastUsed', 'lastUsed');
     }
 
-    function dropDB() {
-        return indexedDB.deleteDatabase(dbName);
+};
+
+phast.ResourceLoader.StorageCache = function (params, storage) {
+
+    var StoredResource = phast.ResourceLoader.IndexedDBStorage.StoredResource;
+
+    this.get = get;
+    this.set = set;
+    this.maybeCleanup = maybeCleanup;
+
+    var storageSize = null;
+
+    if (params.autoCleanup) {
+        setTimeout(maybeCleanup, params.cleanupDelay);
     }
 
-    function cleanUp(itemTTL) {
-        console.debug(logPrefix, "Cleaning up...");
-        var maxTime = Date.now() - itemTTL;
-        return getDB()
-            .then(function (db) {
-                var store = db
-                    .transaction(storeName)
-                    .objectStore(storeName);
-                var cursorRequest = store
-                    .index('lastUsed')
-                    .openCursor(IDBKeyRange.upperBound(maxTime, true));
-                return new Promise(function (resolve, reject) {
-                    var deletes = [];
-                    cursorRequest.onsuccess = function (ev) {
-                        var cursor = ev.target.result;
-                        if (cursor) {
-                            deletes.push(requestToPromise(
-                                db
-                                    .transaction(storeName, 'readwrite')
-                                    .objectStore(storeName)
-                                    .delete(cursor.value.token)
-                            ));
-                            cursor.continue();
-                        } else {
-                            resolve(deletes);
-                        }
-                    };
-                    cursorRequest.onerror = reject;
-                });
-            })
-            .then(function (deletes) {
-                return Promise.all(deletes);
-            })
-            .catch(function (e) {
-                console.error(logPrefix, "Got error while cleaning up", e);
+    function get(token) {
+        return storage.get(token)
+            .then(function (item) {
+                if (item) {
+                    return Promise.resolve(item.content);
+                }
+                return Promise.resolve();
             });
     }
 
-    function maybeCleanup(itemTTL, cleanupProbability) {
-        if (Math.random() < cleanupProbability) {
-            return cleanUp(itemTTL);
+    function set(token, content) {
+        return getCurrentStorageSize()
+            .then(function (size) {
+                var newSize = content.length + size;
+                if (newSize > params.maxStorageSize) {
+                    return Promise.reject(new Error('Storage quota will be exceeded'));
+                }
+                storageSize = newSize;
+                var item = new StoredResource(token, content);
+                return storage.store(item);
+            })
+    }
+
+    function maybeCleanup() {
+        if (Math.random() < params.cleanupProbability) {
+            return cleanUp();
         }
         return Promise.resolve();
     }
 
-    function requestToPromise(request) {
-        return new Promise(function (resolve, reject) {
-            request.onerror = function () {
-                reject(request.error);
-            };
-            request.onsuccess = function () {
-                resolve(request.result);
-            };
-        });
+    function cleanUp() {
+        var maxAge = Date.now() - params.itemTTL;
+        var deletePromises = [];
+        return storage
+            .iterateOnLastUsedBefore(function (item) {
+                deletePromises.push(storage.delete(item));
+            }, maxAge)
+            .then(function () {
+                return Promise.all(deletePromises);
+            });
     }
 
-    function setDBName(name) {
-        dbName = name;
-        dbPromise = null;
+    function getCurrentStorageSize() {
+        if (storageSize !== null) {
+            return Promise.resolve(storageSize);
+        }
+        var size = 0;
+        return storage
+            .iterateOnAll(function (item) {
+                size += item.content.length;
+            })
+            .then(function () {
+                storageSize = size;
+                return Promise.resolve(storageSize);
+            });
     }
 
-})();
+};
+
+phast.ResourceLoader.StorageCache.StorageCacheParams = function () {
+    this.itemTTL = 7 * 86400000;
+    this.cleanupProbability = 0.05;
+    this.cleanupDelay = 5000;
+    this.autoCleanup = true;
+    this.maxStorageSize = 4.5 * 1024 * 1024;
+};
+
 
 phast.ResourceLoader.make = function (serviceUrl) {
+    var storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
+    var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
+    var cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
+    var cache = new phast.ResourceLoader.StorageCache(cacheParams, storage);
     var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl);
-    return new phast.ResourceLoader.IndexedDBResourceCache(client);
+    return new phast.ResourceLoader(client, cache);
 };
 
 
