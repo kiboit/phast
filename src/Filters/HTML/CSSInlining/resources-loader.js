@@ -391,9 +391,7 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
     function cleanUp() {
         return storage.clear()
             .then(function () {
-                if (storageSize) {
-                    storageSize = 0;
-                }
+                storageSize = 0;
             });
     }
 
