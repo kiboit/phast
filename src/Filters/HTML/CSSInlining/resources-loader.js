@@ -53,22 +53,6 @@ phast.ResourceLoader = function (client, cache) {
                 .catch(request.reject);
         });
     }
-
-    function get(params) {
-        return cache.get(params.token)
-            .then(function (content) {
-                if (content) {
-                    cache.set(params.token, content);
-                    return content;
-                }
-                return client.get(params)
-                    .then(function (responseText) {
-                        cache.set(params.token, responseText);
-                        return responseText;
-                    });
-            })
-    }
-
 };
 
 phast.ResourceLoader.RequestParams = function (faulty) {
