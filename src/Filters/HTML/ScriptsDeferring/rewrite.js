@@ -5,7 +5,7 @@ var insertBefore = Element.prototype.insertBefore;
 
 var go = phast.once(loadScripts);
 
-document.addEventListener('DOMContentLoaded', function () {
+phast.on(document, 'DOMContentLoaded').then(function () {
     if (phast.stylesLoading) {
         phast.onStylesLoaded = go;
         setTimeout(go, 4000);

@@ -15,13 +15,19 @@ phast.once = function (fn) {
     };
 };
 
-document.addEventListener('DOMContentLoaded', phast.once(function() {
-    try {
-        logTimings();
-    } catch (e) {}
-}));
+phast.on = function (obj, evt) {
+    return new Promise(function (resolve) {
+        obj.addEventListener(evt, resolve);
+    });
+};
 
-function logTimings() {
+phast.wait = function (delay) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, delay);
+    });
+};
+
+phast.on(document, 'DOMContentLoaded').then(function () {
     var t = performance.timing;
     var m = [];
     m.push(["Downloading phases:"]);
@@ -53,7 +59,7 @@ function logTimings() {
         }
         return v;
     }
-}
+});
 
 while (phast.scripts.length) {
     (phast.scripts.shift())();
