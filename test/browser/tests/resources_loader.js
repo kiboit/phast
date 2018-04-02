@@ -28,12 +28,11 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                 var params = phast.ResourceLoader.RequestParams.fromString(string);
                 assert.equal(params.key1, 'value1', 'key1 is set right');
                 assert.equal(params.key2, 'value2', 'key2 is set right');
-                assert.notOk(params.isFaulty(), 'It is not faulty');
             });
 
             QUnit.test('Check bad params', function (assert) {
                 var params = phast.ResourceLoader.RequestParams.fromString('invalid json');
-                assert.ok(params.isFaulty(), 'It is faulty');
+                assert.ok(params === phast.ResourceLoader.RequestParams.FaultyParams, 'FaultyParams is returned');
             });
         });
 
@@ -73,7 +72,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                 var iterations = 3;
                 var done = assert.async(iterations);
                 for (var i = 0; i < iterations; i++) {
-                    var params = phast.ResourceLoader.RequestParams.fromObject({fail: 'yes'});
+                    var params = {fail: 'yes'};
                     var request = client.get(params);
                     request.then(function () {
                         assert.ok(false, 'Rejects');
@@ -90,7 +89,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                 var done = assert.async(iterations);
                 var client = new phast.ResourceLoader.BundlerServiceClient('does-not-exist');
                 for (var i = 0; i < iterations; i++) {
-                    var params = phast.ResourceLoader.RequestParams.fromObject({});
+                    var params = {};
                     var request = client.get(params);
                     request.then(function () {
                         assert.ok(false, 'Rejects');
@@ -109,7 +108,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     token: 'some-token'
                 };
                 var request1 = client.get(documentParams[0]);
-                var request2 = client.get(phast.ResourceLoader.RequestParams.fromObject(badParams));
+                var request2 = client.get(badParams);
                 var request3 = client.get(documentParams[1]);
                 request1.then(function () {
                     throw 'an error';

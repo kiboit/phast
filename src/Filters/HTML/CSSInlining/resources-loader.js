@@ -48,33 +48,16 @@ phast.ResourceLoader = function (client, cache) {
     }
 };
 
-phast.ResourceLoader.RequestParams = function (faulty) {
+phast.ResourceLoader.RequestParams = {};
 
-    Object.defineProperty(this, 'isFaulty', {
-        value: function () {
-            return faulty;
-        },
-        writable: false,
-        enumerable: false,
-        configurable: false
-    });
-};
+phast.ResourceLoader.RequestParams.FaultyParams = {};
 
 phast.ResourceLoader.RequestParams.fromString = function(string) {
     try {
-        var parsed = JSON.parse(string);
-        return phast.ResourceLoader.RequestParams.fromObject(parsed);
+        return JSON.parse(string);
     } catch (e) {
-        return new phast.ResourceLoader.RequestParams(true);
+        return phast.ResourceLoader.RequestParams.FaultyParams;
     }
-};
-
-phast.ResourceLoader.RequestParams.fromObject = function (parsed) {
-    var params = new phast.ResourceLoader.RequestParams(false);
-    for (var x in parsed) {
-        params[x] = parsed[x];
-    }
-    return params;
 };
 
 phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
@@ -84,7 +67,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
 
     this.get = function (params) {
         return new Promise(function (resolve, reject) {
-            if (params.isFaulty()) {
+            if (params === phast.ResourceLoader.RequestParams.FaultyParams) {
                 reject();
             } else {
                 addToPack(new PackItem({success: resolve, error: reject}, params));
