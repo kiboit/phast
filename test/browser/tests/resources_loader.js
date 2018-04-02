@@ -187,7 +187,6 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                                 .transaction(params.storeName)
                                 .objectStore(params.storeName);
                             assert.equal('token', store.keyPath, 'Proper keypath');
-                            assert.equal('lastUsed', store.indexNames[0], 'Proper index');
                             done();
                         })
                         .catch(function (e) {
@@ -317,40 +316,6 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     .finally(done);
             });
 
-            QUnit.test('Test iterating old items', function (assert) {
-                var done = getDoneCB(assert);
-                var storage = new Storage(params);
-                var items = [0, 1, 2, 3].map(function (value) {
-                    var item = new Storage.StoredResource('token-' + value, 'content-' + value);
-                    item.lastUsed -= value * 1000;
-                    return item;
-                });
-
-                var iteratedOn = [];
-                Promise
-                    .all(items.map(function (item) {
-                       return storage.store(item);
-                    }))
-                    .then(function () {
-                        return storage.iterateOnLastUsedBefore(function (item) {
-                            iteratedOn.push(item);
-                        }, Date.now() - 2000);
-                    })
-                    .then(function () {
-                        assert.equal(2, iteratedOn.length, 'Iterated items length is correct');
-                        iteratedOn.sort(function (a, b) {
-                            return a.token > b.token ? 1 : -1;
-                        });
-                        assert.propEqual(items[2], iteratedOn[0], 'Correctly iterated 0');
-                        assert.propEqual(items[3], iteratedOn[1], 'Correctly iterated 1');
-                    })
-                    .catch(function (e) {
-                        assert.ok(false, 'Got error: ' + e);
-                    })
-                    .finally(done);
-
-            });
-
             QUnit.test('Test handling missing store', function (assert) {
                 var done = getDoneCB(assert);
                 indexedDB.open(params.dbName, params.dbVersion).onsuccess = function (ev) {
@@ -397,68 +362,29 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                 storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
                 storageParams.dbName = 'test-' + Date.now();
                 cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
-                cacheParams.autoCleanup = false;
             });
 
-            QUnit.test('Test cleanup', function (assert) {
-                cacheParams.itemTTL = 90;
-                cacheParams.cleanupProbability = 1;
+
+            QUnit.test('Test obeying size quota', function (assert) {
+                cacheParams.maxStorageSize = 146;
 
                 var done = getDoneCB(assert);
                 var cache = new Cache(cacheParams, storage);
-                cache.set('t1', 'content-1')
-                    .then(wait(100))
+                cache.set('t1', makeStringOfSize(10))
                     .then(function () {
-                        return cache.set('t2', 'content-2');
-                    })
-                    .then(wait(100))
-                    .then(function () {
-                        return cache.set('t3', 'content-3');
+                        return cache.set('t2', makeStringOfSize(147));
                     })
                     .then(function () {
-                        return cache.maybeCleanup();
+                        assert.ok(false, 'Obeying quota');
                     })
-                    .then(function () {
-                        return cache.get('t1');
-                    })
-                    .then(function (item) {
-                        assert.notOk(item, 'Did not find t1');
-                        return cache.get('t2');
-                    })
-                    .then(function (item) {
-                        assert.notOk(item, 'Did not find t2');
-                        return cache.get('t3');
-                    })
-                    .then(function (item) {
-                        assert.ok(item, 'Found t3');
-                        assert.equal('content-3', item);
-                    })
-                    .catch(function (e) {
-                        assert.ok(false, 'Got error: ' + e);
-                    })
-                    .finally(done);
-            });
-
-            QUnit.test('Test not cleaning used stuff', function (assert) {
-                cacheParams.itemTTL = 90;
-                cacheParams.cleanupProbability = 1;
-                cacheParams.autoCleanup = false;
-
-                var done = getDoneCB(assert);
-                var cache = new Cache(cacheParams, storage);
-                cache.set('t1', 'content')
-                    .then(wait(200))
-                    .then(function () {
-                        return cache.get('t1');
-                    })
-                    .then(function () {
-                        return cache.maybeCleanup();
+                    .catch(function () {
+                        assert.ok(true, 'Obeying quota');
                     })
                     .then(function () {
                         return cache.get('t1');
                     })
                     .then(function (content) {
-                        assert.equal(content, 'content');
+                        assert.ok(content, 'Cleanup not triggered');
                     })
                     .catch(function (e) {
                         assert.ok(false, 'Got error: ' + e);
@@ -466,45 +392,13 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     .finally(done);
             });
 
-            QUnit.test('Test obeying size quota', function (assert) {
-                cacheParams.maxStorageSize = 150;
-                var testText = makeStringOfSize(49);
-
-                var done = getDoneCB(assert);
-                var cache = new Cache(cacheParams, storage);
-                cache.set('t1', testText)
-                    .then(function () {
-                        return cache.set('t2', testText);
-                    })
-                    .then(function () {
-                        return cache.set('t3', testText + testText);
-                    })
-                    .then(function () {
-                        assert.ok(false, 'Not exceeding quota');
-                    })
-                    .catch(function () {
-                        assert.ok(true, 'Not exceeding quota');
-                        cache = new Cache(cacheParams, storage);
-                        return cache.set('t3', testText + testText);
-                    })
-                    .then(function () {
-                        assert.ok(false, 'Not exceeding the quota from new instance');
-                    })
-                    .catch(function () {
-                        assert.ok(true, 'Not exceeding the quota from new instance');
-                    })
-                    .finally(done);
-            });
-
             QUnit.test('Test cleaning up upon quota reach', function (assert) {
-                cacheParams.itemTTL = 20;
                 cacheParams.maxStorageSize = 80;
 
                 var content = makeStringOfSize(50);
                 var cache = new Cache(cacheParams, storage);
                 var done =  getDoneCB(assert);
                 cache.set('t1', content)
-                    .then(wait(50))
                     .then(function () {
                         return cache.set('t2', content);
                     })
@@ -513,6 +407,15 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     })
                     .then(function (content) {
                         assert.ok(content, 'Content is read');
+                    })
+                    .catch(function (e) {
+                        assert.ok(false, 'Got error: ' + e);
+                    })
+                    .then(function () {
+                        return cache.get('t1');
+                    })
+                    .then(function (content) {
+                        assert.notOk(content, 'First record has been deleted');
                     })
                     .catch(function (e) {
                         assert.ok(false, 'Got error: ' + e);

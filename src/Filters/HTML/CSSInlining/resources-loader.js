@@ -227,21 +227,6 @@ phast.ResourceLoader.IndexedDBStorage = function (params) {
             });
     };
 
-    this.iterateOnLastUsedBefore = function (callback, time) {
-        return con.get()
-            .then(function (db) {
-                var request = getStore(db)
-                    .index('lastUsed')
-                    .openCursor(IDBKeyRange.upperBound(time, true));
-                return iterateOnRequest(callback, request);
-            })
-            .catch(function (e) {
-                console.error(logPrefix, 'Error iterating on used before: ', e);
-                resetConnection();
-                throw e;
-            });
-    };
-
     function iterateOnRequest(callback, request) {
         return new Promise(function (resolve, reject) {
             request.onsuccess = function (ev) {
@@ -306,7 +291,6 @@ phast.ResourceLoader.IndexedDBStorage.ConnectionParams = function () {
 phast.ResourceLoader.IndexedDBStorage.StoredResource = function (token, content) {
     this.token = token;
     this.content = content;
-    this.lastUsed = Date.now();
 };
 
 phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
@@ -360,8 +344,7 @@ phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
     }
 
     function createSchema(db, params) {
-        var store = db.createObjectStore(params.storeName, {keyPath: 'token'});
-        store.createIndex('lastUsed', 'lastUsed');
+        db.createObjectStore(params.storeName, {keyPath: 'token'});
     }
 
 };
@@ -374,13 +357,9 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
     this.set = function (token, content) {
         return set(token, content, false);
     };
-    this.maybeCleanup = maybeCleanup;
 
     var storageSize = null;
 
-    if (params.autoCleanup) {
-        setTimeout(maybeCleanup, params.cleanupDelay);
-    }
 
     function get(token) {
         return storage.get(token)
@@ -399,7 +378,7 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
             .then(function (size) {
                 var newSize = content.length + size;
                 if (newSize > params.maxStorageSize) {
-                    return noRetry
+                    return noRetry || content.length > params.maxStorageSize
                         ? Promise.reject(new Error('Storage quota will be exceeded'))
                         : cleanupAndRetrySet(token, content);
                 }
@@ -416,28 +395,18 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
             });
     }
 
-    function maybeCleanup() {
-        if (Math.random() < params.cleanupProbability) {
-            return cleanUp();
-        }
-        return Promise.resolve();
-    }
-
     function cleanUp() {
-        var maxAge = Date.now() - params.itemTTL;
         var deletePromises = [];
-        var cleanedUpSpace = 0;
         return storage
-            .iterateOnLastUsedBefore(function (item) {
-                cleanedUpSpace += item.content.length;
+            .iterateOnAll(function (item) {
                 deletePromises.push(storage.delete(item));
-            }, maxAge)
+            })
             .then(function () {
                 return Promise.all(deletePromises);
             })
             .then(function () {
-                if (storageSize !== null) {
-                    storageSize -= cleanedUpSpace;
+                if (storageSize) {
+                    storageSize = 0;
                 }
             });
     }
@@ -460,10 +429,6 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
 };
 
 phast.ResourceLoader.StorageCache.StorageCacheParams = function () {
-    this.itemTTL = 7 * 86400000;
-    this.cleanupProbability = 0.05;
-    this.cleanupDelay = 5000;
-    this.autoCleanup = true;
     this.maxStorageSize = 4.5 * 1024 * 1024;
 };
 
