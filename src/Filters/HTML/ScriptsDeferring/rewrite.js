@@ -77,6 +77,7 @@ function loadScripts() {
     lastScript.addEventListener('load',  restoreReadyState);
     lastScript.addEventListener('error', restoreReadyState);
 }
+
 function getScriptsInExecutionOrder() {
     var immediate = [];
     var deferred = [];
@@ -89,10 +90,12 @@ function getScriptsInExecutionOrder() {
     });
     return immediate.concat(deferred);
 }
+
 function replaceElement(original, rewritten) {
     insertBefore.call(original.parentNode, rewritten, original);
     original.parentNode.removeChild(original);
 }
+
 function restoreReadyState() {
     delete document['readyState'];
 
@@ -103,11 +106,13 @@ function restoreReadyState() {
         triggerEvent(window, 'load');
     }
 }
+
 function triggerEvent(on, name) {
     var e = document.createEvent('Event');
     e.initEvent(name, true, true);
     on.dispatchEvent(e);
 }
+
 function fakeDocumentWrite(originalScript, newScript) {
     var scriptId = ++scriptIndex;
     newScript.setAttribute('data-phast-script', scriptId);
@@ -132,12 +137,14 @@ function fakeDocumentWrite(originalScript, newScript) {
     newScript.addEventListener('load',  cleanup);
     newScript.addEventListener('error', cleanup);
 }
+
 function buildScript(body) {
     var script = document.createElement('script');
     script.async = false;
     script.setAttribute('src', 'data:text/javascript;base64,' + utoa(body));
     return script;
 }
+
 function utoa(str) {
     return btoa(
         encodeURIComponent(str).replace(
