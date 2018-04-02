@@ -360,8 +360,6 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
         return storage.get(token)
             .then(function (item) {
                 if (item) {
-                    item.lastUsed = Date.now();
-                    storage.store(item);
                     return Promise.resolve(item.content);
                 }
                 return Promise.resolve();
