@@ -373,8 +373,7 @@ phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
             .catch(function (e) {
                 console.error(logPrefix, "Error while opening database:", e);
                 throw e;
-            }
-        );
+            });
     }
 
     function createSchema(db, params) {
