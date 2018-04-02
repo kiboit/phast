@@ -31,9 +31,7 @@ phast.ResourceLoader = function (client, cache) {
                 });
         }))
         .then(function () {
-            if (misses.length) {
-                getFromClient(misses);
-            }
+            getFromClient(misses);
         });
         requested = [];
     }
