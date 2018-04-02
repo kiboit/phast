@@ -2,6 +2,8 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
     var Promise = phast.ES6Promise.Promise;
 
+    var indexedDBTest = typeof indexedDB === 'undefined' ? QUnit.skip : QUnit.test;
+
     QUnit.module('ResourcesLoader', function (hooks) {
 
         var client,
@@ -157,7 +159,6 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             var Storage = phast.ResourceLoader.IndexedDBStorage;
 
-
             var params = new Storage.ConnectionParams();
             hooks.beforeEach(function () {
                 params.dbName = 'test-' + Date.now();
@@ -165,7 +166,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             QUnit.module('IndexedDBStorage.Connection', function () {
 
-                QUnit.test('Test connection making', function (assert) {
+                indexedDBTest('Test connection making', function (assert) {
                     var done = getDoneCB(assert);
                     var connection = new Storage.Connection(params);
                     connection.get()
@@ -179,7 +180,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                         });
                 });
 
-                QUnit.test('Test storage creation', function (assert) {
+                indexedDBTest('Test storage creation', function (assert) {
                     var done = getDoneCB(assert);
                     new Storage.Connection(params).get()
                         .then(function (db) {
@@ -195,7 +196,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                         });
                 });
 
-                QUnit.test('Test getting the same connection per instance', function (assert) {
+                indexedDBTest('Test getting the same connection per instance', function (assert) {
                     var done = getDoneCB(assert);
                     assert.expect(2);
                     var con1 = new Storage.Connection(params);
@@ -216,7 +217,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                         .finally(done);
                 });
 
-                QUnit.test('Test dropping database', function (assert) {
+                indexedDBTest('Test dropping database', function (assert) {
                     var done = getDoneCB(assert);
                     var con = new Storage.Connection(params);
                     var db1;
@@ -238,7 +239,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             });
 
-            QUnit.test('Test storing and fetching', function (assert) {
+            indexedDBTest('Test storing and fetching', function (assert) {
                 var done = getDoneCB(assert);
                 var testItem = new Storage.StoredResource('the-token', 'the-content');
                 var storage = new Storage(params);
@@ -264,7 +265,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     .finally(done);
             });
 
-            QUnit.test('Test clearing the store', function (assert) {
+            indexedDBTest('Test clearing the store', function (assert) {
                 var done = getDoneCB(assert, 2000, 3);
                 var storage = new Storage(params);
                 var iterations = [1, 2, 3];
@@ -290,7 +291,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                 });
             });
 
-            QUnit.test('Test iterating on all items', function (assert) {
+            indexedDBTest('Test iterating on all items', function (assert) {
                 var done = getDoneCB(assert);
                 var items = [0, 1, 2].map(function (value) {
                     return new Storage.StoredResource('token-' + value, 'content-' + value);
@@ -322,7 +323,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     .finally(done);
             });
 
-            QUnit.test('Test handling missing store', function (assert) {
+            indexedDBTest('Test handling missing store', function (assert) {
                 var done = getDoneCB(assert);
                 indexedDB.open(params.dbName, params.dbVersion).onsuccess = function (ev) {
                     ev.target.result.close();
@@ -371,7 +372,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             });
 
 
-            QUnit.test('Test obeying size quota', function (assert) {
+            indexedDBTest('Test obeying size quota', function (assert) {
                 cacheParams.maxStorageSize = 146;
 
                 var done = getDoneCB(assert);
@@ -398,7 +399,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     .finally(done);
             });
 
-            QUnit.test('Test cleaning up upon quota reach', function (assert) {
+            indexedDBTest('Test cleaning up upon quota reach', function (assert) {
                 cacheParams.maxStorageSize = 80;
 
                 var content = makeStringOfSize(50);
@@ -477,7 +478,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                 checkFetchingFiles(assert, loader, done);
             });
 
-            QUnit.test('Get from cache', function (assert) {
+            indexedDBTest('Get from cache', function (assert) {
                 var done = getDoneCB(assert, 2000, documentParams.length);
                 var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
                 var cache = new Cache(cacheParams, storage);

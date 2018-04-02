@@ -316,6 +316,10 @@ phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
     }
 
     function openDB(params) {
+        if (typeof indexedDB === 'undefined') {
+            return Promise.reject(new Error('IndexedDB is not available'));
+        }
+
         var request = indexedDB.open(params.dbName, params.dbVersion);
         request.onupgradeneeded = function (db) {
             createSchema(request.result, params);
