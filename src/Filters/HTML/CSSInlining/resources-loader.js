@@ -16,29 +16,24 @@ phast.ResourceLoader = function (client, cache) {
     }
 
     function getFromCache() {
-        var totalCnt = requested.length;
-        var hitsCnt = 0;
         var misses = [];
-
-        requested.forEach(function (request) {
-            cache.get(request.params.token)
+        Promise.all(requested.map(function (request) {
+            return cache.get(request.params.token)
                 .then(function (content) {
                     if (content) {
-                        hitsCnt++;
                         request.resolve(content);
                     } else {
                         return Promise.reject();
                     }
-
                 })
                 .catch(function () {
                     misses.push(request);
-                })
-                .finally(function () {
-                    if (misses.length > 0 && misses.length + hitsCnt === totalCnt) {
-                        getFromClient(misses);
-                    }
                 });
+        }))
+        .then(function () {
+            if (misses.length) {
+                getFromClient(misses);
+            }
         });
         requested = [];
     }
