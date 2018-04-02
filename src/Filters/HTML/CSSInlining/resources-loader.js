@@ -388,7 +388,9 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
     var StoredResource = phast.ResourceLoader.IndexedDBStorage.StoredResource;
 
     this.get = get;
-    this.set = set;
+    this.set = function (token, content) {
+        return set(token, content, false);
+    };
     this.maybeCleanup = maybeCleanup;
 
     var storageSize = null;
@@ -409,17 +411,26 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
             });
     }
 
-    function set(token, content) {
+    function set(token, content, noRetry) {
         return getCurrentStorageSize()
             .then(function (size) {
                 var newSize = content.length + size;
                 if (newSize > params.maxStorageSize) {
-                    return Promise.reject(new Error('Storage quota will be exceeded'));
+                    return noRetry
+                        ? Promise.reject(new Error('Storage quota will be exceeded'))
+                        : cleanupAndRetrySet(token, content);
                 }
                 storageSize = newSize;
                 var item = new StoredResource(token, content);
                 return storage.store(item);
             })
+    }
+
+    function cleanupAndRetrySet(token, content) {
+        return cleanUp()
+            .then(function () {
+                return set(token, content, true);
+            });
     }
 
     function maybeCleanup() {
@@ -432,12 +443,19 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
     function cleanUp() {
         var maxAge = Date.now() - params.itemTTL;
         var deletePromises = [];
+        var cleanedUpSpace = 0;
         return storage
             .iterateOnLastUsedBefore(function (item) {
+                cleanedUpSpace += item.content.length;
                 deletePromises.push(storage.delete(item));
             }, maxAge)
             .then(function () {
                 return Promise.all(deletePromises);
+            })
+            .then(function () {
+                if (storageSize !== null) {
+                    storageSize -= cleanedUpSpace;
+                }
             });
     }
 

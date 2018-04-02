@@ -469,10 +469,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             QUnit.test('Test obeying size quota', function (assert) {
                 cacheParams.maxStorageSize = 150;
-                var testText = '';
-                for (var i = 0; i < 49; i++) {
-                    testText += 'a';
-                }
+                var testText = makeStringOfSize(49);
 
                 var done = getDoneCB(assert);
                 var cache = new Cache(cacheParams, storage);
@@ -499,6 +496,38 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     })
                     .finally(done);
             });
+
+            QUnit.test('Test cleaning up upon quota reach', function (assert) {
+                cacheParams.itemTTL = 20;
+                cacheParams.maxStorageSize = 80;
+
+                var content = makeStringOfSize(50);
+                var cache = new Cache(cacheParams, storage);
+                var done =  getDoneCB(assert);
+                cache.set('t1', content)
+                    .then(wait(50))
+                    .then(function () {
+                        return cache.set('t2', content);
+                    })
+                    .then(function () {
+                        return cache.get('t2');
+                    })
+                    .then(function (content) {
+                        assert.ok(content, 'Content is read');
+                    })
+                    .catch(function (e) {
+                        assert.ok(false, 'Got error: ' + e);
+                    })
+                    .finally(done);
+            });
+
+            function makeStringOfSize(size) {
+                var str = '';
+                for (var i = 0; i < size; i++) {
+                    str += 'a';
+                }
+                return str;
+            }
 
         });
 
@@ -560,7 +589,6 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             });
 
         });
-
 
 
         function checkFetchingFiles(assert, client, done) {
