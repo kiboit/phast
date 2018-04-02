@@ -203,15 +203,10 @@ phast.ResourceLoader.IndexedDBStorage = function (params) {
             });
     };
 
-    this.delete = function (item) {
+    this.clear = function () {
         return con.get()
             .then(function (db) {
-                return r2p(getStore(db, 'readwrite').delete(item.token));
-            })
-            .catch(function (e) {
-                console.error(logPrefix, 'Error deleting from store:', e);
-                resetConnection();
-                throw e;
+                return r2p(getStore(db, 'readwrite').clear());
             });
     };
 
@@ -396,14 +391,7 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
     }
 
     function cleanUp() {
-        var deletePromises = [];
-        return storage
-            .iterateOnAll(function (item) {
-                deletePromises.push(storage.delete(item));
-            })
-            .then(function () {
-                return Promise.all(deletePromises);
-            })
+        return storage.clear()
             .then(function () {
                 if (storageSize) {
                     storageSize = 0;

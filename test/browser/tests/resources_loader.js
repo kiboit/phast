@@ -264,24 +264,30 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     .finally(done);
             });
 
-            QUnit.test('Test deleting from store', function (assert) {
-                var done = getDoneCB(assert);
-                var itemToDelete = new Storage.StoredResource('the-token', 'the-content');
+            QUnit.test('Test clearing the store', function (assert) {
+                var done = getDoneCB(assert, 2000, 3);
                 var storage = new Storage(params);
-                storage.store(itemToDelete)
+                var iterations = [1, 2, 3];
+                var lastPromise = Promise
+                    .all(iterations.map(function (value) {
+                        return storage.store({token: 't' + value, content: 'some-content'});
+                    }))
                     .then(function () {
-                        return storage.delete(itemToDelete);
-                    })
-                    .then(function () {
-                        return storage.get(itemToDelete.token);
-                    })
-                    .then(function (item) {
-                        assert.notOk(item, 'Item was not found');
-                    })
-                    .catch(function (e) {
-                        assert.ok(false, 'Got error: ' + e);
-                    })
-                    .finally(done);
+                        return storage.clear();
+                    });
+                iterations.forEach(function (value) {
+                    lastPromise = lastPromise
+                        .then(function () {
+                            return storage.get('t' + value);
+                        })
+                        .then(function (content) {
+                            assert.notOk(content, 't' + value + ' is cleared');
+                        })
+                        .catch(function (e) {
+                            assert.ok(false, 'Got error: ' + e);
+                        })
+                        .finally(done);
+                });
             });
 
             QUnit.test('Test iterating on all items', function (assert) {
