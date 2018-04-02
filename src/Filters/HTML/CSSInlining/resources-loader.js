@@ -50,9 +50,14 @@ phast.ResourceLoader = function (client, cache) {
 
 phast.ResourceLoader.RequestParams = function (faulty) {
 
-    this.isFaulty = function () {
-        return faulty;
-    };
+    Object.defineProperty(this, 'isFaulty', {
+        value: function () {
+            return faulty;
+        },
+        writable: false,
+        enumerable: false,
+        configurable: false
+    });
 };
 
 phast.ResourceLoader.RequestParams.fromString = function(string) {
@@ -134,9 +139,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         var parts = [];
         getSortedTokens(pack).forEach(function (token, idx) {
             for (var key in pack[token].params) {
-                if (key === 'isFaulty') {
-                    continue;
-                }
                 parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(pack[token].params[key]));
             }
         });
