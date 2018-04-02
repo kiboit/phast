@@ -11,7 +11,7 @@ phast.ResourceLoader = function (client, cache) {
         return new Promise(function (resolve, reject) {
             requested.push({resolve: resolve, reject: reject, params: params});
             clearTimeout(executionTimeout);
-            setTimeout(getFromCache);
+            executionTimeout = setTimeout(getFromCache);
         });
     }
 
