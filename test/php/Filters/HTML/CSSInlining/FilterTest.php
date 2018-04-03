@@ -114,7 +114,6 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
         $styles = $this->dom->getElementsByTagName('style');
         $this->assertFalse($styles->item(0)->hasAttribute('data-phast-params'));
-        $this->assertHasNotCompiledScripts();
     }
 
     public function testNotInliningOnOptimizationError() {
@@ -124,8 +123,6 @@ class FilterTest extends HTMLFilterTestCase {
             ->method('optimizeCSS')
             ->willReturn(null);
         $this->applyFilter();
-
-        $this->assertHasNotCompiledScripts();
 
         $link = $this->getMatchingElement($link);
         $this->assertEquals('/the-path', $link->getAttribute('href'));
