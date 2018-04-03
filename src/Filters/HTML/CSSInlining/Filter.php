@@ -33,16 +33,6 @@ class Filter extends BaseHTMLStreamFilter {
     private $signature;
 
     /**
-     * @var bool
-     */
-    private $withIEFallback = false;
-
-    /**
-     * @var bool
-     */
-    private $hasDoneInlining = false;
-
-    /**
      * @var int
      */
     private $maxInlineDepth = 2;
@@ -140,12 +130,8 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function afterLoop() {
-        if ($this->withIEFallback) {
-            $this->addIEFallbackScript();
-        }
-        if ($this->hasDoneInlining) {
-            $this->addInlinedRetrieverScript();
-        }
+        $this->addIEFallbackScript();
+        $this->addInlinedRetrieverScript();
     }
 
     private function inlineLink(Tag $link, URL $baseUrl) {
@@ -237,7 +223,6 @@ class Filter extends BaseHTMLStreamFilter {
             $content = $optimized;
             $isOptimized = true;
         }
-        $this->hasDoneInlining = true;
         $elements = $this->inlineCSS(
             $url,
             $content,
@@ -289,20 +274,16 @@ class Filter extends BaseHTMLStreamFilter {
 
         $this->logger()->info('Set {url} as IE fallback URL', ['url' => (string)$fallbackUrl]);
 
-        $this->withIEFallback = true;
-
         return $elements;
     }
 
     private function addIEFallbackScript() {
         $this->logger()->info('Adding IE fallback script');
-        $this->withIEFallback = false;
         $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/ie-fallback.js'));
     }
 
     private function addInlinedRetrieverScript() {
         $this->logger()->info('Adding inlined retriever script');
-        $this->hasDoneInlining = false;
         $this->context->addPhastJavascript(new PhastJavaScript(__DIR__ . '/resources-loader.js'));
         $script = new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js');
         $script->setConfig('serviceUrl', (string) $this->serviceUrl);
