@@ -125,7 +125,8 @@ class CachingServiceFilter implements ServiceFilter {
     private function deserializeException(array $data) {
         return new CachedExceptionException(
             sprintf(
-                'Phast: CachedCompositeImageFilter: Type: %s, Msg: %s, Code: %s',
+                'Phast: %s: Type: %s, Msg: %s, Code: %s',
+                static::class,
                 $data['class'],
                 $data['msg'],
                 $data['code']
