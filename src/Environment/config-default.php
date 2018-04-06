@@ -58,8 +58,6 @@ return [
                 'maxImageInliningSize' => 512
             ],
 
-            \Kibo\Phast\Filters\HTML\CSSDeferring\Filter::class => [],
-
             \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\ScriptsRearrangement\Filter::class => [],
