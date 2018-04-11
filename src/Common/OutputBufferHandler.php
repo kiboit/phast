@@ -43,7 +43,10 @@ class OutputBufferHandler {
     }
 
     public function install() {
-        while (@ob_end_flush());
+        $ignoreHandlers = ['default output handler', 'ob_gzhandler'];
+        if (!array_diff(ob_list_handlers(), $ignoreHandlers)) {
+            while (@ob_end_flush());
+        }
         ob_start([$this, 'handleChunk'], 2);
         ob_implicit_flush(true);
     }
