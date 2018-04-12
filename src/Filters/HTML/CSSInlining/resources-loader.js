@@ -68,7 +68,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
     this.get = function (params) {
         return new Promise(function (resolve, reject) {
             if (params === phast.ResourceLoader.RequestParams.FaultyParams) {
-                reject();
+                reject(new Error("Parameters did not parse as JSON"));
             } else {
                 addToPack(new PackItem({success: resolve, error: reject}, params));
                 clearTimeout(timeoutHandler);
@@ -152,7 +152,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 });
             } else {
                 pack[tokens[idx]].requests.forEach(function (request) {
-                    request.error();
+                    request.error(new Error("Got from bundler: " + JSON.stringify(response)));
                 });
             }
         });
