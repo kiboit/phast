@@ -5,7 +5,7 @@ cd "$(dirname "$0")"/..
 
 composer="$PWD/vendor/composer.phar"
 
-release="$(git tag -l --points-at=HEAD | grep ^v || :)"
+release="$(git tag -l --points-at=HEAD | grep -P '^[0-9]\.' || :)"
 if [[ $release = "" ]]; then
     release=HEAD
 fi
@@ -24,3 +24,5 @@ git archive HEAD | tar xf - -C "$tmp"
     find -not -name . -not -name .. -name '.*' -exec rm -r {} +
     tar cJf - --xform 's/^\./phast/' .
 ) > dist/phast-$release.txz
+
+echo dist/phast-$release.txz
