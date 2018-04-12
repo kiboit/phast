@@ -50,7 +50,8 @@ return [
                     '~^https?://fonts\.googleapis\.com/css~' => [
                         'ieCompatible' => false
                     ],
-                    '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~'
+                    '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
+                    '~^https?://maxcdn\.bootstrapcdn\.com/[^?#]*\.css~'
                 ]
             ],
 
