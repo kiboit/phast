@@ -5,7 +5,12 @@
 
     $bundlerTestParams = [];
     foreach ([1, 2, 3] as $i) {
-        $file = "http://phast-browser.test/res/text-$i.txt";
+        $file = sprintf(
+            'http://%s%s/res/text-%s.txt',
+            $_SERVER['HTTP_HOST'],
+            dirname($_SERVER['PHP_SELF']),
+            $i
+        );
         $bundlerTestParams[] = \Kibo\Phast\Services\Bundler\ServiceParams::fromArray(['src' => $file])
             ->sign($signature)
             ->serialize();
