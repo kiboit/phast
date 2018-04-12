@@ -15,7 +15,7 @@ class Diagnostics implements \Kibo\Phast\Diagnostics\Diagnostics {
         Log::setLogger(new Logger(new DiagnosticsLogWriter()));
         $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content');
         $compressed = (new CompressingFilter())->apply($resource, []);
-        (new DecompressingFilter())->apply($compressed, ['accept-encoding' => ['identity']]);
+        (new DecompressingFilter())->apply($compressed, []);
     }
 
 }
