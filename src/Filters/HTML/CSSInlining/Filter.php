@@ -207,7 +207,7 @@ class Filter extends BaseHTMLStreamFilter {
             $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
             return $this->addIEFallback(
                 $ieFallbackUrl,
-                [$this->makeStyle($url, '', $media, true, false)]
+                [$this->makeStyle($url, "@import url(\"$url\");", $media, true, false)]
             );
         }
 
