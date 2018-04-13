@@ -151,7 +151,8 @@ class ImageURLRewriter {
             $this->signature->getCacheSalt(),
             $this->baseUrl->toString(),
             $this->serviceUrl->toString(),
-            $this->maxImageInliningSize
+            $this->maxImageInliningSize,
+            '20180413'
         ], array_keys($this->whitelist), array_values($this->whitelist));
         return join('-', $parts);
     }
