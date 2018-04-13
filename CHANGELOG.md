@@ -6,6 +6,7 @@
 * `PhastDocumentFilters::apply()` method for integration in view rendering.
 * Removal of `Content-Length` header when filters are applied.
 * Inlined CSS from `maxcdn.bootstrapcdn.com`.
+* Cross-domain requests to the service are allowed. (`Access-Control-Allow-Origin: *`)
 
 ### Fixed
 * Path format queries are now serialized the same way as normal queries (via
