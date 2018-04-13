@@ -116,7 +116,8 @@ abstract class BaseService {
 
     protected function validateToken(ServiceRequest $request) {
         if (!$request->verify($this->signature)) {
-            throw new UnauthorizedException('Invalid token');
+            throw new UnauthorizedException('Invalid token in request: ' .
+                $request->serialize(ServiceRequest::FORMAT_QUERY));
         }
     }
 

@@ -48,9 +48,9 @@ class PhastServices {
             $response = (new Factory())
                 ->make($service, $runtimeConfig)
                 ->serve($serviceRequest);
-            Log::info('Service completed!');
+            Log::info('Service completed');
         } catch (UnauthorizedException $e) {
-            Log::error('Unauthorized exception: {message}!', ['message' => $e->getMessage()]);
+            Log::error('Unauthorized exception: {message}', ['message' => $e->getMessage()]);
             exit();
         } catch (ItemNotFoundException $e) {
             Log::error('Item not found: {message}', ['message' => $e->getMessage()]);
