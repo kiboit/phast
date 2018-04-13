@@ -15,6 +15,8 @@
 * Path format queries are now serialized the same way as normal queries (via
   `http_build_query()`). `urlencode()` serializes `false` differently, breaking
   token verification.
+* An error was thrown during image processing when pngquant or jpegtran were
+  missing. This was fixed.
 
 ## [1.1.0] - 2018-04-12
 
