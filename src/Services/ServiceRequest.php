@@ -232,8 +232,9 @@ class ServiceRequest {
     private function serializeToPathFormat(array $params) {
         $srcValue = null;
         $values = [];
-        foreach ($params as $key => $value) {
-            $encodedValue = str_replace(['-', '%'], ['%2D', '-'], urlencode($value));
+        foreach (explode('&', http_build_query($params)) as $element) {
+            list ($key, $value) = explode('=', $element, 2);
+            $encodedValue = str_replace(['-', '%'], ['%2D', '-'], $value);
             if ($key == 'src') {
                 $srcValue = $encodedValue;
             } else {
