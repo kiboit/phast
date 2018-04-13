@@ -40,7 +40,11 @@ abstract class ExternalAppImageFilter implements ImageFilter {
     }
 
     public function getCacheSalt(array $request) {
-        return md5($this->getFullCommand());
+        try {
+            return md5($this->getFullCommand());
+        } catch (ImageProcessingException $e) {
+            return 'binary-not-found';
+        }
     }
 
 

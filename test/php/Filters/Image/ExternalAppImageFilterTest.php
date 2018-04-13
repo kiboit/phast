@@ -109,6 +109,11 @@ class ExternalAppImageFilterTest extends TestCase {
         $this->assertNotEquals($filter2->getCacheSalt([]), $filter3->getCacheSalt([]));
     }
 
+    public function testGenerateCacheSaltWithMissingBinary() {
+        $this->binPath = '/this/should/not/exist';
+        $this->assertEquals('binary-not-found', $this->getFilter()->getCacheSalt([]));
+    }
+
     /**
      * @return DummyImage
      */
