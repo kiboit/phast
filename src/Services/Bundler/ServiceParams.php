@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services\Bundler;
 
+use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Security\ServiceSignature;
 
 class ServiceParams {
@@ -66,7 +67,7 @@ class ServiceParams {
     }
 
     public function serialize() {
-        return json_encode($this->toArray());
+        return JSON::encode($this->toArray());
     }
 
     private function makeToken(ServiceSignature $signature) {

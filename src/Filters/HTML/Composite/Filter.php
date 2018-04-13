@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
+use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -96,8 +97,8 @@ class Filter {
         $log .= sprintf("% 43s % 4dms\n", '(total)', $timeDelta*1000);
 
         $output .= '<script>try{';
-        $output .= 'console.groupCollapsed(' . json_encode("[Phast] Server-side performance metrics") . ');';
-        $output .= 'console.log(' . json_encode($log) . ');console.groupEnd();';
+        $output .= 'console.groupCollapsed(' . JSON::encode("[Phast] Server-side performance metrics") . ');';
+        $output .= 'console.log(' . JSON::encode($log) . ');console.groupEnd();';
         $output .= '}catch(e){}</script>';
         $this->logger()->info($log);
         return $output;

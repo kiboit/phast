@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Parsing\HTML;
 
+use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Comment;
@@ -105,7 +106,7 @@ class PCRETokenizer {
                 $element = new ClosingTag($match['tag_name'][0]);
                 $element->originalString = $match[0][0];
             } else {
-                throw new RuntimeException("Unhandled match:\n" . json_encode($match, JSON_PRETTY_PRINT));
+                throw new RuntimeException("Unhandled match:\n" . JSON::prettyEncode($match));
             }
             yield $element;
             $offset = $match[0][1] + strlen($match[0][0]);

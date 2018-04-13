@@ -3,6 +3,8 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
+use Kibo\Phast\Common\JSON;
+
 class Element {
 
     /**
@@ -45,7 +47,7 @@ class Element {
     }
 
     public function dumpValue() {
-        return json_encode($this->originalString);
+        return JSON::encode($this->originalString);
     }
 
 }

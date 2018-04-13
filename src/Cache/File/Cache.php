@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Cache\File;
 
 use Kibo\Phast\Cache\Cache as CacheInterface;
+use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Logging\LoggingTrait;
 

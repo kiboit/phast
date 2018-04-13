@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\JSMinifier;
+use Kibo\Phast\Common\JSON;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
 class PhastJavaScriptCompiler {
@@ -80,7 +81,7 @@ class PhastJavaScriptCompiler {
             }
         }
         $this->lastCompiledConfig = $config;
-        return json_encode(['config' => $config]);
+        return JSON::encode(['config' => $config]);
     }
 
     /**

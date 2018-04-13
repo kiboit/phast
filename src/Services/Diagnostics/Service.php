@@ -3,6 +3,7 @@
 
 namespace Kibo\Phast\Services\Diagnostics;
 
+use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Diagnostics\SystemDiagnostics;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\LogReaders\JSONLFile\Reader;
@@ -25,7 +26,7 @@ class Service  {
         }
 
         $response = new Response();
-        $response->setContent(json_encode($items, JSON_PRETTY_PRINT));
+        $response->setContent(JSON::prettyEncode($items));
         $response->setHeader('Content-Type', 'application/json');
         return $response;
     }

@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Services\Bundler;
 
+use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -147,7 +148,7 @@ class Service {
             $prepend = '';
             $firstRow = false;
         }
-        return $prepend . json_encode($content);
+        return $prepend . JSON::encode($content);
     }
 
 }
