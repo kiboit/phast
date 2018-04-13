@@ -98,6 +98,7 @@ abstract class BaseService {
         $response->setHeader('Vary', 'Accept-Encoding');
         $response->setHeader('Cache-Control', 'max-age=' . $maxAge);
         $response->setHeader('X-Accel-Expires', $maxAge);
+        $response->setHeader('Access-Control-Allow-Origin', '*');
         return $response;
     }
 
