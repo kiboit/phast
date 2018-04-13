@@ -90,15 +90,9 @@ abstract class BaseService {
      * @return Response
      */
     protected function makeResponse(Resource $resource, array $request) {
-        $maxAge = 86400 * 365;
         $response = new Response();
         $response->setContent($resource->getContent());
-        $response->setHeader('Content-Length', strlen($resource->getContent()));
         $response->setHeader('Content-Encoding', $resource->getEncoding());
-        $response->setHeader('Vary', 'Accept-Encoding');
-        $response->setHeader('Cache-Control', 'max-age=' . $maxAge);
-        $response->setHeader('X-Accel-Expires', $maxAge);
-        $response->setHeader('Access-Control-Allow-Origin', '*');
         return $response;
     }
 

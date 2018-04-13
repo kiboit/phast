@@ -99,9 +99,15 @@ class PhastServices {
             }
         }
 
-        if (!isset($headers['ETag'])) {
-            $headers['ETag'] = self::generateETag($headers, $content);
-        }
+        $maxAge = 86400 * 365;
+
+        $headers += [
+            'Vary' => 'Accept-Encoding',
+            'Cache-Control' => 'max-age=' . $maxAge,
+            'X-Accel-Expires' => $maxAge,
+            'Access-Control-Allow-Origin' => '*',
+            'ETag' => self::generateETag($headers, $content)
+        ];
 
         $funcs->http_response_code($response->getCode());
         foreach ($headers as $name => $value) {
