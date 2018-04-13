@@ -7,6 +7,11 @@
 * Removal of `Content-Length` header when filters are applied.
 * Inlined CSS from `maxcdn.bootstrapcdn.com`.
 
+### Fixed
+* Path format queries are now serialized the same way as normal queries (via
+  `http_build_query()`). `urlencode()` serializes `false` differently, breaking
+  token verification.
+
 ## [1.1.0] - 2018-04-12
 
 ### Added
