@@ -6,7 +6,7 @@
 * Removal of `Content-Length` header when filters are applied.
 * Inlined CSS from `maxcdn.bootstrapcdn.com`.
 
-## [1.1.0]
+## [1.1.0] - 2018-04-12
 
 ### Added
 * Inlining of small images in HTML, CSS.
