@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [Unreleased]
+
+### Added
+
+* Attributes with JSON values are now quotes with single quotes for better
+  readability.
+
+
 ## [1.2.0] - 2018-04-13
 
 ### Added
