@@ -1,6 +1,7 @@
 # Changelog
 
-## [Unreleased]
+
+## [1.2.0] - 2018-04-13
 
 ### Added
 * `PhastDocumentFilters::apply()` method for integration in view rendering.
@@ -16,7 +17,10 @@
   `http_build_query()`). `urlencode()` serializes `false` differently, breaking
   token verification.
 * An error was thrown during image processing when pngquant or jpegtran were
-  missing. This was fixed.
+  missing. This was fixed. ([#60])
+
+[#60]: https://github.com/kiboit/phast/issues/60
+
 
 ## [1.1.0] - 2018-04-12
 
@@ -34,7 +38,9 @@
 ### Fixed
 * IFrame lazy loading compatibility with already existing implementations.
 
-
-[Unreleased]: https://github.com/kiboit/phast/compare/1.1.0...master
-[1.1.0]: https://github.com/kiboit/phast/compare/1.0.0...1.1.0
 [#29]: https://github.com/kiboit/phast/pull/29
+
+
+[Unreleased]: https://github.com/kiboit/phast/compare/1.2.0...master
+[1.2.0]: https://github.com/kiboit/phast/compare/1.1.0...1.2.0
+[1.1.0]: https://github.com/kiboit/phast/compare/1.0.0...1.1.0
