@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+* `PhastDocumentFilters::apply()` method for integration in view rendering.
 * Removal of `Content-Length` header when filters are applied.
 * Inlined CSS from `maxcdn.bootstrapcdn.com`.
 
