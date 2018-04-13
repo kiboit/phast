@@ -17,7 +17,7 @@ class OutputBufferHandler {
         )++
     ~xsiA';
 
-    CONST DOCUMENT_PATTERN = "~
+    const DOCUMENT_PATTERN = "~
         \s* (<\?xml[^>]*>)?
         \s* (<!doctype\s+html[^>]*>)?
         (\s* <!--(.*?)-->)*
