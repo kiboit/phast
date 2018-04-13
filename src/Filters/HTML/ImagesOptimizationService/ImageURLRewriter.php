@@ -106,27 +106,34 @@ class ImageURLRewriter {
         $allInlined = [];
         $result = preg_replace_callback(
             '~
-                (
-                    \b (?: image | background ):
-                    [^;}]*
-                    \b url \( [\'"]?
-                )
-                (
-                    [^\'")] ++
-                )
+                (\b (?: image | background ):)
+                ([^;}]*)
             ~xiS',
-            function ($matches) use (&$allInlined) {
-                $url = $matches[1] . $this->rewriteUrl($matches[2]);
+            function ($match) use (&$allInlined) {
+                return $match[1] . $this->rewriteStyleRule($match[2], $allInlined);
+            },
+            $styleContent
+        );
+        $this->inlinedResources = array_values($allInlined);
+        return $result;
+    }
+
+    private function rewriteStyleRule($ruleContent, &$allInlined) {
+        return preg_replace_callback(
+            '~
+                ( \b url \( [\'"]? )
+                ( [^\'")] ++ )
+            ~xiS',
+            function ($match) use (&$allInlined) {
+                $url = $match[1] . $this->rewriteUrl($match[2]);
                 if (!empty ($this->inlinedResources)) {
                     $inlined = $this->inlinedResources[0];
                     $allInlined[$inlined->getUrl()->toString()] = $inlined;
                 }
                 return $url;
             },
-            $styleContent
+            $ruleContent
         );
-        $this->inlinedResources = array_values($allInlined);
-        return $result;
     }
 
     /**

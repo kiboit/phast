@@ -68,6 +68,15 @@ class ImageURLRewriterTest extends PhastTestCase {
                 . urlencode(self::BASE_URL . '/images/image2')
                 . '&cacheMarker=123&token=the-token'
                 . '\')'
+            ],
+            [
+                "border-image: url(/images/image2), url(/images/image2)",
+                sprintf(
+                    'border-image: url(%1$s), url(%1$s)',
+                    self::BASE_URL . '/images.php?src='
+                    . urlencode(self::BASE_URL . '/images/image2')
+                    . '&cacheMarker=123&token=the-token'
+                )
             ]
         ];
     }
