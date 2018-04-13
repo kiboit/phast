@@ -191,10 +191,23 @@ class Tag extends Element {
     private function generateAttribute($name, $value) {
         $result = $name;
 
-        if ($value != '')
-            $result .= '="' . htmlspecialchars($value) . '"';
+        if ($value != '') {
+            $result .= '=' . $this->quoteAttributeValue($value);
+        }
 
         return $result;
+    }
+
+    private function quoteAttributeValue($value) {
+        if (strpos($value, '"') === false) {
+            return '"' . htmlspecialchars($value) . '"';
+        } else {
+            return "'" . str_replace(
+                ['&',     "'"],
+                ['&amp;', '&#039;'],
+                $value
+            ) . "'";
+        }
     }
 
     private function mustHaveClosing() {
