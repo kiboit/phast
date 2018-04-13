@@ -9,6 +9,7 @@
 * Cross-domain requests to the service are allowed. (`Access-Control-Allow-Origin: *`)
 * Cache control and other default headers for CSS bundler service.
 * Processing of multiple images in one CSS rule. (`background: url(...), url(...)`)
+* Proxy Google Maps API JS, DoubleClick stats JS
 
 ### Fixed
 * Path format queries are now serialized the same way as normal queries (via
