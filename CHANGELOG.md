@@ -4,8 +4,6 @@
 
 ### Added
 * Removal of `Content-Length` header when filters are applied.
-
-### Changed
 * Inlined CSS from `maxcdn.bootstrapcdn.com`.
 
 ## [1.1.0]
