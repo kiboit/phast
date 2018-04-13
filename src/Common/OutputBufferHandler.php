@@ -52,6 +52,7 @@ class OutputBufferHandler {
     }
 
     public function handleChunk($chunk, $phase) {
+        @header_remove('Content-Length');
         if ($this->buffer === null) {
             return $chunk;
         }
