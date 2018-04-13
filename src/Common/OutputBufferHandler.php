@@ -52,11 +52,12 @@ class OutputBufferHandler {
     }
 
     public function handleChunk($chunk, $phase) {
-        @header_remove('Content-Length');
         if ($this->buffer === null) {
             return $chunk;
         }
+
         $this->buffer .= $chunk;
+
         if (strlen($this->buffer) > $this->maxBufferSizeToApply) {
             $this->logger()->info(
                 'Buffer exceeds max. size ({buffersize} bytes). Not applying',
@@ -68,13 +69,20 @@ class OutputBufferHandler {
         }
 
         $output = '';
+
         if (preg_match(self::START_PATTERN, $this->buffer, $match, 0, $this->offset)) {
             $this->offset += strlen($match[0]);
             $output .= $match[0];
         }
+
         if ($phase & PHP_OUTPUT_HANDLER_FINAL) {
             $output .= $this->finalize();
         }
+
+        if ($output !== '') {
+            @header_remove('Content-Length');
+        }
+
         return $output;
     }
 
