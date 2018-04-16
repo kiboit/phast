@@ -5,7 +5,7 @@
 
 ### Added
 
-* Attributes with JSON values are now quotes with single quotes for better
+* Attributes with JSON values are now quoted with single quotes for better
   readability.
 
 
