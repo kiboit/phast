@@ -12,12 +12,13 @@ class ObjectifiedFunctions {
      */
     public function __call($name, array $arguments) {
         if (isset ($this->$name) && is_callable($this->$name)) {
-            return call_user_func_array($this->$name, $arguments);
+            $fn = $this->$name;
+            return $fn(...$arguments);
         }
         if (function_exists($name)) {
-            return call_user_func_array($name, $arguments);
+            return $name(...$arguments);
         }
-        throw new UndefinedObjectifiedFunction("Undefined objectified-function $name");
+        throw new UndefinedObjectifiedFunction("Undefined objectified function $name");
     }
 
 }

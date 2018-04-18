@@ -3,8 +3,8 @@
 namespace Kibo\Phast\Cache\File;
 
 use Kibo\Phast\Cache\Cache as CacheInterface;
-use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Common\System;
 use Kibo\Phast\Logging\LoggingTrait;
 
 class Cache implements CacheInterface {
@@ -47,6 +47,11 @@ class Cache implements CacheInterface {
      */
     private $functions;
 
+    /**
+     * @var System
+     */
+    private $system;
+
     public function __construct(array $config, $cacheNamespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = $config['cacheRoot'];
         $this->shardingDepth = $config['shardingDepth'];
@@ -58,6 +63,8 @@ class Cache implements CacheInterface {
         } else {
             $this->functions = new ObjectifiedFunctions();
         }
+
+        $this->system = new System($this->functions);
 
         if (!isset (self::$garbageCollector)) {
             self::$garbageCollector = new GarbageCollector($config, $this->functions);
@@ -119,13 +126,15 @@ class Cache implements CacheInterface {
         if (!file_exists($dir)) {
             @mkdir($dir, 0700, true);
         }
-        if ($this->functions->posix_geteuid() !== $this->functions->fileowner($this->cacheRoot)) {
+        if (($uid = $this->system->getUserId())
+            && $uid !== $this->functions->fileowner($this->cacheRoot)
+        ) {
             $this->logger()->critical(
                 'Phast: FileCache: Cache root {cacheRoot} owned by {fileOwner}, but process user is {userId}!',
                 [
                     'cacheRoot' => $this->cacheRoot,
                     'fileOwner' => fileowner($this->cacheRoot),
-                    'userId' => posix_getuid()
+                    'userId' => $uid
                 ]
             );
             return;

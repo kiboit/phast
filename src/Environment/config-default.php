@@ -1,5 +1,7 @@
 <?php
 
+use Kibo\Phast\Common\System;
+
 return [
 
     'securityToken' => null,
@@ -9,7 +11,7 @@ return [
     ],
 
     'cache' => [
-        'cacheRoot'   => sys_get_temp_dir() . '/phast-cache-' . posix_geteuid(),
+        'cacheRoot' => sys_get_temp_dir() . '/phast-cache-' . (new System())->getUserId(),
         'shardingDepth' => 1,
         'garbageCollection' => [
             'maxItems'    => 100,
