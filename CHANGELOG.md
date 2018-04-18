@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [Unreleased]
+## [1.3.0] - 2018-04-18
 
 ### Added
 * Attributes with JSON values are now quoted with single quotes for better
@@ -51,6 +51,7 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.2.0...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.3.0...master
+[1.3.0]: https://github.com/kiboit/phast/compare/1.2.0...1.1.0
 [1.2.0]: https://github.com/kiboit/phast/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/kiboit/phast/compare/1.0.0...1.1.0
