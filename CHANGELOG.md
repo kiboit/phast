@@ -4,9 +4,11 @@
 ## [Unreleased]
 
 ### Added
-
 * Attributes with JSON values are now quoted with single quotes for better
   readability.
+
+### Fixed
+* Phast now works on Windows.
 
 
 ## [1.2.0] - 2018-04-13
