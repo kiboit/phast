@@ -189,6 +189,11 @@ class ImageURLRewriter {
     }
 
     private function makeDataUrl(URL $url) {
+        // TODO: Determine mime type based on file extension,
+        // because finfo is not installed everywhere.
+        if (!class_exists('\finfo')) {
+            return false;
+        }
         $content = $this->retriever->retrieve($url);
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
         if ($mime && substr($mime, 0, 6) == 'image/') {
