@@ -20,8 +20,9 @@ class CacheTestCase extends PhastTestCase {
 
     public function setUp() {
         parent::setUp();
+        $uid = function_exists('posix_geteuid') ? posix_geteuid() : 0;
         $this->config = [
-            'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir-' . posix_geteuid(),
+            'cacheRoot' => sys_get_temp_dir() . '/test-cache-dir-' . $uid,
             'shardingDepth' => 1,
             'garbageCollection' => [
                 'probability' => 0,
