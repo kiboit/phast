@@ -5,7 +5,8 @@ RUN apk update && \
         shadow \
         sudo \
         php5 \
-        php5-dom
+        php5-dom \
+        php5-json
 
 RUN ln -s /usr/bin/php5 /usr/bin/php
 
