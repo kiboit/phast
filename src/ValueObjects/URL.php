@@ -49,7 +49,11 @@ class URL {
      * @return URL
      */
     public static function fromString($string) {
-        return self::fromArray(parse_url($string));
+        $components = parse_url($string);
+        if (!$components) {
+            return new self();
+        }
+        return self::fromArray($components);
     }
 
     /**
