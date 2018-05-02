@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+* Phast is no longer dependent on the ctype extension.
+
+
 ## [1.3.1] - 2018-04-27
 
 ### Fixed
