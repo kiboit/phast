@@ -13,7 +13,7 @@ class Factory {
      * @throws ItemNotFoundException
      */
     public function make($service, array $config) {
-        if (!ctype_alpha($service)) {
+        if (!preg_match('/^[a-z]+$/', $service)) {
             throw new ItemNotFoundException('Bad service');
         }
         $class = __NAMESPACE__ . '\\' . ucfirst($service) . '\\Factory';
