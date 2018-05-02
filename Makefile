@@ -1,4 +1,5 @@
-RUN = docker run -it -v $(shell pwd):/data -w /data $(shell cat .docker-image-id)
+PHP56 = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php56.image)
+PHP56MIN = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php56-min.image)
 
 
 .PHONY : all test test-local update docker dist
@@ -6,16 +7,15 @@ RUN = docker run -it -v $(shell pwd):/data -w /data $(shell cat .docker-image-id
 
 all : vendor/autoload.php
 
-test : all docker
-	$(RUN) vendor/bin/phpunit
+test : all docker/php56.image docker/php56-min.image
+	$(PHP56) vendor/bin/phpunit
+	$(PHP56MIN) vendor/bin/phpunit
 
 test-local : all
 	vendor/bin/phpunit
 
 update : all
 	vendor/composer.phar update
-
-docker : .docker-image-id
 
 dist : all
 	bin/package
@@ -30,6 +30,6 @@ vendor/composer.phar :
 	chmod +x $@~
 	mv $@~ $@
 
-.docker-image-id : Dockerfile docker/entrypoint
-	docker build -q . > $@~
+docker/%.image : docker/% docker/entrypoint
+	docker build -q -f $< docker > $@~
 	mv $@~ $@

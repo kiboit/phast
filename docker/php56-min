@@ -1,0 +1,15 @@
+FROM alpine:latest
+
+RUN apk update && \
+    apk add \
+        shadow \
+        sudo \
+        php5 \
+        php5-dom
+
+RUN ln -s /usr/bin/php5 /usr/bin/php
+
+RUN useradd -m docker
+
+COPY entrypoint /entrypoint
+ENTRYPOINT ["/bin/sh", "/entrypoint"]

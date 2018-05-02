@@ -14,5 +14,5 @@ RUN apt-get update && apt-get install -y \
 
 RUN useradd -m docker
 
-COPY docker/entrypoint /entrypoint
+COPY entrypoint /entrypoint
 ENTRYPOINT ["/bin/bash", "/entrypoint"]
