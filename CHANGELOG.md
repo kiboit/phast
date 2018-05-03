@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+
+## [1.4.0] - 2018-05-03
+
+### Added
+* Support for the Requests library that is bundled by WordPress.
+
 ### Fixed
 * The bundler service does now not fail entirely when cURL is missing and remote
   resources are requested.
@@ -71,7 +77,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.3.2...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.4.0...master
+[1.4.0]: https://github.com/kiboit/phast/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/kiboit/phast/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/kiboit/phast/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/kiboit/phast/compare/1.2.0...1.3.0
