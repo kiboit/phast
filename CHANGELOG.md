@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+* The bundler service does now not fail entirely when cURL is missing and remote
+  resources are requested.
+
 
 ## [1.3.2] - 2018-05-03
 
