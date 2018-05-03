@@ -3,11 +3,15 @@
 namespace Kibo\Phast\Retrievers;
 
 use Kibo\Phast\ValueObjects\URL;
+use Kibo\Phast\Exceptions\RuntimeException;
 
 class RemoteRetriever implements Retriever {
     use DynamicCacheSaltTrait;
 
     public function retrieve(URL $url) {
+        if (!function_exists('curl_init')) {
+            throw new RuntimeException('cURL is missing');
+        }
         $ch = curl_init((string)$url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
