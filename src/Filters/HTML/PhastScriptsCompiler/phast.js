@@ -1,3 +1,5 @@
+var Promise = phast.ES6Promise;
+
 phast.forEachSelectedElement = function (selector, callback) {
     Array.prototype.forEach.call(
         window.document.querySelectorAll(selector),
@@ -60,7 +62,3 @@ phast.on(document, 'DOMContentLoaded').then(function () {
         return v;
     }
 });
-
-while (phast.scripts.length) {
-    (phast.scripts.shift())();
-}
