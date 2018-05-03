@@ -4,6 +4,8 @@
 
 ### Fixed
 * Phast is no longer dependent on the ctype extension.
+* A regression on IE 11 due to a missing `Promise` implementation was fixed.
+* URL parsing no longer fails on malformed URLs. (For PhastPress.)
 
 
 ## [1.3.1] - 2018-04-27
