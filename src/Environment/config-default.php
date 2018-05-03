@@ -99,8 +99,7 @@ return [
 
         'whitelist' => [
             '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/[^#?]*\.(jpe?g|gif|png)~i',
-            '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
-            '~^https://www.commitstrip.com~'
+            '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~'
         ],
 
         'filters' => [
