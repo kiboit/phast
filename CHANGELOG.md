@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+
+## [1.3.2] - 2018-05-03
+
 ### Fixed
 * Phast is no longer dependent on the ctype extension.
 * A regression on IE 11 due to a missing `Promise` implementation was fixed.
@@ -64,7 +67,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.3.1...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.3.2...master
+[1.3.1]: https://github.com/kiboit/phast/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/kiboit/phast/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/kiboit/phast/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/kiboit/phast/compare/1.1.0...1.2.0
