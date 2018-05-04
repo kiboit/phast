@@ -88,7 +88,7 @@ class PhastServices {
 
         $fp = fopen('php://output', 'wb');
         if (self::shouldZip($request, $response)) {
-            $zipping = $funcs->stream_filter_append(
+            $zipping = @$funcs->stream_filter_append(
                 $fp,
                 'zlib.deflate',
                 STREAM_FILTER_WRITE,

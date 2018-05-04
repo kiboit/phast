@@ -23,7 +23,7 @@ class GDImageTest extends TestCase {
     }
 
     public function testImageSizeAndTypeForJPEG() {
-        $this->checkImageSizeAndType(Image::TYPE_JPEG, IMG_JPEG, 'imagejpeg');
+        $this->checkImageSizeAndType(Image::TYPE_JPEG, 2 /* IMG_JPEG */, 'imagejpeg');
     }
 
     public function testImageSizeAndTypeForPNG() {
@@ -180,6 +180,9 @@ class GDImageTest extends TestCase {
     }
 
     private function getImageString($callback, $compression = 0, $text = null) {
+        if (!function_exists('imagecreate')) {
+            $this->markTestSkipped('imagecreate (GD) is missing');
+        }
         $image = imagecreate(150, 200);
         $orange = imagecolorallocate($image, 220, 210, 60);
         if ($text) {
