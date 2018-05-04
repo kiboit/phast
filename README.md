@@ -57,9 +57,6 @@ Test your site!
 
 * CSS inlining: Small stylesheets (including Google Fonts) get inlined.
 
-* CSS deferring: Any external stylesheets that weren't inlined are loaded
-  asynchronously.
-
 * Delay IFrames: IFrames are loaded after the page finishes, to prevent stealing
   bandwidth and resources from the main page load.
 
