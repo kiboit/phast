@@ -3,6 +3,11 @@
 return call_user_func(function () {
     $all_caps = json_decode(file_get_contents(__DIR__ . '/data/browsers.json'), true);
 
+    usort($all_caps, function ($a, $b) {
+        return version_compare($a['os_version'], $b['os_version']) ??
+               version_compare($a['browser_version'], $b['browser_version']);
+    });
+
     $min_browser_versions = [
         'chrome' => '62',
         'firefox' => '56',
@@ -14,6 +19,8 @@ return call_user_func(function () {
         'android' => '5',
         'ios' => '8'
     ];
+
+    $seen = [];
 
     foreach ($all_caps as $cap) {
         if ($cap['os'] == 'Windows' && $cap['os_version'] == 'XP') {
@@ -32,6 +39,10 @@ return call_user_func(function () {
         ) {
             continue;
         }
-        yield $cap;
+        $name = http_build_query(array_intersect_key($cap, array_flip(['browser'])));
+        if (!isset($seen[$name])) {
+            $seen[$name] = true;
+            yield $cap;
+        }
     }
 });

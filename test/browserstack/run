@@ -11,6 +11,8 @@ need_env=(
     BROWSERSTACK_ACCESS_KEY
 )
 
+mkdir -p data
+
 
 # Load environment variables
 if [[ ! -f $env_file ]]; then
