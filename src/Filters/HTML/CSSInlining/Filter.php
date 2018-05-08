@@ -50,6 +50,11 @@ class Filter extends BaseHTMLStreamFilter {
     /**
      * @var string
      */
+    private $bundlerUrl;
+
+    /**
+     * @var string
+     */
     private $serviceUrl;
 
     /**
@@ -89,6 +94,9 @@ class Filter extends BaseHTMLStreamFilter {
         $this->baseURL = $baseURL;
         $this->serviceUrl = (new ServiceRequest())->withUrl(
             URL::fromString((string)$config['serviceUrl'])
+        )->serialize(ServiceRequest::FORMAT_QUERY);
+        $this->bundlerUrl = (new ServiceRequest())->withUrl(
+            URL::fromString((string)$config['bundlerUrl'])
         )->serialize(ServiceRequest::FORMAT_QUERY);
         $this->optimizerSizeDiffThreshold = (int)$config['optimizerSizeDiffThreshold'];
         $this->retriever = $retriever;
@@ -207,7 +215,7 @@ class Filter extends BaseHTMLStreamFilter {
             $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
             return $this->addIEFallback(
                 $ieFallbackUrl,
-                [$this->makeStyle($url, "@import url(\"$url\");", $media, true, false)]
+                [$this->makeServiceLink($url, $media)]
             );
         }
 
@@ -286,7 +294,7 @@ class Filter extends BaseHTMLStreamFilter {
         $this->logger()->info('Adding inlined retriever script');
         $this->context->addPhastJavascript(new PhastJavaScript(__DIR__ . '/resources-loader.js'));
         $script = new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js');
-        $script->setConfig('serviceUrl', (string) $this->serviceUrl);
+        $script->setConfig('serviceUrl', (string) $this->bundlerUrl);
         $this->context->addPhastJavaScript($script);
     }
 
@@ -319,6 +327,11 @@ class Filter extends BaseHTMLStreamFilter {
         return $link;
     }
 
+    private function makeServiceLink(URL $location, $media) {
+        $url = $this->makeServiceURL($location);
+        return $this->makeLink(URL::fromString($url), $media);
+    }
+
     protected function makeServiceParams(URL $originalLocation, $stripImports = false) {
         $params = [
             'src' => (string) $originalLocation,
@@ -330,5 +343,19 @@ class Filter extends BaseHTMLStreamFilter {
         return ServiceParams::fromArray($params)
                 ->sign($this->signature)
                 ->serialize();
+    }
+
+    protected function makeServiceURL(URL $originalLocation, $stripImports = false) {
+        $params = [
+            'src' => (string) $originalLocation,
+            'cacheMarker' => $this->retriever->getCacheSalt($originalLocation)
+        ];
+        if ($stripImports) {
+            $params['strip-imports'] = 1;
+        }
+        return (new ServiceRequest())->withParams($params)
+            ->withUrl(URL::fromString($this->serviceUrl))
+            ->sign($this->signature)
+            ->serialize();
     }
 }

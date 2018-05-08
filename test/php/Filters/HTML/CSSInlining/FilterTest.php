@@ -14,6 +14,8 @@ class FilterTest extends HTMLFilterTestCase {
 
     const SERVICE_URL = self::BASE_URL . '/service.php';
 
+    const BUNDLER_URL = self::BASE_URL . '/bundler.php';
+
     const URL_REFRESH_TIME = 7200;
 
     private $retrieverLastModificationTime;
@@ -51,6 +53,7 @@ class FilterTest extends HTMLFilterTestCase {
                 ]
             ],
             'serviceUrl' => self::SERVICE_URL,
+            'bundlerUrl' => self::BUNDLER_URL,
             'urlRefreshTime' => self::URL_REFRESH_TIME,
             'optimizerSizeDiffThreshold' => -1
         ];
@@ -99,6 +102,7 @@ class FilterTest extends HTMLFilterTestCase {
         }
 
         $this->assertHasCompiled('CSSInlining/inlined-css-retriever.js');
+        $this->assertCompiledConfigEqauls(self::BUNDLER_URL . '?', 'serviceUrl');
     }
 
     public function testCallingTheFilterOnBothStylesAndLinks() {
@@ -177,15 +181,20 @@ class FilterTest extends HTMLFilterTestCase {
         $headElements = $this->head->childNodes;
         $this->assertEquals(1, $headElements->length);
 
-        $newStyle = $headElements->item(0);
-        $this->assertEquals('style', $newStyle->tagName);
+        $newLink = $headElements->item(0);
+        $this->assertEquals('link', $newLink->tagName);
 
         $expectedParams = [
             'src' => self::BASE_URL . '/the-css.css',
             'cacheMarker' => 123,
             'token' => 'the-token'
         ];
-        $actualParams = json_decode($newStyle->getAttribute('data-phast-params'), JSON_OBJECT_AS_ARRAY);
+
+        $parsedHref = parse_url($newLink->getAttribute('href'));
+        $this->assertEquals(basename(self::SERVICE_URL), basename($parsedHref['path']));
+
+        $actualParams = null;
+        parse_str($parsedHref['query'], $actualParams);
         $this->assertEquals($expectedParams, $actualParams);
     }
 
@@ -371,6 +380,7 @@ class FilterTest extends HTMLFilterTestCase {
             ' . sprintf($importFormat, $importUrl) . '
             body { color: red; }
         ';
+        $this->files['/css'] = 'some-content';
         $this->makeLink($this->head, $css);
         $this->applyFilter();
 
@@ -391,7 +401,7 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function whitelistedImportProvider() {
         $urls = [
-            'https://fonts.googleapis.com/css1',
+            'https://fonts.googleapis.com/css',
             'https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700',
             '//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700'
         ];

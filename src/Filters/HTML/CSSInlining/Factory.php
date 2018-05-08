@@ -25,7 +25,13 @@ class Factory implements HTMLFilterFactory {
         if (!isset ($config['documents']['filters'][Filter::class]['serviceUrl'])) {
             $url = $config['servicesUrl'];
             $config['documents']['filters'][Filter::class]['serviceUrl']
-            = strpos($url, '?') === false ? $url . '?service=bundler' : $url;
+            = strpos($url, '?') === false ? $url . '?service=css' : $url;
+        }
+
+        if (!isset ($config['documents']['filters'][Filter::class]['bundlerUrl'])) {
+            $url = $config['servicesUrl'];
+            $config['documents']['filters'][Filter::class]['bundlerUrl']
+                = strpos($url, '?') === false ? $url . '?service=bundler' : $url;
         }
 
         return new Filter(
