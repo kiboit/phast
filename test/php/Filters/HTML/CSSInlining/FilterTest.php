@@ -102,7 +102,7 @@ class FilterTest extends HTMLFilterTestCase {
         }
 
         $this->assertHasCompiled('CSSInlining/inlined-css-retriever.js');
-        $this->assertCompiledConfigEqauls(self::BUNDLER_URL . '?', 'serviceUrl');
+        $this->assertCompiledConfigEquals(self::BUNDLER_URL . '?', 'serviceUrl');
     }
 
     public function testCallingTheFilterOnBothStylesAndLinks() {

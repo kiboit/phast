@@ -4,6 +4,7 @@
 
 ### Fixed
 * We do not rely on `finfo` for determining file types anymore.
+* Non-cached non-local styles won't cause a flick on first load anymore
 
 ## [1.4.0] - 2018-05-03
 

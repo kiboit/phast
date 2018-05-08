@@ -196,7 +196,7 @@ class FilterTest extends HTMLFilterTestCase {
         $expectedConfig = $this->config;
         $expectedConfig['whitelist'] = $expectedConfig['match'];
         unset ($expectedConfig['match']);
-        $this->assertCompiledConfigEqauls($expectedConfig, 'script-proxy-service');
+        $this->assertCompiledConfigEquals($expectedConfig, 'script-proxy-service');
     }
 
     public function testDontInjectScriptForNothing() {
