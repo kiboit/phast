@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+### Fixed
+* We do not rely on `finfo` for determining file types anymore.
 
 ## [1.4.0] - 2018-05-03
 

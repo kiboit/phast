@@ -189,18 +189,24 @@ class ImageURLRewriter {
     }
 
     private function makeDataUrl(URL $url) {
-        // TODO: Determine mime type based on file extension,
-        // because finfo is not installed everywhere.
-        if (!class_exists('\finfo')) {
+        $ext2mime = [
+            'gif' => 'image/gif',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'bmp' => 'image/bmp',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+        ];
+        $regexp = '/\.(' . join('|', array_keys($ext2mime)) . ')$/i';
+        $matches = [];
+        if (!preg_match($regexp, (string) $url, $matches)) {
             return false;
         }
+        $mime = $ext2mime[strtolower($matches[1])];
         $content = $this->retriever->retrieve($url);
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
-        if ($mime && substr($mime, 0, 6) == 'image/') {
-            $this->inlinedResources = [Resource::makeWithRetriever($url, $this->retriever, $mime)];
-            return 'data:' . $mime . ';base64,' . base64_encode($content);
-        }
-        return false;
+        $this->inlinedResources = [Resource::makeWithRetriever($url, $this->retriever, $mime)];
+        return 'data:' . $mime . ';base64,' . base64_encode($content);
     }
 
     /**

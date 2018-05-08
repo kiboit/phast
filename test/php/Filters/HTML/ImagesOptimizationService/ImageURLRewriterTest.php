@@ -92,31 +92,38 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->assertEquals($src, $this->getRewriter()->rewriteUrl($src));
     }
 
-    public function testInliningSmallImages() {
+    /**
+     * @param string $fileExtension
+     * @param string $expectedMIMEType
+     * @dataProvider inliningTypes
+     */
+    public function testInliningSmallImages($fileExtension, $expectedMIMEType) {
         $lastModificationTime = 123;
-        $svg = '<?xml version="1.0"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>';
+        $content = 'the-content-of-the-image-file';
         $this->retriever = $this->createMock(LocalRetriever::class);
         $this->retriever->method('getSize')
-            ->willReturn(strlen($svg));
+            ->willReturn(strlen($content));
         $this->retriever->method('retrieve')
-            ->willReturn($svg);
+            ->willReturn($content);
         $this->retriever->method('getCacheSalt')
             ->willReturn($lastModificationTime);
 
-        $expectedDataUrl = 'data:image/svg+xml;base64,' . base64_encode($svg);
+        $expectedDataUrl = "data:$expectedMIMEType;base64," . base64_encode($content);
 
         $rewriter = $this->getRewriter();
-        $url = $rewriter->rewriteUrl('some-url');
+        $inputUrl1 = 'some-url.' . $fileExtension;
+        $url = $rewriter->rewriteUrl($inputUrl1);
         $this->assertEquals($expectedDataUrl, $url);
 
         $inlined = $rewriter->getInlinedResources();
         $this->assertCount(1, $inlined);
         $this->assertInstanceOf(Resource::class, $inlined[0]);
-        $this->assertContains('some-url', (string) $inlined[0]->getUrl());
+        $this->assertContains($inputUrl1, (string) $inlined[0]->getUrl());
         $this->assertEquals($lastModificationTime, $inlined[0]->getCacheSalt());
 
-        $css = 'background: url("some-url-2"); background: url("some-url"); background: url("some-url-2");';
-        $expectedCSS = str_replace(['some-url-2', 'some-url'], $expectedDataUrl, $css);
+        $inputUrl2 = 'some-url-2.' . $fileExtension;
+        $css = "background: url(\"$inputUrl2\"); background: url(\"$inputUrl1\"); background: url(\"$inputUrl2\");";
+        $expectedCSS = str_replace([$inputUrl2, $inputUrl1], $expectedDataUrl, $css);
         $rewrittenCSS = $rewriter->rewriteStyle($css);
         $this->assertEquals($rewrittenCSS, $expectedCSS);
 
@@ -124,13 +131,33 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->assertCount(2, $inlined);
         $this->assertInstanceOf(Resource::class, $inlined[0]);
         $this->assertInstanceOf(Resource::class, $inlined[1]);
-        $this->assertContains('some-url-2', (string) $inlined[0]->getUrl());
-        $this->assertContains('some-url', (string) $inlined[0]->getUrl());
+        $this->assertContains($inputUrl2, (string) $inlined[0]->getUrl());
+        $this->assertContains($inputUrl1, (string) $inlined[1]->getUrl());
         $this->assertEquals($lastModificationTime, $inlined[0]->getCacheSalt());
         $this->assertEquals($lastModificationTime, $inlined[1]->getCacheSalt());
 
         $rewriter->rewriteUrl('http://somewhere.else.test/image');
         $this->assertCount(0, $rewriter->getInlinedResources());
+    }
+
+    public function inliningTypes() {
+        return [
+            ['gif', 'image/gif'],
+            ['png', 'image/png'],
+            ['jpg', 'image/jpeg'],
+            ['jpeg', 'image/jpeg'],
+            ['bmp', 'image/bmp'],
+            ['webp', 'image/webp'],
+            ['svg', 'image/svg+xml'],
+
+            ['GIF', 'image/gif'],
+            ['PNG', 'image/png'],
+            ['JPG', 'image/jpeg'],
+            ['JPEG', 'image/jpeg'],
+            ['BMP', 'image/bmp'],
+            ['WEBP', 'image/webp'],
+            ['SVG', 'image/svg+xml']
+        ];
     }
 
     public function testNotInliningWhenMIMETypeIsNotAnImage() {
@@ -140,7 +167,7 @@ class ImageURLRewriterTest extends PhastTestCase {
             ->willReturn(strlen($image));
         $this->retriever->method('retrieve')
             ->willReturn($image);
-        $url = $this->getRewriter()->rewriteUrl('some-url');
+        $url = $this->getRewriter()->rewriteUrl('some-url.ext');
         $this->assertStringStartsWith(self::BASE_URL, $url);
     }
 
