@@ -54,21 +54,16 @@ function test(file, fn, withPhast) {
             done();
 
             var doc = iframe.contentWindow.document;
-
-            var scripts = doc.getElementsByTagName('script');
-            var logCount = 0;
-
-            Array.prototype.forEach.call(scripts, function (script) {
-                if (/Server-side performance metrics/.test(script.textContent)) {
-                    logCount++;
-                }
-            });
+            var comment = doc.documentElement.nextSibling;
+            var hasLog = comment
+                && comment.nodeType === 8
+                && comment.textContent.indexOf('[Phast] Server-side performance metrics') === 0;
 
             if (withPhast) {
-                assert.ok(scripts.length >= 1, "Any document processed by Phast contains at least one script");
-                assert.equal(logCount, 1, "Exactly one script should contain Phast's log message");
+                assert.ok(hasLog, "The document should contain Phast's log message");
+                console.log(comment)
             } else {
-                assert.equal(logCount, 0, "No scripts should contain Phast's log message");
+                assert.notOk(hasLog, "The document should not contain Phast's log message");
             }
 
             // Remove this workaround if/when the Browserstack issue gets fixed.

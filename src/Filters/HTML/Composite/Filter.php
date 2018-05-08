@@ -96,10 +96,9 @@ class Filter {
         $log .= sprintf("% 43s % 4dms\n", '(other)', ($timeDelta - $timeAccounted)*1000);
         $log .= sprintf("% 43s % 4dms\n", '(total)', $timeDelta*1000);
 
-        $output .= '<script>try{';
-        $output .= 'console.groupCollapsed(' . JSON::encode("[Phast] Server-side performance metrics") . ');';
-        $output .= 'console.log(' . JSON::encode($log) . ');console.groupEnd();';
-        $output .= '}catch(e){}</script>';
+        $output .= "<!--[Phast] Server-side performance metrics:\n";
+        $output .= $log;
+        $output .= ' -->';
         $this->logger()->info($log);
         return $output;
     }
