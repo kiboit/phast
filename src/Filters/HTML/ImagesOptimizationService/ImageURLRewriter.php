@@ -25,6 +25,11 @@ class ImageURLRewriter {
     protected $retriever;
 
     /**
+     * @var ImageInliningManager
+     */
+    protected $inliningManager;
+
+    /**
      * @var URL
      */
     protected $baseUrl;
@@ -73,6 +78,8 @@ class ImageURLRewriter {
         $this->serviceUrl = $serviceUrl;
         $this->whitelist = $whitelist;
         $this->maxImageInliningSize = $maxImageInliningSize;
+
+        $this->inliningManager = new ImageInliningManager($maxImageInliningSize, $retriever);
     }
 
     /**
@@ -87,12 +94,14 @@ class ImageURLRewriter {
         if (!$this->shouldRewriteUrl($absolute)) {
             return $url;
         }
-        $size = $this->retriever->getSize($absolute);
-        if ($size !== false && $size < $this->maxImageInliningSize) {
-            $dataUrl = $this->makeDataUrl($absolute);
-            if ($dataUrl) {
-                return $dataUrl;
-            }
+
+        if ($this->inliningManager->canBeInlined($absolute)) {
+            $this->inlinedResources = [Resource::makeWithRetriever(
+                $absolute,
+                $this->retriever,
+                $this->inliningManager->getMimeType($absolute)
+            )];
+            return $this->inliningManager->toDataUrl($absolute);
         }
         $params['src'] = $absolute->toString();
         return $this->makeSignedUrl($params);
@@ -186,26 +195,6 @@ class ImageURLRewriter {
             }
         }
         return false;
-    }
-
-    private function makeDataUrl(URL $url) {
-        $ext2mime = [
-            'gif' => 'image/gif',
-            'png' => 'image/png',
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'bmp' => 'image/bmp',
-            'webp' => 'image/webp',
-            'svg' => 'image/svg+xml',
-        ];
-        $ext = strtolower($url->getExtension());
-        if (!isset ($ext2mime[$ext])) {
-            return false;
-        }
-        $mime = $ext2mime[$ext];
-        $content = $this->retriever->retrieve($url);
-        $this->inlinedResources = [Resource::makeWithRetriever($url, $this->retriever, $mime)];
-        return 'data:' . $mime . ';base64,' . base64_encode($content);
     }
 
     /**
