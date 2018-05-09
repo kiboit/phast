@@ -51,7 +51,7 @@ phast.on(document, 'DOMContentLoaded').then(function () {
     m.push(["  Receive first byte                 + %s ms", fmt(t.responseStart - t.requestStart)]);
     m.push(["  Download page                      + %s ms", fmt(t.responseEnd - t.responseStart)]);
     m.push([""]);
-    m.push(["Totals:"])
+    m.push(["Totals:"]);
     m.push(["  Time to first byte                   %s ms", fmt(t.responseStart - t.fetchStart)]);
     m.push(["    (since request start)              %s ms", fmt(t.responseStart - t.requestStart)]);
     m.push(["  Total request time                   %s ms", fmt(t.responseEnd - t.fetchStart)]);
@@ -63,9 +63,9 @@ phast.on(document, 'DOMContentLoaded').then(function () {
         f.push(i.shift());
         p = p.concat(i);
     });
-    console.groupCollapsed("[Phast] Client-side performance metrics")
+    console.groupCollapsed("[Phast] Client-side performance metrics");
     console.log.apply(console, [f.join("\n")].concat(p));
-    console.groupEnd()
+    console.groupEnd();
     function fmt(v) {
         v = '' + v;
         while (v.length < 4) {
