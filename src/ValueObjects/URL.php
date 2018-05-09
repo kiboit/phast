@@ -204,6 +204,17 @@ class URL {
     /**
      * @return string
      */
+    public function getExtension() {
+        $matches = [];
+        if (preg_match('/\.([^.]*)$/', $this->path, $matches)) {
+            return $matches[1];
+        }
+        return '';
+    }
+
+    /**
+     * @return string
+     */
     public function getFragment() {
         return $this->fragment;
     }

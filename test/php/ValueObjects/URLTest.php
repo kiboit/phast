@@ -91,4 +91,30 @@ class URLTest extends PhastTestCase {
         ];
     }
 
+    /**
+     * @dataProvider getExtensionData
+     */
+    public function testGetExtension($url, $expectedExtension = 'css') {
+        $this->assertEquals($expectedExtension, URL::fromString($url)->getExtension());
+    }
+
+    public function getExtensionData() {
+        return [
+            ['http://example.com/the-style.css'],
+            ['http://example.com/the-style.css?query'],
+            ['http://example.com/the-style.css#hash'],
+            ['http://example.com/the-style.pref.css'],
+            ['http://example.com/the-style.pref.css?query'],
+            ['http://example.com/the-style.pref.css#hash'],
+            ['//example.com/the-style.css'],
+            ['/path/the-style.css'],
+            ['http://example.com/the-style.CSS', 'CSS'],
+            ['http://example.com/the-image.png', 'png'],
+            ['http://example.com/the-style.css?query'],
+            ['http://example.com/the-style', '']
+        ];
+    }
+
+
+
 }
