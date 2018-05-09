@@ -18,7 +18,7 @@ phast.ResourceLoader = function (client, cache) {
     function getFromCache() {
         var misses = [];
         Promise.all(requested.map(function (request) {
-            return cache.get(request.params.token)
+            return cache.get(request.params)
                 .then(function (content) {
                     if (content) {
                         request.resolve(content);
@@ -40,7 +40,7 @@ phast.ResourceLoader = function (client, cache) {
         requests.forEach(function (request) {
             client.get(request.params)
                 .then(function (responseText) {
-                    cache.set(request.params.token, responseText);
+                    cache.set(request.params, responseText);
                     request.resolve(responseText);
                 })
                 .catch(request.reject);
@@ -352,13 +352,18 @@ phast.ResourceLoader.StorageCache = function (params, storage) {
 
     var StoredResource = phast.ResourceLoader.IndexedDBStorage.StoredResource;
 
-    this.get = get;
-    this.set = function (token, content) {
-        return set(token, content, false);
+    this.get = function (params) {
+        return get(paramsToToken(params));
+    };
+    this.set = function (params, content) {
+        return set(paramsToToken(params), content, false);
     };
 
     var storageSize = null;
 
+    function paramsToToken(params) {
+        return JSON.stringify(params);
+    }
 
     function get(token) {
         return storage.get(token)
