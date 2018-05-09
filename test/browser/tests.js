@@ -61,7 +61,6 @@ function test(file, fn, withPhast) {
 
             if (withPhast) {
                 assert.ok(hasLog, "The document should contain Phast's log message");
-                console.log(comment)
             } else {
                 assert.notOk(hasLog, "The document should not contain Phast's log message");
             }
