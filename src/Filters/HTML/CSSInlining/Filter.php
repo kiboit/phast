@@ -345,14 +345,12 @@ class Filter extends BaseHTMLStreamFilter {
                 ->serialize();
     }
 
-    protected function makeServiceURL(URL $originalLocation, $stripImports = false) {
+    protected function makeServiceURL(URL $originalLocation) {
         $params = [
             'src' => (string) $originalLocation,
             'cacheMarker' => $this->retriever->getCacheSalt($originalLocation)
         ];
-        if ($stripImports) {
-            $params['strip-imports'] = 1;
-        }
+
         return (new ServiceRequest())->withParams($params)
             ->withUrl(URL::fromString($this->serviceUrl))
             ->sign($this->signature)
