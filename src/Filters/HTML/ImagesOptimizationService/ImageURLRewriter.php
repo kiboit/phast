@@ -198,12 +198,11 @@ class ImageURLRewriter {
             'webp' => 'image/webp',
             'svg' => 'image/svg+xml',
         ];
-        $regexp = '/\.(' . join('|', array_keys($ext2mime)) . ')$/i';
-        $matches = [];
-        if (!preg_match($regexp, (string) $url, $matches)) {
+        $ext = strtolower($url->getExtension());
+        if (!isset ($ext2mime[$ext])) {
             return false;
         }
-        $mime = $ext2mime[strtolower($matches[1])];
+        $mime = $ext2mime[$ext];
         $content = $this->retriever->retrieve($url);
         $this->inlinedResources = [Resource::makeWithRetriever($url, $this->retriever, $mime)];
         return 'data:' . $mime . ';base64,' . base64_encode($content);

@@ -112,8 +112,13 @@ class ImageURLRewriterTest extends PhastTestCase {
 
         $rewriter = $this->getRewriter();
         $inputUrl1 = 'some-url.' . $fileExtension;
-        $url = $rewriter->rewriteUrl($inputUrl1);
-        $this->assertEquals($expectedDataUrl, $url);
+        $this->assertEquals($expectedDataUrl, $rewriter->rewriteUrl($inputUrl1));
+
+        $inputUrlQuery = $inputUrl1 . '?query';
+        $this->assertEquals($expectedDataUrl, $rewriter->rewriteUrl($inputUrlQuery));
+
+        $inputUrlHash = $inputUrl1 . '#hash';
+        $this->assertEquals($expectedDataUrl, $rewriter->rewriteUrl($inputUrlHash));
 
         $inlined = $rewriter->getInlinedResources();
         $this->assertCount(1, $inlined);
