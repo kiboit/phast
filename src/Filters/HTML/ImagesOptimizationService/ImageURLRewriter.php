@@ -79,7 +79,7 @@ class ImageURLRewriter {
         $this->whitelist = $whitelist;
         $this->maxImageInliningSize = $maxImageInliningSize;
 
-        $this->inliningManager = new ImageInliningManager($maxImageInliningSize, $retriever);
+        $this->inliningManager = new ImageInliningManager($maxImageInliningSize);
     }
 
     /**
@@ -95,13 +95,10 @@ class ImageURLRewriter {
             return $url;
         }
 
-        if ($this->inliningManager->canBeInlined($absolute)) {
-            $this->inlinedResources = [Resource::makeWithRetriever(
-                $absolute,
-                $this->retriever,
-                $this->inliningManager->getMimeType($absolute)
-            )];
-            return $this->inliningManager->toDataUrl($absolute);
+        $inlinedResource = Resource::makeWithRetriever($absolute, $this->retriever);
+        if ($this->inliningManager->canBeInlined($inlinedResource)) {
+            $this->inlinedResources = [$inlinedResource];
+            return $this->inliningManager->toDataUrl($inlinedResource);
         }
         $params['src'] = $absolute->toString();
         return $this->makeSignedUrl($params);

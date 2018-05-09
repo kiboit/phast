@@ -8,6 +8,19 @@ use Kibo\Phast\Retrievers\Retriever;
 
 class Resource {
 
+    private $ext2mime = [
+        'gif' => 'image/gif',
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'bmp' => 'image/bmp',
+        'webp' => 'image/webp',
+        'svg' => 'image/svg+xml',
+        'css' => 'text/css',
+        'js' => 'application/javascript',
+        'json' => 'application/json'
+    ];
+
     /**
      * @var URL
      */
@@ -80,10 +93,35 @@ class Resource {
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getMimeType() {
+        if (!isset ($this->mimeType)) {
+            $ext = strtolower($this->url->getExtension());
+            if (isset ($this->ext2mime[$ext])) {
+                $this->mimeType = $this->ext2mime[$ext];
+            }
+        }
         return $this->mimeType;
+    }
+
+    /**
+     * @return bool|int
+     */
+    public function getSize() {
+        if (isset ($this->retriever) && method_exists($this->retriever, 'getSize')) {
+            return $this->retriever->getSize($this->url);
+        }
+        if (isset ($this->content)) {
+            return strlen($this->content);
+        }
+        return false;
+    }
+
+    public function toDataURL() {
+        $mime = $this->getMimeType();
+        $content = $this->getContent();
+        return "data:$mime;base64,". base64_encode($content);
     }
 
     /**
