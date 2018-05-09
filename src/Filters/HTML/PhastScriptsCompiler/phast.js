@@ -33,15 +33,12 @@ phast.on(document, 'DOMContentLoaded').then(function () {
     var l = document.documentElement.nextSibling;
     if (l && l.nodeType === 8 && l.textContent.indexOf('[Phast]') === 0) {
         var ll = l.textContent.split('\n');
-        ll.forEach(function (l, i) {
-            if (i === 0) {
-                console.groupCollapsed(l)
-            } else if (i === ll.length - 1) {
-                console.groupEnd();
-            } else {
-                console.log(l);
-            }
-        })
+        ll.pop();
+        console.groupCollapsed(ll.shift());
+        ll.forEach(function (i) {
+            console.log(i);
+        });
+        console.groupEnd();
     }
 
 
