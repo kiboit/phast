@@ -3,9 +3,15 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\ValueObjects\Resource;
 
 class ImageInliningManager {
+
+    /**
+     * @var Cache
+     */
+    private $cache;
 
     /**
      * @var int
@@ -14,10 +20,19 @@ class ImageInliningManager {
 
     /**
      * ImageInliningManager constructor.
+     * @param Cache $cache
      * @param int $maxImageInliningSize
      */
-    public function __construct($maxImageInliningSize) {
+    public function __construct(Cache $cache, $maxImageInliningSize) {
+        $this->cache = $cache;
         $this->maxImageInliningSize = $maxImageInliningSize;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxImageInliningSize() {
+        return $this->maxImageInliningSize;
     }
 
     public function canBeInlined(Resource $resource) {

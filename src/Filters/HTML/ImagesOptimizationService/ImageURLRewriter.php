@@ -45,11 +45,6 @@ class ImageURLRewriter {
     protected $whitelist;
 
     /**
-     * @var int
-     */
-    protected $maxImageInliningSize;
-
-    /**
      * @var Resource[]
      */
     protected $inlinedResources;
@@ -59,27 +54,25 @@ class ImageURLRewriter {
      * ImageURLRewriter constructor.
      * @param ServiceSignature $signature
      * @param LocalRetriever $retriever
+     * @param ImageInliningManager $inliningManager
      * @param URL $baseUrl
      * @param URL $serviceUrl
      * @param array $whitelist
-     * @param int $maxImageInliningSize
      */
     public function __construct(
         ServiceSignature $signature,
         LocalRetriever $retriever,
+        ImageInliningManager $inliningManager,
         URL $baseUrl,
         URL $serviceUrl,
-        array $whitelist,
-        $maxImageInliningSize = 0
+        array $whitelist
     ) {
         $this->signature = $signature;
         $this->retriever = $retriever;
+        $this->inliningManager = $inliningManager;
         $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
         $this->whitelist = $whitelist;
-        $this->maxImageInliningSize = $maxImageInliningSize;
-
-        $this->inliningManager = new ImageInliningManager($maxImageInliningSize);
     }
 
     /**
@@ -157,7 +150,7 @@ class ImageURLRewriter {
             $this->signature->getCacheSalt(),
             $this->baseUrl->toString(),
             $this->serviceUrl->toString(),
-            $this->maxImageInliningSize,
+            $this->inliningManager->getMaxImageInliningSize(),
             '20180413'
         ], array_keys($this->whitelist), array_values($this->whitelist));
         return join('-', $parts);

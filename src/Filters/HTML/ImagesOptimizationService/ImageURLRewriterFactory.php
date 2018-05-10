@@ -28,10 +28,10 @@ class ImageURLRewriterFactory {
         $rewriter = new ImageURLRewriter(
             $signature,
             new LocalRetriever($config['retrieverMap']),
+            (new ImageInliningManagerFactory())->make($config),
             URL::fromString($config['documents']['baseUrl']),
             URL::fromString($serviceUrl),
-            $config['images']['whitelist'],
-            isset ($classConfig['maxImageInliningSize']) ? $classConfig['maxImageInliningSize'] : 0
+            $config['images']['whitelist']
         );
         return $rewriter;
     }

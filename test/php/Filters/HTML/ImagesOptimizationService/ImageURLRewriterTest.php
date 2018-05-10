@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -21,6 +22,11 @@ class ImageURLRewriterTest extends PhastTestCase {
      */
     private $retriever;
 
+    /**
+     * @var ImageInliningManager
+     */
+    private $inliningManager;
+
     public function setUp($rewriteFormat = null) {
         parent::setUp();
 
@@ -31,6 +37,7 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->retriever = $this->createMock(LocalRetriever::class);
         $this->retriever->method('getCacheSalt')->willReturn(123);
         $this->retriever->method('getSize')->willReturn(1024);
+        $this->inliningManager = new ImageInliningManager($this->createMock(Cache::class), 512);
     }
 
     /**
@@ -187,10 +194,10 @@ class ImageURLRewriterTest extends PhastTestCase {
         $inliner = new ImageURLRewriter(
             $this->securityToken,
             $this->retriever,
+            new ImageInliningManager($this->createMock(Cache::class), $params['maxImageSize']),
             URL::fromString($params['baseUrl']),
             URL::fromString($params['serviceUrl']),
-            $params['whitelist'],
-            $params['maxImageSize']
+            $params['whitelist']
         );
         $salt = $inliner->getCacheSalt();
         if ($called) {
@@ -229,10 +236,10 @@ class ImageURLRewriterTest extends PhastTestCase {
         return new ImageURLRewriter(
             $this->securityToken,
             $this->retriever,
+            $this->inliningManager,
             URL::fromString(self::BASE_URL . '/css/'),
             URL::fromString(self::BASE_URL . '/images.php'),
-            ['~' . preg_quote(self::BASE_URL . '') . '~'],
-            512
+            ['~' . preg_quote(self::BASE_URL . '') . '~']
         );
     }
 }
