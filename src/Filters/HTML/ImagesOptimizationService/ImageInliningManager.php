@@ -45,4 +45,42 @@ class ImageInliningManager {
     public function toDataUrl(Resource $resource) {
         return $resource->toDataURL();
     }
+
+    /**
+     * @param Resource $resource
+     * @return string|null
+     */
+    public function getUrlForInlining(Resource $resource) {
+        if ($resource->getMimeType() !== 'image/svg+xml') {
+            return $this->cache->get($this->getCacheKey($resource));
+        }
+        if ($this->hasSizeForInlining($resource)) {
+            return $resource->toDataURL();
+        }
+        return null;
+    }
+
+    public function maybeStoreForInlining(Resource $resource) {
+        if ($this->shouldStoreForInlining($resource)) {
+            $this->cache->set($this->getCacheKey($resource), $resource->toDataURL());
+        }
+    }
+
+    private function shouldStoreForInlining(Resource $resource) {
+        return $this->hasSizeForInlining($resource)
+            && strpos($resource->getMimeType(), 'image/') === 0
+            && $resource->getMimeType() !== 'image/webp';
+    }
+
+    private function hasSizeForInlining(Resource $resource) {
+        $size = $resource->getSize();
+        return $size !== false
+            && $size <= $this->maxImageInliningSize;
+    }
+
+    private function getCacheKey(Resource $resource) {
+        return $resource->getUrl()->toString()
+            . '|' . $resource->getCacheSalt()
+            . '|' . $this->maxImageInliningSize;
+    }
 }
