@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Package;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManagerFactory;
 use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Retrievers\LocalRetriever;
@@ -25,7 +26,10 @@ class Factory {
     }
 
     public function make() {
-        $composite = new Filter(new ImageFactory($this->config));
+        $composite = new Filter(
+            new ImageFactory($this->config),
+            (new ImageInliningManagerFactory())->make($this->config)
+        );
         foreach (array_keys($this->config['images']['filters']) as $class) {
             $package = Package::fromPackageClass($class);
             $filter = $package->getFactory()->make($this->config);

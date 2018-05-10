@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\Composite;
 
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManager;
 use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Filters\Image\ImageFactory;
@@ -44,7 +45,7 @@ class FilterTest extends TestCase {
         $factory->method('getForResource')
             ->with($this->resource)
             ->willReturn($this->image);
-        $this->filter = new Filter($factory);
+        $this->filter = new Filter($factory, $this->createMock(ImageInliningManager::class));
     }
 
     public function tearDown() {
