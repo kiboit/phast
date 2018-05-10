@@ -89,9 +89,10 @@ class ImageURLRewriter {
         }
 
         $inlinedResource = Resource::makeWithRetriever($absolute, $this->retriever);
-        if ($this->inliningManager->canBeInlined($inlinedResource)) {
+        $dataUrl = $this->inliningManager->getUrlForInlining($inlinedResource);
+        if ($dataUrl) {
             $this->inlinedResources = [$inlinedResource];
-            return $this->inliningManager->toDataUrl($inlinedResource);
+            return $dataUrl;
         }
         $params['src'] = $absolute->toString();
         return $this->makeSignedUrl($params);

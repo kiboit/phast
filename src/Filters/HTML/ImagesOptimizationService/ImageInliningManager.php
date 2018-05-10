@@ -35,17 +35,6 @@ class ImageInliningManager {
         return $this->maxImageInliningSize;
     }
 
-    public function canBeInlined(Resource $resource) {
-        $size = $resource->getSize();
-        return $size !== false
-            && $size < $this->maxImageInliningSize
-            && strpos($resource->getMimeType(), 'image/') === 0;
-    }
-
-    public function toDataUrl(Resource $resource) {
-        return $resource->toDataURL();
-    }
-
     /**
      * @param Resource $resource
      * @return string|null
