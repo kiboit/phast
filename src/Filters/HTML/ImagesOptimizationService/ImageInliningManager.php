@@ -4,9 +4,11 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\ValueObjects\Resource;
 
 class ImageInliningManager {
+    use LoggingTrait;
 
     /**
      * @var Cache
@@ -51,7 +53,10 @@ class ImageInliningManager {
 
     public function maybeStoreForInlining(Resource $resource) {
         if ($this->shouldStoreForInlining($resource)) {
+            $this->logger()->info('Storing {url} for inlining', ['url' => $resource->getUrl()->toString()]);
             $this->cache->set($this->getCacheKey($resource), $resource->toDataURL());
+        } else {
+            $this->logger()->info('Not storing {url} for inlining', ['url' => $resource->getUrl()->toString()]);
         }
     }
 
