@@ -8,8 +8,8 @@ major version.
 Follow these steps to release a new version of Phast:
 
 1. Update the change log.
-  1. Make sure all important changes since the last release are mentioned.
-  1. Make sure the header links are set. (Version numbers link to GitHub log.)
+    1. Make sure all important changes since the last release are mentioned.
+    1. Make sure the header links are set. (Version numbers link to GitHub log.)
 1. Commit changelog.
 1. Tag release: `git tag 1.5.0`
 1. Push commits and tags: `git push --tags origin master`
