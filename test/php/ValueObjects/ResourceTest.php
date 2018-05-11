@@ -3,10 +3,12 @@
 namespace Kibo\Phast\ValueObjects;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\PhastTestCase;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
 use PHPUnit\Framework\TestCase;
 
-class ResourceTest extends TestCase {
+class ResourceTest extends PhastTestCase {
 
     /**
      * @var URL
@@ -110,6 +112,57 @@ class ResourceTest extends TestCase {
         $retriever = $this->makeContentRetriever('');
         $resource = Resource::makeWithRetriever($this->url, $retriever);
         $this->assertEmpty($resource->getContent());
+    }
+
+    /**
+     * @dataProvider mimeTypeFromURLExtensionData
+     */
+    public function testGettingMimeTypeFromURLExtension($extension, $expectedMimeType) {
+        $filename = 'file.' . $extension;
+        $resource = Resource::makeWithContent(URL::fromString($filename), 'some-content');
+        $this->assertEquals($expectedMimeType, $resource->getMimeType());
+
+        $uppercase = strtoupper($filename);
+        $resource = Resource::makeWithContent(URL::fromString($uppercase), 'SOME-CONTENT');
+        $this->assertEquals($expectedMimeType, $resource->getMimeType());
+    }
+
+    public function mimeTypeFromURLExtensionData() {
+        return [
+            ['gif', 'image/gif'],
+            ['png', 'image/png'],
+            ['jpg', 'image/jpeg'],
+            ['jpeg', 'image/jpeg'],
+            ['bmp', 'image/bmp'],
+            ['webp', 'image/webp'],
+            ['svg', 'image/svg+xml'],
+            ['css', 'text/css'],
+            ['js', 'application/javascript'],
+            ['json', 'application/json']
+        ];
+    }
+
+    public function testGetSize() {
+        $content = 'some-size';
+        $this->assertEquals(strlen($content), Resource::makeWithContent($this->url, $content)->getSize());
+
+        $size = 30;
+        $localRetriever = $this->createMock(LocalRetriever::class);
+        $localRetriever->method('getSize')
+            ->with($this->url)
+            ->willReturn($size);
+        $this->assertEquals($size, Resource::makeWithRetriever($this->url, $localRetriever)->getSize());
+
+        $retriever = $this->createMock(Retriever::class);
+        $this->assertFalse(Resource::makeWithRetriever($this->url, $retriever)->getSize());
+    }
+
+    public function testToDataURL() {
+        $mime = 'test/mime';
+        $content = 'the-content';
+        $resource = Resource::makeWithContent($this->url, $content, $mime);
+        $encoded = $resource->toDataURL();
+        $this->assertEquals("data:$mime;base64," . base64_encode($content), $encoded);
 
     }
 

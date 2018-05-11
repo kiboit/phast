@@ -25,6 +25,11 @@ class ImageURLRewriter {
     protected $retriever;
 
     /**
+     * @var ImageInliningManager
+     */
+    protected $inliningManager;
+
+    /**
      * @var URL
      */
     protected $baseUrl;
@@ -40,11 +45,6 @@ class ImageURLRewriter {
     protected $whitelist;
 
     /**
-     * @var int
-     */
-    protected $maxImageInliningSize;
-
-    /**
      * @var Resource[]
      */
     protected $inlinedResources;
@@ -54,25 +54,25 @@ class ImageURLRewriter {
      * ImageURLRewriter constructor.
      * @param ServiceSignature $signature
      * @param LocalRetriever $retriever
+     * @param ImageInliningManager $inliningManager
      * @param URL $baseUrl
      * @param URL $serviceUrl
      * @param array $whitelist
-     * @param int $maxImageInliningSize
      */
     public function __construct(
         ServiceSignature $signature,
         LocalRetriever $retriever,
+        ImageInliningManager $inliningManager,
         URL $baseUrl,
         URL $serviceUrl,
-        array $whitelist,
-        $maxImageInliningSize = 0
+        array $whitelist
     ) {
         $this->signature = $signature;
         $this->retriever = $retriever;
+        $this->inliningManager = $inliningManager;
         $this->baseUrl = $baseUrl;
         $this->serviceUrl = $serviceUrl;
         $this->whitelist = $whitelist;
-        $this->maxImageInliningSize = $maxImageInliningSize;
     }
 
     /**
@@ -87,12 +87,12 @@ class ImageURLRewriter {
         if (!$this->shouldRewriteUrl($absolute)) {
             return $url;
         }
-        $size = $this->retriever->getSize($absolute);
-        if ($size !== false && $size < $this->maxImageInliningSize) {
-            $dataUrl = $this->makeDataUrl($absolute);
-            if ($dataUrl) {
-                return $dataUrl;
-            }
+
+        $inlinedResource = Resource::makeWithRetriever($absolute, $this->retriever);
+        $dataUrl = $this->inliningManager->getUrlForInlining($inlinedResource);
+        if ($dataUrl) {
+            $this->inlinedResources = [$inlinedResource];
+            return $dataUrl;
         }
         $params['src'] = $absolute->toString();
         return $this->makeSignedUrl($params);
@@ -151,7 +151,7 @@ class ImageURLRewriter {
             $this->signature->getCacheSalt(),
             $this->baseUrl->toString(),
             $this->serviceUrl->toString(),
-            $this->maxImageInliningSize,
+            $this->inliningManager->getMaxImageInliningSize(),
             '20180413'
         ], array_keys($this->whitelist), array_values($this->whitelist));
         return join('-', $parts);
@@ -186,26 +186,6 @@ class ImageURLRewriter {
             }
         }
         return false;
-    }
-
-    private function makeDataUrl(URL $url) {
-        $ext2mime = [
-            'gif' => 'image/gif',
-            'png' => 'image/png',
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'bmp' => 'image/bmp',
-            'webp' => 'image/webp',
-            'svg' => 'image/svg+xml',
-        ];
-        $ext = strtolower($url->getExtension());
-        if (!isset ($ext2mime[$ext])) {
-            return false;
-        }
-        $mime = $ext2mime[$ext];
-        $content = $this->retriever->retrieve($url);
-        $this->inlinedResources = [Resource::makeWithRetriever($url, $this->retriever, $mime)];
-        return 'data:' . $mime . ';base64,' . base64_encode($content);
     }
 
     /**

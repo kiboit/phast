@@ -2,7 +2,9 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
+use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManager;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -29,10 +31,10 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->filter = new Filter(new ImageURLRewriter(
             $signature,
             $retriever,
+            new ImageInliningManager($this->createMock(Cache::class), 512),
             URL::fromString(self::BASE_URL),
             URL::fromString(self::SERVICE_URL),
-            ['~' . preg_quote(self::BASE_URL) . '~'],
-            512
+            ['~' . preg_quote(self::BASE_URL) . '~']
         ));
     }
 

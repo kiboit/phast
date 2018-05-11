@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\Composite;
 
+use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManager;
 use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
 use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Image\ImageFilter;
@@ -18,6 +19,11 @@ class Filter implements CachedResultServiceFilter {
     private $imageFactory;
 
     /**
+     * @var ImageInliningManager
+     */
+    private $inliningManager;
+
+    /**
      * @var ImageFilter[]
      */
     private $filters = [];
@@ -25,9 +31,11 @@ class Filter implements CachedResultServiceFilter {
     /**
      * Filter constructor.
      * @param ImageFactory $imageFactory
+     * @param ImageInliningManager $inliningManager
      */
-    public function __construct(ImageFactory $imageFactory) {
+    public function __construct(ImageFactory $imageFactory, ImageInliningManager $inliningManager) {
         $this->imageFactory = $imageFactory;
+        $this->inliningManager = $inliningManager;
     }
 
     public function addImageFilter(ImageFilter $filter) {
@@ -39,7 +47,11 @@ class Filter implements CachedResultServiceFilter {
         $salts = array_map(function (ImageFilter $filter) use ($request) {
             return $filter->getCacheSalt($request);
         }, $this->filters);
-        $key = implode("\n", array_merge($filters, $salts, [$resource->getUrl(), $resource->getCacheSalt()]));
+        $key = implode("\n", array_merge(
+            $filters,
+            $salts,
+            [$this->inliningManager->getMaxImageInliningSize(), $resource->getUrl(), $resource->getCacheSalt()]
+        ));
         return $key;
     }
 
@@ -73,7 +85,9 @@ class Filter implements CachedResultServiceFilter {
             $image = $filteredImage;
         }
         $this->logger()->info('Finished, but filtered image is not smaller than original! Returning original!');
-        return $resource->withContent($image->getAsString(), $image->getType());
+        $processedResource = $resource->withContent($image->getAsString(), $image->getType());
+        $this->inliningManager->maybeStoreForInlining($processedResource);
+        return $processedResource;
     }
 
 }

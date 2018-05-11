@@ -41,9 +41,7 @@ return [
 
             \Kibo\Phast\Filters\HTML\BaseURLSetter\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [
-                'maxImageInliningSize' => 512
-            ],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
                 'optimizerSizeDiffThreshold' => 1024,
@@ -57,9 +55,7 @@ return [
                 ]
             ],
 
-            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [
-                'maxImageInliningSize' => 512
-            ],
+            \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
 
             \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
 
@@ -96,6 +92,8 @@ return [
         'enable-cache' => 'imgcache',
 
         'api-mode' => false,
+
+        'maxImageInliningSize' => 512,
 
         'whitelist' => [
             '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/[^#?]*\.(jpe?g|gif|png)~i',
