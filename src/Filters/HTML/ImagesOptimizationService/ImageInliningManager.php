@@ -4,6 +4,7 @@
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\ValueObjects\Resource;
 
@@ -45,8 +46,15 @@ class ImageInliningManager {
         if ($resource->getMimeType() !== 'image/svg+xml') {
             return $this->cache->get($this->getCacheKey($resource));
         }
-        if ($this->hasSizeForInlining($resource)) {
-            return $resource->toDataURL();
+        try {
+            if ($this->hasSizeForInlining($resource)) {
+                return $resource->toDataURL();
+            }
+        } catch (ItemNotFoundException $e) {
+            $this->logger()->warning('Could not fetch contents for {url}. Message is {message}', [
+                'url' => $resource->getUrl()->toString(),
+                'message' => $e->getMessage()
+            ]);
         }
         return null;
     }
