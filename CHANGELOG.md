@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Improved
+* Only optimized versions of images are now inlined
+
 ### Fixed
 * We do not rely on `finfo` for determining file types anymore.
 * Non-cached non-local styles won't cause a flick on first load anymore
