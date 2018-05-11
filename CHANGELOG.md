@@ -1,13 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [1.5.0] - 2018-05-11
 
 ### Improved
-* Only optimized versions of images are now inlined
+* Only optimized versions of images are now inlined.
 
 ### Fixed
 * We do not rely on `finfo` for determining file types anymore.
-* Non-cached non-local styles won't cause a flick on first load anymore
+* Non-cached non-local styles won't cause a flicker on first load anymore.
+
 
 ## [1.4.0] - 2018-05-03
 
@@ -83,7 +84,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.4.0...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.5.0...master
+[1.5.0]: https://github.com/kiboit/phast/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/kiboit/phast/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/kiboit/phast/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/kiboit/phast/compare/1.3.0...1.3.1
