@@ -35,14 +35,21 @@ class ServiceTest extends TestCase {
      */
     private $calledWithParams;
 
+    private $returnResource;
+
     public function setUp() {
         parent::setUp();
+
         $this->calledWithParams = [];
+        $this->returnResource = null;
 
         $this->retriever = $this->createMock(Retriever::class);
         $this->filter = $this->createMock(ServiceFilter::class);
         $this->filter->method('apply')
             ->willReturnCallback(function (Resource $resource, array $params = null) {
+                if (isset($this->returnResource)) {
+                    return $this->returnResource;
+                }
                 $this->calledWithParams = $params;
                 return $resource;
             });
@@ -103,6 +110,25 @@ class ServiceTest extends TestCase {
         );
         $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
         $this->assertEquals($encoding, $this->calledWithParams['accept-encoding']);
+    }
+
+    /**
+     * @dataProvider compressionHeadersData
+     */
+    public function testCompressionHeaders($resource, $expectedEncoding) {
+        $this->returnResource = $resource;
+        $request = Request::fromArray(['src' => 'http://allowed.com/the-script']);
+        $response = $this->service->serve(ServiceRequest::fromHTTPRequest($request));
+        if ($expectedEncoding === null) {
+            $this->assertArrayNotHasKey('Content-Encoding', $response->getHeaders());
+        } else {
+            $this->assertArraySubset(['Content-Encoding' => $expectedEncoding], $response->getHeaders());
+        }
+    }
+
+    public function compressionHeadersData() {
+        yield [Resource::makeWithContent(URL::fromString(''), '', '', 'gzip'), 'gzip'];
+        yield [Resource::makeWithContent(URL::fromString(''), '', ''), null];
     }
 
 }
