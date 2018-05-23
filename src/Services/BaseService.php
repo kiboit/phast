@@ -92,7 +92,9 @@ abstract class BaseService {
     protected function makeResponse(Resource $resource, array $request) {
         $response = new Response();
         $response->setContent($resource->getContent());
-        $response->setHeader('Content-Encoding', $resource->getEncoding());
+        if ($resource->getEncoding() !== 'identity') {
+            $response->setHeader('Content-Encoding', $resource->getEncoding());
+        }
         return $response;
     }
 
