@@ -5,6 +5,7 @@
 
 ### Fixed
 * The `Content-Encoding: identity` header is no longer sent.
+* The bundler request is now flushed before it gets larger than 4.5K or so.
 
 
 ## [1.5.0] - 2018-05-11
