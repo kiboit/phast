@@ -73,6 +73,10 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
                 addToPack(new PackItem({success: resolve, error: reject}, params));
                 clearTimeout(timeoutHandler);
                 timeoutHandler = setTimeout(flush);
+                if (packToQuery(accumulatingPack).length > 4500) {
+                    console.log("[Phast] Resource loader: Pack got too big; flushing early...");
+                    flush();
+                }
             }
         });
     };
@@ -90,7 +94,7 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         }
     }
 
-    function flush () {
+    function flush() {
         var pack = accumulatingPack;
         accumulatingPack = [];
         clearTimeout(timeoutHandler);

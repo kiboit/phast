@@ -1,8 +1,15 @@
 # Changelog
 
+
+## [1.5.1] - 2018-05-23
+
+### Fixed
+* The `Content-Encoding: identity` header is no longer sent.
+
+
 ## [1.5.0] - 2018-05-11
 
-### Improved
+### Added
 * Only optimized versions of images are now inlined.
 
 ### Fixed
@@ -84,8 +91,9 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.5.0...master
-[1.5.0]: https://github.com/kiboit/phast/compare/1.4.0...1.5.0
+[Unreleased]: https://github.com/kiboit/phast/compare/1.5.1...master
+[1.5.1]: https://github.com/kiboit/phast/compare/1.4.0...1.5.0
+[1.5.0]: https://github.com/kiboit/phast/compare/1.5.0...1.5.1
 [1.4.0]: https://github.com/kiboit/phast/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/kiboit/phast/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/kiboit/phast/compare/1.3.0...1.3.1
