@@ -96,9 +96,9 @@ class Filter {
         $log .= sprintf("% 43s % 4dms\n", '(other)', ($timeDelta - $timeAccounted)*1000);
         $log .= sprintf("% 43s % 4dms\n", '(total)', $timeDelta*1000);
 
-        $output .= "<!--[Phast] Server-side performance metrics:\n";
+        $output .= "<!--\n[Phast] Server-side performance metrics\n";
         $output .= $log;
-        $output .= ' -->';
+        $output .= "-->";
         $this->logger()->info($log);
         return $output;
     }

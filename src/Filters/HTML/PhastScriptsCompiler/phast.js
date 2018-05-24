@@ -30,18 +30,24 @@ phast.wait = function (delay) {
 };
 
 phast.on(document, 'DOMContentLoaded').then(function () {
-    var l = document.documentElement.nextSibling;
-    if (l && l.nodeType === 8 && l.textContent.indexOf('[Phast]') === 0) {
-        var ll = l.textContent.split('\n');
-        ll.pop();
+    var l = document.documentElement;
+    var ll;
+
+    while (l = l.nextSibling) {
+        if (l.nodeType !== 8
+            || !/^\s*\[Phast\]/.test(l.textContent)
+        ) {
+            continue;
+        }
+
+        ll = l.textContent.replace(/^\s+|\s+$/g, '').split('\n');
         console.groupCollapsed(ll.shift());
-        ll.forEach(function (i) {
-            console.log(i);
-        });
+        console.log(ll.join('\n'));
         console.groupEnd();
     }
+});
 
-
+phast.on(document, 'DOMContentLoaded').then(function () {
     var t = performance.timing;
     var m = [];
     m.push(["Downloading phases:"]);

@@ -57,7 +57,7 @@ function test(file, fn, withPhast) {
             var comment = doc.documentElement.nextSibling;
             var hasLog = comment
                 && comment.nodeType === 8
-                && comment.textContent.indexOf('[Phast] Server-side performance metrics') === 0;
+                && /\s*\[Phast\] Server-side performance metrics/.test(comment.textContent);
 
             if (withPhast) {
                 assert.ok(hasLog, "The document should contain Phast's log message");
