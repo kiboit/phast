@@ -56,9 +56,17 @@ function loadScripts() {
         if (!el.hasAttribute('src')) {
             script.setAttribute('src', 'data:,;');
             script.addEventListener('load', function () {
-                script.textContent = el.textContent;
-                // See: http://perfectionkills.com/global-eval-what-are-the-options/
-                (1,eval)(el.textContent);
+                var body = el.textContent;
+                script.textContent = body;
+                body = body.replace(/^\s*<!--/, '');
+                try {
+                    // See: http://perfectionkills.com/global-eval-what-are-the-options/
+                    (1,eval)(body);
+                } catch (e) {
+                    console.error("[Phast] Error in inline script:", e);
+                    console.log("First 100 bytes of script body:", body.substr(0, 100));
+                    throw e;
+                }
             });
         }
         if (!el.hasAttribute('async') || !el.hasAttribute('src')) {
