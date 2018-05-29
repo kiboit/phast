@@ -1,6 +1,12 @@
 # Changelog
 
 
+## [1.5.2] - 2018-05-29
+
+### Fixed
+* Inline scripts that begin with `<!--` now work on IE.
+
+
 ## [1.5.1] - 2018-05-23
 
 ### Fixed
@@ -92,7 +98,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.5.1...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.5.2...master
+[1.5.2]: https://github.com/kiboit/phast/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/kiboit/phast/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/kiboit/phast/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/kiboit/phast/compare/1.3.2...1.4.0
