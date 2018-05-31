@@ -1,18 +1,23 @@
 <?php
 
-
 namespace Kibo\Phast\Retrievers;
 
-
+use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\ValueObjects\URL;
 
-class RemoteCURLBackend {
+class RemoteCURLBackend implements HttpClient {
 
-    public function retrieve(URL $url, $userAgent) {
+    public function __construct() {
+        if (!function_exists('curl_init')) {
+            throw new RuntimeException("cURL must be installed to use RemoteCURLBackend");
+        }
+    }
+
+    public function retrieve(URL $url, array $headers = []) {
         $ch = curl_init((string)$url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => ['User-Agent: ' . $userAgent],
+            CURLOPT_HTTPHEADER => $this->makeHeaders($headers),
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5
         ]);
@@ -25,6 +30,14 @@ class RemoteCURLBackend {
             return false;
         }
         return $response;
+    }
+
+    private function makeHeaders(array $headers) {
+        $result = [];
+        foreach ($headers as $k => $v) {
+            $result[] = "$k: $v";
+        }
+        return $result;
     }
 
 }

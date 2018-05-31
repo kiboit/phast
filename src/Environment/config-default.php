@@ -1,6 +1,7 @@
 <?php
 
 use Kibo\Phast\Common\System;
+use Kibo\Phast\Retrievers\RemoteCURLBackend;
 
 return [
 
@@ -9,6 +10,8 @@ return [
     'retrieverMap' => [
         $_SERVER['HTTP_HOST'] => $_SERVER['DOCUMENT_ROOT']
     ],
+
+    'httpClient' => RemoteCURLBackend::class,
 
     'cache' => [
         'cacheRoot' => sys_get_temp_dir() . '/phast-cache-' . (new System())->getUserId(),

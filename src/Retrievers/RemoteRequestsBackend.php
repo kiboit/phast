@@ -6,10 +6,9 @@ namespace Kibo\Phast\Retrievers;
 
 use Kibo\Phast\ValueObjects\URL;
 
-class RemoteRequestsBackend {
+class RemoteRequestsBackend implements HttpClient {
 
-    public function retrieve(URL $url, $userAgent) {
-        $headers = ['User-Agent' => $userAgent];
+    public function retrieve(URL $url, array $headers = []) {
         try {
             $response = \Requests::get((string)$url, $headers);
         } catch (\Exception $e) {

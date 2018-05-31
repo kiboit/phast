@@ -8,19 +8,15 @@ use Kibo\Phast\ValueObjects\URL;
 class RemoteRetriever implements Retriever {
     use DynamicCacheSaltTrait;
 
-    private $backend;
+    private $client;
 
-    public function __construct() {
-        if (class_exists(\Requests::class)) {
-            $this->backend = new RemoteRequestsBackend();
-        } else if (function_exists('curl_init')) {
-            $this->backend = new RemoteCURLBackend();
-        } else {
-            throw new RuntimeException('Could not find appropriate backend for remote retriever');
-        }
+    public function __construct(HttpClient $client) {
+        $this->client = $client;
     }
 
     public function retrieve(URL $url) {
-        return $this->backend->retrieve($url, 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0');
+        return $this->client->retrieve($url, [
+            'User-Agent' => 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0'
+        ]);
     }
 }

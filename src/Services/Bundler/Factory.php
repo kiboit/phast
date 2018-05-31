@@ -8,7 +8,7 @@ use Kibo\Phast\Filters\CSS;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
-use Kibo\Phast\Retrievers\RemoteRetriever;
+use Kibo\Phast\Retrievers\RemoteRetrieverFactory;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
 
@@ -20,7 +20,7 @@ class Factory {
         $retriever->addRetriever(
             new CachingRetriever(
                 new Cache($config['cache'], 'css'),
-                new RemoteRetriever()
+                (new RemoteRetrieverFactory())->make($config)
             )
         );
 
