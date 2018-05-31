@@ -6,7 +6,7 @@ namespace Kibo\Phast\Retrievers;
 
 use Kibo\Phast\ValueObjects\URL;
 
-class RemoteRequestsBackend implements HttpClient {
+class RequestsHTTPClient implements HTTPClient {
 
     public function retrieve(URL $url, array $headers = []) {
         try {

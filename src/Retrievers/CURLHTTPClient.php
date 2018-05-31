@@ -5,7 +5,7 @@ namespace Kibo\Phast\Retrievers;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\ValueObjects\URL;
 
-class RemoteCURLBackend implements HttpClient {
+class CURLHTTPClient implements HTTPClient {
 
     public function __construct() {
         if (!function_exists('curl_init')) {
