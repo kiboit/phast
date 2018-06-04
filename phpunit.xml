@@ -9,6 +9,7 @@
     <testsuites>
         <testsuite name="all">
             <directory>test/</directory>
+            <exclude>test/php/HTTP/CURLClientTest.php</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

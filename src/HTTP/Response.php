@@ -40,6 +40,10 @@ class Response {
         return $this->headers;
     }
 
+    public function setHeaders(array $headers) {
+        $this->headers = $headers;
+    }
+
     /**
      * @param $name
      * @param $value

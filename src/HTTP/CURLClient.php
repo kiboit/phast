@@ -27,13 +27,25 @@ class CURLClient implements Client {
     }
 
     private function request(URL $url, array $headers = [], array $opts = []) {
+        $response = new Response();
+        $readHeader = function ($_, $headerLine) use ($response) {
+            if (strpos($headerLine, 'HTTP/') === 0) {
+                $response->setHeaders([]);
+            } else {
+                list ($name, $value) = explode(':', $headerLine, 2);
+                if (trim($name) !== '') {
+                    $response->setHeader($name, trim($value));
+                }
+            }
+            return strlen($headerLine);
+        };
         $ch = curl_init((string)$url);
         curl_setopt_array($ch, $opts + [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $this->makeHeaders($headers),
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-            CURLOPT_HEADER => true
+            CURLOPT_HEADERFUNCTION => $readHeader
         ]);
         $responseText = @curl_exec($ch);
         if ($responseText === false) {
@@ -43,8 +55,8 @@ class CURLClient implements Client {
         if (!preg_match('/^2/', $info['http_code'])) {
             throw new HTTPError($info['http_code']);
         }
-        $response = $this->parseResponse($responseText);
         $response->setCode($info['http_code']);
+        $response->setContent($responseText);
         return $response;
     }
 
@@ -54,23 +66,6 @@ class CURLClient implements Client {
             $result[] = "$k: $v";
         }
         return $result;
-    }
-
-    private function parseResponse($responseText) {
-        // When status 100 curl returns two lines with status (\r\n\r\n x2)
-        $responseParts = explode("\r\n\r\n", $responseText);
-        $body = array_pop($responseParts);
-        $headersText = array_pop($responseParts);
-        $response = new Response();
-        $response->setContent($body);
-        foreach (explode("\r\n", $headersText) as $idx => $header) {
-            if ($idx === 0) {
-                continue;
-            }
-            list ($name, $value) = explode(':', $header);
-            $response->setHeader($name, $value);
-        }
-        return $response;
     }
 
 }
