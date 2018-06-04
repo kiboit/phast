@@ -14,8 +14,19 @@ class CURLHTTPClient implements HTTPClient {
     }
 
     public function get(URL $url, array $headers = []) {
+        return $this->request($url, $headers);
+    }
+
+    public function post(URL $url, $data, array $headers = []) {
+        return $this->request($url, $headers, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $data
+        ]);
+    }
+
+    private function request(URL $url, array $headers = [], array $opts = []) {
         $ch = curl_init((string)$url);
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, $opts + [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $this->makeHeaders($headers),
             CURLOPT_FOLLOWLOCATION => true,
