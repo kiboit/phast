@@ -30,16 +30,19 @@ class CURLHTTPClient implements HTTPClient {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $this->makeHeaders($headers),
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_HEADER => true
         ]);
-        $response = @curl_exec($ch);
-        if ($response === false) {
+        $responseText = @curl_exec($ch);
+        if ($responseText === false) {
             return false;
         }
         $info = curl_getinfo($ch);
         if (!preg_match('/^2/', $info['http_code'])) {
             return false;
         }
+        $response = $this->parseResponse($responseText);
+        $response->setCode($info['http_code']);
         return $response;
     }
 
@@ -49,6 +52,20 @@ class CURLHTTPClient implements HTTPClient {
             $result[] = "$k: $v";
         }
         return $result;
+    }
+
+    private function parseResponse($responseText) {
+        list ($headersText, $body) = explode("\r\n\r\n", $responseText);
+        $response = new Response();
+        $response->setContent($body);
+        foreach (explode("\r\n", $headersText) as $idx => $header) {
+            if ($idx === 0) {
+                continue;
+            }
+            list ($name, $value) = explode(':', $header);
+            $response->setHeader($name, $value);
+        }
+        return $response;
     }
 
 }
