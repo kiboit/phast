@@ -122,7 +122,16 @@ return [
                 'quality' => '50-85'
             ],
 
-            \Kibo\Phast\Filters\Image\JPEGTransEnhancer\Filter::class => []
+            \Kibo\Phast\Filters\Image\JPEGTransEnhancer\Filter::class => [],
+
+//            \Kibo\Phast\Filters\Image\ImageAPIClient\Filter::class => [
+//                'api-url' => 'http://optimize.phast.io/?service=images',
+//                'diagnostics-image-url' => (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://'
+//                    . $_SERVER['HTTP_HOST'] . '/images/basset.png',
+//                'host-name' => $_SERVER['HTTP_HOST'],
+//                'request-uri' => $_SERVER['REQUEST_URI'],
+//                'plugin-version' => 'phast-core-1.0'
+//            ]
         ]
     ],
 

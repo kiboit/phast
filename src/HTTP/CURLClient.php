@@ -57,7 +57,10 @@ class CURLClient implements Client {
     }
 
     private function parseResponse($responseText) {
-        list ($headersText, $body) = explode("\r\n\r\n", $responseText);
+        // When status 100 curl returns two lines with status (\r\n\r\n x2)
+        $responseParts = explode("\r\n\r\n", $responseText);
+        $body = array_pop($responseParts);
+        $headersText = array_pop($responseParts);
         $response = new Response();
         $response->setContent($body);
         foreach (explode("\r\n", $headersText) as $idx => $header) {
