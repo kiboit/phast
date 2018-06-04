@@ -6,6 +6,6 @@ use Kibo\Phast\ValueObjects\URL;
 
 interface HTTPClient {
 
-    public function retrieve(URL $url, array $headers = []);
+    public function get(URL $url, array $headers = []);
 
 }

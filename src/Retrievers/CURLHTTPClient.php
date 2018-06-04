@@ -13,7 +13,7 @@ class CURLHTTPClient implements HTTPClient {
         }
     }
 
-    public function retrieve(URL $url, array $headers = []) {
+    public function get(URL $url, array $headers = []) {
         $ch = curl_init((string)$url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
