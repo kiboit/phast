@@ -3,6 +3,8 @@
 namespace Kibo\Phast\HTTP;
 
 use Kibo\Phast\Exceptions\RuntimeException;
+use Kibo\Phast\HTTP\Exceptions\HTTPError;
+use Kibo\Phast\HTTP\Exceptions\NetworkError;
 use Kibo\Phast\ValueObjects\URL;
 
 class CURLClient implements Client {
@@ -35,11 +37,11 @@ class CURLClient implements Client {
         ]);
         $responseText = @curl_exec($ch);
         if ($responseText === false) {
-            return false;
+            throw new NetworkError(curl_error($ch), curl_errno($ch));
         }
         $info = curl_getinfo($ch);
         if (!preg_match('/^2/', $info['http_code'])) {
-            return false;
+            throw new HTTPError($info['http_code']);
         }
         $response = $this->parseResponse($responseText);
         $response->setCode($info['http_code']);
