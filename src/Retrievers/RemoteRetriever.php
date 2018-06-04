@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Retrievers;
 
-use Kibo\Phast\HTTP\HTTPClient;
+use Kibo\Phast\HTTP\Client;
 use Kibo\Phast\ValueObjects\URL;
 
 class RemoteRetriever implements Retriever {
@@ -10,7 +10,7 @@ class RemoteRetriever implements Retriever {
 
     private $client;
 
-    public function __construct(HTTPClient $client) {
+    public function __construct(Client $client) {
         $this->client = $client;
     }
 

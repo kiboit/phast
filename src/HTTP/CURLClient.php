@@ -5,7 +5,7 @@ namespace Kibo\Phast\HTTP;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\ValueObjects\URL;
 
-class CURLHTTPClient implements HTTPClient {
+class CURLClient implements Client {
 
     public function __construct() {
         if (!function_exists('curl_init')) {

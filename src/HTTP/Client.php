@@ -4,7 +4,7 @@ namespace Kibo\Phast\HTTP;
 
 use Kibo\Phast\ValueObjects\URL;
 
-interface HTTPClient {
+interface Client {
 
     /**
      * @param URL $url
