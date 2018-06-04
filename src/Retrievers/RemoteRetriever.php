@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Retrievers;
 
+use Kibo\Phast\HTTP\HTTPClient;
 use Kibo\Phast\ValueObjects\URL;
 
 class RemoteRetriever implements Retriever {

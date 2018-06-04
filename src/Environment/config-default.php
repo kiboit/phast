@@ -1,7 +1,7 @@
 <?php
 
 use Kibo\Phast\Common\System;
-use Kibo\Phast\Retrievers\CURLHTTPClient;
+use Kibo\Phast\HTTP\CURLHTTPClient;
 
 return [
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Kibo\Phast\Retrievers;
+namespace Kibo\Phast\HTTP;
 
 use Kibo\Phast\ValueObjects\URL;
 
