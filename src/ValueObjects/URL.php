@@ -57,8 +57,9 @@ class URL {
     }
 
     /**
-     * @param array $arr
+     * @param array $arr Should follow the format produced by parse_url()
      * @return URL
+     * @see parse_url()
      */
     public static function fromArray(array $arr) {
         $url = new self();
@@ -69,8 +70,16 @@ class URL {
     }
 
     /**
+     * If $this can be interpreted as relative to $base,
+     * will produce URL that is $base/$this.
+     * Otherwise the returned URL will point to the same place as $this
+     *
      * @param URL $base
      * @return URL
+     *
+     * @example this: www/htdocs + base: /var -> /var/www/htdocs
+     * @example this: /var + base: http://example.com -> http://example.com/var
+     * @example this: /var + base: /www -> /var
      */
     public function withBase(URL $base) {
         $new = clone $this;
