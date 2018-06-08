@@ -2,24 +2,14 @@
 
 use Kibo\Phast\Common\System;
 use Kibo\Phast\HTTP\CURLClient;
+use Kibo\Phast\HTTP\Request;
 
 return [
 
     'securityToken' => null,
 
     'retrieverMap' => [
-        $_SERVER['HTTP_HOST'] => call_user_func(function () {
-            $scriptName = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '';
-            $scriptFilename = isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : '';
-            if (strpos($scriptName, '/') === 0
-                && strpos($scriptFilename, '/') === 0
-                && substr($scriptFilename, -strlen($scriptName)) === $scriptName
-                && file_exists($scriptFilename)
-            ) {
-                return substr($scriptFilename, 0, strlen($scriptFilename) - strlen($scriptName));
-            }
-            return $_SERVER['DOCUMENT_ROOT'];
-        })
+        $_SERVER['HTTP_HOST'] => Request::fromGlobals()->getDocumentRoot()
     ],
 
     'httpClient' => CURLClient::class,

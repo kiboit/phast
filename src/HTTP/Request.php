@@ -82,4 +82,30 @@ class Request {
         }
     }
 
+    public function getDocumentRoot() {
+        $scriptName = (string) $this->getEnvValue('SCRIPT_NAME');
+        $scriptFilename = $this->normalizePath((string) $this->getEnvValue('SCRIPT_FILENAME'));
+
+        if (strpos($scriptName, '/') === 0
+            && $this->isAbsolutePath($scriptFilename)
+            && $this->isSuffix($scriptName, $scriptFilename)
+        ) {
+            return substr($scriptFilename, 0, strlen($scriptFilename) - strlen($scriptName));
+        }
+
+        return $this->getEnvValue('DOCUMENT_ROOT');
+    }
+
+    private function normalizePath($path) {
+        return str_replace('\\', '/', $path);
+    }
+
+    private function isAbsolutePath($path) {
+        return preg_match('~^/|^[a-z]:/~i', $path);
+    }
+
+    private function isSuffix($suffix, $string) {
+        return substr($string, -strlen($suffix)) === $suffix;
+    }
+
 }

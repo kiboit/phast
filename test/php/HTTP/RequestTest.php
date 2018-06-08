@@ -15,4 +15,46 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
         yield [['PHP_SELF' => '/phast.php', 'DOCUMENT_URI' => '/phast.php/test']];
     }
 
+    /** @dataProvider documentRootData */
+    public function testDocumentRoot($env, $expectedDocumentRoot) {
+        $req = Request::fromArray([], $env, []);
+        $this->assertEquals($expectedDocumentRoot, $req->getDocumentRoot());
+    }
+
+    public function documentRootData() {
+        yield [
+            [
+                'DOCUMENT_ROOT' => '/var/www'
+            ],
+            '/var/www'
+        ];
+
+        yield [
+            [
+                'DOCUMENT_ROOT' => '/var/www',
+                'SCRIPT_FILENAME' => '/var/www/subdomain/index.php',
+                'SCRIPT_NAME' => '/index.php'
+            ],
+            '/var/www/subdomain'
+        ];
+
+        yield [
+            [
+                'DOCUMENT_ROOT' => '/var/www',
+                'SCRIPT_FILENAME' => '/var/www/subdomain/index.php',
+                'SCRIPT_NAME' => '/mismatch.php'
+            ],
+            '/var/www'
+        ];
+
+        yield [
+            [
+                'DOCUMENT_ROOT' => 'C:\\var\\www',
+                'SCRIPT_FILENAME' => 'C:\\var\\www\\subdomain\\index.php',
+                'SCRIPT_NAME' => '/index.php'
+            ],
+            'C:/var/www/subdomain',
+        ];
+    }
+
 }
