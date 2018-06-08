@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [Unreleased]
+
+### Fixed
+* Phast now correctly locates resources on setups where DOCUMENT_ROOT is wrong,
+  but SCRIPT_NAME and SCRIPT_FILENAME are congruent.
+
+
 ## [1.5.2] - 2018-05-29
 
 ### Fixed
