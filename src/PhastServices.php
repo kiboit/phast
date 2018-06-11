@@ -104,6 +104,7 @@ class PhastServices {
         $headers += [
             'Vary' => 'Accept-Encoding',
             'Cache-Control' => 'max-age=' . $maxAge,
+            'Expires' => gmdate('D, d M Y H:i:s', time() + $maxAge) . ' GMT',
             'X-Accel-Expires' => $maxAge,
             'Access-Control-Allow-Origin' => '*',
             'ETag' => self::generateETag($headers, $content)
