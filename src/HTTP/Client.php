@@ -11,7 +11,7 @@ interface Client {
      *
      * @param URL $url
      * @param array $headers - headers to send in headerName => headerValue format
-     * @return Response|false
+     * @return Response
      * @throws \Exception
      */
     public function get(URL $url, array $headers = []);
@@ -22,7 +22,7 @@ interface Client {
      * @param URL $url
      * @param array|string $data - if array, it will be encoded as form data, if string - will be sent as is
      * @param array $headers - headers to send in headerName => headerValue format
-     * @return Response|false
+     * @return Response
      * @throws \Exception
      */
     public function post(URL $url, $data, array $headers = []);
