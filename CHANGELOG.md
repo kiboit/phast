@@ -1,7 +1,11 @@
 # Changelog
 
 
-## [Unreleased]
+## [1.5.3] - 2018-06-11
+
+### Added
+* Phast now sends the `Expires` header, in addition to `Cache-Control`, so that
+  mod_expires doesn't add its own.
 
 ### Fixed
 * Phast now correctly locates resources on setups where DOCUMENT_ROOT is wrong,
@@ -105,7 +109,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.5.2...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.5.3...master
+[1.5.3]: https://github.com/kiboit/phast/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/kiboit/phast/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/kiboit/phast/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/kiboit/phast/compare/1.4.0...1.5.0
