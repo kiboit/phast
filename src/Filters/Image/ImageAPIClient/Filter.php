@@ -65,6 +65,9 @@ class Filter implements ImageFilter {
                 . ' Code: ' . $e->getCode()
             );
         }
+        if (strlen($response->getContent()) === 0) {
+            throw new ImageProcessingException('Image API response is empty');
+        }
         $newImage = new DummyImage();
         $newImage->setImageString($response->getContent());
         $headers = [];
