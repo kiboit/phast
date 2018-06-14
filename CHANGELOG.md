@@ -1,6 +1,12 @@
 # Changelog
 
 
+## [1.5.4] - 2018-06-14
+
+### Fixed
+* An empty response from the image optimization API is now considered an error.
+
+
 ## [1.5.3] - 2018-06-11
 
 ### Added
@@ -109,7 +115,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.5.3...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.5.4...master
+[1.5.4]: https://github.com/kiboit/phast/compare/1.5.4...1.5.3
 [1.5.3]: https://github.com/kiboit/phast/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/kiboit/phast/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/kiboit/phast/compare/1.5.0...1.5.1
