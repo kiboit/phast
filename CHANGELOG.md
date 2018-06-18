@@ -122,7 +122,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.5.4...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.5.5...master
+[1.5.5]: https://github.com/kiboit/phast/compare/1.5.5...1.5.4
 [1.5.4]: https://github.com/kiboit/phast/compare/1.5.4...1.5.3
 [1.5.3]: https://github.com/kiboit/phast/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/kiboit/phast/compare/1.5.1...1.5.2
