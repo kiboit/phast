@@ -123,8 +123,8 @@
 
 
 [Unreleased]: https://github.com/kiboit/phast/compare/1.5.5...master
-[1.5.5]: https://github.com/kiboit/phast/compare/1.5.5...1.5.4
-[1.5.4]: https://github.com/kiboit/phast/compare/1.5.4...1.5.3
+[1.5.5]: https://github.com/kiboit/phast/compare/1.5.4...1.5.5
+[1.5.4]: https://github.com/kiboit/phast/compare/1.5.3...1.5.4
 [1.5.3]: https://github.com/kiboit/phast/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/kiboit/phast/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/kiboit/phast/compare/1.5.0...1.5.1
