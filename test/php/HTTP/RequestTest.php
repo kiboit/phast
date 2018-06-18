@@ -13,6 +13,10 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     public function pathInfoData() {
         yield [['PATH_INFO' => '/test']];
         yield [['PHP_SELF' => '/phast.php', 'DOCUMENT_URI' => '/phast.php/test']];
+        yield [['PHP_SELF' => '/phast.php', 'REQUEST_URI' => '/phast.php/test']];
+        yield [['PHP_SELF' => '/phast.php', 'REQUEST_URI' => '/phast.php/test?q=v']];
+        yield [['PHP_SELF' => '/index.php', 'REQUEST_URI' => '/test']];
+        yield [['PHP_SELF' => '/index.php', 'DOCUMENT_URI' => '/test']];
     }
 
     /** @dataProvider documentRootData */
