@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.5.5] - 2018-06-18
+
+### Fixed
+* Phast will now fallback to using REQUEST_URI if DOCUMENT_URI is not available.
+* Phast will now use full DOCUMENT_URI or REQUEST_URI if PHP_SELF is not part of them.
+
+
 ## [1.5.4] - 2018-06-14
 
 ### Fixed
