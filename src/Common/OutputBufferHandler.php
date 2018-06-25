@@ -19,6 +19,7 @@ class OutputBufferHandler {
 
     const DOCUMENT_PATTERN = "~
         \s* (<\?xml[^>]*>)?
+        (\s* <!--(.*?)-->)*
         \s* (<!doctype\s+html[^>]*>)?
         (\s* <!--(.*?)-->)*
         \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )

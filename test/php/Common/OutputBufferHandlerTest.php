@@ -87,6 +87,7 @@ class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
         yield ["<html>\n<body></body>\n</html>"];
         yield ["    \n<!doctype       html>\n<html>\n<body></body>\n</html>"];
         yield ["<!doctype html>\n<!-- hello -->\n<html>\n<body></body>\n</html>"];
+        yield ["<!-- hello -->\n<!doctype html>\n<html>\n<body></body>\n</html>"];
     }
 
     /** @dataProvider shouldNotApplyData */
