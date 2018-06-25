@@ -1,11 +1,18 @@
 # Changelog
 
+## [1.5.6] - 2018-06-25
+
+### Fixed
+
+* Reverted REQUEST_URI parsing to determine PATH_INFO.
+* Process HTML where one or more comments occur before the doctype declaration.
+
 
 ## [1.5.5] - 2018-06-18
 
 ### Fixed
-* Phast will now fallback to using REQUEST_URI if DOCUMENT_URI is not available.
-* Phast will now use full DOCUMENT_URI or REQUEST_URI if PHP_SELF is not part of them.
+* ~~Phast will now fallback to using REQUEST_URI if DOCUMENT_URI is not available.~~ Reverted in 1.5.6.
+* ~~Phast will now use full DOCUMENT_URI or REQUEST_URI if PHP_SELF is not part of them.~~ Reverted in 1.5.6.
 
 
 ## [1.5.4] - 2018-06-14
@@ -122,7 +129,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.5.5...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.5.6...master
+[1.5.6]: https://github.com/kiboit/phast/compare/1.5.5...1.5.6
 [1.5.5]: https://github.com/kiboit/phast/compare/1.5.4...1.5.5
 [1.5.4]: https://github.com/kiboit/phast/compare/1.5.3...1.5.4
 [1.5.3]: https://github.com/kiboit/phast/compare/1.5.2...1.5.3
