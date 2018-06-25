@@ -10,12 +10,18 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('/test', $req->getPathInfo());
     }
 
+    /** @dataProvider negativePathInfoData */
+    public function testNegativePathInfo($env) {
+        $req = Request::fromArray([], $env, []);
+        $this->assertSame(null, $req->getPathInfo());
+    }
+
     public function pathInfoData() {
         yield [['PATH_INFO' => '/test']];
         yield [['PHP_SELF' => '/phast.php', 'DOCUMENT_URI' => '/phast.php/test']];
-        yield [['PHP_SELF' => '/phast.php', 'REQUEST_URI' => '/phast.php/test']];
-        yield [['PHP_SELF' => '/phast.php', 'REQUEST_URI' => '/phast.php/test?q=v']];
-        yield [['PHP_SELF' => '/index.php', 'REQUEST_URI' => '/test']];
+    }
+
+    public function negativePathInfoData() {
         yield [['PHP_SELF' => '/index.php', 'DOCUMENT_URI' => '/test']];
     }
 

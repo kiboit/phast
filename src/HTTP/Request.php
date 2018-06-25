@@ -62,13 +62,12 @@ class Request {
         }
         $script = $this->getEnvValue('PHP_SELF');
         $uri = $this->getEnvValue('DOCUMENT_URI');
-        if ($uri === null) {
-            $uri = explode('?', $this->getEnvValue('REQUEST_URI'))[0];
-        }
-        if ($script !== null && $uri !== null && strpos($uri, $script . '/') === 0) {
+        if ($script !== null
+            && $uri !== null
+            && strpos($uri, $script . '/') === 0
+        ) {
             return substr($uri, strlen($script));
         }
-        return $uri;
     }
 
     public function getCookie($name) {
