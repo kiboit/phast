@@ -22,7 +22,7 @@ class PhastDocumentFilters {
 
         $handler = new OutputBufferHandler(
             $runtimeConfig['documents']['maxBufferSizeToApply'],
-            $filter
+            [$filter, 'apply']
         );
         $handler->install();
 

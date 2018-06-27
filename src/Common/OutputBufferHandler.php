@@ -27,7 +27,7 @@ class OutputBufferHandler {
         ( </body> | </html> )
     ~xsiA";
 
-    private $filter;
+    private $filterCb;
 
     private $buffer = '';
 
@@ -38,9 +38,9 @@ class OutputBufferHandler {
      */
     private $maxBufferSizeToApply;
 
-    public function __construct($maxBufferSizeToApply, Filter $filter) {
+    public function __construct($maxBufferSizeToApply, callable $filterCb) {
         $this->maxBufferSizeToApply = $maxBufferSizeToApply;
-        $this->filter = $filter;
+        $this->filterCb = $filterCb;
     }
 
     public function install() {
@@ -96,7 +96,7 @@ class OutputBufferHandler {
         }
 
         $this->buffer = null;
-        $result = $this->filter->apply($input);
+        $result = call_user_func($this->filterCb, $input);
 
         return $result;
     }

@@ -13,12 +13,9 @@ class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
     private $handler;
 
     public function setUp() {
-        $filter = $this->createMock(Filters\HTML\Composite\Filter::class);
-        $filter->method('apply')->willReturnCallback(function ($buffer) {
+        $this->handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, function ($buffer) {
             return strtoupper($buffer);
         });
-
-        $this->handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, $filter);
     }
 
     public function testImmediateFinal() {
@@ -72,12 +69,12 @@ class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
 
     /** @dataProvider shouldApplyData */
     public function testShouldApply($buffer) {
-        $filter = $this->createMock(Filters\HTML\Composite\Filter::class);
-        $filter->expects($this->once())->method('apply');
-
-        $handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, $filter);
-        
+        $called = false;
+        $handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, function () use (&$called) {
+            $called = true;
+        });
         $handler->handleChunk($buffer, PHP_OUTPUT_HANDLER_FINAL);
+        $this->assertTrue($called, 'Not applied when should have been applied');
     }
     
     public function shouldApplyData() {
@@ -92,12 +89,12 @@ class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
 
     /** @dataProvider shouldNotApplyData */
     public function testShouldNotApply($buffer) {
-        $filter = $this->createMock(Filters\HTML\Composite\Filter::class);
-        $filter->expects($this->never())->method('apply');
-
-        $handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, $filter);
-
+        $called = false;
+        $handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, function () use (&$called) {
+            $called = true;
+        });
         $handler->handleChunk($buffer, PHP_OUTPUT_HANDLER_FINAL);
+        $this->assertFalse($called, 'Applied when should not have been applied');
     }
     
     public function shouldNotApplyData() {
