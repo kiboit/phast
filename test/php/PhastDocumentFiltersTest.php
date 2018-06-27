@@ -27,13 +27,23 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
     public function testApply() {
         $in = '<!doctype html><html><head><title>Hello, World!</title></head><body></body></html>';
         $out = PhastDocumentFilters::apply($in, []);
-        $this->assertContains('[Phast]', $out);
+        $this->assertFiltersApplied($out);
     }
 
     public function testApplyNonHTML() {
         $in = 'Nope';
         $out = PhastDocumentFilters::apply($in, []);
         $this->assertEquals($in, $out);
+    }
+
+    public function testApplyNonHTMLWithConfig() {
+        $in = 'Nope';
+        $out = PhastDocumentFilters::apply($in, ['optimizeHTMLDocumentsOnly' => false]);
+        $this->assertFiltersApplied($out);
+    }
+
+    private function assertFiltersApplied($out) {
+        $this->assertContains('[Phast]', $out);
     }
 
 }

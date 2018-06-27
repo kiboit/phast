@@ -36,7 +36,7 @@ class PhastDocumentFilters {
             return $html;
         }
 
-        if (!preg_match(OutputBufferHandler::DOCUMENT_PATTERN, $html)) {
+        if ($runtimeConfig['optimizeHTMLDocumentsOnly'] && !preg_match(OutputBufferHandler::DOCUMENT_PATTERN, $html)) {
             return $html;
         }
 

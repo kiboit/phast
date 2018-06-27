@@ -33,6 +33,8 @@ return [
 
     'serviceRequestFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH,
 
+    'optimizeHTMLDocumentsOnly' => true,
+
     'documents' => [
         'maxBufferSizeToApply' => pow(1024, 3),
 
