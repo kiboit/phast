@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.6.0] - 2018-06-27
+
+### Added
+
+* A configuration variable for toggling HTML document detection before applying filters.
+
+### Fixed
+
+* Unify the filter application logic when doing output buffering and on-demand application.
+
 ## [1.5.6] - 2018-06-25
 
 ### Fixed
@@ -129,7 +139,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.5.6...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.6.0...master
+[1.6.0]: https://github.com/kiboit/phast/compare/1.5.6...1.6.0
 [1.5.6]: https://github.com/kiboit/phast/compare/1.5.5...1.5.6
 [1.5.5]: https://github.com/kiboit/phast/compare/1.5.4...1.5.5
 [1.5.4]: https://github.com/kiboit/phast/compare/1.5.3...1.5.4
