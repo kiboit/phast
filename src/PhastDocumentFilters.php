@@ -23,37 +23,25 @@ class PhastDocumentFilters {
 
     public static function deploy(array $userConfig) {
         $runtimeConfig = self::configure($userConfig);
-
         if (!$runtimeConfig) {
             return;
         }
-
-        $filter = (new Factory())->make($runtimeConfig);
-
         $handler = new OutputBufferHandler(
             $runtimeConfig['documents']['maxBufferSizeToApply'],
-            [$filter, 'apply']
+            function ($html, $applyCheckBuffer) use ($runtimeConfig) {
+                return self::applyWithRuntimeConfig($html, $runtimeConfig, $applyCheckBuffer);
+            }
         );
         $handler->install();
-
         Log::info('Phast deployed!');
     }
 
     public static function apply($html, array $userConfig) {
         $runtimeConfig = self::configure($userConfig);
-
         if (!$runtimeConfig) {
             return $html;
         }
-
-        if ($runtimeConfig['optimizeHTMLDocumentsOnly'] && !preg_match(self::DOCUMENT_PATTERN, $html)) {
-            Log::info('Buffer doesn\'t look like html! Not applying filters');
-            return $html;
-        }
-
-        $filter = (new Factory())->make($runtimeConfig);
-
-        return $filter->apply($html);
+        return self::applyWithRuntimeConfig($html, $runtimeConfig);
     }
 
     private static function configure(array $userConfig) {
@@ -80,6 +68,19 @@ class PhastDocumentFilters {
         }
 
         return $runtimeConfig;
+    }
+
+    private static function applyWithRuntimeConfig($buffer, $runtimeConfig, $applyCheckBuffer = null) {
+        if (is_null($applyCheckBuffer)) {
+            $applyCheckBuffer = $buffer;
+        }
+        if ($runtimeConfig['optimizeHTMLDocumentsOnly'] && !preg_match(self::DOCUMENT_PATTERN, $applyCheckBuffer)) {
+            Log::info('Buffer doesn\'t look like html! Not applying filters');
+            return $buffer;
+        }
+        return (new Factory())
+            ->make($runtimeConfig)
+            ->apply($buffer);
     }
 
 }

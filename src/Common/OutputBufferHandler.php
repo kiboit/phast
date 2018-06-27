@@ -79,8 +79,8 @@ class OutputBufferHandler {
 
     private function finalize() {
         $input = substr($this->buffer, $this->offset);
+        $result = call_user_func($this->filterCb, $input, $this->buffer);
         $this->buffer = null;
-        $result = call_user_func($this->filterCb, $input);
         return $result;
     }
 
