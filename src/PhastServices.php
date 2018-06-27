@@ -34,14 +34,17 @@ class PhastServices {
             header('Cache-Control: max-age=86400');
         }
 
+        $userConfig = new Configuration($getConfig());
+
+        $runtimeConfig = Configuration::fromDefaults()
+            ->withUserConfiguration($userConfig)
+            ->withServiceRequest($serviceRequest)
+            ->getRuntimeConfig()
+            ->toArray();
+
+        Log::init($runtimeConfig['logging'], $serviceRequest, $service);
+
         try {
-            $userConfig = new Configuration($getConfig());
-            $runtimeConfig = Configuration::fromDefaults()
-                ->withUserConfiguration($userConfig)
-                ->withServiceRequest($serviceRequest)
-                ->getRuntimeConfig()
-                ->toArray();
-            Log::init($runtimeConfig['logging'], $serviceRequest, $service);
             ServiceRequest::setDefaultSerializationMode($runtimeConfig['serviceRequestFormat']);
 
             Log::info('Starting service');
