@@ -55,41 +55,11 @@ class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame('<BODY></BODY>', $this->handler->handleChunk('', PHP_OUTPUT_HANDLER_FINAL));
     }
 
-    public function testShouldReturnOriginal() {
-        $this->assertSame('nope', $this->handler->handleChunk('nope', PHP_OUTPUT_HANDLER_FINAL));
-    }
-
     public function testShouldStopBufferingAfterMax() {
         $chunk = str_repeat('*', self::MAX_BUFFER_SIZE_TO_APPLY);
         $this->assertSame('', $this->handler->handleChunk($chunk, 0));
         $this->assertSame($chunk . '!', $this->handler->handleChunk('!', 0));
         $this->assertSame('?', $this->handler->handleChunk('?', 0));
         $this->assertSame('', $this->handler->handleChunk('', PHP_OUTPUT_HANDLER_FINAL));
-    }
-
-    /** @dataProvider shouldApplyData */
-    public function testShouldApply($buffer, $shouldApply) {
-        $called = false;
-        $handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, function () use (&$called) {
-            $called = true;
-        });
-        $handler->handleChunk($buffer, PHP_OUTPUT_HANDLER_FINAL);
-        $this->assertEquals($shouldApply, $called);
-    }
-    
-    public function shouldApplyData() {
-        yield ["<!DOCTYPE html>\n<html>\n<body></body>\n</html>", true];
-        yield ["<?xml version=\"1.0\"?\><!DOCTYPE html>\n<html>\n<body></body>\n</html>", true];
-        yield ["<!doctype html>\n<html>\n<body></body>\n</html>", true];
-        yield ["<html>\n<body></body>\n</html>", true];
-        yield ["    \n<!doctype       html>\n<html>\n<body></body>\n</html>", true];
-        yield ["<!doctype html>\n<!-- hello -->\n<html>\n<body></body>\n</html>", true];
-        yield ["<!-- hello -->\n<!doctype html>\n<html>\n<body></body>\n</html>", true];
-        yield ["<html>\n<body>", false];
-        yield ['<?xml version="1.0"?\><tag>asd</tag>', false];
-        yield ["\0<html><body></body></html>", false];
-        yield [sprintf('<html><body>%s</body></html>', str_pad('', self::MAX_BUFFER_SIZE_TO_APPLY, 's')), false];
-        yield ['<!doctype html><html amp><body></body></html>', false];
-        yield ['<!doctype html><html ⚡><body></body></html>', false];
     }
 }

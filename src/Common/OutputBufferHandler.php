@@ -17,16 +17,6 @@ class OutputBufferHandler {
         )++
     ~xsiA';
 
-    const DOCUMENT_PATTERN = "~
-        \s* (<\?xml[^>]*>)?
-        (\s* <!--(.*?)-->)*
-        \s* (<!doctype\s+html[^>]*>)?
-        (\s* <!--(.*?)-->)*
-        \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
-        .*
-        ( </body> | </html> )
-    ~xsiA";
-
     private $filterCb;
 
     private $buffer = '';
@@ -89,15 +79,8 @@ class OutputBufferHandler {
 
     private function finalize() {
         $input = substr($this->buffer, $this->offset);
-
-        if (!preg_match(self::DOCUMENT_PATTERN, $this->buffer)) {
-            $this->logger()->info('Buffer doesn\'t look like html! Not applying filters');
-            return $input;
-        }
-
         $this->buffer = null;
         $result = call_user_func($this->filterCb, $input);
-
         return $result;
     }
 

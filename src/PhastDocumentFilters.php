@@ -11,6 +11,16 @@ use Kibo\Phast\Services\ServiceRequest;
 
 class PhastDocumentFilters {
 
+    const DOCUMENT_PATTERN = "~
+        \s* (<\?xml[^>]*>)?
+        (\s* <!--(.*?)-->)*
+        \s* (<!doctype\s+html[^>]*>)?
+        (\s* <!--(.*?)-->)*
+        \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
+        .*
+        ( </body> | </html> )
+    ~xsiA";
+
     public static function deploy(array $userConfig) {
         $runtimeConfig = self::configure($userConfig);
 
@@ -36,7 +46,7 @@ class PhastDocumentFilters {
             return $html;
         }
 
-        if ($runtimeConfig['optimizeHTMLDocumentsOnly'] && !preg_match(OutputBufferHandler::DOCUMENT_PATTERN, $html)) {
+        if ($runtimeConfig['optimizeHTMLDocumentsOnly'] && !preg_match(self::DOCUMENT_PATTERN, $html)) {
             return $html;
         }
 
