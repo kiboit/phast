@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Common;
 
-use Kibo\Phast\Filters\HTML\Composite\Filter;
 use Kibo\Phast\Logging\LoggingTrait;
 
 class OutputBufferHandler {
