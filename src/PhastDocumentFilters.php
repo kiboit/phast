@@ -47,6 +47,7 @@ class PhastDocumentFilters {
         }
 
         if ($runtimeConfig['optimizeHTMLDocumentsOnly'] && !preg_match(self::DOCUMENT_PATTERN, $html)) {
+            Log::info('Buffer doesn\'t look like html! Not applying filters');
             return $html;
         }
 
