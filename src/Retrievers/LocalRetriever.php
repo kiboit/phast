@@ -89,7 +89,8 @@ class LocalRetriever implements Retriever {
         });
 
         foreach ($prefixes as $prefix) {
-            $pattern = '~^(?:' . str_replace('~', '\\~', $prefix) . ')(?<path>.*)~';
+            $sanitizedPrefix = preg_replace(['/~/', '~^(?!/)~', '~(?<!/)$~'], ['\\~', '/', '/'], $prefix);
+            $pattern = '~^(?:' . $sanitizedPrefix . ')(?<path>.*)~';
             if (preg_match($pattern, $url->getPath(), $matches)) {
                 return $this->appendNormalized($submap[$prefix], $matches['path']);
             }

@@ -54,9 +54,12 @@ class LocalRetrieverTest extends TestCase {
         };
         $map = [
             'kibo.test' => [
-                '/pub/version\d+/' => '/var/www/pub',
                 '/dir1' => '/the-dir-1',
                 '/dir2' => '/the-dir-2',
+                '/pub/version\d+/' => '/var/www/pub',
+                '/dir~' => '/dir-tilde',
+                'dir3' => '/the-dir-3',
+                'dir4/' => '/the-dir-4',
                 '/dir1/subdir' => '/the-sub-dir'
             ]
         ];
@@ -70,7 +73,11 @@ class LocalRetrieverTest extends TestCase {
             ['http://kibo.test/dir1/dir1-file.css', '/the-dir-1/dir1-file.css'],
             ['http://kibo.test/dir2/dir2-file.css', '/the-dir-2/dir2-file.css'],
             ['http://kibo.test/dir1/subdir/subdir-file.css', '/the-sub-dir/subdir-file.css'],
-            ['http://kibo.test/pub/version1234/abcd.gif', '/var/www/pub/abcd.gif']
+            ['http://kibo.test/pub/version1234/abcd.gif', '/var/www/pub/abcd.gif'],
+            ['http://kibo.test/dir~/dir~-file.css', '/dir-tilde/dir~-file.css'],
+            ['http://kibo.test/dir3/dir3-file.css', '/the-dir-3/dir3-file.css'],
+            ['http://kibo.test/dir4/dir4-file.css', '/the-dir-4/dir4-file.css'],
+            ['http://kibo.test/dir2abc/dir2-file.css', null]
         ]);
     }
 
