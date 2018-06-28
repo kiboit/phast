@@ -58,6 +58,34 @@ class TagsFilterTest extends HTMLFilterTestCase {
         );
     }
 
+    public function testPictureSourceRewriting() {
+        $html = '<html><body>';
+            $html .= '<picture>';
+                $html .= '<source srcset="/img1">';
+                $html .= '<source src="/img2">';
+                $html .= '<a src="/img3">something</a>';
+                $html .= '<source src="/img4" srcset="/img5">';
+                $html .= '<img src="/img6">';
+            $html .= '</picture>';
+            $html .= '<video>';
+                $html .= '<source srcset="/img7">';
+            $html .= '</video>';
+        $html .= '</body></html>';
+
+        $filtered = $this->applyFilter($html, true);
+        $regexp = '~' . preg_replace('~/(img|ignore)\d~', '([^"]*)', $html) . '~';
+
+        $matches = [];
+        if (!preg_match($regexp, $filtered, $matches)) {
+            $this->fail('Could not match filtered html!');
+        }
+        foreach ([1, 2, 4, 5, 6] as $i) {
+            $this->checkSrc(str_replace('&amp;', '&', $matches[$i]), ['src' => self::BASE_URL . '/img' . $i]);
+        }
+        $this->assertEquals('/img3', $matches[3]);
+        $this->assertEquals('/img7', $matches[7]);
+    }
+
     public function testRewriteSrcWithSpace() {
         $html = '<html><body><img src=" /img "></body></html>';
         $this->applyFilter($html);
