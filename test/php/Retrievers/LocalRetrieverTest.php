@@ -54,6 +54,7 @@ class LocalRetrieverTest extends TestCase {
         };
         $map = [
             'kibo.test' => [
+                '/pub/version\d+/' => '/var/www/pub',
                 '/dir1' => '/the-dir-1',
                 '/dir2' => '/the-dir-2',
                 '/dir1/subdir' => '/the-sub-dir'
@@ -68,7 +69,8 @@ class LocalRetrieverTest extends TestCase {
         return $this->allMethodsWithData([
             ['http://kibo.test/dir1/dir1-file.css', '/the-dir-1/dir1-file.css'],
             ['http://kibo.test/dir2/dir2-file.css', '/the-dir-2/dir2-file.css'],
-            ['http://kibo.test/dir1/subdir/subdir-file.css', '/the-sub-dir/subdir-file.css']
+            ['http://kibo.test/dir1/subdir/subdir-file.css', '/the-sub-dir/subdir-file.css'],
+            ['http://kibo.test/pub/version1234/abcd.gif', '/var/www/pub/abcd.gif']
         ]);
     }
 
