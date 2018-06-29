@@ -42,6 +42,8 @@ class Filter implements HTMLStreamFilter {
             $this->rewriteSrcset($tag, $context);
         } else if ($tag->getTagName() == 'picture') {
             $this->inPictureTag = true;
+        } else if ($tag->getTagName() == 'video' || $tag->getTagName() == 'audio') {
+            $this->inPictureTag = false;
         }
     }
 

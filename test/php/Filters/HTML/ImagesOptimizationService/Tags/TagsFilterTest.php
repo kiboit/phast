@@ -86,6 +86,18 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->assertEquals('/img7', $matches[7]);
     }
 
+    /** @dataProvider dontRewriteMediaSourceData */
+    public function testDontRewriteMediaSource($tag) {
+        $html = "<picture><$tag><source src=\"/canary\">";
+        $filtered = $this->applyFilter($html, true);
+        $this->assertContains('"/canary"', $filtered);
+    }
+
+    public function dontRewriteMediaSourceData() {
+        yield ['video'];
+        yield ['audio'];
+    }
+
     public function testRewriteSrcWithSpace() {
         $html = '<html><body><img src=" /img "></body></html>';
         $this->applyFilter($html);
