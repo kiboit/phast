@@ -4,8 +4,8 @@
 ## Unreleased
 
 ### Added
-* Support for `<PICTURE>` elements. (#75)
-* `retrieverMap` path prefixes are now regexes. (#73)
+* Support for `<PICTURE>` elements.
+* `retrieverMap` path prefixes are now regexes.
 
 
 ## [1.6.0] - 2018-06-27
