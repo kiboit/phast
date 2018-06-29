@@ -83,19 +83,24 @@ class LocalRetriever implements Retriever {
             return $this->appendNormalized($submap, $url->getPath());
         }
 
-        $prefixes = array_keys($submap);
-        usort($prefixes, function ($prefix1, $prefix2) {
-            return strlen($prefix1) > strlen($prefix2) ? -1 : 1;
-        });
+        $selectedPath = null;
+        $selectedRoot = null;
 
-        foreach ($prefixes as $prefix) {
-            $sanitizedPrefix = preg_replace(['/~/', '~^(?!/)~', '~(?<!/)$~'], ['\\~', '/', '/'], $prefix);
-            $pattern = '~^(?:' . $sanitizedPrefix . ')(?<path>.*)~';
-            if (preg_match($pattern, $url->getPath(), $matches)) {
-                return $this->appendNormalized($submap[$prefix], $matches['path']);
+        foreach ($submap as $prefix => $root) {
+            $pattern = '~^(?=/)/*?(?:' . str_replace('~', '\\~', $prefix) . ')(?<path>/*(?<=/).*)~';
+            if (preg_match($pattern, $url->getPath(), $match)
+                && ($selectedPath === null || strlen($match['path']) < strlen($selectedPath))
+            ) {
+                $selectedRoot = $root;
+                $selectedPath = $match['path'];
             }
         }
-        return false;
+
+        if ($selectedPath === null) {
+            return false;
+        }
+
+        return $this->appendNormalized($selectedRoot, $selectedPath);
     }
 
     private function appendNormalized($target, $appended) {

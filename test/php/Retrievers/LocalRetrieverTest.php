@@ -76,6 +76,7 @@ class LocalRetrieverTest extends TestCase {
             ['http://kibo.test/pub/version1234/abcd.gif', '/var/www/pub/abcd.gif'],
             ['http://kibo.test/dir~/dir~-file.css', '/dir-tilde/dir~-file.css'],
             ['http://kibo.test/dir3/dir3-file.css', '/the-dir-3/dir3-file.css'],
+            ['http://kibo.test/not/dir3/dir3-file.css', null],
             ['http://kibo.test/dir4/dir4-file.css', '/the-dir-4/dir4-file.css'],
             ['http://kibo.test/dir2abc/dir2-file.css', null]
         ]);
