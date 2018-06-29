@@ -1,14 +1,21 @@
 # Changelog
 
+
+## Unreleased
+
+### Added
+* Support for `<PICTURE>` elements. (#75)
+* `retrieverMap` path prefixes are now regexes. (#73)
+
+
 ## [1.6.0] - 2018-06-27
 
 ### Added
-
 * A configuration variable for toggling HTML document detection before applying filters.
 
 ### Fixed
-
 * Unify the filter application logic when doing output buffering and on-demand application.
+
 
 ## [1.5.6] - 2018-06-25
 
