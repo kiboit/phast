@@ -1,8 +1,8 @@
 <?php
 
 use Kibo\Phast\Common\System;
-use Kibo\Phast\HTTP\CURLClient;
 use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\HTTP\RequestsHTTPClient;
 
 return [
 
@@ -12,7 +12,14 @@ return [
         $_SERVER['HTTP_HOST'] => Request::fromGlobals()->getDocumentRoot()
     ],
 
-    'httpClient' => CURLClient::class,
+    'httpClient' => function () {
+        if (!class_exists(Requests::class)) {
+            require_once __DIR__ . '/../../vendor/rmccue/requests/library/Requests.php';
+            Requests::register_autoloader();
+            Requests::set_certificate_path(__DIR__ . '/../../certificates/mozilla-cacert.pem');
+        }
+        return new RequestsHTTPClient();
+    },
 
     'cache' => [
         'cacheRoot' => sys_get_temp_dir() . '/phast-cache-' . (new System())->getUserId(),

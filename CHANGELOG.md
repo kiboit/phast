@@ -6,6 +6,7 @@
 ### Added
 * Support for `<PICTURE>` elements.
 * `retrieverMap` path prefixes are now regexes.
+* Bundle the `Requests` library and Mozilla CA certificates and use them as default HTTP client engine.
 
 
 ## [1.6.0] - 2018-06-27
