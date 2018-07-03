@@ -13,11 +13,7 @@ return [
     ],
 
     'httpClient' => function () {
-        if (!class_exists(Requests::class)) {
-            require_once __DIR__ . '/../../vendor/rmccue/requests/library/Requests.php';
-            Requests::register_autoloader();
-            Requests::set_certificate_path(__DIR__ . '/../../certificates/mozilla-cacert.pem');
-        }
+        Requests::set_certificate_path(__DIR__ . '/../../certificates/mozilla-cacert.pem');
         return new RequestsHTTPClient();
     },
 
