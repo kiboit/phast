@@ -24,31 +24,15 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
         $this->assertNotEquals($handlersBefore, $handlersAfter);
     }
 
-    public function testApply() {
-        $in = '<!doctype html><html><head><title>Hello, World!</title></head><body></body></html>';
-        $out = PhastDocumentFilters::apply($in, []);
-        $this->assertFiltersApplied($out);
-    }
-
-    public function testApplyNonHTML() {
-        $in = 'Nope';
-        $out = PhastDocumentFilters::apply($in, []);
-        $this->assertEquals($in, $out);
-    }
-
-    public function testApplyNonHTMLWithConfig() {
-        $in = 'Nope';
-        $out = PhastDocumentFilters::apply($in, ['optimizeHTMLDocumentsOnly' => false]);
-        $this->assertFiltersApplied($out);
-    }
-
     /** @dataProvider shouldApplyData */
-    public function testShouldApply($buffer) {
-        $out = PhastDocumentFilters::apply($buffer, []);
+    public function testShouldApply($buffer, $documentsOnly = true) {
+        $config = ['optimizeHTMLDocumentsOnly' => $documentsOnly];
+        $out = PhastDocumentFilters::apply($buffer, $config);
         $this->assertFiltersApplied($out);
     }
 
     public function shouldApplyData() {
+        yield ["<!doctype html><html><head><title>Hello, World!</title></head><body></body></html>"];
         yield ["<!DOCTYPE html>\n<html>\n<body></body>\n</html>"];
         yield ["<?xml version=\"1.0\"?\><!DOCTYPE html>\n<html>\n<body></body>\n</html>"];
         yield ["<!doctype html>\n<html>\n<body></body>\n</html>"];
@@ -56,13 +40,15 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
         yield ["    \n<!doctype       html>\n<html>\n<body></body>\n</html>"];
         yield ["<!doctype html>\n<!-- hello -->\n<html>\n<body></body>\n</html>"];
         yield ["<!-- hello -->\n<!doctype html>\n<html>\n<body></body>\n</html>"];
+        yield ["<b>Yup</b>", false];
     }
 
     /**
      * @dataProvider shouldNotApplyData
      */
-    public function testShouldNotApply($buffer) {
-        $out = PhastDocumentFilters::apply($buffer, []);
+    public function testShouldNotApply($buffer, $documentsOnly = true) {
+        $config = ['optimizeHTMLDocumentsOnly' => $documentsOnly];
+        $out = PhastDocumentFilters::apply($buffer, $config);
         $this->assertFiltersNotApplied($out);
     }
 
@@ -72,6 +58,7 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
         yield ["\0<html><body></body></html>"];
         yield ['<!doctype html><html amp><body></body></html>'];
         yield ['<!doctype html><html ⚡><body></body></html>'];
+        yield ['Not html', false];
     }
 
     private function assertFiltersApplied($out) {

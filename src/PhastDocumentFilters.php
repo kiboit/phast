@@ -74,13 +74,20 @@ class PhastDocumentFilters {
         if (is_null($applyCheckBuffer)) {
             $applyCheckBuffer = $buffer;
         }
-        if ($runtimeConfig['optimizeHTMLDocumentsOnly'] && !preg_match(self::DOCUMENT_PATTERN, $applyCheckBuffer)) {
+        if (!self::shouldApply($applyCheckBuffer, $runtimeConfig)) {
             Log::info('Buffer doesn\'t look like html! Not applying filters');
             return $buffer;
         }
         return (new Factory())
             ->make($runtimeConfig)
             ->apply($buffer);
+    }
+
+    private static function shouldApply($buffer, $runtimeConfig) {
+        if ($runtimeConfig['optimizeHTMLDocumentsOnly']) {
+            return preg_match(self::DOCUMENT_PATTERN, $buffer);
+        }
+        return strpos($buffer, '<') !== false;
     }
 
 }
