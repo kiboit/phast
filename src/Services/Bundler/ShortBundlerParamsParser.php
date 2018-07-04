@@ -8,29 +8,35 @@ use Kibo\Phast\Services\ServiceRequest;
 
 class ShortBundlerParamsParser {
 
-    const PARAM_MAPPINGS = [
-        's' => 'src',
-        'i' => 'strip-imports',
-        'c' => 'cacheMarker',
-        't' => 'token'
-    ];
+    public static function getParamsMappings() {
+        return [
+            's' => 'src',
+            'i' => 'strip-imports',
+            'c' => 'cacheMarker',
+            't' => 'token'
+        ];
+    }
 
     public function parse(ServiceRequest $request) {
         $query = $request->getHTTPRequest()->getEnvValue('QUERY_STRING');
         $result = [];
         foreach (preg_split('/&(?=s=)/', $query) as $part) {
-            $result[] = $this->parseAndMap($part);
+            $parsed = $this->parseAndMap($part);
+            if (isset ($parsed['src'])) {
+                $result[] = $parsed;
+            }
         }
-        return $result;
+        return empty ($result) ? [$parsed] : $result;
     }
 
     private function parseAndMap($string) {
         $parsed = [];
         parse_str($string, $parsed);
+        $mappings = self::getParamsMappings();
         $mapped = [];
         foreach ($parsed as $key => $value) {
-            if (isset (self::PARAM_MAPPINGS[$key])) {
-                $mapped[self::PARAM_MAPPINGS[$key]] = $value === '' ? '1' : $value;
+            if (isset ($mappings[$key])) {
+                $mapped[$mappings[$key]] = $value === '' ? '1' : $value;
             } else {
                 $mapped[$key] = $value;
             }

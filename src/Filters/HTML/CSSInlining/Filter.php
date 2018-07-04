@@ -8,6 +8,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\Bundler\ServiceParams;
+use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
@@ -183,6 +184,7 @@ class Filter extends BaseHTMLStreamFilter {
      * @param int $currentLevel
      * @param string[] $seen
      * @return Tag[]
+     * @throws \Kibo\Phast\Exceptions\ItemNotFoundException
      */
     private function inlineURL(URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
         $whitelistEntry = $this->findInWhitelist($url);
@@ -294,7 +296,13 @@ class Filter extends BaseHTMLStreamFilter {
         $this->logger()->info('Adding inlined retriever script');
         $this->context->addPhastJavascript(new PhastJavaScript(__DIR__ . '/resources-loader.js'));
         $script = new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js');
-        $script->setConfig('serviceUrl', (string) $this->bundlerUrl);
+
+        $bundlerMappings = ShortBundlerParamsParser::getParamsMappings();
+        $jsMappings = array_combine(array_values($bundlerMappings), array_keys($bundlerMappings));
+        $script->setConfig('inlinedCSSRetriever', [
+            'serviceUrl' => (string) $this->bundlerUrl,
+            'shortParamsMappings' => $jsMappings
+        ]);
         $this->context->addPhastJavaScript($script);
     }
 

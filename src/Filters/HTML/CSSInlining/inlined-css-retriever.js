@@ -1,6 +1,9 @@
 phast.stylesLoading = 0;
 
-var resourceLoader = new phast.ResourceLoader.make(phast.config.serviceUrl);
+var resourceLoader = new phast.ResourceLoader.make(
+    phast.config.inlinedCSSRetriever.serviceUrl,
+    phast.config.inlinedCSSRetriever.shortParamsMappings
+);
 
 phast.forEachSelectedElement('style[data-phast-params]', function (style) {
     var textParams = style.getAttribute('data-phast-params');

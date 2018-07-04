@@ -60,7 +60,7 @@ phast.ResourceLoader.RequestParams.fromString = function(string) {
     }
 };
 
-phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
+phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMappings) {
 
     var timeoutHandler;
     var accumulatingPack = {};
@@ -126,7 +126,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         var parts = [];
         getSortedTokens(pack).forEach(function (token, idx) {
             for (var key in pack[token].params) {
-                parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(pack[token].params[key]));
+                var queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
+                parts.push(encodeURIComponent(queryKey) + '=' + encodeURIComponent(pack[token].params[key]));
             }
         });
         return serviceUrl + glue + parts.join('&');
@@ -430,12 +431,12 @@ phast.ResourceLoader.StorageCache.StorageCacheParams = function () {
 };
 
 
-phast.ResourceLoader.make = function (serviceUrl) {
+phast.ResourceLoader.make = function (serviceUrl, shortParamsMappings) {
     var storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
     var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
     var cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
     var cache = new phast.ResourceLoader.StorageCache(cacheParams, storage);
-    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl);
+    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl, shortParamsMappings);
     return new phast.ResourceLoader(client, cache);
 };
 

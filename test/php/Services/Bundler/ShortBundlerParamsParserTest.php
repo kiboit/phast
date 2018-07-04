@@ -52,7 +52,8 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
                 'cacheMarker' => 'cm3'
             ]
         ];
-        $query = 's=s1&t=t1&not-mapped=o1&c=cm1';
+        $query = 'service=bundler';
+        $query .= '&s=s1&t=t1&not-mapped=o1&c=cm1';
         $query .= '&s=s2&t=t2&not-mapped=o2';
         $query .= '&s=s3&c=cm3';
 
