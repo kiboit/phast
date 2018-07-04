@@ -4,6 +4,7 @@ namespace Kibo\Phast\Services\Bundler;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
+use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Retrievers\Retriever;
@@ -81,6 +82,23 @@ class ServiceTest extends PhastTestCase {
         }
     }
 
+    public function testUsingShortenedParams() {
+        $params = $this->signParams([['src' => 'the-file'] ]);
+        $query = http_build_query(['s' => $params[0]['src'], 't' => $params[0]['token']]);
+        $httpRequest = Request::fromArray([], ['QUERY_STRING' => $query]);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $response = $this->service->serve($serviceRequest);
+        $content = $this->checkCorrectResponse($response);
+
+        $expected = [
+            (object)[
+                'status' => 200,
+                'content' => 'the-file-content-filtered'
+            ]
+        ];
+        $this->assertEquals($expected, $content);
+    }
+
     public function testErrorOnBadlySignedBundledRequest() {
         $params = $this->makeParams([
             ['src' => 'will-pass', 'ab' => 'gogo'],
@@ -133,10 +151,15 @@ class ServiceTest extends PhastTestCase {
     }
 
     private function doRequest(array $params) {
-        $request = (new ServiceRequest())->withParams($params);
+        $httpRequest = Request::fromArray($params);
+        $request = ServiceRequest::fromHTTPRequest($httpRequest);
         $response = $this->service->serve($request);
 
         $this->assertInstanceOf(Response::class, $response);
+        return $this->checkCorrectResponse($response);
+    }
+
+    private function checkCorrectResponse(Response $response) {
         $this->assertEquals(200, $response->getCode());
 
         $headers = $response->getHeaders();
@@ -150,18 +173,22 @@ class ServiceTest extends PhastTestCase {
     }
 
     private function makeParams(array $input) {
-        foreach ($input as &$item) {
-            $item['token'] = ServiceParams::fromArray($item)
-                ->sign($this->signature)
-                ->toArray()['token'];
-        }
         $output = [];
-        foreach ($input as $idx => $items) {
+        foreach ($this->signParams($input) as $idx => $items) {
             foreach ($items as $key => $value) {
                 $output["{$key}_$idx"] = $value;
             }
         }
         return $output;
+    }
+
+    private function signParams(array $input) {
+        foreach ($input as &$item) {
+            $item['token'] = ServiceParams::fromArray($item)
+                ->sign($this->signature)
+                ->toArray()['token'];
+        }
+        return $input;
     }
 
 }

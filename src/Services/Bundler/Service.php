@@ -103,7 +103,11 @@ class Service {
     }
 
     private function getParams(ServiceRequest $request) {
-        return (new BundlerParamsParser())->parse($request);
+        $params = $request->getParams();
+        if (isset ($params['src_0'])) {
+            return (new BundlerParamsParser())->parse($request);
+        }
+        return (new ShortBundlerParamsParser())->parse($request);
     }
 
     private function verifyParams(array $params) {
