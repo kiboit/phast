@@ -38,6 +38,8 @@ return [
 
     'optimizeHTMLDocumentsOnly' => true,
 
+    'outputServerSideStats' => true,
+
     'documents' => [
         'maxBufferSizeToApply' => pow(1024, 3),
 

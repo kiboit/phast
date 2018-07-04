@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\HTML\Composite;
 
-use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -17,6 +16,8 @@ class Filter {
      */
     private $baseUrl;
 
+    private $outputStats;
+
     /**
      * @var HTMLStreamFilter[]
      */
@@ -27,10 +28,13 @@ class Filter {
     /**
      * Filter constructor.
      * @param URL $baseUrl
+     * @param $outputStats
      */
-    public function __construct(URL $baseUrl) {
+    public function __construct(URL $baseUrl, $outputStats) {
         $this->baseUrl = $baseUrl;
+        $this->outputStats = $outputStats;
     }
+
 
     /**
      * @param string $buffer
@@ -96,9 +100,11 @@ class Filter {
         $log .= sprintf("% 43s % 4dms\n", '(other)', ($timeDelta - $timeAccounted)*1000);
         $log .= sprintf("% 43s % 4dms\n", '(total)', $timeDelta*1000);
 
-        $output .= "<!--\n[Phast] Server-side performance metrics\n";
-        $output .= $log;
-        $output .= "-->";
+        if ($this->outputStats) {
+            $output .= "<!--\n[Phast] Server-side performance metrics\n";
+            $output .= $log;
+            $output .= "-->";
+        }
         $this->logger()->info($log);
         return $output;
     }

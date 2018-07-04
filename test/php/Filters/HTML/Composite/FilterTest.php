@@ -8,10 +8,10 @@ use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\Logger;
 use Kibo\Phast\Logging\LogLevel;
 use Kibo\Phast\Logging\LogWriter;
+use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\ValueObjects\URL;
-use PHPUnit\Framework\TestCase;
 
-class FilterTest extends TestCase {
+class FilterTest extends PhastTestCase {
 
     /**
      * @var Filter
@@ -25,7 +25,7 @@ class FilterTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new Filter(URL::fromString('http://phast.test'));
+        $this->filter = new Filter(URL::fromString(self::BASE_URL), true);
     }
 
     public function testShouldReturnApplied() {
@@ -116,6 +116,29 @@ class FilterTest extends TestCase {
         $this->assertEquals($buffer, $actual);
     }
 
+    public function testShouldAddStats() {
+        $buffer = '<html><body></body></html>';
+        $this->shouldTransform();
+        $actual = $this->filter->apply($buffer);
+        $this->assertContains("<!--\n[Phast] Server-side performance metrics\n", $actual);
+    }
+
+    public function testShouldNotAddStats() {
+        $this->filter = new Filter(URL::fromString(self::BASE_URL), false);
+        $buffer = '<html><body></body></html>';
+        $this->shouldTransform();
+        $actual = $this->filter->apply($buffer);
+        $this->assertNotContains("<!--\n[Phast] Server-side performance metrics\n", $actual);
+    }
+
+    private function shouldTransform() {
+        return $this->setExpectation($this->once());
+    }
+
+    private function shouldNotTransform() {
+        return $this->setExpectation($this->never());
+    }
+
     private function setExpectation($expectation) {
         $filterMock = $this->createMock(HTMLStreamFilter::class);
         $filterMock
@@ -127,14 +150,6 @@ class FilterTest extends TestCase {
             });
         $this->filter->addHTMLFilter($filterMock);
         return $filterMock;
-    }
-
-    private function shouldTransform() {
-        return $this->setExpectation($this->once());
-    }
-
-    private function shouldNotTransform() {
-        return $this->setExpectation($this->never());
     }
 
 }

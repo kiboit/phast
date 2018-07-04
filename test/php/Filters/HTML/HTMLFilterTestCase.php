@@ -77,7 +77,7 @@ class HTMLFilterTestCase extends PhastTestCase {
 
     protected function applyFilter($inputHtml = null, $skipResultParsing = false) {
 
-        $composite = new Composite\Filter(URL::fromString(self::BASE_URL));
+        $composite = new Composite\Filter(URL::fromString(self::BASE_URL), true);
         $composite->addHTMLFilter(new BaseURLSetter\Filter());
         $composite->addHTMLFilter($this->filter);
         $composite->addHTMLFilter(new PhastScriptsCompiler\Filter($this->jsCompiler));

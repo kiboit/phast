@@ -8,7 +8,7 @@ use Kibo\Phast\ValueObjects\URL;
 class Factory {
 
     public function make(array $config) {
-        $composite = new Filter(URL::fromString($config['documents']['baseUrl']));
+        $composite = new Filter(URL::fromString($config['documents']['baseUrl']), $config['outputServerSideStats']);
         foreach (array_keys($config['documents']['filters']) as $class) {
             $package = Package::fromPackageClass($class);
             if ($package->hasFactory()) {
