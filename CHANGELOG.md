@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Unreleased
+## [1.7.0] - 2018-07-04
 
 ### Added
 * Support for `<PICTURE>` elements.
