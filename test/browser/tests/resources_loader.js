@@ -1,4 +1,4 @@
-loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (phast) {
+loadPhastJS(['public/es6-promise.js', 'public/hash.js' , 'public/resources-loader.js'], function (phast) {
 
     var Promise = phast.ES6Promise.Promise;
 
@@ -176,8 +176,8 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                         'token': 'the-token',
                         'not-mapped': 'original'
                     }));
-                    var expected = 's=00the-src&c=the-cache&t=the-token&not-mapped=original';
-                    assert.equal(pack.toQuery(), expected, 'Maps correctly');
+                    var expected = /c=\d+&s=00the-src&t=the-token&not-mapped=original/;
+                    assert.ok(expected.test(pack.toQuery()), 'Maps correctly');
                 });
 
 
@@ -212,6 +212,20 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                         + '&s=00' + 'c'.repeat(1297) + '&t=6'
                         + '&s=zzccd&t=7';
                     assert.equal(pack.toQuery(), expected, 'Compresses src and groups correctly')
+                });
+
+                QUnit.test('Test building big cache marker', function (assert) {
+                    pack.add(new PackItem({}, {cacheMarker: 'a', token: 1}));
+                    var query1 = pack.toQuery();
+
+                    var cacheMarkerPattern = /^c=\d+/;
+                    assert.ok(cacheMarkerPattern.test(query1), 'Has set cache marker 1');
+
+                    pack.add(new PackItem({}, {cacheMarker: 'b', token: 2}));
+                    var query2 = pack.toQuery();
+
+                    assert.ok(cacheMarkerPattern.test(query2), 'Has set cache marker 2');
+                    assert.notEqual(query1, query2, 'Cache markers are different');
                 });
             });
         });

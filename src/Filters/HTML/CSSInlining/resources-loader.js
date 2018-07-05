@@ -131,11 +131,16 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
     }
 
     function packToQuery() {
-        var parts = [];
+        var parts = [],
+            cacheMarkers = [],
             lastSrc = '';
         getSortedTokens().forEach(function (token) {
             var queryKey,  queryValue;
             for (var key in items[token].params) {
+                if (key === 'cacheMarker') {
+                    cacheMarkers.push(items[token].params.cacheMarker);
+                    continue;
+                }
                 queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
                 if (key === 'strip-imports') {
                     queryValue = encodeURIComponent(queryKey);
@@ -152,6 +157,9 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
                 parts.push(queryValue);
             }
         });
+        if (cacheMarkers.length > 0) {
+            parts.unshift('c=' + phast.hash(cacheMarkers.join('|'), 23045));
+        }
         return parts.join('&');
     }
 

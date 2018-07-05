@@ -294,9 +294,10 @@ class Filter extends BaseHTMLStreamFilter {
 
     private function addInlinedRetrieverScript() {
         $this->logger()->info('Adding inlined retriever script');
+        $this->context->addPhastJavascript(new PhastJavaScript(__DIR__ . '/../../../Common/hash.js'));
         $this->context->addPhastJavascript(new PhastJavaScript(__DIR__ . '/resources-loader.js'));
-        $script = new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js');
 
+        $script = new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js');
         $bundlerMappings = ShortBundlerParamsParser::getParamsMappings();
         $jsMappings = array_combine(array_values($bundlerMappings), array_keys($bundlerMappings));
         $script->setConfig('inlinedCSSRetriever', [

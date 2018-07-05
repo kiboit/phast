@@ -72,6 +72,9 @@ class ServiceParams {
 
     private function makeToken(ServiceSignature $signature) {
         $params = $this->params;
+        if (isset ($params['cacheMarker'])) {
+            unset ($params['cacheMarker']);
+        }
         ksort($params);
         array_walk($params, function (&$item) {
             $item = (string) $item;

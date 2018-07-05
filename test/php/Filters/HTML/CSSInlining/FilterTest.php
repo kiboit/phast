@@ -102,6 +102,8 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertArrayHasKey('token', $params);
         }
 
+        $this->assertHasCompiled('Common/hash.js');
+        $this->assertHasCompiled('CSSInlining/resources-loader.js');
         $this->assertHasCompiled('CSSInlining/inlined-css-retriever.js');
         $bundlerMappings = ShortBundlerParamsParser::getParamsMappings();
         $expectedMappings = array_combine(array_values($bundlerMappings), array_keys($bundlerMappings));
