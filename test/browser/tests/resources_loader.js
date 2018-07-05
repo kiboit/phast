@@ -7,7 +7,12 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
     QUnit.module('ResourcesLoader', function (hooks) {
 
         var client,
-            documentParams = [];
+            documentParams = [],
+            paramsMappings = {'src': 's', 'strip-imports': 'i', 'cacheMarker': 'c', 'token': 't'};
+
+        function makeClient (serviceUrl) {
+            return new phast.ResourceLoader.BundlerServiceClient(serviceUrl, paramsMappings);
+        }
 
         hooks.before(function () {
             Array.prototype.forEach.call(
@@ -20,7 +25,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
         });
 
         hooks.beforeEach(function () {
-            client = new phast.ResourceLoader.BundlerServiceClient('phast.php?service=bundler', {'src': 's'});
+            client = makeClient('phast.php?service=bundler');
         });
 
         QUnit.module('RequestParams', function () {
@@ -46,7 +51,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             QUnit.test('Test fetching from dedicated service file', function (assert) {
                 var done = assert.async();
-                var client = new phast.ResourceLoader.BundlerServiceClient('bundler.php', {'src': 's'});
+                var client = makeClient('bundler.php');
                 var request = client.get(documentParams[0]);
                 request.then(function (responseText) {
                     assert.equal('text-1-contents', responseText, 'Fetched correctly');
@@ -89,7 +94,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             QUnit.test('Test handling network errors', function (assert) {
                 var iterations = 3;
                 var done = assert.async(iterations);
-                var client = new phast.ResourceLoader.BundlerServiceClient('does-not-exist', {'src': 's'});
+                var client = makeClient('does-not-exist');
                 for (var i = 0; i < iterations; i++) {
                     var params = {};
                     var request = client.get(params);
@@ -126,7 +131,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             QUnit.test('Test ignoring exceptions while dispatching network error', function (assert) {
                 var done = assert.async();
-                var client = new phast.ResourceLoader.BundlerServiceClient('bad-url', {'src': 's'});
+                var client = makeClient('bad-url');
                 var request1 = client.get(documentParams[0]);
                 var request2 = client.get(documentParams[1]);
                 request1.catch(function () {
