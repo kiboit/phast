@@ -135,7 +135,10 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
         getSortedTokens().forEach(function (token, idx) {
             for (var key in items[token].params) {
                 var queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
-                parts.push(encodeURIComponent(queryKey) + '=' + encodeURIComponent(items[token].params[key]));
+                var queryValue = key === 'strip-imports'
+                    ? encodeURIComponent(queryKey)
+                    : encodeURIComponent(queryKey) + '=' + encodeURIComponent(items[token].params[key])
+                parts.push(queryValue);
             }
         });
         return parts.join('&');

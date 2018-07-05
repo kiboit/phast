@@ -158,6 +158,38 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                         });
                 }
             });
+
+            QUnit.module('RequestsPack', function (hooks) {
+
+                var pack,
+                    RequestsPack = phast.ResourceLoader.BundlerServiceClient.RequestsPack,
+                    PackItem = phast.ResourceLoader.BundlerServiceClient.RequestsPack.PackItem;
+
+                hooks.beforeEach(function () {
+                    pack = new RequestsPack(paramsMappings);
+                });
+
+                QUnit.test('Test correct params mapping', function (assert) {
+                    pack.add(new PackItem({}, {
+                        'src': 'the-src',
+                        'cacheMarker': 'the-cache',
+                        'token': 'the-token',
+                        'not-mapped': 'original'
+                    }));
+                    var expected = 's=the-src&c=the-cache&t=the-token&not-mapped=original';
+                    assert.equal(pack.toQuery(), expected, 'Maps correctly');
+                });
+
+
+                QUnit.test('Test skipping the value for `strip-imports`', function (assert) {
+                    pack.add(new PackItem({}, {'strip-imports': 1}));
+                    assert.equal(pack.toQuery(), 'i', 'Skips value for default mapping');
+
+                    var otherPack = new RequestsPack({'strip-imports': 'm'});
+                    otherPack.add(new PackItem({}, {'strip-imports': 1}));
+                    assert.equal(otherPack.toQuery(), 'm', 'Skips value for alternate mapping');
+                });
+            });
         });
 
         QUnit.module('IndexedDBStorage', function (hooks) {
