@@ -84,7 +84,7 @@ class ServiceTest extends PhastTestCase {
 
     public function testUsingShortenedParams() {
         $params = $this->signParams([['src' => 'the-file'] ]);
-        $query = http_build_query(['s' => $params[0]['src'], 't' => $params[0]['token']]);
+        $query = http_build_query(['s' => '00' . $params[0]['src'], 't' => $params[0]['token']]);
         $httpRequest = Request::fromArray([], ['QUERY_STRING' => $query]);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $response = $this->service->serve($serviceRequest);

@@ -29,7 +29,7 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
                 'not-mapped' => 'original'
             ]
         ];
-        $query = 's=the-source&i&c=the-cache-marker&t=the-token&not-mapped=original';
+        $query = 's=00the-source&i&c=the-cache-marker&t=the-token&not-mapped=original';
         $actual = $this->parseString($query);
         $this->assertEquals($expected, $actual);
     }
@@ -53,9 +53,31 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
             ]
         ];
         $query = 'service=bundler';
-        $query .= '&s=s1&t=t1&not-mapped=o1&c=cm1';
-        $query .= '&s=s2&t=t2&not-mapped=o2';
-        $query .= '&s=s3&c=cm3';
+        $query .= '&s=00s1&t=t1&not-mapped=o1&c=cm1';
+        $query .= '&s=012&t=t2&not-mapped=o2';
+        $query .= '&s=013&c=cm3';
+
+        $actual = $this->parseString($query);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testSrcPrefixing() {
+        $expected = [
+            ['src' => '/this/is/the/root/and/this/is/specific'],
+            ['src' => '/this/is/the/root/but/these/are/others'],
+            ['src' => '/this/is/the/root/but/this-is-third'],
+            ['src' => '/another/root/smaller'],
+            ['src' => '/another/root/somewhat-bigger'],
+            ['src' => str_repeat('a', 1296) . '/1'],
+            ['src' => str_repeat('a', 1296) . '/2']
+        ];
+        $query = 's=00/this/is/the/root/and/this/is/specific';
+        $query .= '&s=0ibut/these/are/others';
+        $query .= '&s=0ois-is-third';
+        $query .= '&s=00/another/root/smaller';
+        $query .= '&s=0fomewhat-bigger';
+        $query .= '&s=00' . str_repeat('a', 1296) . '/1';
+        $query .= '&s=zza/2';
 
         $actual = $this->parseString($query);
         $this->assertEquals($expected, $actual);

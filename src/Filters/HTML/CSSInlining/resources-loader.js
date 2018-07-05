@@ -132,17 +132,65 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
 
     function packToQuery() {
         var parts = [];
-        getSortedTokens().forEach(function (token, idx) {
+            lastSrc = '';
+        getSortedTokens().forEach(function (token) {
+            var queryKey,  queryValue;
             for (var key in items[token].params) {
-                var queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
-                var queryValue = key === 'strip-imports'
-                    ? encodeURIComponent(queryKey)
-                    : encodeURIComponent(queryKey) + '=' + encodeURIComponent(items[token].params[key])
+                queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
+                if (key === 'strip-imports') {
+                    queryValue = encodeURIComponent(queryKey);
+                } else if (key === 'src') {
+                    queryValue = encodeURIComponent(queryKey)
+                        + '='
+                        + encodeURIComponent(
+                            compressSrc(items[token].params.src, lastSrc)
+                        );
+                    lastSrc = items[token].params.src;
+                } else {
+                    queryValue = encodeURIComponent(queryKey) + '=' + encodeURIComponent(items[token].params[key]);
+                }
                 parts.push(queryValue);
             }
         });
         return parts.join('&');
     }
+
+    function getSortedTokens() {
+        var paramsArr = [];
+        for (var token in items) {
+            paramsArr.push(items[token].params);
+        }
+        return paramsArr
+            .sort(function (a, b) {
+                return a.src > b.src ? 1 : -1
+            })
+            .map(function (item) {
+                return item.token;
+            })
+    }
+
+     function compressSrc(src, lastSrc) {
+         var prefixLen = 0, maxBase36Val = Math.pow(36, 2) - 1;
+         while (prefixLen < lastSrc.length && src[prefixLen] === lastSrc[prefixLen]) {
+             prefixLen++;
+         }
+         prefixLen = Math.min(prefixLen, maxBase36Val);
+         return toBase36(prefixLen) + '' + src.substr(prefixLen);
+     }
+
+     function toBase36(dec) {
+         var charsTable = [
+             '0', '1', '2', '3', '4', '5',
+             '6', '7', '8', '9', 'a', 'b',
+             'c', 'd', 'e', 'f', 'g', 'h',
+             'i', 'j', 'k', 'l', 'm', 'n',
+             'o', 'p', 'q', 'r', 's', 't',
+             'u', 'v', 'w', 'x', 'y', 'z'
+         ];
+         var p1 = dec % 36;
+         var p2 = Math.floor((dec - p1) / 36);
+         return charsTable[p2] + charsTable[p1];
+     }
 
     function handleResponse(responseText) {
         try {
@@ -172,10 +220,6 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
                 request.error();
             });
         }
-    }
-
-    function getSortedTokens() {
-        return Object.keys(items).sort();
     }
 
     this.add = addToPack;

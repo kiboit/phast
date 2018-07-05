@@ -176,7 +176,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                         'token': 'the-token',
                         'not-mapped': 'original'
                     }));
-                    var expected = 's=the-src&c=the-cache&t=the-token&not-mapped=original';
+                    var expected = 's=00the-src&c=the-cache&t=the-token&not-mapped=original';
                     assert.equal(pack.toQuery(), expected, 'Maps correctly');
                 });
 
@@ -188,6 +188,30 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                     var otherPack = new RequestsPack({'strip-imports': 'm'});
                     otherPack.add(new PackItem({}, {'strip-imports': 1}));
                     assert.equal(otherPack.toQuery(), 'm', 'Skips value for alternate mapping');
+                });
+
+                QUnit.test('Test src compression and grouping', function (assert) {
+                    var params = [
+                        {src: 'aaaaaaaaaaaaaaa', token: 1},
+                        {src: 'bbbbbbbbbbbbbbb', token: 2},
+                        {src: 'aaaaaaaaaaaaaaaaaaa', token: 3},
+                        {src: 'bbbbbbbbbbbbbbbcccc', token: 4},
+                        {src: 'bbbbbbbd', token: 5},
+                        {src: 'c'.repeat(1297), token: 6},
+                        {src: 'c'.repeat(1297) + 'd', token: 7}
+                    ];
+                    params.forEach(function (item) {
+                        pack.add(new PackItem({}, item));
+                    });
+                    var expected
+                        = 's=00aaaaaaaaaaaaaaa&t=1'
+                        + '&s=0faaaa&t=3'
+                        + '&s=00bbbbbbbbbbbbbbb&t=2'
+                        + '&s=0fcccc&t=4'
+                        + '&s=07d&t=5'
+                        + '&s=00' + 'c'.repeat(1297) + '&t=6'
+                        + '&s=zzccd&t=7';
+                    assert.equal(pack.toQuery(), expected, 'Compresses src and groups correctly')
                 });
             });
         });
