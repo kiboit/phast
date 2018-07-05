@@ -62,18 +62,21 @@ phast.ResourceLoader.RequestParams.fromString = function(string) {
 
 phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMappings) {
 
+    var RequestsPack = phast.ResourceLoader.BundlerServiceClient.RequestsPack;
+    var PackItem = RequestsPack.PackItem;
+
     var timeoutHandler;
-    var accumulatingPack = {};
+    var accumulatingPack = new RequestsPack(shortParamsMappings);
 
     this.get = function (params) {
         return new Promise(function (resolve, reject) {
             if (params === phast.ResourceLoader.RequestParams.FaultyParams) {
                 reject(new Error("Parameters did not parse as JSON"));
             } else {
-                addToPack(new PackItem({success: resolve, error: reject}, params));
+                accumulatingPack.add(new PackItem({success: resolve, error: reject}, params));
                 clearTimeout(timeoutHandler);
                 timeoutHandler = setTimeout(flush);
-                if (packToQuery(accumulatingPack).length > 4500) {
+                if (accumulatingPack.toQuery().length > 4500) {
                     console.log("[Phast] Resource loader: Pack got too big; flushing early...");
                     flush();
                 }
@@ -81,36 +84,24 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
         });
     };
 
-    function addToPack(packItem) {
-        if (!accumulatingPack[packItem.params.token]) {
-            accumulatingPack[packItem.params.token] = {
-                params: packItem.params,
-                requests: [packItem.request]
-            };
-        } else {
-            accumulatingPack[packItem.params.token]
-                .requests
-                .push(packItem.request);
-        }
-    }
-
     function flush() {
         var pack = accumulatingPack;
-        accumulatingPack = [];
+        accumulatingPack = new RequestsPack(shortParamsMappings);
         clearTimeout(timeoutHandler);
         makeRequest(pack);
     }
 
     function makeRequest(pack) {
-        var query = packToQuery(pack);
+        var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
+        var query = serviceUrl + glue + pack.toQuery();
         var errorHandler = function () {
-            handleError(pack);
+            pack.handleError();
         };
         var successHandler = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
-                handleResponse(xhr.responseText, pack);
+                pack.handleResponse(xhr.responseText);
             } else {
-                handleError(pack);
+                pack.handleError();
             }
         };
         var xhr = new XMLHttpRequest();
@@ -120,58 +111,82 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
         xhr.addEventListener('load', successHandler);
         xhr.send();
     }
+};
 
-    function packToQuery(pack) {
-        var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
-        var parts = [];
-        getSortedTokens(pack).forEach(function (token, idx) {
-            for (var key in pack[token].params) {
-                var queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
-                parts.push(encodeURIComponent(queryKey) + '=' + encodeURIComponent(pack[token].params[key]));
-            }
-        });
-        return serviceUrl + glue + parts.join('&');
-    }
+phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMappings) {
 
-    function handleError(pack) {
-        for (var k in pack) {
-            pack[k].requests.forEach(function (request) {
-                request.error();
-            });
+    var items = {};
+
+    function addToPack(packItem) {
+        if (!items[packItem.params.token]) {
+            items[packItem.params.token] = {
+                params: packItem.params,
+                requests: [packItem.request]
+            };
+        } else {
+            items[packItem.params.token]
+                .requests
+                .push(packItem.request);
         }
     }
 
-    function handleResponse(responseText, pack) {
+    function packToQuery() {
+        var parts = [];
+        getSortedTokens().forEach(function (token, idx) {
+            for (var key in items[token].params) {
+                var queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
+                parts.push(encodeURIComponent(queryKey) + '=' + encodeURIComponent(items[token].params[key]));
+            }
+        });
+        return parts.join('&');
+    }
+
+    function handleResponse(responseText) {
         try {
             var responses = JSON.parse(responseText);
         } catch (e) {
-            handleError(pack);
+            handleError();
             return;
         }
 
-        var tokens = getSortedTokens(pack);
+        var tokens = getSortedTokens();
         responses.forEach(function (response, idx) {
             if (response.status === 200) {
-                pack[tokens[idx]].requests.forEach(function (request) {
+                items[tokens[idx]].requests.forEach(function (request) {
                     request.success(response.content)
                 });
             } else {
-                pack[tokens[idx]].requests.forEach(function (request) {
+                items[tokens[idx]].requests.forEach(function (request) {
                     request.error(new Error("Got from bundler: " + JSON.stringify(response)));
                 });
             }
         });
     }
 
-    function getSortedTokens(pack) {
-        return Object.keys(pack).sort();
+    function handleError() {
+        for (var k in items) {
+            items[k].requests.forEach(function (request) {
+                request.error();
+            });
+        }
     }
 
-    function PackItem(request, params) {
-        this.request = request;
-        this.params = params;
+    function getSortedTokens() {
+        return Object.keys(items).sort();
     }
 
+    this.add = addToPack;
+
+    this.handleResponse = handleResponse;
+
+    this.handleError = handleError;
+
+    this.toQuery = packToQuery;
+};
+
+phast.ResourceLoader.BundlerServiceClient.RequestsPack.PackItem = function (request, params) {
+    this.request = request;
+    this.params = params;
 };
 
 phast.ResourceLoader.IndexedDBStorage = function (params) {
