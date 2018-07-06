@@ -60,20 +60,23 @@ phast.ResourceLoader.RequestParams.fromString = function(string) {
     }
 };
 
-phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
+phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMappings) {
+
+    var RequestsPack = phast.ResourceLoader.BundlerServiceClient.RequestsPack;
+    var PackItem = RequestsPack.PackItem;
 
     var timeoutHandler;
-    var accumulatingPack = {};
+    var accumulatingPack = new RequestsPack(shortParamsMappings);
 
     this.get = function (params) {
         return new Promise(function (resolve, reject) {
             if (params === phast.ResourceLoader.RequestParams.FaultyParams) {
                 reject(new Error("Parameters did not parse as JSON"));
             } else {
-                addToPack(new PackItem({success: resolve, error: reject}, params));
+                accumulatingPack.add(new PackItem({success: resolve, error: reject}, params));
                 clearTimeout(timeoutHandler);
                 timeoutHandler = setTimeout(flush);
-                if (packToQuery(accumulatingPack).length > 4500) {
+                if (accumulatingPack.toQuery().length > 4500) {
                     console.log("[Phast] Resource loader: Pack got too big; flushing early...");
                     flush();
                 }
@@ -81,36 +84,24 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         });
     };
 
-    function addToPack(packItem) {
-        if (!accumulatingPack[packItem.params.token]) {
-            accumulatingPack[packItem.params.token] = {
-                params: packItem.params,
-                requests: [packItem.request]
-            };
-        } else {
-            accumulatingPack[packItem.params.token]
-                .requests
-                .push(packItem.request);
-        }
-    }
-
     function flush() {
         var pack = accumulatingPack;
-        accumulatingPack = [];
+        accumulatingPack = new RequestsPack(shortParamsMappings);
         clearTimeout(timeoutHandler);
         makeRequest(pack);
     }
 
     function makeRequest(pack) {
-        var query = packToQuery(pack);
+        var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
+        var query = serviceUrl + glue + pack.toQuery();
         var errorHandler = function () {
-            handleError(pack);
+            pack.handleError();
         };
         var successHandler = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
-                handleResponse(xhr.responseText, pack);
+                pack.handleResponse(xhr.responseText);
             } else {
-                handleError(pack);
+                pack.handleError();
             }
         };
         var xhr = new XMLHttpRequest();
@@ -120,57 +111,137 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl) {
         xhr.addEventListener('load', successHandler);
         xhr.send();
     }
+};
 
-    function packToQuery(pack) {
-        var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
-        var parts = [];
-        getSortedTokens(pack).forEach(function (token, idx) {
-            for (var key in pack[token].params) {
-                parts.push(encodeURIComponent(key) + '_' + idx + '=' + encodeURIComponent(pack[token].params[key]));
-            }
-        });
-        return serviceUrl + glue + parts.join('&');
-    }
+phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMappings) {
 
-    function handleError(pack) {
-        for (var k in pack) {
-            pack[k].requests.forEach(function (request) {
-                request.error();
-            });
+    var items = {};
+
+    function addToPack(packItem) {
+        if (!items[packItem.params.token]) {
+            items[packItem.params.token] = {
+                params: packItem.params,
+                requests: [packItem.request]
+            };
+        } else {
+            items[packItem.params.token]
+                .requests
+                .push(packItem.request);
         }
     }
 
-    function handleResponse(responseText, pack) {
+    function packToQuery() {
+        var parts = [],
+            cacheMarkers = [],
+            lastSrc = '';
+        getSortedTokens().forEach(function (token) {
+            var queryKey,  queryValue;
+            for (var key in items[token].params) {
+                if (key === 'cacheMarker') {
+                    cacheMarkers.push(items[token].params.cacheMarker);
+                    continue;
+                }
+                queryKey = shortParamsMappings[key] ? shortParamsMappings[key] : key;
+                if (key === 'strip-imports') {
+                    queryValue = encodeURIComponent(queryKey);
+                } else if (key === 'src') {
+                    queryValue = encodeURIComponent(queryKey)
+                        + '='
+                        + encodeURIComponent(
+                            compressSrc(items[token].params.src, lastSrc)
+                        );
+                    lastSrc = items[token].params.src;
+                } else {
+                    queryValue = encodeURIComponent(queryKey) + '=' + encodeURIComponent(items[token].params[key]);
+                }
+                parts.push(queryValue);
+            }
+        });
+        if (cacheMarkers.length > 0) {
+            parts.unshift('c=' + phast.hash(cacheMarkers.join('|'), 23045));
+        }
+        return parts.join('&');
+    }
+
+    function getSortedTokens() {
+        var paramsArr = [];
+        for (var token in items) {
+            paramsArr.push(items[token].params);
+        }
+        return paramsArr
+            .sort(function (a, b) {
+                return a.src > b.src ? 1 : -1
+            })
+            .map(function (item) {
+                return item.token;
+            })
+    }
+
+     function compressSrc(src, lastSrc) {
+         var prefixLen = 0, maxBase36Val = Math.pow(36, 2) - 1;
+         while (prefixLen < lastSrc.length && src[prefixLen] === lastSrc[prefixLen]) {
+             prefixLen++;
+         }
+         prefixLen = Math.min(prefixLen, maxBase36Val);
+         return toBase36(prefixLen) + '' + src.substr(prefixLen);
+     }
+
+     function toBase36(dec) {
+         var charsTable = [
+             '0', '1', '2', '3', '4', '5',
+             '6', '7', '8', '9', 'a', 'b',
+             'c', 'd', 'e', 'f', 'g', 'h',
+             'i', 'j', 'k', 'l', 'm', 'n',
+             'o', 'p', 'q', 'r', 's', 't',
+             'u', 'v', 'w', 'x', 'y', 'z'
+         ];
+         var p1 = dec % 36;
+         var p2 = Math.floor((dec - p1) / 36);
+         return charsTable[p2] + charsTable[p1];
+     }
+
+    function handleResponse(responseText) {
         try {
             var responses = JSON.parse(responseText);
         } catch (e) {
-            handleError(pack);
+            handleError();
             return;
         }
 
-        var tokens = getSortedTokens(pack);
+        var tokens = getSortedTokens();
         responses.forEach(function (response, idx) {
             if (response.status === 200) {
-                pack[tokens[idx]].requests.forEach(function (request) {
+                items[tokens[idx]].requests.forEach(function (request) {
                     request.success(response.content)
                 });
             } else {
-                pack[tokens[idx]].requests.forEach(function (request) {
+                items[tokens[idx]].requests.forEach(function (request) {
                     request.error(new Error("Got from bundler: " + JSON.stringify(response)));
                 });
             }
         });
     }
 
-    function getSortedTokens(pack) {
-        return Object.keys(pack).sort();
+    function handleError() {
+        for (var k in items) {
+            items[k].requests.forEach(function (request) {
+                request.error();
+            });
+        }
     }
 
-    function PackItem(request, params) {
-        this.request = request;
-        this.params = params;
-    }
+    this.add = addToPack;
 
+    this.handleResponse = handleResponse;
+
+    this.handleError = handleError;
+
+    this.toQuery = packToQuery;
+};
+
+phast.ResourceLoader.BundlerServiceClient.RequestsPack.PackItem = function (request, params) {
+    this.request = request;
+    this.params = params;
 };
 
 phast.ResourceLoader.IndexedDBStorage = function (params) {
@@ -430,12 +501,12 @@ phast.ResourceLoader.StorageCache.StorageCacheParams = function () {
 };
 
 
-phast.ResourceLoader.make = function (serviceUrl) {
+phast.ResourceLoader.make = function (serviceUrl, shortParamsMappings) {
     var storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
     var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
     var cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
     var cache = new phast.ResourceLoader.StorageCache(cacheParams, storage);
-    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl);
+    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl, shortParamsMappings);
     return new phast.ResourceLoader(client, cache);
 };
 

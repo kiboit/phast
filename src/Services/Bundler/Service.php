@@ -103,14 +103,11 @@ class Service {
     }
 
     private function getParams(ServiceRequest $request) {
-        $result = [];
-        foreach ($request->getParams() as $name => $value) {
-            if (strpos($name, '_') !== false) {
-                list ($name, $key) = explode('_', $name, 2);
-                $result[$key][$name] = $value;
-            }
+        $params = $request->getParams();
+        if (isset ($params['src_0'])) {
+            return (new BundlerParamsParser())->parse($request);
         }
-        return $result;
+        return (new ShortBundlerParamsParser())->parse($request);
     }
 
     private function verifyParams(array $params) {

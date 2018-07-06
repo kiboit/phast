@@ -1,4 +1,4 @@
-loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (phast) {
+loadPhastJS(['public/es6-promise.js', 'public/hash.js' , 'public/resources-loader.js'], function (phast) {
 
     var Promise = phast.ES6Promise.Promise;
 
@@ -7,7 +7,12 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
     QUnit.module('ResourcesLoader', function (hooks) {
 
         var client,
-            documentParams = [];
+            documentParams = [],
+            paramsMappings = {'src': 's', 'strip-imports': 'i', 'cacheMarker': 'c', 'token': 't'};
+
+        function makeClient (serviceUrl) {
+            return new phast.ResourceLoader.BundlerServiceClient(serviceUrl, paramsMappings);
+        }
 
         hooks.before(function () {
             Array.prototype.forEach.call(
@@ -20,7 +25,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
         });
 
         hooks.beforeEach(function () {
-            client = new phast.ResourceLoader.BundlerServiceClient('phast.php?service=bundler');
+            client = makeClient('phast.php?service=bundler');
         });
 
         QUnit.module('RequestParams', function () {
@@ -46,7 +51,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             QUnit.test('Test fetching from dedicated service file', function (assert) {
                 var done = assert.async();
-                var client = new phast.ResourceLoader.BundlerServiceClient('bundler.php');
+                var client = makeClient('bundler.php');
                 var request = client.get(documentParams[0]);
                 request.then(function (responseText) {
                     assert.equal('text-1-contents', responseText, 'Fetched correctly');
@@ -89,7 +94,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
             QUnit.test('Test handling network errors', function (assert) {
                 var iterations = 3;
                 var done = assert.async(iterations);
-                var client = new phast.ResourceLoader.BundlerServiceClient('does-not-exist');
+                var client = makeClient('does-not-exist');
                 for (var i = 0; i < iterations; i++) {
                     var params = {};
                     var request = client.get(params);
@@ -126,7 +131,7 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
 
             QUnit.test('Test ignoring exceptions while dispatching network error', function (assert) {
                 var done = assert.async();
-                var client = new phast.ResourceLoader.BundlerServiceClient('bad-url');
+                var client = makeClient('bad-url');
                 var request1 = client.get(documentParams[0]);
                 var request2 = client.get(documentParams[1]);
                 request1.catch(function () {
@@ -152,6 +157,76 @@ loadPhastJS(['public/es6-promise.js', 'public/resources-loader.js'], function (p
                             done();
                         });
                 }
+            });
+
+            QUnit.module('RequestsPack', function (hooks) {
+
+                var pack,
+                    RequestsPack = phast.ResourceLoader.BundlerServiceClient.RequestsPack,
+                    PackItem = phast.ResourceLoader.BundlerServiceClient.RequestsPack.PackItem;
+
+                hooks.beforeEach(function () {
+                    pack = new RequestsPack(paramsMappings);
+                });
+
+                QUnit.test('Test correct params mapping', function (assert) {
+                    pack.add(new PackItem({}, {
+                        'src': 'the-src',
+                        'cacheMarker': 'the-cache',
+                        'token': 'the-token',
+                        'not-mapped': 'original'
+                    }));
+                    var expected = /c=\d+&s=00the-src&t=the-token&not-mapped=original/;
+                    assert.ok(expected.test(pack.toQuery()), 'Maps correctly');
+                });
+
+
+                QUnit.test('Test skipping the value for `strip-imports`', function (assert) {
+                    pack.add(new PackItem({}, {'strip-imports': 1}));
+                    assert.equal(pack.toQuery(), 'i', 'Skips value for default mapping');
+
+                    var otherPack = new RequestsPack({'strip-imports': 'm'});
+                    otherPack.add(new PackItem({}, {'strip-imports': 1}));
+                    assert.equal(otherPack.toQuery(), 'm', 'Skips value for alternate mapping');
+                });
+
+                QUnit.test('Test src compression and grouping', function (assert) {
+                    var params = [
+                        {src: 'aaaaaaaaaaaaaaa', token: 1},
+                        {src: 'bbbbbbbbbbbbbbb', token: 2},
+                        {src: 'aaaaaaaaaaaaaaaaaaa', token: 3},
+                        {src: 'bbbbbbbbbbbbbbbcccc', token: 4},
+                        {src: 'bbbbbbbd', token: 5},
+                        {src: 'c'.repeat(1297), token: 6},
+                        {src: 'c'.repeat(1297) + 'd', token: 7}
+                    ];
+                    params.forEach(function (item) {
+                        pack.add(new PackItem({}, item));
+                    });
+                    var expected
+                        = 's=00aaaaaaaaaaaaaaa&t=1'
+                        + '&s=0faaaa&t=3'
+                        + '&s=00bbbbbbbbbbbbbbb&t=2'
+                        + '&s=0fcccc&t=4'
+                        + '&s=07d&t=5'
+                        + '&s=00' + 'c'.repeat(1297) + '&t=6'
+                        + '&s=zzccd&t=7';
+                    assert.equal(pack.toQuery(), expected, 'Compresses src and groups correctly')
+                });
+
+                QUnit.test('Test building big cache marker', function (assert) {
+                    pack.add(new PackItem({}, {cacheMarker: 'a', token: 1}));
+                    var query1 = pack.toQuery();
+
+                    var cacheMarkerPattern = /^c=\d+/;
+                    assert.ok(cacheMarkerPattern.test(query1), 'Has set cache marker 1');
+
+                    pack.add(new PackItem({}, {cacheMarker: 'b', token: 2}));
+                    var query2 = pack.toQuery();
+
+                    assert.ok(cacheMarkerPattern.test(query2), 'Has set cache marker 2');
+                    assert.notEqual(query1, query2, 'Cache markers are different');
+                });
             });
         });
 

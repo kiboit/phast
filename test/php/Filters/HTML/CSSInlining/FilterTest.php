@@ -6,6 +6,7 @@ use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
@@ -101,8 +102,16 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertArrayHasKey('token', $params);
         }
 
+        $this->assertHasCompiled('Common/hash.js');
+        $this->assertHasCompiled('CSSInlining/resources-loader.js');
         $this->assertHasCompiled('CSSInlining/inlined-css-retriever.js');
-        $this->assertCompiledConfigEquals(self::BUNDLER_URL . '?', 'serviceUrl');
+        $bundlerMappings = ShortBundlerParamsParser::getParamsMappings();
+        $expectedMappings = array_combine(array_values($bundlerMappings), array_keys($bundlerMappings));
+        $expectedConfig = [
+            'serviceUrl' => self::BUNDLER_URL . '?',
+            'shortParamsMappings' => $expectedMappings
+        ];
+        $this->assertCompiledConfigEquals($expectedConfig, 'inlinedCSSRetriever');
     }
 
     public function testCallingTheFilterOnBothStylesAndLinks() {
