@@ -58,8 +58,6 @@ phast.on(document, 'DOMContentLoaded').then(function () {
         console.log(statsLines.join('\n'));
         console.groupEnd();
     }
-}).catch(function (e) {
-        console.log(e);
 });
 
 phast.on(document, 'DOMContentLoaded').then(function () {
