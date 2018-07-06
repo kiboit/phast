@@ -40,12 +40,12 @@ class FilterTest extends HTMLFilterTestCase {
             });
     }
 
-    public function testAddingBeforeFirstBodyTag() {
-        $html = '<html><head></head><body></body></body></html>';
+    public function testAddingBeforeLastBodyTag() {
+        $html = '<html><head></head><body></body></body><span>some text</span></body></html>';
         $filtered = $this->applyFilter($html, true);
-        $expected = '<html><head></head><body>';
+        $expected = '<html><head></head><body></body></body><span>some text</span>';
         $expected .= $this->expectedCompiledScript;
-        $expected .= '</body></body></html>';
+        $expected .= '</body></html>';
         $this->assertStringStartsWith($expected, $filtered);
     }
 

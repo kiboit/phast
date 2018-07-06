@@ -30,19 +30,32 @@ phast.wait = function (delay) {
 };
 
 phast.on(document, 'DOMContentLoaded').then(function () {
-    var l = document.documentElement;
-    var ll;
+    var statsLines, statsElement;
 
-    while (l = l.nextSibling) {
-        if (l.nodeType !== 8
-            || !/^\s*\[Phast\]/.test(l.textContent)
-        ) {
-            continue;
+    function isStatsElement(element) {
+        return  element && element.nodeType === 8
+                && /^\s*\[Phast\]/.test(element.textContent);
+    }
+
+    function searchForStats(inspected) {
+        while (inspected) {
+            if (isStatsElement(inspected)) {
+                return inspected;
+            }
+            inspected = inspected.nextSibling;
         }
+        return false;
+    }
 
-        ll = l.textContent.replace(/^\s+|\s+$/g, '').split('\n');
-        console.groupCollapsed(ll.shift());
-        console.log(ll.join('\n'));
+    statsElement = searchForStats(document.documentElement.nextSibling);
+    if (statsElement === false) {
+        statsElement = searchForStats(document.body.firstChild);
+    }
+
+    if (statsElement) {
+        statsLines = statsElement.textContent.replace(/^\s+|\s+$/g, '').split('\n');
+        console.groupCollapsed(statsLines.shift());
+        console.log(statsLines.join('\n'));
         console.groupEnd();
     }
 });
