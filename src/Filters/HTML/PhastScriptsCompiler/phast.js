@@ -49,7 +49,7 @@ phast.on(document, 'DOMContentLoaded').then(function () {
 
     statsElement = searchForStats(document.documentElement.nextSibling);
     if (statsElement === false) {
-        statsElement = searchForStats(document.body.childNodes.item(0));
+        statsElement = searchForStats(document.body.firstChild);
     }
 
     if (statsElement) {
