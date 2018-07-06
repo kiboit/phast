@@ -30,9 +30,17 @@ class Filter implements HTMLStreamFilter {
         $buffered = [];
         $buffering = false;
         foreach ($elements as $element) {
-            if ($this->isClosingBodyTag($element) || $buffering) {
-                $buffered[] = $element;
+            if ($this->isClosingBodyTag($element)) {
+                if ($buffering) {
+                    foreach ($buffered as $bufElement) {
+                        yield $bufElement;
+                    }
+                    $buffered =  [];
+                }
                 $buffering = true;
+            }
+            if ($buffering) {
+                $buffered[] = $element;
             } else {
                 yield $element;
             }
