@@ -13,7 +13,7 @@ class Filter implements ServiceFilter {
 
     public function apply(Resource $resource, array $request) {
         $css = $resource->getContent();
-        $filtered = preg_replace(self::FONT_FACE_REGEXP, '$0font-display: swap;', $css);
+        $filtered = preg_replace(self::FONT_FACE_REGEXP, '$0font-display:swap;', $css);
         return $resource->withContent($filtered);
     }
 }

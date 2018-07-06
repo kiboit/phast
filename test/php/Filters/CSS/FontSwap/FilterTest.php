@@ -21,7 +21,7 @@ class FilterTest extends PhastTestCase {
 
     public function testAddingSwap() {
         $css = "@font-face {}\n@font-face{ font-family: \"Something\";} .else{color: red;}";
-        $expected = "@font-face {font-display: swap;}\n@font-face{font-display: swap; font-family: \"Something\";} .else{color: red;}";
+        $expected = "@font-face {font-display:swap;}\n@font-face{font-display:swap; font-family: \"Something\";} .else{color: red;}";
         $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), $css);
         $actual = $this->filter->apply($resource, []);
         $this->assertEquals($expected, $actual->getContent());
