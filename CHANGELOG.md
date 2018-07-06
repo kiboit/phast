@@ -5,6 +5,8 @@
 
 ### Added
 * Bundle URLs are now much shorter, allowing more resources per request.
+* Add `font-display: swap` to `@font-face` elements for immediate text
+  rendering.
 
 
 ## [1.7.0] - 2018-07-04
