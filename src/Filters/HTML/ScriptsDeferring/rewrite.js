@@ -29,7 +29,6 @@ function loadScripts() {
     if (scripts.length === 0) {
         return;
     }
-    var lastNewScript;
     try {
         Object.defineProperty(document, 'readyState', {
             configurable: true,
@@ -110,12 +109,6 @@ function getScriptText(script) {
     }
     var body = script.textContent.replace(/^\s*<!--/, '');
     return Promise.resolve(body);
-}
-
-function getPromise() {
-    return new Promise(function (resolve) {
-        window.setTimeout(resolve, 10);
-    })
 }
 
 function downloadScriptWithBrowser(originalScript) {
