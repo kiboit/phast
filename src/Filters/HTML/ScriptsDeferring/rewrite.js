@@ -1,4 +1,4 @@
-var Promise = phast.ES6Promise;
+    var Promise = phast.ES6Promise;
 
 var scriptIndex = 0;
 
@@ -46,9 +46,14 @@ function loadScripts() {
 
     var promises = [];
     scripts.forEach(function (originalScript, idx) {
-        promises.push(getScriptText(originalScript).then(function (scriptText) {
-            return Promise.resolve([originalScript, scriptText]);
-        }));
+        var promise = getScriptText(originalScript)
+            .then(function (scriptText) {
+                return Promise.resolve([originalScript, scriptText]);
+            })
+            .catch(function () {
+               throw originalScript;
+            });
+        promises.push(promise);
     });
 
     prepareNextPromise();
@@ -59,6 +64,15 @@ function loadScripts() {
             var originalScript = data[0];
             var scriptText = data[1];
             var lastNewScript = makeReplacementScript(originalScript, scriptText);
+            if (promises.length > 0) {
+                prepareNextPromise();
+            } else {
+                lastNewScript.addEventListener('load',  restoreReadyState);
+                lastNewScript.addEventListener('error', restoreReadyState);
+            }
+        })
+        .catch(function (originalScript) {
+            var lastNewScript = makeFallbackScript(originalScript);
             if (promises.length > 0) {
                 prepareNextPromise();
             } else {
@@ -94,6 +108,32 @@ function getPromise() {
     return new Promise(function (resolve) {
         window.setTimeout(resolve, 10);
     })
+}
+
+function makeFallbackScript(originalScript) {
+    var newScript = document.createElement('script');
+    Array.prototype.forEach.call(originalScript.attributes, function (attr) {
+        if (/^data-phast-|^defer$|^src$|^type$/i.test(attr.nodeName)) {
+            return;
+        }
+        newScript.setAttribute(attr.nodeName, attr.nodeValue);
+    });
+    if (originalScript.hasAttribute('data-phast-original-type')) {
+        newScript.setAttribute('type', originalScript.getAttribute('data-phast-original-type'));
+    }
+    if (!originalScript.hasAttribute('async') || !originalScript.hasAttribute('src')) {
+        newScript.async = false;
+    }
+    if (!originalScript.hasAttribute('async') && !originalScript.hasAttribute('defer')) {
+        fakeDocumentWrite(originalScript, newScript);
+    }
+    if (originalScript.hasAttribute('data-phast-original-src')) {
+        newScript.setAttribute('src', originalScript.getAttribute('data-phast-original-src'));
+    } else if (originalScript.hasAttribute('src')) {
+        newScript.setAttribute('src', originalScript.getAttribute('src'));
+    }
+    replaceElement(originalScript, newScript);
+    return newScript;
 }
 
 function makeReplacementScript(originalScript, scriptText) {
