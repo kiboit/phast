@@ -46,6 +46,14 @@ function loadScripts() {
 
     var promises = [];
     scripts.forEach(function (originalScript, idx) {
+        if (originalScript.hasAttribute('src') && (!originalScript.hasAttribute('data-phast-original-src') || originalScript.getAttribute('data-phast-original-src') === originalScript.getAttribute('src'))) {
+            var lastNewScript = downloadScriptWithBrowser(originalScript);
+            if (idx === scripts.length - 1) {
+                lastNewScript.addEventListener('load',  restoreReadyState);
+                lastNewScript.addEventListener('error', restoreReadyState);
+            }
+            return;
+        }
         var promise = getScriptText(originalScript)
             .then(function (scriptText) {
                 return Promise.resolve([originalScript, scriptText]);
@@ -108,6 +116,27 @@ function getPromise() {
     return new Promise(function (resolve) {
         window.setTimeout(resolve, 10);
     })
+}
+
+function downloadScriptWithBrowser(originalScript) {
+    var newScript = document.createElement('script');
+    Array.prototype.forEach.call(originalScript.attributes, function (attr) {
+        if (/^data-phast-|^defer$|^type$/i.test(attr.nodeName)) {
+            return;
+        }
+        newScript.setAttribute(attr.nodeName, attr.nodeValue);
+    });
+    if (originalScript.hasAttribute('data-phast-original-type')) {
+        newScript.setAttribute('type', originalScript.getAttribute('data-phast-original-type'));
+    }
+    if (!originalScript.hasAttribute('async') || !originalScript.hasAttribute('src')) {
+        newScript.async = false;
+    }
+    if (!originalScript.hasAttribute('async') && !originalScript.hasAttribute('defer')) {
+        fakeDocumentWrite(originalScript, newScript);
+    }
+    replaceElement(originalScript, newScript);
+    return newScript;
 }
 
 function makeFallbackScript(originalScript) {
