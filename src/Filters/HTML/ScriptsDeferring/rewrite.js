@@ -1,3 +1,5 @@
+var Promise = phast.ES6Promise;
+
 var scriptIndex = 0;
 
 // Save insertBefore before it is overridden by the scripts proxy filter.
@@ -27,7 +29,7 @@ function loadScripts() {
     if (scripts.length === 0) {
         return;
     }
-    var lastScript;
+    var lastNewScript;
     try {
         Object.defineProperty(document, 'readyState', {
             configurable: true,
@@ -41,49 +43,30 @@ function loadScripts() {
     if (loadHappened) {
         triggerLoad = true;
     }
-    scripts.forEach(function (el) {
-        var script = document.createElement('script');
-        Array.prototype.forEach.call(el.attributes, function (attr) {
-            if (/^data-phast-|^defer$/i.test(attr.nodeName)) {
-                return;
-            }
-            script.setAttribute(attr.nodeName, attr.nodeValue);
-        });
-        script.removeAttribute('type');
-        if (el.hasAttribute('data-phast-original-type')) {
-            script.setAttribute('type', el.getAttribute('data-phast-original-type'));
-        }
-        if (!el.hasAttribute('src')) {
-            script.setAttribute('src', 'data:,;');
-            script.addEventListener('load', function () {
-                var body = el.textContent;
-                script.textContent = body;
-                body = body.replace(/^\s*<!--/, '');
-                try {
-                    // See: http://perfectionkills.com/global-eval-what-are-the-options/
-                    (1,eval)(body);
-                } catch (e) {
-                    console.error("[Phast] Error in inline script:", e);
-                    console.log("First 100 bytes of script body:", body.substr(0, 100));
-                    throw e;
-                }
-            });
-        }
-        if (!el.hasAttribute('async') || !el.hasAttribute('src')) {
-            script.async = false;
-        }
-        if (!el.hasAttribute('async') && !el.hasAttribute('defer')) {
-            fakeDocumentWrite(el, script);
-        }
-        replaceElement(el, script);
-        script.removeAttribute('src');
-        if (el.hasAttribute('data-phast-original-src')) {
-            script.setAttribute('src', el.getAttribute('data-phast-original-src'));
-        }
-        lastScript = script;
+
+    var promises = [];
+    scripts.forEach(function (originalScript, idx) {
+        promises.push(getScriptText(originalScript).then(function (scriptText) {
+            return Promise.resolve([originalScript, scriptText]);
+        }));
     });
-    lastScript.addEventListener('load',  restoreReadyState);
-    lastScript.addEventListener('error', restoreReadyState);
+
+    prepareNextPromise();
+
+    function prepareNextPromise() {
+        var next = promises.shift();
+        next.then(function (data) {
+            var originalScript = data[0];
+            var scriptText = data[1];
+            var lastNewScript = makeReplacementScript(originalScript, scriptText);
+            if (promises.length > 0) {
+                prepareNextPromise();
+            } else {
+                lastNewScript.addEventListener('load',  restoreReadyState);
+                lastNewScript.addEventListener('error', restoreReadyState);
+            }
+        });
+    }
 }
 
 function getScriptsInExecutionOrder() {
@@ -97,6 +80,58 @@ function getScriptsInExecutionOrder() {
         }
     });
     return immediate.concat(deferred);
+}
+
+function getScriptText(script) {
+    if (script.hasAttribute('src')) {
+        return fetchScript(script.getAttribute('src'));
+    }
+    var body = script.textContent.replace(/^\s*<!--/, '');
+    return Promise.resolve(body);
+}
+
+function getPromise() {
+    return new Promise(function (resolve) {
+        window.setTimeout(resolve, 10);
+    })
+}
+
+function makeReplacementScript(originalScript, scriptText) {
+    var newScript = document.createElement('script');
+    Array.prototype.forEach.call(originalScript.attributes, function (attr) {
+        if (/^data-phast-|^defer$|^src$|^type$/i.test(attr.nodeName)) {
+            return;
+        }
+        newScript.setAttribute(attr.nodeName, attr.nodeValue);
+    });
+    newScript.textContent = originalScript.textContent;
+    newScript.setAttribute('src', 'data:,;');
+    newScript.addEventListener('load', function () {
+        try {
+            // See: http://perfectionkills.com/global-eval-what-are-the-options/
+            (1,eval)(scriptText);
+        } catch (e) {
+            console.error("[Phast] Error in inline script:", e);
+            console.log("First 100 bytes of script body:", scriptText.substr(0, 100));
+            throw e;
+        }
+    });
+    if (originalScript.hasAttribute('data-phast-original-type')) {
+        newScript.setAttribute('type', originalScript.getAttribute('data-phast-original-type'));
+    }
+    if (!originalScript.hasAttribute('async') || !originalScript.hasAttribute('src')) {
+        newScript.async = false;
+    }
+    if (!originalScript.hasAttribute('async') && !originalScript.hasAttribute('defer')) {
+        fakeDocumentWrite(originalScript, newScript);
+    }
+    replaceElement(originalScript, newScript);
+    if (originalScript.hasAttribute('data-phast-original-src')) {
+        newScript.setAttribute('src', originalScript.getAttribute('data-phast-original-src'));
+    } else if (originalScript.hasAttribute('src')) {
+        newScript.setAttribute('src', originalScript.getAttribute('src'));
+    }
+    return newScript;
 }
 
 function replaceElement(original, rewritten) {
@@ -162,4 +197,21 @@ function utoa(str) {
             }
         )
     );
+}
+
+
+function fetchScript(url) {
+    return new phast.ES6Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(xhr.responseText);
+            } else {
+                reject();
+            }
+        };
+        xhr.onerror = reject;
+        xhr.send();
+    });
 }
