@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Unreleased
+## [1.8.0] - 2018-07-11
 
 ### Added
 * Bundle URLs are now much shorter, allowing more resources per request.
@@ -158,7 +158,8 @@
 [#29]: https://github.com/kiboit/phast/pull/29
 
 
-[Unreleased]: https://github.com/kiboit/phast/compare/1.7.0...master
+[Unreleased]: https://github.com/kiboit/phast/compare/1.8.0...master
+[1.8.0]: https://github.com/kiboit/phast/compare/1.7.0...1.8.0
 [1.7.0]: https://github.com/kiboit/phast/compare/1.6.0...1.7.0
 [1.6.0]: https://github.com/kiboit/phast/compare/1.5.6...1.6.0
 [1.5.6]: https://github.com/kiboit/phast/compare/1.5.5...1.5.6
