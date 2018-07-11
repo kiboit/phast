@@ -8,6 +8,9 @@
 * Add `font-display: swap` to `@font-face` elements for immediate text
   rendering.
 
+### Fixed
+* Changed cache size threshold from 100 GiB to 500 MiB.
+
 
 ## [1.7.0] - 2018-07-04
 
