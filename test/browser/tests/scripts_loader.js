@@ -1,112 +1,186 @@
 loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (phast) {
 
-    var testDocument,
+    var ScriptsLoader = phast.ScriptsLoader,
         Promise = phast.ES6Promise;
 
-    QUnit.module('ScriptsLoader', function (hooks) {
+    QUnit.module('ScriptsLoader', function () {
 
-        hooks.beforeEach(function () {
-            delete window.PROXIED_WAS_EXECUTED;
-            testDocument = document.implementation.createHTMLDocument();
-        });
+        QUnit.module('ScriptsLoader.Utilities', function (hooks) {
 
-        QUnit.module('ScriptsLoader.ScriptsFactory', function () {
+            var utils, testDoc;
 
-        });
+            hooks.beforeEach(function () {
+                testDoc = document.implementation.createHTMLDocument();
+                utils = new ScriptsLoader.Utilities(testDoc);
+            });
 
-        QUnit.module('ScriptsLoader.ProxiedSyncScript', function () {
+            QUnit.test('Test scriptFromPhastScript()', function (assert) {
+                var original = testDoc.createElement('script');
+                original.setAttribute('defer', true);
+                original.setAttribute('src', 'some-src');
+                original.setAttribute('type', 'some-type');
+                original.setAttribute('data-phast-some-info', true);
+                original.setAttribute('id', 'should-see');
+                original.setAttribute('async', true);
 
-            var Script = phast.ScriptsLoader.ProxiedSyncScript;
+                var newOne = utils.scriptFromPhastScript(original);
+                ['defer', 'src', 'data-phast-some-info', 'type'].forEach(function (attr) {
+                    assert.notOk(newOne.hasAttribute(attr), attr + ' is missing');
+                });
 
-            QUnit.test('Test recognition of phast-proxied scripts', function (assert) {
-                var notProxiedElement,
-                    proxiedElement,
-                    notProxiedElementWithPhastMark,
-                    noSrcElement,
-                    fetch = function () {
-                        return new Promise(function () {});
-                    };
+                ['id', 'async'].forEach(function (attr) {
+                    assert.equal(newOne.getAttribute(attr), original.getAttribute(attr), attr + ' has been copied');
+                });
+            });
 
-                notProxiedElement = testDocument.createElement('script');
-                notProxiedElement.setAttribute('src', 'this-is-not-proxied');
+            QUnit.test('Test copySrc()', function (assert) {
+                var s1 = testDoc.createElement('script');
+                var s2 = testDoc.createElement('script');
+                s1.setAttribute('src', 'the-src');
+                utils.copySrc(s1, s2);
+                assert.equal(s2.getAttribute('src'), s1.getAttribute('src'), 'src was copied');
+            });
 
-                proxiedElement = testDocument.createElement('script');
-                proxiedElement.setAttribute('src', 'to-proxy-service');
-                proxiedElement.setAttribute('data-phast-original-src', 'original-src');
-
-                notProxiedElementWithPhastMark = testDocument.createElement('script');
-                notProxiedElementWithPhastMark.setAttribute('src', 'original-src');
-                notProxiedElementWithPhastMark.setAttribute('data-phast-original-src', 'original-src');
-
-                noSrcElement = testDocument.createElement('script');
-
-                assert.notOk(new Script(notProxiedElement, fetch).isProxied(), 'Not proxied element was reported as such');
-                assert.ok(new Script(proxiedElement, fetch).isProxied(), 'Proxied element was reported as such');
-                assert.notOk(
-                    new Script(notProxiedElementWithPhastMark, fetch).isProxied(),
-                    'No phast-mark element was reported as not proxied'
+            QUnit.test('Test setOriginalSrc()', function (assert) {
+                var s1 = testDoc.createElement('script');
+                var s2 = testDoc.createElement('script');
+                s1.setAttribute('data-phast-original-src', 'the-original-src');
+                utils.setOriginalSrc(s1, s2);
+                assert.equal(
+                    s2.getAttribute('src'),
+                    s1.getAttribute('data-phast-original-src'),
+                    'The original src has been set'
                 );
-                assert.notOk(new Script(noSrcElement, fetch).isProxied(), 'No src element was reported as not proxied');
             });
 
-            QUnit.test('Test immediate load for phast-proxied scripts', function (assert) {
-                assert.timeout(20);
-                var testUrl = 'test-url';
-                var done = assert.async();
-                var fetch = function (url) {
-                    assert.equal(url, testUrl, 'Fetched with correct URL');
-                    done();
+            QUnit.test('Test setOriginalType()', function (assert) {
+                var s1 = testDoc.createElement('script');
+                var s2 = testDoc.createElement('script');
+                s1.setAttribute('data-phast-original-type', 'the-original-type');
+                utils.setOriginalType(s1, s2);
+                assert.equal(
+                    s2.getAttribute('type'),
+                    s1.getAttribute('data-phast-original-type'),
+                    'The original type has been set'
+                );
+            });
+
+            QUnit.test('Test executeString()', function (assert) {
+                window.STRING_EXECUTED = false;
+                var string = func2string(function  () { window.STRING_EXECUTED = true; });
+                utils.executeString(string);
+                assert.ok(window.STRING_EXECUTED, 'String was executed');
+                delete window.STRING_EXECUTED;
+            });
+
+            QUnit.test('Test writeProtectAndExecuteString()', function (assert) {
+                var s1 = testDoc.createElement('script');
+                var s2 = testDoc.createElement('script');
+                testDoc.body.appendChild(s1);
+                testDoc.body.appendChild(s2);
+                var func = function () {
+                    document.write('<p>write works</p>');
+                    document.writeln('<p>writeln works</p>');
                 };
-                var script = testDocument.createElement('script');
-                script.setAttribute('src', testUrl);
-                script.setAttribute('data-phast-original-src', 'the-original');
-                new Script(script, fetch);
-            });
-
-            QUnit.test('Test no load for non phast-proxied scripts', function (assert) {
-                var called = false,
-                    script = testDocument.createElement('script'),
-                    fetch = function () {
-                        called = true;
-                    };
-                new Script(script, fetch);
-                assert.notOk(called, 'Not proxied script was not fetched');
-            });
-
-            QUnit.test('Test execution for proxied sync scripts', function (assert) {
-                window.PROXIED_WAS_EXECUTED = false;
-                var fetch = function () {
-                    return new Promise(function (resolve) {
-                        window.setTimeout(function () {
-                            var toExec = function () {
-                                window.PROXIED_WAS_EXECUTED = true;
-                            };
-                            resolve('(' + toExec.toString() + ')' + '();');
-                        }, 20);
-                    })
-                };
-                var scriptElement = testDocument.createElement('script');
-                scriptElement.setAttribute('src', 'proxied');
-                scriptElement.setAttribute('data-phast-original-src', 'original');
-                var script = new Script(scriptElement, fetch);
-
+                var checkWrites = getWriteProtectChecker(assert);
                 assert.timeout(100);
                 var done = assert.async();
 
-                assert.notOk(window.PROXIED_WAS_EXECUTED, 'ProxiedSyncScript was not executed before call');
-                window.setTimeout(function () {
-                    assert.notOk(window.PROXIED_WAS_EXECUTED, 'ProxiedSyncScript was not executed after load');
-                    script.execute()
-                        .then(function () {
-                            assert.ok(window.PROXIED_WAS_EXECUTED, 'ProxiedSyncScript was executed');
-                            done();
-                        });
-                }, 30);
+                utils = new ScriptsLoader.Utilities(document);
+                utils.writeProtectAndExecuteString(s1, func2string(func))
+                    .then(function () {
+                        checkWrites();
+                        var paragraphs = testDoc.getElementsByTagName('p');
+                        assert.equal(paragraphs.length, 2, 'Paragraphs have been written');
+                        assert.equal(paragraphs[0].innerHTML, 'write works', 'paragraph 0 is correct');
+                        assert.equal(paragraphs[1].innerHTML, 'writeln works', 'paragraph 1 is correct');
+                        assert.ok(s1 === paragraphs[0].previousSibling, 'paragraph 0 is in the correct position');
+                        done();
+                    });
             });
 
+            QUnit.test('Test writeProtectAndExecuteString() restores write and writeln after exception', function (assert) {
+                var s = testDoc.createElement('script');
+                var checkWrites = getWriteProtectChecker(assert);
+                assert.timeout(100);
+                var done = assert.async();
+                var script = 'throw "error";';
 
+                utils = new ScriptsLoader.Utilities(document);
+                utils.writeProtectAndExecuteString(s, script)
+                    .finally(function () {
+                        checkWrites();
+                        done();
+                    });
+            });
 
+            QUnit.test('Test replaceElement', function (assert) {
+                var s1 = testDoc.createElement('script');
+                var s2 = testDoc.createElement('script');
+                testDoc.body.appendChild(s1);
+                Element.prototype.insertBefore = function () {};
+                utils.replaceElement(s1, s2);
+                delete Element.prototype.insertBefore;
+                assert.equal(1, testDoc.body.children.length, 'There is only one body child');
+                assert.ok(testDoc.body.children[0] === s2, 'Script has been replaced');
+            });
+
+            QUnit.test('Test writeProtectAndReplaceElement()', function (assert) {
+                var s1 = testDoc.createElement('script');
+                var s2 = testDoc.createElement('script');
+                var checkWrite = getWriteProtectChecker(assert);
+                assert.timeout(200);
+                var done = assert.async();
+                s1.setAttribute('id', 'writeProtectAndReplaceElementTestScriptToRemove')
+                var writeFunc = function () {
+                    document.write('<p id="writtenline"></p>');
+                };
+                s2.setAttribute('src', 'data:text/javascript;base64,' + utoa(func2string(writeFunc)));
+                s2.setAttribute('id', 'writeProtectAndReplaceElementReplacementScript');
+                document.body.appendChild(s1);
+
+                utils = new ScriptsLoader.Utilities(document);
+                utils.writeProtectAndReplaceElement(s1, s2)
+                    .finally(function () {
+                        checkWrite();
+                        var replaced = document.getElementById('writeProtectAndReplaceElementTestScriptToRemove');
+                        var replacement = document.getElementById('writeProtectAndReplaceElementReplacementScript');
+                        var written = document.getElementById('writtenline');
+
+                        assert.ok(replaced === null, 'Target was replaced');
+                        assert.ok(replacement === s2, 'Replacement is in place');
+                        assert.ok(written, 'Written exists');
+                        document.body.removeChild(replacement);
+                        document.body.removeChild(written);
+                        done();
+                    });
+            });
+
+            function func2string(func) {
+                return '(' + func.toString() + ')();';
+            }
+
+            function getWriteProtectChecker(assert) {
+                var originalWrite = document.write;
+                var originalWriteLn = document.writeln;
+                return function () {
+                    assert.ok(originalWrite === document.write, 'document.write has been restored');
+                    assert.ok(originalWriteLn === document.writeln, 'document.writeln has been restored');
+                }
+            }
+
+            function utoa(str) {
+                return btoa(
+                    encodeURIComponent(str).replace(
+                        /%([0-9A-F]{2})/g,
+                        function toSolidBytes(match, p1) {
+                            return String.fromCharCode('0x' + p1);
+                        }
+                    )
+                );
+            }
         });
+
 
     });
 
