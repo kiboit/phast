@@ -6,7 +6,7 @@
 <script id="script">
     didLoad = true;
     var shouldBeGlobal = true;
-    srcWasEmptyData = document.getElementById('script').src === 'data:,;';
+    srcWasEmpty = document.getElementById('script').src === '';
 </script>
 </body>
 </html>
