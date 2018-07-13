@@ -47,6 +47,37 @@ phast.ScriptsLoader.Utilities = function (document) {
         })
     }
 
+    function copyElement(source) {
+        var copy = document.createElement(source.nodeName);
+        Array.prototype.forEach.call(source.attributes, function (attr) {
+            copy.setAttribute(attr.nodeName, attr.nodeValue);
+        });
+        return copy;
+    }
+
+    function restoreOriginals(element) {
+        Array.prototype
+            .map.call(element.attributes, function (attr) {
+                return attr.nodeName;
+            })
+            .forEach(function (attrName) {
+                var matches = attrName.match(/^data-phast-original-(.*)/i);
+                if (matches) {
+                    element.setAttribute(matches[1], element.getAttribute(attrName));
+                    element.removeAttribute(attrName);
+                }
+            });
+    }
+
+    function replaceElement(target, replacement) {
+        return new Promise(function (resolve, reject) {
+            replacement.addEventListener('load', resolve);
+            replacement.addEventListener('error', reject);
+            insertBefore.call(target.parentNode, replacement, target);
+            target.parentNode.removeChild(target);
+        });
+    }
+
     function writeProtectAndExecuteString(sourceElement, scriptString) {
         return writeProtectAndCallback(sourceElement, function () {
             return executeString(scriptString);
@@ -77,22 +108,15 @@ phast.ScriptsLoader.Utilities = function (document) {
         });
     }
 
-    function replaceElement(target, replacement) {
-        return new Promise(function (resolve, reject) {
-            replacement.addEventListener('load', resolve);
-            replacement.addEventListener('error', reject);
-            insertBefore.call(target.parentNode, replacement, target);
-            target.parentNode.removeChild(target);
-        });
-    }
-
     this.scriptFromPhastScript = scriptFromPhastScript;
     this.copySrc = copySrc;
     this.setOriginalSrc = setOriginalSrc;
     this.setOriginalType = setOriginalType;
     this.executeString = executeString;
-    this.writeProtectAndExecuteString = writeProtectAndExecuteString;
+    this.copyElement = copyElement;
+    this.restoreOriginals = restoreOriginals;
     this.replaceElement = replaceElement;
+    this.writeProtectAndExecuteString = writeProtectAndExecuteString;
     this.writeProtectAndReplaceElement = writeProtectAndReplaceElement;
 
 };

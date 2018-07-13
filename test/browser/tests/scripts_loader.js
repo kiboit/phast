@@ -43,6 +43,34 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 });
             });
 
+            QUnit.test('Test copyElement()', function (assert) {
+                var s = testDoc.createElement('script');
+                s.setAttribute('src', 'the-src');
+                s.setAttribute('type', 'the-type');
+                var copied = utils.copyElement(s);
+                assert.equal(copied.nodeName, s.nodeName, 'nodeName is the same');
+                assert.equal(copied.getAttribute('src'), s.getAttribute('src'), 'src is copied');
+                assert.equal(copied.getAttribute('type'), s.getAttribute('type'), 'type is copied');
+                assert.ok(copied !== s, 'copy is not the same object');
+            });
+
+            QUnit.test('Test restoreOriginals()', function (assert) {
+                var originalSrc = 'the-original-src';
+                var originalType = 'the-original-type';
+                var s = testDoc.createElement('script');
+                s.setAttribute('src', 'the-src');
+                s.setAttribute('id', 'the-id');
+                s.setAttribute('data-phast-original-src', originalSrc);
+                s.setAttribute('data-phast-original-type', originalType);
+                utils.restoreOriginals(s);
+
+                assert.equal(s.getAttribute('src'), originalSrc, 'src is restored');
+                assert.equal(s.getAttribute('type'), originalType, 'type is restored');
+                assert.notOk(s.hasAttribute('data-phast-original-src'), 'phast src has been removed');
+                assert.notOk(s.hasAttribute('data-phast-original-type'), 'phast type has been removed');
+                assert.equal(s.getAttribute('id'), 'the-id', 'id is intact');
+            });
+
             QUnit.test('Test copySrc()', function (assert) {
                 var s1 = testDoc.createElement('script');
                 var s2 = testDoc.createElement('script');
