@@ -14,46 +14,6 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 utils = new ScriptsLoader.Utilities(testDoc);
             });
 
-            QUnit.test('Test scriptFromPhastScript()', function (assert) {
-                var original = testDoc.createElement('script');
-                original.setAttribute('defer', true);
-                original.setAttribute('src', 'some-src');
-                original.setAttribute('type', 'some-type');
-                original.setAttribute('data-phast-original-src', 'the-original-src');
-                original.setAttribute('data-phast-original-type', 'the-original-type');
-                original.setAttribute('id', 'should-see');
-                original.setAttribute('async', true);
-
-                var newOne = utils.scriptFromPhastScript(original);
-                ['data-phast-original-src', 'data-phast-original-type'].forEach(function (attr) {
-                    assert.notOk(newOne.hasAttribute(attr), attr + ' is missing');
-                });
-
-                ['id', 'async'].forEach(function (attr) {
-                    assert.equal(newOne.getAttribute(attr), original.getAttribute(attr), attr + ' has been copied');
-                });
-
-                ['src', 'type'].forEach(function (attr) {
-                    var phastAttr = 'data-phast-original-' + attr;
-                    assert.equal(
-                        newOne.getAttribute(attr),
-                        original.getAttribute(phastAttr),
-                        attr + ' has been set'
-                    )
-                });
-            });
-
-            QUnit.test('Test copyElement()', function (assert) {
-                var s = testDoc.createElement('script');
-                s.setAttribute('src', 'the-src');
-                s.setAttribute('type', 'the-type');
-                var copied = utils.copyElement(s);
-                assert.equal(copied.nodeName, s.nodeName, 'nodeName is the same');
-                assert.equal(copied.getAttribute('src'), s.getAttribute('src'), 'src is copied');
-                assert.equal(copied.getAttribute('type'), s.getAttribute('type'), 'type is copied');
-                assert.ok(copied !== s, 'copy is not the same object');
-            });
-
             QUnit.test('Test restoreOriginals()', function (assert) {
                 var originalSrc = 'the-original-src';
                 var originalType = 'the-original-type';
@@ -69,38 +29,6 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 assert.notOk(s.hasAttribute('data-phast-original-src'), 'phast src has been removed');
                 assert.notOk(s.hasAttribute('data-phast-original-type'), 'phast type has been removed');
                 assert.equal(s.getAttribute('id'), 'the-id', 'id is intact');
-            });
-
-            QUnit.test('Test copySrc()', function (assert) {
-                var s1 = testDoc.createElement('script');
-                var s2 = testDoc.createElement('script');
-                s1.setAttribute('src', 'the-src');
-                utils.copySrc(s1, s2);
-                assert.equal(s2.getAttribute('src'), s1.getAttribute('src'), 'src was copied');
-            });
-
-            QUnit.test('Test setOriginalSrc()', function (assert) {
-                var s1 = testDoc.createElement('script');
-                var s2 = testDoc.createElement('script');
-                s1.setAttribute('data-phast-original-src', 'the-original-src');
-                utils.setOriginalSrc(s1, s2);
-                assert.equal(
-                    s2.getAttribute('src'),
-                    s1.getAttribute('data-phast-original-src'),
-                    'The original src has been set'
-                );
-            });
-
-            QUnit.test('Test setOriginalType()', function (assert) {
-                var s1 = testDoc.createElement('script');
-                var s2 = testDoc.createElement('script');
-                s1.setAttribute('data-phast-original-type', 'the-original-type');
-                utils.setOriginalType(s1, s2);
-                assert.equal(
-                    s2.getAttribute('type'),
-                    s1.getAttribute('data-phast-original-type'),
-                    'The original type has been set'
-                );
             });
 
             QUnit.test('Test executeString()', function (assert) {

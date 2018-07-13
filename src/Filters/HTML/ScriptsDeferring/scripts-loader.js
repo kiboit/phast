@@ -6,33 +6,6 @@ phast.ScriptsLoader.Utilities = function (document) {
 
     var insertBefore = Element.prototype.insertBefore;
 
-    function scriptFromPhastScript(original) {
-        var newScript = document.createElement('script');
-        Array.prototype.forEach.call(original.attributes, function (attr) {
-            var attrName;
-            var phastAttr = attr.nodeName.match(/^data-phast-original-(.*)/i);
-            if (phastAttr) {
-                attrName = phastAttr[1];
-            } else {
-                attrName = attr.nodeName;
-            }
-            newScript.setAttribute(attrName, attr.nodeValue);
-        });
-        return newScript;
-    }
-
-    function copySrc(source, target) {
-        target.setAttribute('src', source.getAttribute('src'));
-    }
-
-    function setOriginalSrc(original, target) {
-        target.setAttribute('src', original.getAttribute('data-phast-original-src'));
-    }
-
-    function setOriginalType(original, target) {
-        target.setAttribute('type', original.getAttribute('data-phast-original-type'));
-    }
-
     function executeString(string) {
         return new Promise(function (resolve, reject) {
             try {
@@ -108,10 +81,6 @@ phast.ScriptsLoader.Utilities = function (document) {
             });
     }
 
-    this.scriptFromPhastScript = scriptFromPhastScript;
-    this.copySrc = copySrc;
-    this.setOriginalSrc = setOriginalSrc;
-    this.setOriginalType = setOriginalType;
     this.executeString = executeString;
     this.copyElement = copyElement;
     this.restoreOriginals = restoreOriginals;
