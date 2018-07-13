@@ -84,6 +84,12 @@ phast.ScriptsLoader.Utilities = function (document) {
         });
     }
 
+    function writeProtectAndReplaceElement(target, replacement) {
+        return writeProtectAndCallback(replacement, function () {
+            return replaceElement(target, replacement);
+        });
+    }
+
     function writeProtectAndCallback(sourceElement, callback) {
         var writeBuffer = '';
         document.write = function (string) {
@@ -102,12 +108,6 @@ phast.ScriptsLoader.Utilities = function (document) {
             });
     }
 
-    function writeProtectAndReplaceElement(target, replacement) {
-        return writeProtectAndCallback(replacement, function () {
-            return replaceElement(target, replacement);
-        });
-    }
-
     this.scriptFromPhastScript = scriptFromPhastScript;
     this.copySrc = copySrc;
     this.setOriginalSrc = setOriginalSrc;
@@ -118,5 +118,79 @@ phast.ScriptsLoader.Utilities = function (document) {
     this.replaceElement = replaceElement;
     this.writeProtectAndExecuteString = writeProtectAndExecuteString;
     this.writeProtectAndReplaceElement = writeProtectAndReplaceElement;
+};
+
+phast.ScriptsLoader.Scripts = {};
+
+phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
+
+    this.init = function () {};
+
+    this.execute = function () {
+        utils.restoreOriginals(element);
+        return utils.executeString(element.textContent.replace(/\s*<!--\s*.*?\n/i, ''));
+    };
+};
+
+phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
+
+    this.init = function  () {
+        var newElement = utils.copyElement(element);
+        utils.restoreOriginals(newElement);
+        utils.replaceElement(element, newElement);
+    };
+
+    this.execute = function () {
+        return Promise.resolve();
+    };
+};
+
+phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
+
+    this.init = function () {};
+
+    this.execute = function () {
+        var newElement = utils.copyElement(element);
+        utils.restoreOriginals(newElement);
+        return utils.writeProtectAndReplaceElement(element, newElement);
+    };
+};
+
+phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, fallback) {
+
+    this.init = function () {
+        fetch(element.getAttribute('src'))
+            .then(function (execString) {
+                utils.restoreOriginals(element);
+                utils.executeString(execString);
+            })
+            .catch(function () {
+                fallback.init();
+            });
+    };
+
+    this.execute = function () {
+        return Promise.resolve();
+    };
+};
+
+phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fallback) {
+
+    var promise;
+    this.init = function () {
+        promise = fetch(element.getAttribute('src'));
+    };
+
+    this.execute = function () {
+        return promise
+            .then(function (execString) {
+                utils.restoreOriginals(element);
+                utils.writeProtectAndExecuteString(element, execString);
+            })
+            .catch(function () {
+                fallback.init();
+                return fallback.execute();
+            });
+    };
 
 };
