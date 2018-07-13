@@ -41,7 +41,7 @@ return [
     'outputServerSideStats' => true,
 
     'documents' => [
-        'maxBufferSizeToApply' => pow(1024, 3),
+        'maxBufferSizeToApply' => pow(1024, 2),
 
         'baseUrl' => (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://'
             . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
