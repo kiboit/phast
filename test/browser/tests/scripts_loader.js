@@ -469,15 +469,10 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     return Promise.resolve('writeProtectAndExecuteString promise');
                 };
 
-                this._makePromiseCb = function (cbName, resolves) {
-                    this[cbName] = function (param) {
-                        this._pushCall(cbName, param);
-                        var resolver = resolves === false ? 'reject' : 'resolve';
-                        return Promise[resolver](cbName + ' promise');
-                    }
+                this.executeString = function (string) {
+                    this._pushCall('executeString', string);
+                    return Promise.resolve('executeString promise');
                 };
-
-                ['executeString'].forEach(this._makePromiseCb.bind(this));
             }
         });
 
