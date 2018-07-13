@@ -9,10 +9,14 @@ phast.ScriptsLoader.Utilities = function (document) {
     function scriptFromPhastScript(original) {
         var newScript = document.createElement('script');
         Array.prototype.forEach.call(original.attributes, function (attr) {
-            if (/^data-phast-|^defer$|^src$|^type$/i.test(attr.nodeName)) {
-                return;
+            var attrName;
+            var phastAttr = attr.nodeName.match(/^data-phast-original-(.*)/i);
+            if (phastAttr) {
+                attrName = phastAttr[1];
+            } else {
+                attrName = attr.nodeName;
             }
-            newScript.setAttribute(attr.nodeName, attr.nodeValue);
+            newScript.setAttribute(attrName, attr.nodeValue);
         });
         return newScript;
     }

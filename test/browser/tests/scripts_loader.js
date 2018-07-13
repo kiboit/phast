@@ -19,17 +19,27 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 original.setAttribute('defer', true);
                 original.setAttribute('src', 'some-src');
                 original.setAttribute('type', 'some-type');
-                original.setAttribute('data-phast-some-info', true);
+                original.setAttribute('data-phast-original-src', 'the-original-src');
+                original.setAttribute('data-phast-original-type', 'the-original-type');
                 original.setAttribute('id', 'should-see');
                 original.setAttribute('async', true);
 
                 var newOne = utils.scriptFromPhastScript(original);
-                ['defer', 'src', 'data-phast-some-info', 'type'].forEach(function (attr) {
+                ['data-phast-original-src', 'data-phast-original-type'].forEach(function (attr) {
                     assert.notOk(newOne.hasAttribute(attr), attr + ' is missing');
                 });
 
                 ['id', 'async'].forEach(function (attr) {
                     assert.equal(newOne.getAttribute(attr), original.getAttribute(attr), attr + ' has been copied');
+                });
+
+                ['src', 'type'].forEach(function (attr) {
+                    var phastAttr = 'data-phast-original-' + attr;
+                    assert.equal(
+                        newOne.getAttribute(attr),
+                        original.getAttribute(phastAttr),
+                        attr + ' has been set'
+                    )
                 });
             });
 
@@ -114,7 +124,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     });
             });
 
-            QUnit.test('Test replaceElement', function (assert) {
+            QUnit.test('Test replaceElement()', function (assert) {
                 var s1 = testDoc.createElement('script');
                 var s2 = testDoc.createElement('script');
                 testDoc.body.appendChild(s1);
