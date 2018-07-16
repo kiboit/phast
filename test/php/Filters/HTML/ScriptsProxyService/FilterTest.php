@@ -54,7 +54,7 @@ class FilterTest extends HTMLFilterTestCase {
         $urls = [
             'http://example.com/script.js',
             'http://test.com/script.js',
-            self::BASE_URL . '/rewrite.js',
+            self::BASE_URL . '/_rewrite.js',
             'http://example.com/script1.cs',
             'http://norewrite.com/script.js',
         ];
@@ -137,7 +137,7 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function testSettingLastModifiedTimeForCacheMarker() {
         $script = $this->makeMarkedElement('script');
-        $script->setAttribute('src', self::BASE_URL . '/rewrite.js');
+        $script->setAttribute('src', self::BASE_URL . '/_rewrite.js');
         $this->head->appendChild($script);
         $this->modTime = 123;
 
