@@ -476,6 +476,91 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
             }
         });
 
+        QUnit.module('Scripts.Factory', function (hooks) {
+
+            var Scripts = ScriptsLoader.Scripts;
+
+            var fetch = function () {};
+
+            var factory = new Scripts.Factory(document, fetch);
+
+            var element;
+            hooks.beforeEach(function () {
+                element = document.createElement('script');
+            });
+
+            QUnit.test('Test creating inline script', function (assert) {
+                var script = factory.makeScriptFromElement(element);
+                assert.ok(script instanceof Scripts.InlineScript, 'Instance of InlineScript');
+                assertCorrectBuild(assert, script);
+            });
+
+            QUnit.test('Test creating AsyncBrowserScript', function (assert) {
+                element.setAttribute('src', 'some-src');
+                element.setAttribute('async', '');
+
+                var script1 = factory.makeScriptFromElement(element);
+
+                element.setAttribute('data-phast-original-src', 'some-src');
+                var script2 = factory.makeScriptFromElement(element);
+
+                assert.ok(script1 instanceof Scripts.AsyncBrowserScript, 'Correct for only src');
+                assert.ok(script2 instanceof Scripts.AsyncBrowserScript, 'Correct for same src and data-phast-original-src');
+
+                assertCorrectBuild(assert, script1);
+                assertCorrectBuild(assert, script2);
+            });
+
+            QUnit.test('Test create SyncBrowserScript', function (assert) {
+                element.setAttribute('src', 'some-src');
+
+                var script1 = factory.makeScriptFromElement(element);
+
+                element.setAttribute('data-phast-original-src', 'some-src');
+                var script2 = factory.makeScriptFromElement(element);
+
+                assert.ok(script1 instanceof Scripts.SyncBrowserScript, 'Correct for only src');
+                assert.ok(script2 instanceof Scripts.SyncBrowserScript, 'Correct for same src and data-phast-original-src');
+
+                assertCorrectBuild(assert, script1);
+                assertCorrectBuild(assert, script2);
+            });
+
+            QUnit.test('Test create AsyncAJAXScript', function (assert) {
+                element.setAttribute('src', 'proxied-src');
+                element.setAttribute('data-phast-original-src', 'original-src');
+                element.setAttribute('async', '');
+
+                var script = factory.makeScriptFromElement(element);
+                assert.ok(script instanceof Scripts.AsyncAJAXScript, 'Correct type');
+                assert.ok(script._fallback instanceof Scripts.AsyncBrowserScript, 'Correct fallback');
+
+                assertCorrectBuild(assert, script, true);
+                assertCorrectBuild(assert, script._fallback);
+            });
+
+            QUnit.test('Test create SyncAJAXScript', function (assert) {
+                element.setAttribute('src', 'proxied-src');
+                element.setAttribute('data-phast-original-src', 'original-src');
+
+                var script = factory.makeScriptFromElement(element);
+                assert.ok(script instanceof Scripts.SyncAJAXScript, 'Correct type');
+                assert.ok(script._fallback instanceof Scripts.SyncBrowserScript, 'Correct fallback');
+
+                assertCorrectBuild(assert, script, true);
+                assertCorrectBuild(assert, script._fallback);
+            });
+
+            function assertCorrectBuild(assert, script, ajax) {
+                assert.ok(script._utils._document === document, 'Correct utils document set');
+                assert.ok(script._element === element, 'Correct element set');
+                if (ajax) {
+                    assert.ok(script._fetch === fetch, 'Correct fetch');
+                }
+            }
+
+        });
+
 
     });
 

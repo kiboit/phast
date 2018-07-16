@@ -6,6 +6,8 @@ phast.ScriptsLoader.Utilities = function (document) {
 
     var insertBefore = Element.prototype.insertBefore;
 
+    this._document = document;
+
     function executeString(string) {
         return new Promise(function (resolve, reject) {
             try {
@@ -93,6 +95,9 @@ phast.ScriptsLoader.Scripts = {};
 
 phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
 
+    this._utils = utils;
+    this._element = element;
+
     this.init = function () {};
 
     this.execute = function () {
@@ -102,6 +107,9 @@ phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
 };
 
 phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
+
+    this._utils = utils;
+    this._element = element;
 
     this.init = function  () {
         var newElement = utils.copyElement(element);
@@ -116,6 +124,9 @@ phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
 
 phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
 
+    this._utils = utils;
+    this._element = element;
+
     this.init = function () {};
 
     this.execute = function () {
@@ -126,6 +137,11 @@ phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
 };
 
 phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, fallback) {
+
+    this._utils = utils;
+    this._element = element;
+    this._fetch = fetch;
+    this._fallback = fallback;
 
     this.init = function () {
         fetch(element.getAttribute('src'))
@@ -145,6 +161,11 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
 
 phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fallback) {
 
+    this._utils = utils;
+    this._element = element;
+    this._fetch = fetch;
+    this._fallback = fallback;
+
     var promise;
     this.init = function () {
         promise = fetch(element.getAttribute('src'));
@@ -161,5 +182,47 @@ phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fa
                 return fallback.execute();
             });
     };
+
+};
+
+phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
+
+    var Scripts = phast.ScriptsLoader.Scripts;
+
+    var utils = new phast.ScriptsLoader.Utilities(document);
+
+    this.makeScriptFromElement = function (element) {
+        if (isInline(element)) {
+            return new Scripts.InlineScript(utils, element);
+        }
+        if (isProxied(element)) {
+            if (isAsync(element)) {
+                var fallback = new Scripts.AsyncBrowserScript(utils, element);
+                return new Scripts.AsyncAJAXScript(utils, element, fetch, fallback);
+            }
+            fallback = new Scripts.SyncBrowserScript(utils, element);
+            return new Scripts.SyncAJAXScript(utils, element, fetch, fallback);
+        }
+
+        if (isAsync(element)) {
+            return new Scripts.AsyncBrowserScript(utils, element);
+        }
+        return new Scripts.SyncBrowserScript(utils, element);
+
+    };
+
+    function isInline (element) {
+        return !element.hasAttribute('src', element);
+    }
+
+    function isProxied(element) {
+        return element.hasAttribute('src')
+               && element.hasAttribute('data-phast-original-src')
+               && element.getAttribute('src') !== element.getAttribute('data-phast-original-src')
+    }
+
+    function isAsync(element) {
+        return element.hasAttribute('async');
+    }
 
 };
