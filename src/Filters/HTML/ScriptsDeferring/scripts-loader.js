@@ -2,6 +2,46 @@ var Promise = phast.ES6Promise;
 
 phast.ScriptsLoader = {};
 
+phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
+    var elements = document.querySelectorAll('script[type="phast-script"]');
+    var nonDeferred = [], deferred = [];
+    for (var i = 0; i < elements.length; i++) {
+        if (elements[i].hasAttribute('defer')) {
+            deferred.push(elements[i]);
+        } else {
+            nonDeferred.push(elements[i]);
+        }
+    }
+    return nonDeferred.concat(deferred).map(function (element) {
+        return factory.makeScriptFromElement(element);
+    });
+};
+
+phast.ScriptsLoader.executeScripts = function (scripts) {
+
+    scripts.forEach(function (script) {
+        script.init();
+    });
+
+    function execNextScript(done) {
+        if (scripts.length === 0) {
+            done();
+        } else {
+            scripts
+                .shift()
+                .execute()
+                .finally(function () {
+                    execNextScript(done);
+                });
+        }
+    }
+
+    return new Promise(function (resolve) {
+        execNextScript(resolve);
+    });
+
+};
+
 phast.ScriptsLoader.Utilities = function (document) {
 
     var insertBefore = Element.prototype.insertBefore;

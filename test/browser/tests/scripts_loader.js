@@ -561,6 +561,105 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
         });
 
+        QUnit.module('Test executeScripts()', function () {
+
+            QUnit.test('Init all scripts', function (assert) {
+                var init = 0;
+                var scripts = [1, 2, 3].map(function () {
+                    return {
+                        init: function () {
+                            init++;
+                        },
+
+                        execute: function () {
+                            return Promis.resolve();
+                        }
+                    };
+                });
+                ScriptsLoader.executeScripts(scripts);
+                assert.equal(init, 3, 'All scripts initialized');
+            });
+
+            QUnit.test('Execute correctly', function (assert) {
+                var order = [];
+                var execs = [
+                    function () {
+                        order.push(0);
+                        return Promise.resolve();
+                    },
+                    function () {
+                        order.push(1);
+                        return Promise.reject();
+                    },
+                    function () {
+                        return new Promise(function (resolve) {
+                            window.setTimeout(function () {
+                                order.push(2);
+                                resolve();
+                            }, 50);
+                        });
+                    },
+                    function () {
+                        order.push(3);
+                        return Promise.resolve();
+                    }
+                ];
+                var scripts = execs.map(function (exec) {
+                    return {init: function () {}, execute: exec};
+                });
+
+                assert.timeout(100);
+                var done = assert.async(2);
+                window.setTimeout(function () {
+                    assert.equal(order.length, 2, 'Correct length in mid execution');
+                    assert.equal(order[0], 0, 'Correct item 0');
+                    assert.equal(order[1], 1, 'Correct item 1');
+                    done();
+                }, 25);
+
+                ScriptsLoader.executeScripts(scripts)
+                    .then(function () {
+                        assert.equal(order.length, 4, 'Correct length in end');
+                        assert.equal(order[2], 2, 'Correct item 0');
+                        assert.equal(order[3], 3, 'Correct item 1');
+                        done();
+                    });
+            });
+
+        });
+
+        QUnit.test('Test finding scripts in order', function (assert) {
+            var d = document.implementation.createHTMLDocument();
+            function makeElement (attributes, elementName) {
+                elementName = elementName || 'script';
+                var e = d.createElement(elementName);
+                for (var x in attributes) {
+                    e.setAttribute(x, attributes[x]);
+                }
+                d.body.appendChild(e);
+                return e;
+            }
+
+            makeElement({'non-phast': ''});
+            makeElement({});
+            makeElement({}, 'p');
+            var deferred = makeElement({'type': 'phast-script', 'defer': ''});
+            var inline = makeElement({'type': 'phast-script'});
+            var external = makeElement({'type': 'phast-script', 'async': ''});
+
+            var factory = {
+                makeScriptFromElement: function (element) {
+                    return {_element: element};
+                }
+            };
+
+            var scripts = ScriptsLoader.getScriptsInExecutionOrder(d, factory);
+            assert.equal(scripts.length, 3, 'Correct number of scripts found');
+            assert.ok(scripts[0]._element === inline, 'Correct item 0');
+            assert.ok(scripts[1]._element === external, 'Correct item 1');
+            assert.ok(scripts[2]._element === deferred, 'Correct item 2');
+        });
+
 
     });
 
