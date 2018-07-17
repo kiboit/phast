@@ -190,13 +190,15 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
             QUnit.module('InlineScript', function (hooks) {
 
-                var script;
+                var script, whenInitialized;
                 hooks.beforeEach(function () {
                     script = new Scripts.InlineScript(utils, element);
-                    script.init();
+                    whenInitialized = script.init();
                 });
 
-                QUnit.test('No init execution', assertNothingWasCalled);
+                QUnit.test('No init execution', function (assert) {
+                    assertEmptyInit(assert, whenInitialized);
+                });
 
                 QUnit.test('Execute', function (assert) {
                     var done = getAsync(assert);
@@ -213,10 +215,10 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
             QUnit.module('AsyncBrowserScript', function (hooks) {
 
-                var script;
+                var script, whenInitialized;
                 hooks.beforeEach(function () {
                     script = new Scripts.AsyncBrowserScript(utils, element);
-                    script.init();
+                    whenInitialized = script.init();
                 });
 
                 QUnit.test('Init execution', function (assert) {
@@ -224,6 +226,11 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     var copy = assertElementCopied(assert, 0, element);
                     assertRestoredOriginals(assert, 1, copy);
                     assertReplacedElement(assert, 2, element, copy);
+                    var done = getAsync(assert);
+                    whenInitialized.then(function (testText) {
+                        assertPromiseText(assert, testText, 'replaceElement');
+                        done();
+                    });
                 });
 
                 QUnit.test('Test execution method is independent from load', function (assert) {
@@ -239,13 +246,15 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
             QUnit.module('SyncBrowserScript', function (hooks) {
 
-                var script;
+                var script, whenInitialized;
                 hooks.beforeEach(function () {
                     script = new Scripts.SyncBrowserScript(utils, element);
-                    script.init();
+                    whenInitialized = script.init();
                 });
 
-                QUnit.test('No init execution', assertNothingWasCalled);
+                QUnit.test('No init execution', function (assert) {
+                    assertEmptyInit(assert, whenInitialized);
+                });
 
                 QUnit.test('Test execution', function (assert) {
                     var done = getAsync(assert);
@@ -262,13 +271,15 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
             QUnit.module('AsyncAJAXScript', function (hooks) {
 
+                var whenInitialized;
                 hooks.beforeEach(function () {
+                    whenInitialized = null;
                     element.setAttribute('src', 'proxied-url');
                 });
 
                 function makeScript(fetch) {
                     var script = new Scripts.AsyncAJAXScript(utils, element, fetch, fallback);
-                    script.init();
+                    whenInitialized = script.init();
                     return script;
                 }
 
@@ -277,12 +288,12 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     makeScript(successfulFetch);
                     assertNumberOfCalls(assert, 1);
                     assertCallToFetch(assert, 0);
-                    window.setTimeout(function () {
+                    whenInitialized.then(function (testText) {
                         assertNumberOfCalls(assert, 3);
                         assertRestoredOriginals(assert, 1, element);
                         assertStringExecution(assert, 2, 'contents-for-proxied-url');
                         done();
-                    }, 20);
+                    });
                 });
 
                 QUnit.test('Test execution method is independent from init', function (assert) {
@@ -298,23 +309,25 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 QUnit.test('Test fallback', function (assert) {
                     var done = getAsync(assert);
                     makeScript(failingFetch);
-                    window.setTimeout(function () {
+                    whenInitialized.then(function () {
                         assertNumberOfCalls(assert, 2);
                         assertFallbackInitCall(assert, 1);
                         done();
-                    }, 20);
+                    });
                 });
             });
 
             QUnit.module('SyncAJAXScript', function (hooks) {
 
+                var whenInitialized;
                 hooks.beforeEach(function () {
+                    whenInitialized = null;
                     element.setAttribute('src', 'proxied-url');
                 });
 
                 function makeScript(fetch) {
                     var script = new Scripts.SyncAJAXScript(utils, element, fetch, fallback);
-                    script.init();
+                    whenInitialized = script.init();
                     return script;
                 }
 
@@ -323,7 +336,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     makeScript(successfulFetch);
                     assertNumberOfCalls(assert, 1);
                     assertCallToFetch(assert, 0);
-                    window.setTimeout(function () {
+                    whenInitialized.then(function () {
                         assertNumberOfCalls(assert, 1);
                         done();
                     });
@@ -356,8 +369,13 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
             });
 
-            function assertNothingWasCalled(assert) {
+            function assertEmptyInit(assert, whenInitialized) {
                 assertNumberOfCalls(assert, 0);
+                var done = getAsync(assert);
+                whenInitialized.then(function () {
+                    assertNumberOfCalls(assert, 0);
+                    done();
+                })
             }
 
             function assertNumberOfCalls(assert, expectedCallsCount) {
@@ -577,7 +595,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                         },
 
                         execute: function () {
-                            return Promis.resolve();
+                            return Promise.resolve();
                         }
                     };
                 });
@@ -610,7 +628,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     }
                 ];
                 var scripts = execs.map(function (exec) {
-                    return {init: function () {}, execute: exec};
+                    return {init: function () { return Promise.resolve(); }, execute: exec};
                 });
 
                 assert.timeout(100);
@@ -629,6 +647,50 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                         assert.equal(order[3], 3, 'Correct item 1');
                         done();
                     });
+            });
+
+            QUnit.test('Resolve on both init and execute', function (assert) {
+                var initialized = false,
+                    executed = false;
+                var script = {
+                    init: function () {
+                        return new Promise(function (resolve) {
+                            window.setTimeout(function () {
+                                initialized = true;
+                                resolve();
+                            }, 30);
+                        });
+                    },
+
+                    execute: function () {
+                        return new Promise(function (resolve) {
+                            executed = true;
+                            resolve();
+                        });
+                    }
+                };
+
+                assert.timeout(100);
+                var done = assert.async();
+                ScriptsLoader.executeScripts([script])
+                    .then(function () {
+                        assert.ok(initialized, 'Was initialized');
+                        assert.ok(executed, 'Was executed');
+                        done();
+                    });
+            });
+
+            QUnit.test('Resolve when error in init', function (assert) {
+                var script = {
+                    init: function () { return Promise.reject(); },
+                    execute: function () { return Promise.resolve(); }
+                };
+                assert.timeout(100);
+                assert.expect(0);
+                var done = assert.async();
+                ScriptsLoader
+                    .executeScripts([script])
+                    .then(done);
             });
 
         });

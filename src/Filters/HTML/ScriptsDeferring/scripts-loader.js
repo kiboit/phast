@@ -19,26 +19,23 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
 
 phast.ScriptsLoader.executeScripts = function (scripts) {
 
-    scripts.forEach(function (script) {
-        script.init();
+    var initializers = scripts.map(function (script) {
+        return script.init();
     });
 
-    function execNextScript(done) {
+    function execNextScript() {
         if (scripts.length === 0) {
-            done();
-        } else {
-            scripts
-                .shift()
-                .execute()
-                .finally(function () {
-                    execNextScript(done);
-                });
+            return Promise.all(initializers)
+                .catch(function () {});
         }
+        return scripts
+            .shift()
+            .execute()
+            .then(execNextScript)
+            .catch(execNextScript);
     }
 
-    return new Promise(function (resolve) {
-        execNextScript(resolve);
-    });
+    return execNextScript();
 
 };
 
@@ -142,7 +139,9 @@ phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
     this._utils = utils;
     this._element = element;
 
-    this.init = function () {};
+    this.init = function () {
+        return Promise.resolve();
+    };
 
     this.execute = function () {
         var execString = element.textContent.replace(/\s*<!--\s*.*?\n/i, '');
@@ -159,7 +158,7 @@ phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
     this.init = function  () {
         var newElement = utils.copyElement(element);
         utils.restoreOriginals(newElement);
-        utils.replaceElement(element, newElement);
+        return utils.replaceElement(element, newElement);
     };
 
     this.execute = function () {
@@ -172,7 +171,9 @@ phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
     this._utils = utils;
     this._element = element;
 
-    this.init = function () {};
+    this.init = function () {
+        return Promise.resolve();
+    };
 
     this.execute = function () {
         var newElement = utils.copyElement(element);
@@ -189,13 +190,13 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
     this._fallback = fallback;
 
     this.init = function () {
-        fetch(element.getAttribute('src'))
+        return fetch(element.getAttribute('src'))
             .then(function (execString) {
                 utils.restoreOriginals(element);
-                utils.executeString(execString);
+                return utils.executeString(execString);
             })
             .catch(function () {
-                fallback.init();
+                return fallback.init();
             });
     };
 
@@ -214,6 +215,7 @@ phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fa
     var promise;
     this.init = function () {
         promise = fetch(element.getAttribute('src'));
+        return promise;
     };
 
     this.execute = function () {
