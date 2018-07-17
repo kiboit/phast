@@ -87,10 +87,15 @@ phast.ScriptsLoader.Utilities = function (document) {
 
     function replaceElement(target, replacement) {
         return new Promise(function (resolve, reject) {
+            var src = replacement.getAttribute('src');
             replacement.addEventListener('load', resolve);
             replacement.addEventListener('error', reject);
+            replacement.removeAttribute('src');
             insertBefore.call(target.parentNode, replacement, target);
             target.parentNode.removeChild(target);
+            if (src) {
+                replacement.setAttribute('src', src);
+            }
         });
     }
 
