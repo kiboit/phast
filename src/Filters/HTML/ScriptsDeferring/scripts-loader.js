@@ -71,7 +71,7 @@ phast.ScriptsLoader.Utilities = function (document) {
     }
 
     function restoreOriginals(element) {
-        element.removeAttribute('type');
+        var shouldRemoveType = !element.hasAttribute('data-phast-original-type');
         Array.prototype
             .map.call(element.attributes, function (attr) {
                 return attr.nodeName;
@@ -83,6 +83,9 @@ phast.ScriptsLoader.Utilities = function (document) {
                     element.removeAttribute(attrName);
                 }
             });
+        if (shouldRemoveType) {
+            element.removeAttribute('type');
+        }
     }
 
     function replaceElement(target, replacement) {
