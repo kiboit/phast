@@ -648,7 +648,8 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
             makeElement({'non-phast': ''});
             makeElement({});
             makeElement({}, 'p');
-            var deferred = makeElement({'type': 'phast-script', 'defer': ''});
+            var inlineDeferred = makeElement({'type': 'phast-script', 'defer': ''});
+            var deferred = makeElement({'type': 'phast-script', 'defer': '', 'src': 'some-src'});
             var inline = makeElement({'type': 'phast-script'});
             var external = makeElement({'type': 'phast-script', 'async': ''});
 
@@ -659,10 +660,11 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
             };
 
             var scripts = ScriptsLoader.getScriptsInExecutionOrder(d, factory);
-            assert.equal(scripts.length, 3, 'Correct number of scripts found');
-            assert.ok(scripts[0]._element === inline, 'Correct item 0');
-            assert.ok(scripts[1]._element === external, 'Correct item 1');
-            assert.ok(scripts[2]._element === deferred, 'Correct item 2');
+            assert.equal(scripts.length, 4, 'Correct number of scripts found');
+            assert.ok(scripts[0]._element === inlineDeferred, 'Correct item 0');
+            assert.ok(scripts[1]._element === inline, 'Correct item 0');
+            assert.ok(scripts[2]._element === external, 'Correct item 1');
+            assert.ok(scripts[3]._element === deferred, 'Correct item 2');
         });
 
 

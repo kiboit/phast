@@ -6,7 +6,7 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
     var elements = document.querySelectorAll('script[type="phast-script"]');
     var nonDeferred = [], deferred = [];
     for (var i = 0; i < elements.length; i++) {
-        if (elements[i].hasAttribute('defer')) {
+        if (elements[i].hasAttribute('src') && elements[i].hasAttribute('defer')) {
             deferred.push(elements[i]);
         } else {
             nonDeferred.push(elements[i]);
