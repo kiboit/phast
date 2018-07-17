@@ -1,10 +1,5 @@
 var Promise = phast.ES6Promise;
 
-var scriptIndex = 0;
-
-// Save insertBefore before it is overridden by the scripts proxy filter.
-var insertBefore = Element.prototype.insertBefore;
-
 var go = phast.once(loadScripts);
 
 phast.on(document, 'DOMContentLoaded').then(function () {
@@ -17,12 +12,11 @@ phast.on(document, 'DOMContentLoaded').then(function () {
 });
 
 
-var loadHappened = false;
+var triggerLoad = false;
 window.addEventListener('load', function () {
-    loadHappened = true;
+    triggerLoad = true;
 });
 
-var triggerLoad = false;
 function loadScripts() {
     var scriptsFactory = new phast.ScriptsLoader.Scripts.Factory(document, fetchScript);
     var scripts = phast.ScriptsLoader.getScriptsInExecutionOrder(document, scriptsFactory);
@@ -39,10 +33,6 @@ function loadScripts() {
         });
     } catch (e) {
         window.console && console.error("Phast: Unable to override document.readyState on this browser: ", e);
-    }
-
-    if (loadHappened) {
-        triggerLoad = true;
     }
 
     phast
