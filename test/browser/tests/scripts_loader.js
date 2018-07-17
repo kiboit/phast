@@ -200,7 +200,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                         .then(function () {
                             assertNumberOfCalls(assert, 2);
                             assertRestoredOriginals(assert, 0, element);
-                            assertStringExecution(assert, 1, 'console.log("works");');
+                            assertWriteProtectedStringExecution(assert, 1, element, 'console.log("works");');
                             done();
                         });
                 });
