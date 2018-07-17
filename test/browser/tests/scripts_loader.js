@@ -29,6 +29,11 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 assert.notOk(s.hasAttribute('data-phast-original-src'), 'phast src has been removed');
                 assert.notOk(s.hasAttribute('data-phast-original-type'), 'phast type has been removed');
                 assert.equal(s.getAttribute('id'), 'the-id', 'id is intact');
+
+                s = testDoc.createElement('script');
+                s.setAttribute('type', 'phast-script');
+                utils.restoreOriginals(s);
+                assert.notOk(s.hasAttribute('type'), 'type attribute has been removed when no data-phast-original-type');
             });
 
             QUnit.test('Test executeString()', function (assert) {

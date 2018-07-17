@@ -71,6 +71,7 @@ phast.ScriptsLoader.Utilities = function (document) {
     }
 
     function restoreOriginals(element) {
+        element.removeAttribute('type');
         Array.prototype
             .map.call(element.attributes, function (attr) {
                 return attr.nodeName;
