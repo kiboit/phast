@@ -60,21 +60,5 @@ function triggerEvent(on, name) {
 
 
 function fetchScript(url) {
-    return phast.ResourceLoader.instance.get({src: url, isScript: ''});
-}
-
-function _fetchScript(url) {
-    return new phast.ES6Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                resolve(xhr.responseText);
-            } else {
-                reject();
-            }
-        };
-        xhr.onerror = reject;
-        xhr.send();
-    });
+    return phast.ResourceLoader.instance.get({src: url, isScript: '', token:  url});
 }
