@@ -46,7 +46,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals('non-js', $nonJS->getAttribute('type'));
 
-        $this->assertHasCompiled('ScriptsDeferring/_rewrite.js');
+        $this->assertHasCompiled('ScriptsDeferring/rewrite.js');
     }
 
     public function testDisableRewriting() {
