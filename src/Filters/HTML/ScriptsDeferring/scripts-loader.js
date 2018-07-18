@@ -195,7 +195,7 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
     this._fallback = fallback;
 
     this.init = function () {
-        return fetch(element.getAttribute('src'))
+        return fetch(element.getAttribute('data-phast-original-absolute-src'))
             .then(function (execString) {
                 utils.restoreOriginals(element);
                 return utils.executeString(execString);
@@ -219,7 +219,7 @@ phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fa
 
     var promise;
     this.init = function () {
-        promise = fetch(element.getAttribute('src'));
+        promise = fetch(element.getAttribute('data-phast-original-absolute-src'));
         return promise;
     };
 

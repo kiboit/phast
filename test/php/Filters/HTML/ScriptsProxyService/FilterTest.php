@@ -86,6 +86,11 @@ class FilterTest extends HTMLFilterTestCase {
         $noRewrite2 = $this->getMatchingElement($noRewrite2);
 
         foreach ([$rewrite1, $rewrite2, $rewrite3] as $i => $script) {
+            $this->assertTrue($script->hasAttribute('data-phast-original-absolute-src'));
+            $this->assertEquals(
+                $script->getAttribute('data-phast-original-src'),
+                $script->getAttribute('data-phast-original-absolute-src')
+            );
             list ($query, $url) = $this->parseSrc($script);
             $this->assertEquals('script-proxy.php', $url['path']);
             $this->assertArrayHasKey('src', $query);

@@ -274,7 +274,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 var whenInitialized;
                 hooks.beforeEach(function () {
                     whenInitialized = null;
-                    element.setAttribute('src', 'proxied-url');
+                    element.setAttribute('data-phast-original-absolute-src', 'proxied-url');
                 });
 
                 function makeScript(fetch) {
@@ -322,7 +322,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 var whenInitialized;
                 hooks.beforeEach(function () {
                     whenInitialized = null;
-                    element.setAttribute('src', 'proxied-url');
+                    element.setAttribute('data-phast-original-absolute-src', 'proxied-url');
                 });
 
                 function makeScript(fetch) {

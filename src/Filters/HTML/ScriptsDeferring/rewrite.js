@@ -60,6 +60,10 @@ function triggerEvent(on, name) {
 
 
 function fetchScript(url) {
+    return phast.ResourceLoader.instance.get({src: url, isScript: ''});
+}
+
+function _fetchScript(url) {
     return new phast.ES6Promise(function (resolve, reject) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);

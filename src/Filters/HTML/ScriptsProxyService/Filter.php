@@ -72,10 +72,11 @@ class Filter extends BaseHTMLStreamFilter {
         $url = $this->rewriteURL($src);
         $element->setAttribute('src', $url);
         $element->setAttribute('data-phast-original-src', $src);
+        $element->setAttribute('data-phast-original-absolute-src', $this->getAbsolute($src));
     }
 
     private function rewriteURL($src) {
-        $url = URL::fromString($src)->withBase($this->context->getBaseUrl());
+        $url = $this->getAbsolute($src);
         if (!$this->shouldRewriteURL($url)) {
             $this->logger()->info('Not proxying {src}', ['src' => $src]);
             return $src;
@@ -113,6 +114,10 @@ class Filter extends BaseHTMLStreamFilter {
         $script = new PhastJavaScript(__DIR__ . '/rewrite-function.js');
         $script->setConfig('script-proxy-service', $config);
         $this->context->addPhastJavaScript($script);
+    }
+
+    private function getAbsolute($url) {
+        return URL::fromString($url)->withBase($this->context->getBaseUrl());
     }
 
 }
