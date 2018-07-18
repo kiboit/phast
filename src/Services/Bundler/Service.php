@@ -42,25 +42,33 @@ class Service {
     private $jsFilter;
 
     /**
+     * @var array
+     */
+    private $scriptsWhitelist;
+
+    /**
      * Service constructor.
      * @param ServiceSignature $signature
      * @param Retriever $cssRetriever
      * @param ServiceFilter $cssFilter
      * @param Retriever $jsRetriever
      * @param ServiceFilter $jsFilter
+     * @param array $scriptsWhitelist
      */
     public function __construct(
         ServiceSignature $signature,
         Retriever $cssRetriever,
         ServiceFilter $cssFilter,
         Retriever $jsRetriever,
-        ServiceFilter $jsFilter
+        ServiceFilter $jsFilter,
+        array $scriptsWhitelist
     ) {
         $this->signature = $signature;
         $this->cssRetriever = $cssRetriever;
         $this->cssFilter = $cssFilter;
         $this->jsRetriever = $jsRetriever;
         $this->jsFilter = $jsFilter;
+        $this->scriptsWhitelist = $scriptsWhitelist;
     }
 
 
@@ -133,7 +141,15 @@ class Service {
     }
 
     private function verifyParams(array $params) {
-        return ServiceParams::fromArray($params)->verify($this->signature);
+        if (!isset ($params['isScript'])) {
+            return ServiceParams::fromArray($params)->verify($this->signature);
+        }
+        foreach ($this->scriptsWhitelist as $regexp) {
+            if (preg_match($regexp, $params['src'])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function getRetrieverAndFilter(array $params) {

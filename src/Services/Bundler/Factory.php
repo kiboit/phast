@@ -33,7 +33,8 @@ class Factory {
             $cssServiceFactory->makeRetriever($config),
             $cssFilter,
             $jsServiceFactory->makeRetriever($config),
-            $jsFilter
+            $jsFilter,
+            $config['scripts']['whitelist']
         );
     }
 
