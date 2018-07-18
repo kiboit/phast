@@ -1,5 +1,10 @@
 var Promise = phast.ES6Promise;
 
+phast.ResourceLoader.instance = phast.ResourceLoader.make(
+    phast.config.resourcesLoader.serviceUrl,
+    phast.config.resourcesLoader.shortParamsMappings
+);
+
 phast.forEachSelectedElement = function (selector, callback) {
     Array.prototype.forEach.call(
         window.document.querySelectorAll(selector),

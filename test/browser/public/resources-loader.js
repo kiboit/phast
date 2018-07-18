@@ -1,1 +1,1 @@
-../../../src/Filters/HTML/CSSInlining/resources-loader.js
+../../../src/Filters/HTML/PhastScriptsCompiler/resources-loader.js

@@ -1,1 +1,1 @@
-../../../src/Common/hash.js
+../../../src/Filters/HTML/PhastScriptsCompiler/hash.js
