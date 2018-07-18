@@ -59,7 +59,13 @@ class ServiceTest extends PhastTestCase {
                 return $resource->withContent($newContent);
             });
 
-        $this->service = new Service($this->signature, $this->retriever, $this->filter);
+        $this->service = new Service(
+            $this->signature,
+            $this->retriever,
+            $this->filter,
+            $this->retriever,
+            $this->filter
+        );
     }
 
     public function testBundlingMultipleResources() {

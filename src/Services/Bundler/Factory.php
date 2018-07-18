@@ -11,32 +11,33 @@ use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetrieverFactory;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
+use Kibo\Phast\Services\ServiceFactoryTrait;
 
 class Factory {
+    use ServiceFactoryTrait;
 
     public function make(array $config) {
-        $retriever = new UniversalRetriever();
-        $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
-        $retriever->addRetriever(
-            new CachingRetriever(
-                new Cache($config['cache'], 'css'),
-                (new RemoteRetrieverFactory())->make($config)
-            )
+        $cssServiceFactory = new \Kibo\Phast\Services\Css\Factory();
+        $jsServiceFactory = new \Kibo\Phast\Services\Scripts\Factory();
+
+        $cssFilter = $this->makeCachingServiceFilter(
+            $config,
+            $cssServiceFactory->makeFilter($config),
+            'bundler-css'
         );
 
-        $cssComposite = (new CSS\Composite\Factory())->make($config);
-
-        $caching = new CachingServiceFilter(
-            new Cache($config['cache'], 'css-processing-2'),
-            $cssComposite,
-            new LocalRetriever($config['retrieverMap'])
+        $jsFilter = $this->makeCachingServiceFilter(
+            $config,
+            $jsServiceFactory->makeFilter(),
+            'bundler-js'
         );
-
 
         return new Service(
             (new ServiceSignatureFactory())->make($config),
-            $retriever,
-            $caching
+            $cssServiceFactory->makeRetriever($config),
+            $cssFilter,
+            $jsServiceFactory->makeRetriever($config),
+            $jsFilter
         );
     }
 
