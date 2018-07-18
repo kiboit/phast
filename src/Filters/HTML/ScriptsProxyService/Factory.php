@@ -12,8 +12,10 @@ class Factory implements HTMLFilterFactory {
             $config['documents']['filters'][Filter::class]['serviceUrl']
             = $config['servicesUrl'] . '?service=scripts';
         }
+        $filterConfig = $config['documents']['filters'][Filter::class];
+        $filterConfig['match'] = $config['scripts']['whitelist'];
         return new Filter(
-            $config['documents']['filters'][Filter::class],
+            $filterConfig,
             new LocalRetriever($config['retrieverMap'])
         );
     }

@@ -17,7 +17,7 @@ class Factory {
 
         return new Service(
             (new ServiceSignatureFactory())->make($config),
-            $config['documents']['filters'][Filter::class]['match'],
+            $config['scripts']['whitelist'],
             $this->makeRetriever($config),
             $this->makeCachingServiceFilterWithCompression($config, $cachedComposite, 'scripts-minified'),
             $config
