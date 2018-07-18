@@ -89,13 +89,14 @@ class Service {
                 yield $this->generateJSONRow(['status' => 401], $firstRow);
                 continue;
             }
+            list ($retriever, $filter) = $this->getRetrieverAndFilter($params);
             $resource = Resource::makeWithRetriever(
                 URL::fromString($params['src']),
-                $this->cssRetriever
+                $retriever
             );
             try {
                 $this->logger()->info('Applying for set {key}', ['key' => $key]);
-                $filtered = $this->cssFilter->apply($resource, $params);
+                $filtered = $filter->apply($resource, $params);
                 yield $this->generateJSONRow([
                     'status' => 200,
                     'content' => $this->cleanUTF8($filtered->getContent())
@@ -133,6 +134,13 @@ class Service {
 
     private function verifyParams(array $params) {
         return ServiceParams::fromArray($params)->verify($this->signature);
+    }
+
+    private function getRetrieverAndFilter(array $params) {
+        if (isset ($params['isScript'])) {
+            return [$this->jsRetriever, $this->jsFilter];
+        }
+        return [$this->cssRetriever, $this->cssFilter];
     }
 
     private function cleanUTF8($buffer) {
