@@ -69,6 +69,7 @@ phast.ScriptsLoader.Utilities = function (document) {
 
     function restoreOriginals(element) {
         var shouldRemoveType = !element.hasAttribute('data-phast-original-type');
+        element.removeAttribute('data-phast-params');
         Array.prototype
             .map.call(element.attributes, function (attr) {
                 return attr.nodeName;

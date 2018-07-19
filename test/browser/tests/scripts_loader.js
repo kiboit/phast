@@ -22,12 +22,15 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 s.setAttribute('id', 'the-id');
                 s.setAttribute('data-phast-original-src', originalSrc);
                 s.setAttribute('data-phast-original-type', originalType);
+                s.setAttribute('data-phast-params', 'some-params');
                 utils.restoreOriginals(s);
 
                 assert.equal(s.getAttribute('src'), originalSrc, 'src is restored');
                 assert.equal(s.getAttribute('type'), originalType, 'type is restored');
                 assert.notOk(s.hasAttribute('data-phast-original-src'), 'phast src has been removed');
                 assert.notOk(s.hasAttribute('data-phast-original-type'), 'phast type has been removed');
+                assert.notOk(s.hasAttribute('data-phast-params'), 'phast params have been removed');
+                assert.notOk(s.hasAttribute('params'), 'phast params have not been copied');
                 assert.equal(s.getAttribute('id'), 'the-id', 'id is intact');
 
                 s = testDoc.createElement('script');
