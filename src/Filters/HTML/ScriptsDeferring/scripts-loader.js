@@ -130,12 +130,21 @@ phast.ScriptsLoader.Utilities = function (document) {
             });
     }
 
+    function addPreload(url) {
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'script';
+        link.href = url;
+        document.head.appendChild(link);
+    }
+
     this.executeString = executeString;
     this.copyElement = copyElement;
     this.restoreOriginals = restoreOriginals;
     this.replaceElement = replaceElement;
     this.writeProtectAndExecuteString = writeProtectAndExecuteString;
     this.writeProtectAndReplaceElement = writeProtectAndReplaceElement;
+    this.addPreload = addPreload;
 };
 
 phast.ScriptsLoader.Scripts = {};
@@ -178,6 +187,7 @@ phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
     this._element = element;
 
     this.init = function () {
+        utils.addPreload(element.getAttribute('src'));
         return Promise.resolve();
     };
 

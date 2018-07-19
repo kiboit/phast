@@ -130,6 +130,16 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     });
             });
 
+            QUnit.test('Test addPreload()', function (assert) {
+                utils.addPreload('some-url');
+                assert.equal(testDoc.head.children.length, 1, 'A child in the head is present');
+                var link = testDoc.head.children[0];
+                assert.equal('LINK', link.nodeName, 'The child is a link');
+                assert.equal(link.rel, 'preload', 'The link is a preload');
+                assert.equal(link.as, 'script', 'The link has correct as');
+                assert.equal(link.href, 'http://phast-browser.test/some-url', 'The link has correct href');
+            });
+
             function func2string(func) {
                 return '(' + func.toString() + ')();';
             }
@@ -261,17 +271,22 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     whenInitialized = script.init();
                 });
 
-                QUnit.test('No init execution', function (assert) {
-                    assertEmptyInit(assert, whenInitialized);
+                QUnit.test('Test adding preload on init', function (assert) {
+                    var done = getAsync(assert);
+                    whenInitialized.then(function () {
+                        assertNumberOfCalls(assert, 1);
+                        assertPreloadAdded(assert, 0, element.getAttribute('src'));
+                        done();
+                    });
                 });
 
                 QUnit.test('Test execution', function (assert) {
                     var done = getAsync(assert);
                     script.execute()
                         .then(function (testText) {
-                            var copy = assertElementCopied(assert, 0, element);
-                            assertRestoredOriginals(assert, 1, copy);
-                            assertWriteProtectedReplacedElement(assert, 2, element, copy);
+                            var copy = assertElementCopied(assert, 1, element);
+                            assertRestoredOriginals(assert, 2, copy);
+                            assertWriteProtectedReplacedElement(assert, 3, element, copy);
                             assertPromiseText(assert, testText, 'writeProtectAndReplaceElement');
                             done();
                         });
@@ -431,6 +446,12 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 assert.ok(calls[idx].string === execString, 'Correct string was executed');
             }
 
+            function assertPreloadAdded(assert, idx, url) {
+                var calls = utils._getCalls();
+                assert.equal(calls[idx].name, 'addPreload', 'Preload was added');
+                assert.equal(calls[idx].params,  url, 'Correct url was preloaded');
+            }
+
             function assertPromiseText(assert, testText, expectedFunc) {
                 assert.equal(testText, expectedFunc + ' promise', 'Correct promise was returned');
             }
@@ -505,6 +526,10 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                     this._pushCall('executeString', string);
                     return Promise.resolve('executeString promise');
                 };
+
+                this.addPreload = function (url) {
+                    this._pushCall('addPreload', url);
+                }
             }
         });
 
