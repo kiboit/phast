@@ -49,58 +49,43 @@ class FilterTest extends HTMLFilterTestCase {
         );
     }
 
-    public function testRewrite() {
+    /**
+     * @dataProvider rewriteData
+     */
+    public function testRewrite($attributes, $shouldRewrite) {
         $this->modTime = 2;
-        $urls = [
-            'http://example.com/script.js',
-            'http://test.com/script.js',
-            self::BASE_URL . '/rewrite.js',
-            'http://example.com/script1.cs',
-            'http://norewrite.com/script.js',
-        ];
-
-        $rewrite1 = $this->makeMarkedElement('script');
-        $rewrite1->setAttribute('type', 'application/javascript');
-        $rewrite1->setAttribute('src', $urls[0]);
-        $rewrite2 = $this->makeMarkedElement('script');
-        $rewrite2->setAttribute('src', $urls[1]);
-        $rewrite3 = $this->makeMarkedElement('script');
-        $rewrite3->setAttribute('src', $urls[2]);
-        $noRewrite1 = $this->makeMarkedElement('script');
-        $noRewrite1->setAttribute('src', $urls[3]);
-        $noRewrite1->setAttribute('type', 'application/coffeescript');
-        $noRewrite2 = $this->makeMarkedElement('script');
-        $noRewrite2->setAttribute('src', $urls[4]);
-
-        $this->head->appendChild($rewrite1);
-        $this->head->appendChild($rewrite2);
-        $this->head->appendChild($rewrite3);
-        $this->head->appendChild($noRewrite1);
-        $this->head->appendChild($noRewrite2);
-
+        $element = $this->makeMarkedElement('script');
+        foreach ($attributes as $name => $value) {
+            $element->setAttribute($name, $value);
+        }
+        $this->head->appendChild($element);
         $this->applyFilter();
-        $rewrite1 = $this->getMatchingElement($rewrite1);
-        $rewrite2 = $this->getMatchingElement($rewrite2);
-        $rewrite3 = $this->getMatchingElement($rewrite3);
-        $noRewrite1 = $this->getMatchingElement($noRewrite1);
-        $noRewrite2 = $this->getMatchingElement($noRewrite2);
-
-        foreach ([$rewrite1, $rewrite2, $rewrite3] as $i => $script) {
-            $this->assertTrue($script->hasAttribute('data-phast-original-absolute-src'));
+        $newElement = $this->getMatchingElement($element);
+        if ($shouldRewrite) {
+            $this->assertTrue($newElement->hasAttribute('data-phast-original-absolute-src'));
             $this->assertEquals(
-                $script->getAttribute('data-phast-original-src'),
-                $script->getAttribute('data-phast-original-absolute-src')
+                $newElement->getAttribute('data-phast-original-src'),
+                $newElement->getAttribute('data-phast-original-absolute-src')
             );
-            list ($query, $url) = $this->parseSrc($script);
+            list ($query, $url) = $this->parseSrc($newElement);
             $this->assertEquals('script-proxy.php', $url['path']);
             $this->assertArrayHasKey('src', $query);
             $this->assertArrayHasKey('cacheMarker', $query);
-            $this->assertEquals($urls[$i], $query['src']);
-            $this->assertEquals(2, $query['cacheMarker']);
+            $this->assertEquals($attributes['src'], $query['src']);
+            $this->assertEquals($this->modTime, $query['cacheMarker']);
+        } else {
+            $this->assertEquals($attributes['src'], $newElement->getAttribute('src'));
         }
+    }
 
-        $this->assertEquals($urls[3], $noRewrite1->getAttribute('src'));
-        $this->assertEquals($urls[4], $noRewrite2->getAttribute('src'));
+    public function rewriteData() {
+        return [
+            [['src' => 'http://example.com/script.js', 'type' => 'application/javascript'], true],
+            [['src'  => 'http://test.com/script.js'], true],
+            [['src'  => self::BASE_URL . '/rewrite.js'], true],
+            [['src'  => 'http://example.com/script1.cs', 'type' => 'application/coffeesctipt'], false],
+            [['src'  => 'http://norewrite.com/script.js'], false],
+        ];
     }
 
     public function testSettingSameSrcForSameURLInDifferentDocs() {
@@ -136,8 +121,6 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals($scriptA1->getAttribute('src'), $scriptA2->getAttribute('src'));
         $this->assertEquals($scriptB1->getAttribute('src'), $scriptB2->getAttribute('src'));
-
-
     }
 
     public function testSettingLastModifiedTimeForCacheMarker() {
