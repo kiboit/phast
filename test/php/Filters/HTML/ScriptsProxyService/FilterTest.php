@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
 
 class FilterTest extends HTMLFilterTestCase {
@@ -31,6 +32,9 @@ class FilterTest extends HTMLFilterTestCase {
 
         $this->modTime = false;
 
+        $signature = $this->createMock(ServiceSignature::class);
+        $signature->method('sign')
+            ->willReturn('the-token');
 
         $this->retriever = $this->createMock(Retriever::class);
         $this->retriever->method('getCacheSalt')
@@ -44,6 +48,7 @@ class FilterTest extends HTMLFilterTestCase {
         };
         $this->filter = new Filter(
             $this->config,
+            $signature,
             $this->retriever,
             $functions
         );
@@ -62,11 +67,12 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
         $newElement = $this->getMatchingElement($element);
         if ($shouldRewrite) {
-            $this->assertTrue($newElement->hasAttribute('data-phast-original-absolute-src'));
-            $this->assertEquals(
-                $newElement->getAttribute('data-phast-original-src'),
-                $newElement->getAttribute('data-phast-original-absolute-src')
-            );
+            $this->assertTrue($newElement->hasAttribute('data-phast-params'));
+            $params = json_decode($newElement->getAttribute('data-phast-params'));
+            $this->assertEquals($attributes['src'], $params->src);
+            $this->assertEquals('the-token', $params->token);
+            $this->assertEquals('1', $params->isScript);
+
             list ($query, $url) = $this->parseSrc($newElement);
             $this->assertEquals('script-proxy.php', $url['path']);
             $this->assertArrayHasKey('src', $query);

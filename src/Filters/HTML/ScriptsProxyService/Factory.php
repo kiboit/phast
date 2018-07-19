@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 use Kibo\Phast\Retrievers\LocalRetriever;
+use Kibo\Phast\Security\ServiceSignatureFactory;
 
 class Factory implements HTMLFilterFactory {
 
@@ -16,6 +17,7 @@ class Factory implements HTMLFilterFactory {
         $filterConfig['match'] = $config['scripts']['whitelist'];
         return new Filter(
             $filterConfig,
+            (new ServiceSignatureFactory())->make($config),
             new LocalRetriever($config['retrieverMap'])
         );
     }

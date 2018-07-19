@@ -59,6 +59,8 @@ function triggerEvent(on, name) {
 }
 
 
-function fetchScript(url) {
-    return phast.ResourceLoader.instance.get({src: url, isScript: '', token:  url});
+function fetchScript(element) {
+    return phast.ResourceLoader.instance.get(
+        phast.ResourceLoader.RequestParams.fromString(element.getAttribute('data-phast-params'))
+    );
 }

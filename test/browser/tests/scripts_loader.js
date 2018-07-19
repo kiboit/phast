@@ -156,18 +156,24 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
             var Scripts = ScriptsLoader.Scripts;
 
-            var successfulFetch = function (url) {
-                utils._pushCall('fetch', url);
-                return new Promise(function (resolve) {
-                    resolve('contents-for-' + url);
+            var fetch = function (element, successful) {
+                var params = JSON.parse(element.getAttribute('data-phast-params'));
+                utils._pushCall('fetch', params.src);
+                return new Promise(function (resolve, reject) {
+                    if (successful) {
+                        resolve('contents-for-' + params.src);
+                    } else {
+                        reject('failure-for-' + params.src);
+                    }
                 });
             };
 
-            var failingFetch = function (url) {
-                utils._pushCall('fetch', url);
-                return new Promise(function (resolve, reject) {
-                    reject('failure-for-' + url);
-                });
+            var successfulFetch = function (element) {
+                return fetch(element, true);
+            };
+
+            var failingFetch = function (element) {
+                return fetch(element, false);
             };
 
             var fallback = {
@@ -274,7 +280,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 var whenInitialized;
                 hooks.beforeEach(function () {
                     whenInitialized = null;
-                    element.setAttribute('data-phast-original-absolute-src', 'proxied-url');
+                    element.setAttribute('data-phast-params', '{"src": "proxied-url"}');
                 });
 
                 function makeScript(fetch) {
@@ -322,7 +328,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 var whenInitialized;
                 hooks.beforeEach(function () {
                     whenInitialized = null;
-                    element.setAttribute('data-phast-original-absolute-src', 'proxied-url');
+                    element.setAttribute('data-phast-params', '{"src": "proxied-url"}');
                 });
 
                 function makeScript(fetch) {

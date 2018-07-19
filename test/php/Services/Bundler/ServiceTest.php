@@ -123,21 +123,6 @@ class ServiceTest extends PhastTestCase {
         $this->assertEquals(401, $content[2]->status);
     }
 
-    public function testErrorOnNonWhitelistedScripts() {
-        $params = $this->makeParams([
-            ['src' => 'scripts.only.here/1.js', 'isScript' => ''],
-            ['src' => 'not-allowed', 'isScript' => '']
-        ]);
-
-        unset ($params['token_0']);
-        unset ($params['token_1']);
-
-        $content = $this->doRequest($params);
-
-        $this->assertEquals(200, $content[0]->status);
-        $this->assertEquals(401, $content[1]->status);
-    }
-
     public function testExceptionHandling() {
         $params = $this->makeParams([
             ['src' => 'not-found'],
