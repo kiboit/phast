@@ -12,7 +12,7 @@ class Factory {
     use ServiceFactoryTrait;
 
     public function make(array $config) {
-        $cachedComposite = $this->makeFilter();
+        $cachedComposite = $this->makeFilter($config);
 
         return new Service(
             (new ServiceSignatureFactory())->make($config),
