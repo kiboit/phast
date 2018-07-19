@@ -24,7 +24,7 @@ class Factory {
 
         $jsFilter = $this->makeCachingServiceFilter(
             $config,
-            $jsServiceFactory->makeFilter(),
+            $jsServiceFactory->makeFilter($config),
             'bundler-js'
         );
 

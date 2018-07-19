@@ -13,7 +13,6 @@ class Factory {
 
     public function make(array $config) {
         $cachedComposite = $this->makeFilter();
-        $cachedComposite->addFilter(new JSMinifierFilter(@$config['scripts']['removeLicenseHeaders']));
 
         return new Service(
             (new ServiceSignatureFactory())->make($config),
@@ -28,8 +27,10 @@ class Factory {
         return $this->makeUniversalCachingRetriever($config, 'scripts');
     }
 
-    public function makeFilter() {
-        return new CompositeFilter();
+    public function makeFilter(array $config) {
+        $filter = new CompositeFilter();
+        $filter->addFilter(new JSMinifierFilter(@$config['scripts']['removeLicenseHeaders']));
+        return $filter;
     }
 
 }
