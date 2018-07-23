@@ -10,7 +10,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
             var utils, testDoc;
 
             hooks.beforeEach(function () {
-                testDoc = document.implementation.createHTMLDocument();
+                testDoc = document.implementation.createHTMLDocument('');
                 utils = new ScriptsLoader.Utilities(testDoc);
             });
 
@@ -105,7 +105,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 var checkWrite = getWriteProtectChecker(assert);
                 assert.timeout(200);
                 var done = assert.async();
-                s1.setAttribute('id', 'writeProtectAndReplaceElementTestScriptToRemove')
+                s1.setAttribute('id', 'writeProtectAndReplaceElementTestScriptToRemove');
                 var writeFunc = function () {
                     document.write('<p id="writtenline"></p>');
                 };
@@ -132,12 +132,12 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
 
             QUnit.test('Test addPreload()', function (assert) {
                 utils.addPreload('some-url');
-                assert.equal(testDoc.head.children.length, 1, 'A child in the head is present');
-                var link = testDoc.head.children[0];
+                assert.equal(testDoc.head.children.length, 2, 'A child in the head is present');
+                var link = testDoc.head.children[1];
                 assert.equal('LINK', link.nodeName, 'The child is a link');
-                assert.equal(link.rel, 'preload', 'The link is a preload');
-                assert.equal(link.as, 'script', 'The link has correct as');
-                assert.equal(link.href, 'http://phast-browser.test/some-url', 'The link has correct href');
+                assert.equal(link.getAttribute('rel'), 'preload', 'The link is a preload');
+                assert.equal(link.getAttribute('as'), 'script', 'The link has correct as');
+                assert.equal(link.getAttribute('href'), 'some-url', 'The link has correct href');
             });
 
             function func2string(func) {
@@ -715,7 +715,7 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
         });
 
         QUnit.test('Test finding scripts in order', function (assert) {
-            var d = document.implementation.createHTMLDocument();
+            var d = document.implementation.createHTMLDocument('');
             function makeElement (attributes, elementName) {
                 elementName = elementName || 'script';
                 var e = d.createElement(elementName);

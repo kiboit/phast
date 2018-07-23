@@ -191,14 +191,21 @@ loadPhastJS(['public/es6-promise.js', 'public/hash.js' , 'public/resources-loade
                 });
 
                 QUnit.test('Test src compression and grouping', function (assert) {
+                    var repeat = function (char, count) {
+                        var result = '';
+                        for (var i = 0; i < count; i++) {
+                            result += char;
+                        }
+                        return result;
+                    };
                     var params = [
                         {src: 'aaaaaaaaaaaaaaa', token: 1},
                         {src: 'bbbbbbbbbbbbbbb', token: 2},
                         {src: 'aaaaaaaaaaaaaaaaaaa', token: 3},
                         {src: 'bbbbbbbbbbbbbbbcccc', token: 4},
                         {src: 'bbbbbbbd', token: 5},
-                        {src: 'c'.repeat(1297), token: 6},
-                        {src: 'c'.repeat(1297) + 'd', token: 7}
+                        {src: repeat('c', 1297), token: 6},
+                        {src: repeat('c', 1297) + 'd', token: 7}
                     ];
                     params.forEach(function (item) {
                         pack.add(new PackItem({}, item));
@@ -209,7 +216,7 @@ loadPhastJS(['public/es6-promise.js', 'public/hash.js' , 'public/resources-loade
                         + '&s=00bbbbbbbbbbbbbbb&t=2'
                         + '&s=0fcccc&t=4'
                         + '&s=07d&t=5'
-                        + '&s=00' + 'c'.repeat(1297) + '&t=6'
+                        + '&s=00' + repeat('c', 1297) + '&t=6'
                         + '&s=zzccd&t=7';
                     assert.equal(pack.toQuery(), expected, 'Compresses src and groups correctly')
                 });
