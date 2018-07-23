@@ -275,7 +275,7 @@ phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
     };
 
     function isInline (element) {
-        return !element.hasAttribute('src', element);
+        return !element.hasAttribute('src');
     }
 
     function isProxied(element) {
