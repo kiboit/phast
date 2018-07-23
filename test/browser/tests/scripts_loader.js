@@ -556,31 +556,16 @@ loadPhastJS(['public/es6-promise.js', 'public/scripts-loader.js'], function (pha
                 element.setAttribute('src', 'some-src');
                 element.setAttribute('async', '');
 
-                var script1 = factory.makeScriptFromElement(element);
-
-                element.setAttribute('data-phast-original-src', 'some-src');
-                var script2 = factory.makeScriptFromElement(element);
-
-                assert.ok(script1 instanceof Scripts.AsyncBrowserScript, 'Correct for only src');
-                assert.ok(script2 instanceof Scripts.AsyncBrowserScript, 'Correct for same src and data-phast-original-src');
-
-                assertCorrectBuild(assert, script1);
-                assertCorrectBuild(assert, script2);
+                var script = factory.makeScriptFromElement(element);
+                assert.ok(script instanceof Scripts.AsyncBrowserScript, 'Correct for only src');
+                assertCorrectBuild(assert, script);
             });
 
             QUnit.test('Test create SyncBrowserScript', function (assert) {
                 element.setAttribute('src', 'some-src');
-
-                var script1 = factory.makeScriptFromElement(element);
-
-                element.setAttribute('data-phast-original-src', 'some-src');
-                var script2 = factory.makeScriptFromElement(element);
-
-                assert.ok(script1 instanceof Scripts.SyncBrowserScript, 'Correct for only src');
-                assert.ok(script2 instanceof Scripts.SyncBrowserScript, 'Correct for same src and data-phast-original-src');
-
-                assertCorrectBuild(assert, script1);
-                assertCorrectBuild(assert, script2);
+                var script = factory.makeScriptFromElement(element);
+                assert.ok(script instanceof Scripts.SyncBrowserScript, 'Correct for only src');
+                assertCorrectBuild(assert, script);
             });
 
             QUnit.test('Test create AsyncAJAXScript', function (assert) {

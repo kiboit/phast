@@ -80,25 +80,19 @@ class Filter extends BaseHTMLStreamFilter {
             return;
         }
         $src = trim($element->getAttribute('src'));
-        $url = $this->rewriteURL($src);
-        $element->setAttribute('src', $url);
-        $element->setAttribute('data-phast-original-src', $src);
-        $element->setAttribute(
-            'data-phast-params',
-            ServiceParams::
-                fromArray(['src' => (string) $this->getAbsolute($src), 'isScript' => '1'])
-                ->sign($this->signature)
-                ->serialize()
-        );
-    }
-
-    private function rewriteURL($src) {
-        $url = $this->getAbsolute($src);
-        if (!$this->shouldRewriteURL($url)) {
+        $absolute = $this->getAbsoluteURL($src);
+        if (!$this->shouldProxyURL($absolute)) {
             $this->logger()->info('Not proxying {src}', ['src' => $src]);
-            return $src;
+            return;
         }
         $this->logger()->info('Proxying {src}', ['src' => $src]);
+        $rewritten = $this->makeProxiedURL($absolute);
+        $element->setAttribute('src', $rewritten);
+        $element->setAttribute('data-phast-original-src', $src);
+        $element->setAttribute('data-phast-params', $this->makeServiceParams($absolute));
+    }
+
+    private function makeProxiedURL($url) {
         $params = [
             'src' => (string) $url,
             'cacheMarker' => $this->retriever->getCacheSalt($url)
@@ -109,7 +103,14 @@ class Filter extends BaseHTMLStreamFilter {
             ->serialize();
     }
 
-    private function shouldRewriteURL(URL $url) {
+    private function makeServiceParams($url) {
+        return ServiceParams::
+            fromArray(['src' => (string) $url, 'isScript' => '1'])
+            ->sign($this->signature)
+            ->serialize();
+    }
+
+    private function shouldProxyURL(URL $url) {
         if ($url->isLocalTo($this->context->getBaseUrl())) {
             return true;
         }
@@ -133,7 +134,7 @@ class Filter extends BaseHTMLStreamFilter {
         $this->context->addPhastJavaScript($script);
     }
 
-    private function getAbsolute($url) {
+    private function getAbsoluteURL($url) {
         return URL::fromString($url)->withBase($this->context->getBaseUrl());
     }
 

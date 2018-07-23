@@ -279,9 +279,7 @@ phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
     }
 
     function isProxied(element) {
-        return element.hasAttribute('src')
-               && element.hasAttribute('data-phast-original-src')
-               && element.getAttribute('src') !== element.getAttribute('data-phast-original-src')
+        return element.hasAttribute('data-phast-original-src');
     }
 
     function isAsync(element) {
