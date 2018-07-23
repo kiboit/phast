@@ -159,7 +159,7 @@ phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
     };
 
     this.execute = function () {
-        var execString = element.textContent.replace(/\s*<!--\s*.*?\n/i, '');
+        var execString = element.textContent.replace(/\s*<!--.*\n/i, '');
         utils.restoreOriginals(element);
         return utils.writeProtectAndExecuteString(element, execString);
     };
