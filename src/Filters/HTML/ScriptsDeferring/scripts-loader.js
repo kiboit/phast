@@ -39,9 +39,10 @@ phast.ScriptsLoader.executeScripts = function (scripts) {
 
 };
 
+// Capture insertBefore before it get's rewritten
+var insertBefore = Element.prototype.insertBefore;
 phast.ScriptsLoader.Utilities = function (document) {
 
-    var insertBefore = Element.prototype.insertBefore;
 
     this._document = document;
 
