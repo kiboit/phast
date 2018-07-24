@@ -13,7 +13,8 @@ class ShortBundlerParamsParser {
             's' => 'src',
             'i' => 'strip-imports',
             'c' => 'cacheMarker',
-            't' => 'token'
+            't' => 'token',
+            'j' => 'isScript'
         ];
     }
 

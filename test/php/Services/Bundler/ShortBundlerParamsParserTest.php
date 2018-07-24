@@ -26,10 +26,11 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
                 'strip-imports' => '1',
                 'cacheMarker' => 'the-cache-marker',
                 'token' => 'the-token',
+                'isScript' => '1',
                 'not-mapped' => 'original'
             ]
         ];
-        $query = 's=00the-source&i&c=the-cache-marker&t=the-token&not-mapped=original';
+        $query = 's=00the-source&i&c=the-cache-marker&t=the-token&not-mapped=original&j';
         $actual = $this->parseString($query);
         $this->assertEquals($expected, $actual);
     }

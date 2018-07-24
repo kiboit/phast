@@ -70,22 +70,8 @@ return [
 
             \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
 
-            \Kibo\Phast\Filters\HTML\ScriptsRearrangement\Filter::class => [],
-
             \Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter::class => [
-                'urlRefreshTime' => 7200,
-                'match' => [
-                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
-                    '~^https?://(ssl|www)\.google-analytics\.com/(analytics|ga)\.js~',
-                    '~^https?://www\.googletagmanager\.com/~',
-                    '~^https?://www\.googleadservices\.com/~',
-                    '~^https?://pixel\.adcrowd\.com/~',
-                    '~^https?://connect\.facebook\.net/~',
-                    '~^https?://static\.hotjar\.com/~',
-                    '~^https?://v2\.zopim\.com/~',
-                    '~^https?://maps\.googleapis\.com/maps/api/js(\?|$)~',
-                    '~^https?://stats\.g\.doubleclick\.net/dc\.js$~'
-                ]
+                'urlRefreshTime' => 7200
             ],
 
             \Kibo\Phast\Filters\HTML\Diagnostics\Filter::class => [
@@ -179,7 +165,19 @@ return [
     ],
 
     'scripts' => [
-        'removeLicenseHeaders' => false
+        'removeLicenseHeaders' => false,
+        'whitelist' => [
+            '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
+            '~^https?://(ssl|www)\.google-analytics\.com/(analytics|ga)\.js~',
+            '~^https?://www\.googletagmanager\.com/~',
+            '~^https?://www\.googleadservices\.com/~',
+            '~^https?://pixel\.adcrowd\.com/~',
+            '~^https?://connect\.facebook\.net/~',
+            '~^https?://static\.hotjar\.com/~',
+            '~^https?://v2\.zopim\.com/~',
+            '~^https?://maps\.googleapis\.com/maps/api/js(\?|$)~',
+            '~^https?://stats\.g\.doubleclick\.net/dc\.js$~'
+        ]
     ]
 ];
 

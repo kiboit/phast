@@ -6,7 +6,10 @@ namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\JSMinifier;
 use Kibo\Phast\Common\JSON;
+use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
+use Kibo\Phast\ValueObjects\URL;
 
 class PhastJavaScriptCompiler {
 
@@ -16,6 +19,11 @@ class PhastJavaScriptCompiler {
     private $cache;
 
     /**
+     * @var string
+     */
+    private $bundlerUrl;
+
+    /**
      * @var \stdClass
      */
     private $lastCompiledConfig;
@@ -23,10 +31,15 @@ class PhastJavaScriptCompiler {
     /**
      * PhastJavaScriptCompiler constructor.
      * @param Cache $cache
+     * @param string $bundlerUrl
      */
-    public function __construct(Cache $cache) {
+    public function __construct(Cache $cache, $bundlerUrl) {
         $this->cache = $cache;
+        $this->bundlerUrl = (new ServiceRequest())->withUrl(
+            URL::fromString((string)$bundlerUrl)
+        )->serialize(ServiceRequest::FORMAT_QUERY);;
     }
+
 
     /**
      * @return \stdClass|null
@@ -41,12 +54,6 @@ class PhastJavaScriptCompiler {
      * @return string
      */
     public function compileScripts(array $scripts) {
-        $scripts = array_merge([
-            new PhastJavaScript(__DIR__ . '/runner.js'),
-            new PhastJavaScript(__DIR__ . '/es6-promise.js'),
-            new PhastJavaScript(__DIR__ . '/phast.js')
-        ], $scripts);
-
         return $this->cache->get($this->getCacheKey($scripts), function () use ($scripts) {
             return $this->performCompilation($scripts);
         });
@@ -57,6 +64,20 @@ class PhastJavaScriptCompiler {
      * @return string
      */
     public function compileScriptsWithConfig(array $scripts) {
+        $bundlerMappings = ShortBundlerParamsParser::getParamsMappings();
+        $jsMappings = array_combine(array_values($bundlerMappings), array_keys($bundlerMappings));
+        $resourcesLoader = new PhastJavaScript(__DIR__ . '/resources-loader.js');
+        $resourcesLoader->setConfig('resourcesLoader', [
+            'serviceUrl' => (string) $this->bundlerUrl,
+            'shortParamsMappings' => $jsMappings
+        ]);
+        $scripts = array_merge([
+            new PhastJavaScript(__DIR__ . '/runner.js'),
+            new PhastJavaScript(__DIR__ . '/es6-promise.js'),
+            new PhastJavaScript(__DIR__ . '/hash.js'),
+            $resourcesLoader,
+            new PhastJavaScript(__DIR__ . '/phast.js')
+        ], $scripts);
         $compiled = $this->compileScripts($scripts);
         return '(' . $compiled . ')(' . $this->compileConfig($scripts) . ');';
     }

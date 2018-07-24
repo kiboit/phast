@@ -12,6 +12,11 @@ class PhastJavaScriptCompilerTest extends TestCase {
 
     private $cache;
 
+    /**
+     * @var PhastJavaScriptCompiler
+     */
+    private $compiler;
+
     public function setUp() {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
@@ -19,6 +24,8 @@ class PhastJavaScriptCompilerTest extends TestCase {
             ->willReturnCallback(function ($key, callable $cb) {
                 return $cb();
             });
+
+        $this->compiler = new PhastJavaScriptCompiler($this->cache, '');
     }
 
     public function testCompileScripts() {
@@ -37,7 +44,7 @@ class PhastJavaScriptCompilerTest extends TestCase {
             return 123;
         };
         $scripts = [new PhastJavaScript('f1', $funcs1), new PhastJavaScript('f2', $funcs2)];
-        $compiled = (new PhastJavaScriptCompiler($this->cache))->compileScripts($scripts);
+        $compiled = $this->compiler->compileScripts($scripts);
 
         $this->assertStringStartsWith('function phastScripts', $compiled);
         $this->assertStringEndsWith('}', $compiled);
@@ -58,10 +65,10 @@ class PhastJavaScriptCompilerTest extends TestCase {
         };
         $script = new PhastJavaScript('f1', $funcs1);
         $script->setConfig('configKey1', ['item' => 'value']);
-        $compiled = (new PhastJavaScriptCompiler($this->cache))->compileScriptsWithConfig([$script]);
+        $compiled = $this->compiler->compileScriptsWithConfig([$script]);
 
         $this->assertStringStartsWith('(', $compiled);
-        $this->assertStringEndsWith(')({"config":{"configKey1":{"item":"value"}}});', $compiled);
+        $this->assertStringEndsWith('"configKey1":{"item":"value"}}});', $compiled);
     }
 
     public function testCaching() {
@@ -87,7 +94,7 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $s2 = new PhastJavaScript('f2', $funcs1);
         $s3 = new PhastJavaScript('f2', $funcs2);
 
-        $compiler = new PhastJavaScriptCompiler($this->cache);
+        $compiler = new PhastJavaScriptCompiler($this->cache, '');
         $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
         $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
         $this->assertEquals('cached', $compiler->compileScripts([$s2]));

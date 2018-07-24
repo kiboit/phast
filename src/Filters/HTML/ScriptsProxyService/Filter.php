@@ -8,6 +8,8 @@ use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\Bundler\ServiceParams;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
@@ -19,6 +21,11 @@ class Filter extends BaseHTMLStreamFilter {
      * @var array
      */
     private $config;
+
+    /**
+     * @var ServiceSignature
+     */
+    private $signature;
 
     /**
      * @var Retriever
@@ -38,18 +45,22 @@ class Filter extends BaseHTMLStreamFilter {
     /**
      * Filter constructor.
      * @param array $config
+     * @param ServiceSignature $signature
      * @param Retriever $retriever
-     * @param ObjectifiedFunctions|null $functions
+     * @param ObjectifiedFunctions $functions
      */
     public function __construct(
         array $config,
+        ServiceSignature $signature,
         Retriever $retriever,
         ObjectifiedFunctions $functions = null
     ) {
         $this->config = $config;
+        $this->signature = $signature;
         $this->retriever = $retriever;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
+
 
     protected function isTagOfInterest(Tag $tag) {
         return $tag->getTagName() == 'script' && $this->isJSElement($tag);
@@ -69,18 +80,19 @@ class Filter extends BaseHTMLStreamFilter {
             return;
         }
         $src = trim($element->getAttribute('src'));
-        $url = $this->rewriteURL($src);
-        $element->setAttribute('src', $url);
-        $element->setAttribute('data-phast-original-src', $src);
-    }
-
-    private function rewriteURL($src) {
-        $url = URL::fromString($src)->withBase($this->context->getBaseUrl());
-        if (!$this->shouldRewriteURL($url)) {
+        $absolute = $this->getAbsoluteURL($src);
+        if (!$this->shouldProxyURL($absolute)) {
             $this->logger()->info('Not proxying {src}', ['src' => $src]);
-            return $src;
+            return;
         }
         $this->logger()->info('Proxying {src}', ['src' => $src]);
+        $rewritten = $this->makeProxiedURL($absolute);
+        $element->setAttribute('src', $rewritten);
+        $element->setAttribute('data-phast-original-src', $src);
+        $element->setAttribute('data-phast-params', $this->makeServiceParams($absolute));
+    }
+
+    private function makeProxiedURL($url) {
         $params = [
             'src' => (string) $url,
             'cacheMarker' => $this->retriever->getCacheSalt($url)
@@ -91,7 +103,14 @@ class Filter extends BaseHTMLStreamFilter {
             ->serialize();
     }
 
-    private function shouldRewriteURL(URL $url) {
+    private function makeServiceParams($url) {
+        return ServiceParams::
+            fromArray(['src' => (string) $url, 'isScript' => '1'])
+            ->sign($this->signature)
+            ->serialize();
+    }
+
+    private function shouldProxyURL(URL $url) {
         if ($url->isLocalTo($this->context->getBaseUrl())) {
             return true;
         }
@@ -113,6 +132,10 @@ class Filter extends BaseHTMLStreamFilter {
         $script = new PhastJavaScript(__DIR__ . '/rewrite-function.js');
         $script->setConfig('script-proxy-service', $config);
         $this->context->addPhastJavaScript($script);
+    }
+
+    private function getAbsoluteURL($url) {
+        return URL::fromString($url)->withBase($this->context->getBaseUrl());
     }
 
 }

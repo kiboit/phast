@@ -24,24 +24,45 @@ class Service {
     /**
      * @var Retriever
      */
-    private $retriever;
+    private $cssRetriever;
 
     /**
      * @var ServiceFilter
      */
-    private $filter;
+    private $cssFilter;
 
     /**
-     * Bundler constructor.
-     * @param ServiceSignature $signature
-     * @param Retriever $retriever
-     * @param ServiceFilter $filter
+     * @var Retriever
      */
-    public function __construct(ServiceSignature $signature, Retriever $retriever, ServiceFilter $filter) {
+    private $jsRetriever;
+
+    /**
+     * @var ServiceFilter
+     */
+    private $jsFilter;
+
+    /**
+     * Service constructor.
+     * @param ServiceSignature $signature
+     * @param Retriever $cssRetriever
+     * @param ServiceFilter $cssFilter
+     * @param Retriever $jsRetriever
+     * @param ServiceFilter $jsFilter
+     */
+    public function __construct(
+        ServiceSignature $signature,
+        Retriever $cssRetriever,
+        ServiceFilter $cssFilter,
+        Retriever $jsRetriever,
+        ServiceFilter $jsFilter
+    ) {
         $this->signature = $signature;
-        $this->retriever = $retriever;
-        $this->filter = $filter;
+        $this->cssRetriever = $cssRetriever;
+        $this->cssFilter = $cssFilter;
+        $this->jsRetriever = $jsRetriever;
+        $this->jsFilter = $jsFilter;
     }
+
 
     /**
      * @param ServiceRequest $request
@@ -68,13 +89,14 @@ class Service {
                 yield $this->generateJSONRow(['status' => 401], $firstRow);
                 continue;
             }
+            list ($retriever, $filter) = $this->getRetrieverAndFilter($params);
             $resource = Resource::makeWithRetriever(
                 URL::fromString($params['src']),
-                $this->retriever
+                $retriever
             );
             try {
                 $this->logger()->info('Applying for set {key}', ['key' => $key]);
-                $filtered = $this->filter->apply($resource, $params);
+                $filtered = $filter->apply($resource, $params);
                 yield $this->generateJSONRow([
                     'status' => 200,
                     'content' => $this->cleanUTF8($filtered->getContent())
@@ -112,6 +134,13 @@ class Service {
 
     private function verifyParams(array $params) {
         return ServiceParams::fromArray($params)->verify($this->signature);
+    }
+
+    private function getRetrieverAndFilter(array $params) {
+        if (isset ($params['isScript'])) {
+            return [$this->jsRetriever, $this->jsFilter];
+        }
+        return [$this->cssRetriever, $this->cssFilter];
     }
 
     private function cleanUTF8($buffer) {

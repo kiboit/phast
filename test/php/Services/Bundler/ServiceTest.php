@@ -59,7 +59,14 @@ class ServiceTest extends PhastTestCase {
                 return $resource->withContent($newContent);
             });
 
-        $this->service = new Service($this->signature, $this->retriever, $this->filter);
+        $this->service = new Service(
+            $this->signature,
+            $this->retriever,
+            $this->filter,
+            $this->retriever,
+            $this->filter,
+            ['/^scripts\.only\.here/']
+        );
     }
 
     public function testBundlingMultipleResources() {
@@ -148,6 +155,34 @@ class ServiceTest extends PhastTestCase {
         $params = ['key' => 'val'];
         $request = (new ServiceRequest())->withParams($params);
         $this->service->serve($request);
+    }
+
+    public function testBundlingScripts() {
+        $jsRetriever = $this->createMock(Retriever::class);
+        $jsRetriever->method('retrieve')
+            ->willReturnCallback(function (URL $url) {
+                return 'js-retriever';
+            });
+
+        $jsFilter = $this->createMock(ServiceFilter::class);
+        $jsFilter->method('apply')
+            ->willReturnCallback(function (Resource $resource) {
+                $newContent = $resource->getContent() . '-js-filter';
+                return $resource->withContent($newContent);
+            });
+
+        $this->service = new Service(
+            $this->signature,
+            $this->retriever,
+            $this->filter,
+            $jsRetriever,
+            $jsFilter,
+            ['//']
+        );
+
+        $params = $this->makeParams([['src' => 'some-src', 'isScript' => '1']]);
+        $content = $this->doRequest($params);
+        $this->assertEquals('js-retriever-js-filter', $content[0]->content);
     }
 
     private function doRequest(array $params) {
