@@ -9,7 +9,12 @@ QUnit.module('ScriptsLoader', function () {
 
         hooks.beforeEach(function () {
             testDoc = document.implementation.createHTMLDocument('');
+            window.TEST_DOC = testDoc;
             utils = new ScriptsLoader.Utilities(testDoc);
+        });
+
+        hooks.afterEach(function () {
+            delete window.TEST_DOC;
         });
 
         QUnit.test('Test restoreOriginals()', function (assert) {
@@ -51,14 +56,13 @@ QUnit.module('ScriptsLoader', function () {
             testDoc.body.appendChild(s1);
             testDoc.body.appendChild(s2);
             var func = function () {
-                document.write('<p>write works</p>');
-                document.writeln('<p>writeln works</p>');
+                window.TEST_DOC.write('<p>write works</p>');
+                window.TEST_DOC.writeln('<p>writeln works</p>');
             };
             var checkWrites = getWriteProtectChecker(assert);
             assert.timeout(100);
             var done = assert.async();
 
-            utils = new ScriptsLoader.Utilities(document);
             utils.writeProtectAndExecuteString(s1, func2string(func))
                 .then(function () {
                     checkWrites();
@@ -78,7 +82,6 @@ QUnit.module('ScriptsLoader', function () {
             var done = assert.async();
             var script = 'throw "error";';
 
-            utils = new ScriptsLoader.Utilities(document);
             utils.writeProtectAndExecuteString(s, script)
                 .finally(function () {
                     checkWrites();
@@ -98,8 +101,9 @@ QUnit.module('ScriptsLoader', function () {
         });
 
         QUnit.test('Test writeProtectAndReplaceElement()', function (assert) {
-            var s1 = testDoc.createElement('script');
-            var s2 = testDoc.createElement('script');
+            var s1 = document.createElement('script');
+            var s2 = document.createElement('script');
+            window.TEST_DOC = document;
             var checkWrite = getWriteProtectChecker(assert);
             assert.timeout(200);
             var done = assert.async();
@@ -143,11 +147,11 @@ QUnit.module('ScriptsLoader', function () {
         }
 
         function getWriteProtectChecker(assert) {
-            var originalWrite = document.write;
-            var originalWriteLn = document.writeln;
+            var originalWrite = window.TEST_DOC.write;
+            var originalWriteLn = window.TEST_DOC.writeln;
             return function () {
-                assert.ok(originalWrite === document.write, 'document.write has been restored');
-                assert.ok(originalWriteLn === document.writeln, 'document.writeln has been restored');
+                assert.ok(originalWrite === window.TEST_DOC.write, 'document.write has been restored');
+                assert.ok(originalWriteLn === window.TEST_DOC.writeln, 'document.writeln has been restored');
             }
         }
 
