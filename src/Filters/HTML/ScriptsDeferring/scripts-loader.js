@@ -133,9 +133,9 @@ phast.ScriptsLoader.Utilities = function (document) {
 
     function addPreload(url) {
         var link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'script';
-        link.href = url;
+        link.setAttribute('rel', 'preload');
+        link.setAttribute('as', 'script');
+        link.setAttribute('href', url);
         document.head.appendChild(link);
     }
 
