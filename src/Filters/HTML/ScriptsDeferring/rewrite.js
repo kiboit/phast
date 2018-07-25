@@ -11,10 +11,13 @@ phast.on(document, 'DOMContentLoaded').then(function () {
     }
 });
 
+var loadFiltered = false;
 
-var triggerLoad = false;
-window.addEventListener('load', function () {
-    triggerLoad = true;
+window.addEventListener('load', function (e) {
+    if (!loadFiltered) {
+        e.stopImmediatePropagation();
+    }
+    loadFiltered = true;
 });
 
 function loadScripts() {
@@ -47,8 +50,10 @@ function restoreReadyState() {
     triggerEvent(document, 'readystatechange');
     triggerEvent(document, 'DOMContentLoaded');
 
-    if (triggerLoad) {
+    if (loadFiltered) {
         triggerEvent(window, 'load');
+    } else {
+        loadFiltered = true;
     }
 }
 
