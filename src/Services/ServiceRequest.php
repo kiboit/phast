@@ -235,21 +235,21 @@ class ServiceRequest {
     }
 
     private function serializeToPathFormat(array $params) {
-        $srcValue = null;
+        $encodedSrc = null;
         $values = [];
         $ext = 'js';
         foreach (explode('&', http_build_query($params)) as $element) {
             list ($key, $value) = explode('=', $element, 2);
             $encodedValue = str_replace(['-', '%'], ['%2D', '-'], $value);
             if ($key == 'src') {
-                $srcValue = $encodedValue;
+                $encodedSrc = $encodedValue;
             } else {
                 $values[] = $key . '=' . $encodedValue;
             }
         }
-        if ($srcValue) {
-            array_unshift($values, $srcValue);
-            $ext = URL::fromString($srcValue)->getExtension();
+        if ($encodedSrc) {
+            array_unshift($values, $encodedSrc);
+            $ext = URL::fromString($params['src'])->getExtension();
         }
         $params = '/' . join('/', $values) . '/__p__.' . $ext;
         if (isset ($this->url)) {

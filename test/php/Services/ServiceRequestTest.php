@@ -91,6 +91,12 @@ class ServiceRequestTest extends TestCase {
                 ['src' => 'image.png'],
                 'images.php/__p__.png?param=value&src=image.png',
                 'images.php/image.png/param=value/__p__.png'
+            ],
+            [
+                'images.php',
+                ['src' => 'http://example.com/the-image.png?ver=1'],
+                'images.php/__p__.png?src=http%3A%2F%2Fexample.com%2Fthe-image.png%3Fver%3D1',
+                'images.php/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png-3Fver-3D1/__p__.png'
             ]
         ];
     }
