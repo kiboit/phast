@@ -227,8 +227,10 @@ class ServiceRequest {
             return $encoded;
         }
         $serialized = preg_replace('~\?.*~', '', (string)$this->url);
-        if (self::$defaultSerializationMode === self::FORMAT_PATH) {
-            $serialized = rtrim($serialized, '/') . '/' . $this->getDummyFilename($params);
+        if (self::$defaultSerializationMode === self::FORMAT_PATH
+            && !preg_match('~/$~', $serialized)
+        ) {
+            $serialized .= '/' . $this->getDummyFilename($params);
         }
         return $serialized . '?' . $encoded;
     }

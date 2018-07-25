@@ -88,7 +88,7 @@ class ServiceRequestTest extends TestCase {
             [
                 'images-service/',
                 ['src' => 'the-image.png'],
-                'images-service/__p__.png?src=the-image.png',
+                'images-service/?src=the-image.png',
                 'images-service/the-2Dimage.png/__p__.png'
             ],
             [
