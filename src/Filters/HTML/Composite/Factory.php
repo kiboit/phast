@@ -19,6 +19,7 @@ class Factory {
             } elseif (!class_exists($class)) {
                 $this->logger(__METHOD__, __LINE__)
                      ->error("Skipping non-existent filter class: $class");
+                continue;
             } else {
                 $filter = new $class();
             }
