@@ -169,7 +169,7 @@ class ServiceRequest {
             $pair = explode('=', $part);
             if (isset ($pair[1])) {
                 $values[$pair[0]] = self::decodeSingleValue($pair[1]);
-            } else {
+            } else if (!preg_match('/^__p__\./', $pair[0])) {
                 $values['src'] = self::decodeSingleValue($pair[0]);
             }
         }
@@ -223,15 +223,21 @@ class ServiceRequest {
 
     private function serializeToQueryFormat(array $params) {
         $encoded = http_build_query($params);
-        if (isset ($this->url)) {
-            return preg_replace('~\?.*~', '', (string)$this->url) . '?' . $encoded;
+        if (!isset ($this->url)) {
+            return $encoded;
         }
-        return $encoded;
+        $serialized = preg_replace('~\?.*~', '', (string)$this->url);
+        if (self::$defaultSerializationMode === self::FORMAT_PATH) {
+            $ext = isset ($params['src']) ? URL::fromString($params['src'])->getExtension() : 'js';
+            $serialized =  rtrim($serialized, '/') . '/__p__.' . $ext;
+        }
+        return $serialized . '?' . $encoded;
     }
 
     private function serializeToPathFormat(array $params) {
         $srcValue = null;
         $values = [];
+        $ext = 'js';
         foreach (explode('&', http_build_query($params)) as $element) {
             list ($key, $value) = explode('=', $element, 2);
             $encodedValue = str_replace(['-', '%'], ['%2D', '-'], $value);
@@ -243,8 +249,9 @@ class ServiceRequest {
         }
         if ($srcValue) {
             array_unshift($values, $srcValue);
+            $ext = URL::fromString($srcValue)->getExtension();
         }
-        $params = '/' . join('/', $values);
+        $params = '/' . join('/', $values) . '/__p__.' . $ext;
         if (isset ($this->url)) {
             return preg_replace(['~\?.*~', '~/$~'], '', $this->url) . $params;
         }

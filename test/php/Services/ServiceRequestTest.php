@@ -28,32 +28,32 @@ class ServiceRequestTest extends TestCase {
             [
                 ['src' => '/images/file.png'],
                 'src=%2Fimages%2Ffile.png',
-                '/-2Fimages-2Ffile.png'
+                '/-2Fimages-2Ffile.png/__p__.png'
             ],
             [
-                ['src' => 'http://example.com/path/file.png'],
-                'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile.png',
-                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile.png'
+                ['src' => 'http://example.com/path/file.jpeg'],
+                'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile.jpeg',
+                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile.jpeg/__p__.jpeg'
             ],
             [
                 ['src' => 'http://example.com///path////file.png'],
                 'src=http%3A%2F%2Fexample.com%2F%2F%2Fpath%2F%2F%2F%2Ffile.png',
-                '/http-3A-2F-2Fexample.com-2F-2F-2Fpath-2F-2F-2F-2Ffile.png'
+                '/http-3A-2F-2Fexample.com-2F-2F-2Fpath-2F-2F-2F-2Ffile.png/__p__.png'
             ],
             [
                 ['src' => 'http://example.com/path/file-file.png'],
                 'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile-file.png',
-                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile-2Dfile.png'
+                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile-2Dfile.png/__p__.png'
             ],
             [
                 ['src' => 'the-file.png', 'width' => 20],
                 'src=the-file.png&width=20',
-                '/the-2Dfile.png/width=20'
+                '/the-2Dfile.png/width=20/__p__.png'
             ],
             [
                 ['src' => 'the-file.png', 'width' => 20, 'height' => 30],
                 'src=the-file.png&width=20&height=30',
-                '/the-2Dfile.png/width=20/height=30'
+                '/the-2Dfile.png/width=20/height=30/__p__.png'
             ]
         ];
     }
@@ -66,8 +66,37 @@ class ServiceRequestTest extends TestCase {
         $this->checkRequest($request, $expectedQuery, $expectedPath);
     }
 
+    public function getSerializeParamsAndURLTestData() {
+        return [
+            [
+                'images.php',
+                ['src' => 'http://example.com/the-image.png'],
+                'images.php/__p__.png?src=http%3A%2F%2Fexample.com%2Fthe-image.png',
+                'images.php/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png/__p__.png'
+            ],
+            [
+                'images.php?param=some-value',
+                ['src' => 'the-image.jpeg'],
+                'images.php/__p__.jpeg?param=some-value&src=the-image.jpeg',
+                'images.php/the-2Dimage.jpeg/param=some-2Dvalue/__p__.jpeg'
+            ],
+            [
+                'images-service/',
+                ['src' => 'the-image.png'],
+                'images-service/__p__.png?src=the-image.png',
+                'images-service/the-2Dimage.png/__p__.png'
+            ],
+            [
+                'images.php?param=value&src=overridden',
+                ['src' => 'image.png'],
+                'images.php/__p__.png?param=value&src=image.png',
+                'images.php/image.png/param=value/__p__.png'
+            ]
+        ];
+    }
+
     public function testFromHTTPRequest() {
-        $pathInfo = '/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png/key2=value2';
+        $pathInfo = '/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png/key2=value2/__p__.js';
         $getParams = ['key3' => 'value3'];
         $expectedParams = [
             'src' => 'http://example.com/the-image.png',
@@ -79,35 +108,6 @@ class ServiceRequestTest extends TestCase {
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $this->assertEquals($expectedParams, $serviceRequest->getParams());
         $this->assertSame($httpRequest, $serviceRequest->getHTTPRequest());
-    }
-
-    public function getSerializeParamsAndURLTestData() {
-        return [
-            [
-                'images.php',
-                ['src' => 'http://example.com/the-image.png'],
-                'images.php?src=http%3A%2F%2Fexample.com%2Fthe-image.png',
-                'images.php/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png'
-            ],
-            [
-                'images.php?param=some-value',
-                ['src' => 'the-image.png'],
-                'images.php?param=some-value&src=the-image.png',
-                'images.php/the-2Dimage.png/param=some-2Dvalue'
-            ],
-            [
-                'images-service/',
-                ['src' => 'the-image.png'],
-                'images-service/?src=the-image.png',
-                'images-service/the-2Dimage.png'
-            ],
-            [
-                'images.php?param=value&src=overridden',
-                ['src' => 'image.png'],
-                'images.php?param=value&src=image.png',
-                'images.php/image.png/param=value'
-            ]
-        ];
     }
 
     public function testSigning() {
@@ -260,11 +260,12 @@ class ServiceRequestTest extends TestCase {
     public function testSettingDefaultSerializationMode() {
         $url = URL::fromString('phast.php?p=v');
         $pathSerialization = (new ServiceRequest())->withUrl($url)->serialize();
+
         ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
         $querySerialization = (new ServiceRequest())->withUrl($url)->serialize();
 
-        $this->assertEquals('phast.php/p=v', $pathSerialization);
-        $this->assertEquals($url, $querySerialization);
+        $this->assertEquals('phast.php/p=v/__p__.js', $pathSerialization);
+        $this->assertEquals((string)$url, $querySerialization);
     }
 
     
