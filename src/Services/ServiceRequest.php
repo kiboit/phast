@@ -228,8 +228,7 @@ class ServiceRequest {
         }
         $serialized = preg_replace('~\?.*~', '', (string)$this->url);
         if (self::$defaultSerializationMode === self::FORMAT_PATH) {
-            $ext = isset ($params['src']) ? URL::fromString($params['src'])->getExtension() : 'js';
-            $serialized =  rtrim($serialized, '/') . '/__p__.' . $ext;
+            $serialized = rtrim($serialized, '/') . '/' . $this->getDummyFilename($params);
         }
         return $serialized . '?' . $encoded;
     }
@@ -237,7 +236,6 @@ class ServiceRequest {
     private function serializeToPathFormat(array $params) {
         $encodedSrc = null;
         $values = [];
-        $ext = 'js';
         foreach (explode('&', http_build_query($params)) as $element) {
             list ($key, $value) = explode('=', $element, 2);
             $encodedValue = str_replace(['-', '%'], ['%2D', '-'], $value);
@@ -249,12 +247,29 @@ class ServiceRequest {
         }
         if ($encodedSrc) {
             array_unshift($values, $encodedSrc);
-            $ext = URL::fromString($params['src'])->getExtension();
         }
-        $params = '/' . join('/', $values) . '/__p__.' . $ext;
+        $params = '/' . join('/', $values) . '/' . $this->getDummyFilename($params);
         if (isset ($this->url)) {
             return preg_replace(['~\?.*~', '~/$~'], '', $this->url) . $params;
         }
         return $params;
+    }
+
+    private function getDummyFilename(array $params) {
+        return '__p__.' . $this->getDummyExtension($params);
+    }
+
+    private function getDummyExtension(array $params) {
+        $default = 'js';
+        if (empty($params['src'])) {
+            return $default;
+        }
+        $url = URL::fromString($params['src']);
+        $ext = strtolower($url->getExtension());
+        if (preg_match('/^(jpe?g|gif|png|js|css)$/', $ext)) {
+            return $ext;
+        } else {
+            return $default;
+        }
     }
 }

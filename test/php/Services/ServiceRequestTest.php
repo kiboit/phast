@@ -31,6 +31,11 @@ class ServiceRequestTest extends TestCase {
                 '/-2Fimages-2Ffile.png/__p__.png'
             ],
             [
+                ['src' => '/images/file.php'],
+                'src=%2Fimages%2Ffile.php',
+                '/-2Fimages-2Ffile.php/__p__.js'
+            ],
+            [
                 ['src' => 'http://example.com/path/file.jpeg'],
                 'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile.jpeg',
                 '/http-3A-2F-2Fexample.com-2Fpath-2Ffile.jpeg/__p__.jpeg'
