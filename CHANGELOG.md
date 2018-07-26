@@ -1,6 +1,19 @@
 # Changelog
 
 
+## 1.9.0 - 2018-07-26
+
+### Added
+* Scripts are now retrieved in a single request.
+* Non-existent filter classes are ignored, and an error is logged.
+* A 'dummy filename' such as `__p__.js` is appended to service requests to trick
+  Cloudflare into caching those responses.
+
+### Fixed
+* The maximum document size for filters to be applied was corrected to be 1 MiB,
+  not 1 GiB
+
+
 ## [1.8.0] - 2018-07-11
 
 ### Added
