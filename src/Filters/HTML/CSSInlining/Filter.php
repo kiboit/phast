@@ -214,7 +214,6 @@ class Filter extends BaseHTMLStreamFilter {
         $this->logger()->info('Inlining {url}.', ['url' => (string)$url]);
         $content = $this->retriever->retrieve($url);
         if ($content === false) {
-            $this->logger()->error('Could not get contents for {url}', ['url' => (string)$url]);
             return $this->addIEFallback(
                 $ieFallbackUrl,
                 [$this->makeServiceLink($url, $media)]
