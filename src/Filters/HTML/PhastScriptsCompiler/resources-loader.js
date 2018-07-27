@@ -20,7 +20,7 @@ phast.ResourceLoader = function (client, cache) {
         Promise.all(requested.map(function (request) {
             return cache.get(request.params)
                 .then(function (content) {
-                    if (content) {
+                    if (typeof content === 'string') {
                         request.resolve(content);
                     } else {
                         return Promise.reject();
