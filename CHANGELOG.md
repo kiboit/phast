@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.9.2 - 2018-07-27
+
+### Fixed
+* Empty scripts are cached correctly.
+
+
 ## 1.9.1 - 2018-07-27
 
 ### Fixed
