@@ -243,24 +243,23 @@ QUnit.module('ScriptsLoader', function () {
             });
 
             QUnit.test('Init execution', function (assert) {
-                assertNumberOfCalls(assert, 3);
-                var copy = assertElementCopied(assert, 0, element);
-                assertRestoredOriginals(assert, 1, copy);
-                assertReplacedElement(assert, 2, element, copy);
-                var done = getAsync(assert);
-                whenInitialized.then(function (testText) {
-                    assertPromiseText(assert, testText, 'replaceElement');
-                    done();
-                });
+                assertNumberOfCalls(assert, 1);
+                assertPreloadAdded(assert, 0, element.getAttribute('src'));
+                assertInitResolved(assert, false, whenInitialized);
             });
 
-            QUnit.test('Test execution method is independent from load', function (assert) {
+            QUnit.test('Test execution', function (assert) {
                 var done = getAsync(assert);
                 script.execute()
                     .then(function (testText) {
+                        assertNumberOfCalls(assert, 4);
+                        var copy = assertElementCopied(assert, 1, element);
+                        assertRestoredOriginals(assert, 2, copy);
+                        assertReplacedElement(assert, 3, element, copy);
                         assertPromiseNotFromFunction(assert, testText);
                         done();
                     });
+                assertInitResolved(assert, true, whenInitialized);
             });
 
         });
@@ -310,36 +309,38 @@ QUnit.module('ScriptsLoader', function () {
             }
 
             QUnit.test('Test init load execution', function (assert) {
-                var done = getAsync(assert);
                 makeScript(successfulFetch);
                 assertNumberOfCalls(assert, 1);
                 assertCallToFetch(assert, 0);
-                whenInitialized.then(function (testText) {
-                    assertNumberOfCalls(assert, 3);
-                    assertRestoredOriginals(assert, 1, element);
-                    assertStringExecution(assert, 2, 'contents-for-proxied-url');
-                    done();
-                });
+                assertInitResolved(assert, false, whenInitialized);
             });
 
-            QUnit.test('Test execution method is independent from init', function (assert) {
-                var done = getAsync(assert);
+            QUnit.test('Test execution method waits on init', function (assert) {
+                assert.timeout(200);
+                var done = assert.async(2);
                 makeScript(successfulFetch)
                     .execute()
                     .then(function (testText) {
                         assertPromiseNotFromFunction(assert, testText);
                         done();
-                    })
+                    });
+                window.setTimeout(function () {
+                    assertRestoredOriginals(assert, 1, element);
+                    assertStringExecution(assert, 2, 'contents-for-proxied-url');
+                    assertInitResolved(assert, true, whenInitialized);
+                    done();
+                }, 20);
             });
 
             QUnit.test('Test fallback', function (assert) {
                 var done = getAsync(assert);
-                makeScript(failingFetch);
-                whenInitialized.then(function () {
-                    assertNumberOfCalls(assert, 2);
+                makeScript(failingFetch).execute();
+                window.setTimeout(function () {
+                    assertNumberOfCalls(assert, 3);
                     assertFallbackInitCall(assert, 1);
+                    assertFallbackExecuteCall(assert, 2);
                     done();
-                });
+                }, 20);
             });
         });
 
@@ -480,6 +481,22 @@ QUnit.module('ScriptsLoader', function () {
 
         function assertFallbackPromise(assert, testText) {
             assert.equal(testText, 'fallback-promise', 'This is a fallback promise');
+        }
+
+        function assertInitResolved(assert, shouldResolve, promise) {
+            var done = getAsync(assert);
+            var initResolved = false;
+            promise.then(function () {
+                initResolved = true;
+            });
+            setTimeout(function () {
+                if (shouldResolve) {
+                    assert.ok(initResolved, 'Init promise is resolved');
+                } else {
+                    assert.notOk(initResolved, 'Init promise is not resolved');
+                }
+                done();
+            }, 10);
         }
 
         function getAsync(assert) {

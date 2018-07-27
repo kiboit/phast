@@ -171,13 +171,20 @@ phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
     this._utils = utils;
     this._element = element;
 
+    var resolver;
     this.init = function  () {
-        var newElement = utils.copyElement(element);
-        utils.restoreOriginals(newElement);
-        return utils.replaceElement(element, newElement);
+        utils.addPreload(element.getAttribute('src'));
+        return new Promise(function (r) {
+            resolver = r;
+        });
     };
 
     this.execute = function () {
+        var newElement = utils.copyElement(element);
+        utils.restoreOriginals(newElement);
+        utils.replaceElement(element, newElement)
+            .then(resolver)
+            .catch(resolver);
         return Promise.resolve();
     };
 };
@@ -206,18 +213,25 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
     this._fetch = fetch;
     this._fallback = fallback;
 
+    var load;
+    var resolver;
     this.init = function () {
-        return fetch(element)
-            .then(function (execString) {
-                utils.restoreOriginals(element);
-                return utils.executeString(execString);
-            })
-            .catch(function () {
-                return fallback.init();
-            });
+        load = fetch(element);
+        return new Promise(function (r) {
+            resolver = r;
+        });
     };
 
     this.execute = function () {
+        load
+            .then(function (execString) {
+                utils.restoreOriginals(element);
+                return utils.executeString(execString).then(resolver);
+            })
+            .catch(function () {
+                fallback.init();
+                return fallback.execute().then(resolver);
+            });
         return Promise.resolve();
     };
 };
