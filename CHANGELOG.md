@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 1.9.1 - 2018-07-27
+
+### Fixed
+* Async scripts are now not loaded before sync scripts that occur earlier in the
+  document.
+
+
 ## 1.9.0 - 2018-07-26
 
 ### Added
