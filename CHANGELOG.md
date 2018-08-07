@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.9.3 - 2018-08-07
+
+### Fixed
+* `<!--` comments in inline scripts are removed only at the beginning.
+
+
 ## 1.9.2 - 2018-07-27
 
 ### Fixed
