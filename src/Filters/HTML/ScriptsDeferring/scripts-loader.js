@@ -23,26 +23,25 @@ phast.ScriptsLoader.executeScripts = function (scripts) {
         return script.init();
     });
 
-    function execNextScript() {
-        if (scripts.length === 0) {
-            return Promise.all(initializers)
-                .catch(function () {});
-        }
-        return scripts
-            .shift()
-            .execute()
-            .then(execNextScript)
-            .catch(execNextScript);
-    }
+    var lastScript = Promise.resolve();
 
-    return execNextScript();
+    scripts.forEach(function (script) {
+        lastScript = lastScript
+            .then(function () {
+                return script.execute();
+            })
+            .catch(function () {});
+    });
+
+    return lastScript.then(function () {
+        return Promise.all(initializers).catch(function () {});
+    });
 
 };
 
 // Capture insertBefore before it get's rewritten
 var insertBefore = Element.prototype.insertBefore;
 phast.ScriptsLoader.Utilities = function (document) {
-
 
     this._document = document;
 
