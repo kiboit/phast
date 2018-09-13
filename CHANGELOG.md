@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 1.9.6 - 2018-09-13
+
+### Fixed
+* Removed `src` attribute from scripts that are loaded through the bundler, so
+  that old versions of Firefox do not make extraneous downloads.
+
+
 ## 1.9.5 - 2018-09-13
 
 ### Fixed
