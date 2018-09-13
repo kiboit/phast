@@ -19,6 +19,11 @@ class Request {
      */
     private $cookie;
 
+    /**
+     * @var string
+     */
+    private $query;
+
     private function __construct() {}
 
     public static function fromGlobals() {
@@ -76,7 +81,14 @@ class Request {
         }
     }
 
-    public function getEnvValue($key) {
+    public function getQueryString() {
+        $parsed = parse_url($this->getEnvValue('REQUEST_URI'));
+        if (isset ($parsed['query'])) {
+            return $parsed['query'];
+        }
+    }
+
+    private function getEnvValue($key) {
         if (isset ($this->env[$key])) {
             return $this->env[$key];
         }

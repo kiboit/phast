@@ -19,7 +19,7 @@ class ShortBundlerParamsParser {
     }
 
     public function parse(ServiceRequest $request) {
-        $query = $request->getHTTPRequest()->getEnvValue('QUERY_STRING');
+        $query = $request->getHTTPRequest()->getQueryString();
         $result = [];
         foreach (preg_split('/&(?=s=)/', $query) as $part) {
             $parsed = $this->map($this->parseQuery($part));

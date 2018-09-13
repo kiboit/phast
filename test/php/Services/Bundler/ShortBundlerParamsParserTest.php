@@ -85,7 +85,7 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
     }
 
     private function parseString($string) {
-        $httpRequest = Request::fromArray([], ['QUERY_STRING' => $string]);
+        $httpRequest = Request::fromArray([], ['REQUEST_URI' => "/?$string"]);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         return (new ShortBundlerParamsParser())->parse($serviceRequest);
     }
