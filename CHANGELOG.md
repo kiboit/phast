@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 1.9.5 - 2018-09-13
+
+### Fixed
+* Check that the bundler returns the right amount of responses.
+
+### Added
+* Per-script debugging message when executing scripts.
+
+
 ## 1.9.4 - 2018-09-13
 
 ### Fixed
