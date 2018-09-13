@@ -26,11 +26,31 @@ phast.ScriptsLoader.executeScripts = function (scripts) {
     var lastScript = Promise.resolve();
 
     scripts.forEach(function (script) {
+        var description;
+        try {
+            if (script.describe) {
+                description = script.describe();
+            } else {
+                description = 'unknown script';
+            }
+        } catch (e) {
+            description = 'script.describe() failed';
+        }
+
         lastScript = lastScript
             .then(function () {
-                return script.execute();
+                var promise = script.execute();
+                promise.then(function () {
+                    console.log('✓', description)
+                });
+                return promise;
             })
-            .catch(function () {});
+            .catch(function (error) {
+                console.error('✘', description);
+                if (error) {
+                    console.log(error);
+                }
+            });
     });
 
     return lastScript.then(function () {
@@ -51,9 +71,9 @@ phast.ScriptsLoader.Utilities = function (document) {
                 // See: http://perfectionkills.com/global-eval-what-are-the-options/
                 (1,eval)(string);
             } catch (e) {
-                console.error("[Phast] Error in inline script:", e);
-                console.log("First 100 bytes of script body:", string.substr(0, 100));
-                reject(e);
+                console.error("[Phast] Error in eval'ed script:", e);
+                console.log("First 100 bytes of script body:", string.substr(0, 100).replace(/\s+/g, ' '));
+                reject(new Error("" + e));
             }
             resolve();
         })
@@ -163,6 +183,10 @@ phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
         utils.restoreOriginals(element);
         return utils.writeProtectAndExecuteString(element, execString);
     };
+
+    this.describe = function () {
+        return 'inline script';
+    };
 };
 
 phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
@@ -186,6 +210,10 @@ phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
             .catch(resolver);
         return Promise.resolve();
     };
+
+    this.describe = function() {
+        return 'async script on ' + element.getAttribute('src');
+    };
 };
 
 phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
@@ -202,6 +230,10 @@ phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
         var newElement = utils.copyElement(element);
         utils.restoreOriginals(newElement);
         return utils.writeProtectAndReplaceElement(element, newElement);
+    };
+
+    this.describe = function () {
+        return 'sync script on ' + element.getAttribute('src');
     };
 };
 
@@ -233,6 +265,10 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
             });
         return Promise.resolve();
     };
+
+    this.describe = function () {
+        return 'bundled async script on ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
+    };
 };
 
 phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fallback) {
@@ -260,6 +296,9 @@ phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fa
             });
     };
 
+    this.describe = function () {
+        return 'bundled sync script on ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
+    };
 };
 
 phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
