@@ -2,7 +2,7 @@ PHP56 = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php56.i
 PHP56MIN = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php56-min.image)
 
 
-.PHONY : all test test-local update docker dist
+.PHONY : all test test-local update docker dist clean
 
 
 all : vendor/autoload.php
@@ -19,6 +19,9 @@ update : all
 
 dist : all
 	bin/package
+
+clean :
+	rm -f docker/*.image
 
 
 vendor/autoload.php : vendor/composer.phar composer.json composer.lock
