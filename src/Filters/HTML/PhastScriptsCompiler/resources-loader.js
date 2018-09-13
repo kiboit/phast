@@ -209,6 +209,13 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
         }
 
         var tokens = getSortedTokens();
+
+        if (responses.length !== tokens.length) {
+            console.error("[Phast] Requested", tokens.length, "items from bundler, but got", responses.length, "response(s)");
+            handleError();
+            return;
+        }
+
         responses.forEach(function (response, idx) {
             if (response.status === 200) {
                 items[tokens[idx]].requests.forEach(function (request) {
