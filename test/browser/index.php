@@ -53,10 +53,9 @@
         scripts: []
     };
 </script>
-<script src="public/es6-promise.js"></script>
-<script src="public/hash.js"></script>
-<script src="public/resources-loader.js"></script>
-<script src="public/scripts-loader.js"></script>
+<?php foreach (['es6-promise', 'hash', 'resources-loader', 'scripts-loader'] as $script): ?>
+<script>(function () {<?= file_get_contents('public/' . $script . '.js'); ?>})();</script>
+<?php endforeach; ?>
 <script src="qunit.js"></script>
 <script src="tests.js?<?= uniqid(); ?>"></script>
 <?php foreach (preg_grep('/\..*\./', glob('tests/*.js'), PREG_GREP_INVERT) as $test): ?>

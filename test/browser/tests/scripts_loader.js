@@ -588,7 +588,7 @@ QUnit.module('ScriptsLoader', function () {
         });
 
         QUnit.test('Test create AsyncAJAXScript', function (assert) {
-            element.setAttribute('src', 'proxied-src');
+            element.setAttribute('data-phast-params', '{}');
             element.setAttribute('data-phast-original-src', 'original-src');
             element.setAttribute('async', '');
 
@@ -601,7 +601,7 @@ QUnit.module('ScriptsLoader', function () {
         });
 
         QUnit.test('Test create SyncAJAXScript', function (assert) {
-            element.setAttribute('src', 'proxied-src');
+            element.setAttribute('data-phast-params', '{}');
             element.setAttribute('data-phast-original-src', 'original-src');
 
             var script = factory.makeScriptFromElement(element);

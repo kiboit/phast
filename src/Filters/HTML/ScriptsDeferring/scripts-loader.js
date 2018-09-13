@@ -6,7 +6,7 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
     var elements = document.querySelectorAll('script[type="phast-script"]');
     var nonDeferred = [], deferred = [];
     for (var i = 0; i < elements.length; i++) {
-        if (elements[i].hasAttribute('src') && elements[i].hasAttribute('defer')) {
+        if (getSrc(elements[i]) !== undefined && elements[i].hasAttribute('defer')) {
             deferred.push(elements[i]);
         } else {
             nonDeferred.push(elements[i]);
@@ -190,13 +190,14 @@ phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
 };
 
 phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
+    
+    var resolver;
 
     this._utils = utils;
     this._element = element;
 
-    var resolver;
     this.init = function  () {
-        utils.addPreload(element.getAttribute('src'));
+        utils.addPreload(getSrc(element));
         return new Promise(function (r) {
             resolver = r;
         });
@@ -212,7 +213,7 @@ phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
     };
 
     this.describe = function() {
-        return 'async script on ' + element.getAttribute('src');
+        return 'async script at ' + getSrc(element);
     };
 };
 
@@ -222,7 +223,7 @@ phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
     this._element = element;
 
     this.init = function () {
-        utils.addPreload(element.getAttribute('src'));
+        utils.addPreload(getSrc(element));
         return Promise.resolve();
     };
 
@@ -233,8 +234,9 @@ phast.ScriptsLoader.Scripts.SyncBrowserScript = function (utils, element) {
     };
 
     this.describe = function () {
-        return 'sync script on ' + element.getAttribute('src');
+        return 'sync script at ' + getSrc(element);
     };
+
 };
 
 phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, fallback) {
@@ -267,7 +269,7 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
     };
 
     this.describe = function () {
-        return 'bundled async script on ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
+        return 'bundled async script at ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
     };
 };
 
@@ -297,7 +299,7 @@ phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fa
     };
 
     this.describe = function () {
-        return 'bundled sync script on ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
+        return 'bundled sync script at ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
     };
 };
 
@@ -308,31 +310,34 @@ phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
     var utils = new phast.ScriptsLoader.Utilities(document);
 
     this.makeScriptFromElement = function (element) {
-        if (isInline(element)) {
-            return new Scripts.InlineScript(utils, element);
-        }
+        var fallback;
+
         if (isProxied(element)) {
             if (isAsync(element)) {
-                var fallback = new Scripts.AsyncBrowserScript(utils, element);
+                fallback = new Scripts.AsyncBrowserScript(utils, element);
                 return new Scripts.AsyncAJAXScript(utils, element, fetch, fallback);
             }
             fallback = new Scripts.SyncBrowserScript(utils, element);
             return new Scripts.SyncAJAXScript(utils, element, fetch, fallback);
         }
 
+        if (isInline(element)) {
+            return new Scripts.InlineScript(utils, element);
+        }
+
         if (isAsync(element)) {
             return new Scripts.AsyncBrowserScript(utils, element);
         }
-        return new Scripts.SyncBrowserScript(utils, element);
 
+        return new Scripts.SyncBrowserScript(utils, element);
     };
+
+    function isProxied(element) {
+        return element.hasAttribute('data-phast-params');
+    }
 
     function isInline (element) {
         return !element.hasAttribute('src');
-    }
-
-    function isProxied(element) {
-        return element.hasAttribute('data-phast-original-src');
     }
 
     function isAsync(element) {
@@ -340,3 +345,11 @@ phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
     }
 
 };
+
+function getSrc(element) {
+    if (element.hasAttribute('data-phast-original-src')) {
+        return element.getAttribute('data-phast-original-src');
+    } else if (element.hasAttribute('src')) {
+        return element.getAttribute('src');
+    }
+}

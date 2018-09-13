@@ -28,12 +28,14 @@ class Filter extends BaseHTMLStreamFilter {
         $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/rewrite.js'));
     }
 
-
     private function rewrite(Tag $script) {
         if ($script->hasAttribute('type')) {
             $script->setAttribute('data-phast-original-type', $script->getAttribute('type'));
         }
         $script->setAttribute('type', 'phast-script');
+        if ($script->hasAttribute('data-phast-params')) {
+            $script->removeAttribute('src');
+        }
     }
 
 }
