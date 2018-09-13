@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.9.4 - 2018-09-13
+
+### Fixed
+* Animated GIFs are no longer processed, so that animation is preserved.
+
+
 ## 1.9.3 - 2018-08-07
 
 ### Fixed

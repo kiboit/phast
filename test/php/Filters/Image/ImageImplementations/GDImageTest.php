@@ -193,4 +193,28 @@ class GDImageTest extends TestCase {
         return ob_get_clean();
     }
 
+    public function testRefuseAnimatedGIF() {
+        $data = file_get_contents(__DIR__ . '/../../../resources/animated.gif');
+        if (!$data) {
+            throw new \RuntimeException("Could not load animated.gif");
+        }
+        $image = $this->makeImage($data);
+        $this->expectException(ImageProcessingException::class);
+        $image->resize(100, 100)->getAsString();
+    }
+
+    public function testAcceptStillGIF() {
+        if (!function_exists('imagecreate')) {
+            $this->markTestSkipped('imagecreate (GD) is missing');
+        }
+        $data = file_get_contents(__DIR__ . '/../../../resources/still.gif');
+        if (!$data) {
+            throw new \RuntimeException("Could not load animated.gif");
+        }
+        $image = $this->makeImage($data);
+        $newData = $image->resize(100, 100)->getAsString();
+        $dimensions = getimagesizefromstring($newData);
+        $this->assertEquals(100, $dimensions[0]);
+    }
+
 }

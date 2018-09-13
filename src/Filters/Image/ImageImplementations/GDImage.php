@@ -195,7 +195,13 @@ class GDImage extends BaseImage implements Image {
         if (isset ($this->gdImage) && @getimagesize($this->gdImage)) {
             return;
         }
-        $gdImage = @imagecreatefromstring($this->getImageString());
+        $string = $this->getImageString();
+        if (preg_match('~^GIF8~', $string)
+            && preg_match_all('#\x00\x21\xF9\x04.{4}\x00(\x2C|\x21)#s', $string) > 1
+        ) {
+            throw new ImageProcessingException('GD cannot handle animated GIFs');
+        }
+        $gdImage = @imagecreatefromstring($string);
         if ($gdImage === false) {
             throw new ImageProcessingException('Could not load GD image');
         }
