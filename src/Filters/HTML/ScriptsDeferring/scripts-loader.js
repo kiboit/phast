@@ -41,7 +41,7 @@ phast.ScriptsLoader.executeScripts = function (scripts) {
             .then(function () {
                 var promise = script.execute();
                 promise.then(function () {
-                    console.log('✓', description)
+                    console.debug('✓', description)
                 });
                 return promise;
             })
