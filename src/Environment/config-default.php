@@ -98,32 +98,12 @@ return [
         ],
 
         'filters' => [
-            \Kibo\Phast\Filters\Image\Resizer\Filter::class => [
-                'defaultMaxWidth'  => 1920 * 2,
-                'defaultMaxHeight' => 1080 * 2
-            ],
-
-            \Kibo\Phast\Filters\Image\Compression\Filter::class => [
-                \Kibo\Phast\Filters\Image\Image::TYPE_PNG  =>  9,
-                \Kibo\Phast\Filters\Image\Image::TYPE_JPEG => 80
-            ],
-
-            \Kibo\Phast\Filters\Image\WEBPEncoder\Filter::class => [
-                'compression' => 80
-            ],
-
-            \Kibo\Phast\Filters\Image\PNGQuantCompression\Filter::class => [
-                'quality' => '50-85'
-            ],
-
-            \Kibo\Phast\Filters\Image\JPEGTransEnhancer\Filter::class => [],
-
-//            \Kibo\Phast\Filters\Image\ImageAPIClient\Filter::class => [
-//                'api-url' => 'http://optimize.phast.io/?service=images',
-//                'host-name' => $_SERVER['HTTP_HOST'],
-//                'request-uri' => $_SERVER['REQUEST_URI'],
-//                'plugin-version' => 'phast-core-1.0'
-//            ]
+            \Kibo\Phast\Filters\Image\ImageAPIClient\Filter::class => [
+                'api-url' => 'http://optimize.phast.io/?service=images',
+                'host-name' => $_SERVER['HTTP_HOST'],
+                'request-uri' => $_SERVER['REQUEST_URI'],
+                'plugin-version' => 'phast-core-1.0'
+            ]
         ]
     ],
 
