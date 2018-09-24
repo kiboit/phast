@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.10.0 - 2018-09-24
+
+### Removed
+* Moved image processing filters to API.
+
+
 ## 1.9.6 - 2018-09-13
 
 ### Fixed
