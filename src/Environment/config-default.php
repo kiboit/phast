@@ -63,7 +63,9 @@ return [
                         'ieCompatible' => false
                     ],
                     '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
-                    '~^https?://maxcdn\.bootstrapcdn\.com/[^?#]*\.css~'
+                    '~^https?://maxcdn\.bootstrapcdn\.com/[^?#]*\.css~',
+                    '~^https?://idangero\.us/~',
+                    '~^https?://[^/]*\.github\.io/~',
                 ]
             ],
 
