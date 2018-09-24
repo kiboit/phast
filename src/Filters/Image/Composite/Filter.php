@@ -80,11 +80,20 @@ class Filter implements CachedResultServiceFilter {
                 ]);
             }
         }
-        if ($filteredImage->getSizeAsString() < $image->getSizeAsString()) {
-            $this->logger()->info('Finished! Returning filtered image!');
+        $sizeBefore = $filteredImage->getSizeAsString();
+        $sizeAfter = $image->getSizeAsString();
+        $sizeDifference = $sizeBefore - $sizeAfter;
+        $this->logger()->info('Image processed. Size before/after: {sizeBefore}/{sizeAfter} ({sizeDifference})', [
+            'sizeBefore' => $sizeBefore,
+            'sizeAfter' => $sizeAfter,
+            'sizeDifference' => $sizeDifference < 0 ? $sizeDifference : "+$sizeDifference",
+        ]);
+        if ($sizeDifference < 0) {
+            $this->logger()->info('Return filtered image and save {sizeDifference} bytes', ['sizeDifference' => -$sizeDifference]);
             $image = $filteredImage;
+        } else {
+            $this->logger()->info('Return original image');
         }
-        $this->logger()->info('Finished, but filtered image is not smaller than original! Returning original!');
         $processedResource = $resource->withContent($image->getAsString(), $image->getType());
         $this->inliningManager->maybeStoreForInlining($processedResource);
         return $processedResource;

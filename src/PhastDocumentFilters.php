@@ -75,7 +75,7 @@ class PhastDocumentFilters {
             $applyCheckBuffer = $buffer;
         }
         if (!self::shouldApply($applyCheckBuffer, $runtimeConfig)) {
-            Log::info('Buffer doesn\'t look like html! Not applying filters');
+            Log::info("Buffer ({bufferSize} bytes) doesn't look like html! Not applying filters", ['bufferSize' => strlen($applyCheckBuffer)]);
             return $buffer;
         }
         return (new Factory())
