@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\Image\Composite;
 
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Package;
+use Kibo\Phast\Exceptions\LogicException;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManagerFactory;
 use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
@@ -26,8 +27,12 @@ class Factory {
     }
 
     public function make() {
+        $imageFactoryClass = $this->config['images']['factory'];
+        if (!class_exists($imageFactoryClass)) {
+            throw new LogicException("No such class: $imageFactoryClass");
+        }
         $composite = new Filter(
-            new ImageFactory($this->config),
+            new $imageFactoryClass($this->config),
             (new ImageInliningManagerFactory())->make($this->config)
         );
         foreach ($this->config['images']['filters'] as $class => $config) {
