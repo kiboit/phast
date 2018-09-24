@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-use Kibo\Phast\Filters\Image\ImageImplementations\GDImage;
+use Kibo\Phast\Exceptions\LogicException;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\PostDataRetriever;
 use Kibo\Phast\Retrievers\RemoteRetrieverFactory;
@@ -20,7 +20,7 @@ class ImageFactory {
 
     /**
      * @param URL $url
-     * @return GDImage
+     * @return Image
      */
     public function getForURL(URL $url) {
         if ($this->config['images']['api-mode']) {
@@ -30,12 +30,19 @@ class ImageFactory {
             $retriever->addRetriever(new LocalRetriever($this->config['retrieverMap']));
             $retriever->addRetriever((new RemoteRetrieverFactory())->make($this->config));
         }
-        return new GDImage($url, $retriever);
+        if (empty($this->config['images']['imageImplementation'])) {
+            throw new LogicException("An image implementation must be configured");
+        }
+        $imageClass = $this->config['images']['imageImplementation'];
+        if (!class_exists($imageClass)) {
+            throw new LogicException("Image implementation does not exist: $imageClass");
+        }
+        return new $imageClass($url, $retriever);
     }
 
     /**
      * @param Resource $resource
-     * @return GDImage
+     * @return Image
      */
     public function getForResource(Resource $resource) {
         return $this->getForURL($resource->getUrl());

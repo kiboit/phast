@@ -95,7 +95,7 @@ class Filter implements ImageFilter {
     private function getRequestHeaders(Image $image, array $request) {
         $headers = [
             'X-Phast-Image-API-Client' => $this->getRequestToken(),
-            'Content-Type' => $image->getType()
+            'Content-Type' => 'application/octet-stream'
         ];
         if (isset ($request['preferredType']) && $request['preferredType'] == Image::TYPE_WEBP) {
             $headers['Accept'] = 'image/webp';
