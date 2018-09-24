@@ -30,7 +30,10 @@ class Factory {
             new ImageFactory($this->config),
             (new ImageInliningManagerFactory())->make($this->config)
         );
-        foreach (array_keys($this->config['images']['filters']) as $class) {
+        foreach ($this->config['images']['filters'] as $class => $config) {
+            if ($config === null) {
+                continue;
+            }
             $package = Package::fromPackageClass($class);
             $filter = $package->getFactory()->make($this->config);
             $composite->addImageFilter($filter);
