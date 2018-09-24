@@ -2,9 +2,8 @@
 
 namespace Kibo\Phast\Filters\Image;
 
-use Kibo\Phast\Exceptions\LogicException;
+use Kibo\Phast\Filters\Image\ImageImplementations\DefaultImage;
 use Kibo\Phast\Retrievers\LocalRetriever;
-use Kibo\Phast\Retrievers\PostDataRetriever;
 use Kibo\Phast\Retrievers\RemoteRetrieverFactory;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\ValueObjects\Resource;
@@ -23,21 +22,10 @@ class ImageFactory {
      * @return Image
      */
     public function getForURL(URL $url) {
-        if ($this->config['images']['api-mode']) {
-            $retriever = new PostDataRetriever();
-        } else {
-            $retriever = new UniversalRetriever();
-            $retriever->addRetriever(new LocalRetriever($this->config['retrieverMap']));
-            $retriever->addRetriever((new RemoteRetrieverFactory())->make($this->config));
-        }
-        if (empty($this->config['images']['imageImplementation'])) {
-            throw new LogicException("An image implementation must be configured");
-        }
-        $imageClass = $this->config['images']['imageImplementation'];
-        if (!class_exists($imageClass)) {
-            throw new LogicException("Image implementation does not exist: $imageClass");
-        }
-        return new $imageClass($url, $retriever);
+        $retriever = new UniversalRetriever();
+        $retriever->addRetriever(new LocalRetriever($this->config['retrieverMap']));
+        $retriever->addRetriever((new RemoteRetrieverFactory())->make($this->config));
+        return new DefaultImage($url, $retriever);
     }
 
     /**

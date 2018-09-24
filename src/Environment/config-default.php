@@ -91,8 +91,6 @@ return [
 
         'api-mode' => false,
 
-        'imageImplementation' => DefaultImage::class,
-
         'maxImageInliningSize' => 512,
 
         'whitelist' => [

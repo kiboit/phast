@@ -28,6 +28,11 @@ class DefaultImage extends BaseImage implements Image {
     private $imageString;
 
     /**
+     * @var array
+     */
+    private $imageInfo;
+
+    /**
      * @var ObjectifiedFunctions
      */
     private $funcs;
@@ -38,16 +43,23 @@ class DefaultImage extends BaseImage implements Image {
         $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
 
-    public function getType() {
-        throw new LogicException("No operations may be performed on DefaultImage");
+    public function getWidth() {
+        return isset ($this->width) ? $this->width : $this->getImageInfo()[0];
     }
 
     public function getHeight() {
-        throw new LogicException("No operations may be performed on DefaultImage");
+        return isset ($this->height) ? $this->height : $this->getImageInfo()[1];
     }
 
-    public function getWidth() {
-        throw new LogicException("No operations may be performed on DefaultImage");
+    public function getType() {
+        if (isset ($this->type)) {
+            return $this->type;
+        }
+        $type = @image_type_to_mime_type($this->getImageInfo()[2]);
+        if (!$type) {
+            throw new ImageProcessingException('Could not determine image type');
+        }
+        return $type;
     }
 
     public function getAsString() {
@@ -63,6 +75,20 @@ class DefaultImage extends BaseImage implements Image {
             $this->imageString = $imageString;
         }
         return $this->imageString;
+    }
+
+    private function getImageInfo() {
+        if (!isset ($this->imageInfo)) {
+            if ($this->getImageString() === '') {
+                throw new ImageProcessingException('Image is empty');
+            }
+            $imageInfo = @getimagesizefromstring($this->getImageString());
+            if ($imageInfo === false) {
+                throw new ImageProcessingException('Could not read GD image info');
+            }
+            $this->imageInfo = $imageInfo;
+        }
+        return $this->imageInfo;
     }
 
     protected function __clone() {
