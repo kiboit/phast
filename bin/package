@@ -15,12 +15,12 @@ trap "rm -rf '$tmp'" EXIT
 
 mkdir -p dist
 
-git archive HEAD | tar xf - -C "$tmp"
+git archive HEAD composer.{json,lock} src certificates | tar xf - -C "$tmp"
 
 (
     cd "$tmp"
     $composer install -o --no-dev
-    rm -r test
+    rm -f composer.{json,lock}
     find -not -name . -not -name .. -name '.*' -exec rm -r {} +
     tar cJf - --xform 's/^\./phast/' .
 ) > dist/phast-$release.txz
