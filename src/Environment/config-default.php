@@ -1,7 +1,7 @@
 <?php
 
 use Kibo\Phast\Common\System;
-use Kibo\Phast\Filters\Image\ImageImplementations\DefaultImage;
+use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\RequestsHTTPClient;
 
@@ -90,6 +90,8 @@ return [
         'enable-cache' => 'imgcache',
 
         'api-mode' => false,
+
+        'factory' => ImageFactory::class,
 
         'maxImageInliningSize' => 512,
 
