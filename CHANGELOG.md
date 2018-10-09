@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 1.11.0 - 2018-10-09
+
+### Added
+* Proxy CSS for maxcdn.bootstrapcdn.com, idangero.us, *.github.io.
+* Proxy icon fonts and other resources from fonts.googleapis.com.
+* Improve log messages from image filter.
+
+### Fixed
+* Do not proxy maps.googleapis.com, to fix NotLoadingAPIFromGoogleMapError.
+
+
 ## 1.10.0 - 2018-09-24
 
 ### Removed
