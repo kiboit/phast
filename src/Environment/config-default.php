@@ -160,7 +160,6 @@ return [
             '~^https?://connect\.facebook\.net/~',
             '~^https?://static\.hotjar\.com/~',
             '~^https?://v2\.zopim\.com/~',
-            '~^https?://maps\.googleapis\.com/maps/api/js(\?|$)~',
             '~^https?://stats\.g\.doubleclick\.net/dc\.js$~'
         ]
     ]
