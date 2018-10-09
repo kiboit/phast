@@ -59,7 +59,7 @@ return [
                 'optimizerSizeDiffThreshold' => 1024,
                 'whitelist' => [
                     '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
-                    '~^https?://fonts\.googleapis\.com/css~' => [
+                    '~^https?://fonts\.googleapis\.com/~' => [
                         'ieCompatible' => false
                     ],
                     '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
