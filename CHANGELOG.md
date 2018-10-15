@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.12.1 - 2018-10-15
+
+### Fixed
+* Don't use IndexedDB-backed cache on Safari.
+
+
 ## 1.12.0 - 2018-10-15
 
 ### Added
