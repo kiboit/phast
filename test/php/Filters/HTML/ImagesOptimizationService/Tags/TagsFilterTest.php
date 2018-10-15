@@ -61,6 +61,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
     public function testLazySrcRewriting() {
         $img = $this->makeMarkedElement('img');
         $img->setAttribute('data-lazy-src', '/img?1');
+        $img->setAttribute('data-lazy-srcset', '/img?2 2x');
         $this->body->appendChild($img);
 
         $this->applyFilter();
@@ -69,6 +70,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $images = iterator_to_array($this->dom->getElementsByTagName('img'));
 
         $this->checkSrc($images[0]->getAttribute('data-lazy-src'), ['src' => self::BASE_URL . '/img?1']);
+        $this->checkSrc(preg_replace('/\s.*$/', '', $images[0]->getAttribute('data-lazy-srcset')), ['src' => self::BASE_URL . '/img?2']);
     }
 
     public function testPictureSourceRewriting() {
@@ -179,6 +181,11 @@ class TagsFilterTest extends HTMLFilterTestCase {
 
     private function checkSrc($url, $expectedParams) {
         $components = parse_url($url);
+
+        $this->assertArrayHasKey('scheme', $components);
+        $this->assertArrayHasKey('host', $components);
+        $this->assertArrayHasKey('path', $components);
+        $this->assertArrayHasKey('query', $components);
 
         $this->assertEquals('http', $components['scheme']);
         $this->assertEquals('the-service.org', $components['host']);

@@ -38,10 +38,10 @@ class Filter implements HTMLStreamFilter {
 
     private function handleTag(Tag $tag, HTMLPageContext $context) {
         if ($tag->getTagName() == 'img' || ($this->inPictureTag && $tag->getTagName() == 'source')) {
-            $this->rewriteSrc($tag, $context);
-            $this->rewriteSrcset($tag, $context);
-            $this->rewriteSrc($tag, $context, 'data-lazy-src');
-            $this->rewriteSrcset($tag, $context, 'data-lazy-srcset');
+            foreach (['', 'data-lazy-'] as $prefix) {
+                $this->rewriteSrc($tag, $context, $prefix . 'src');
+                $this->rewriteSrcset($tag, $context, $prefix . 'srcset');
+            }
         } else if ($tag->getTagName() == 'picture') {
             $this->inPictureTag = true;
         } else if ($tag->getTagName() == 'video' || $tag->getTagName() == 'audio') {
@@ -55,7 +55,7 @@ class Filter implements HTMLStreamFilter {
         }
     }
 
-    private function rewriteSrc(Tag $img, HTMLPageContext $context, $attribute = 'src') {
+    private function rewriteSrc(Tag $img, HTMLPageContext $context, $attribute) {
         $url = $img->getAttribute($attribute);
         if (!$url) {
             return;
@@ -71,7 +71,7 @@ class Filter implements HTMLStreamFilter {
         $img->setAttribute($attribute, $newURL);
     }
 
-    private function rewriteSrcset(Tag $img, HTMLPageContext $context, $attribute = 'srcset') {
+    private function rewriteSrcset(Tag $img, HTMLPageContext $context, $attribute) {
         $srcset = $img->getAttribute($attribute);
         if (!$srcset) {
             return;
