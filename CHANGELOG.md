@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 1.12.0 - 2018-10-15
+
+### Added
+* Rewrite `data-lazy-src`, `data-lazy-srcset` attributes on `img`, `picture >
+  source` tags.
+
+
 ## 1.11.0 - 2018-10-09
 
 ### Added
