@@ -58,6 +58,19 @@ class TagsFilterTest extends HTMLFilterTestCase {
         );
     }
 
+    public function testLazySrcRewriting() {
+        $img = $this->makeMarkedElement('img');
+        $img->setAttribute('data-lazy-src', '/img?1');
+        $this->body->appendChild($img);
+
+        $this->applyFilter();
+
+        /** @var \DOMElement[] $images */
+        $images = iterator_to_array($this->dom->getElementsByTagName('img'));
+
+        $this->checkSrc($images[0]->getAttribute('data-lazy-src'), ['src' => self::BASE_URL . '/img?1']);
+    }
+
     public function testPictureSourceRewriting() {
         $html = '<html><body>';
             $html .= '<picture>';
