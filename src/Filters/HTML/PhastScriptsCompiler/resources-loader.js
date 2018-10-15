@@ -507,14 +507,35 @@ phast.ResourceLoader.StorageCache.StorageCacheParams = function () {
     this.maxStorageSize = 4.5 * 1024 * 1024;
 };
 
+phast.ResourceLoader.BlackholeCache = function () {
+
+    this.get = function () {
+        return Promise.reject();
+    };
+
+    this.set = function () {
+        return Promise.reject();
+    };
+
+};
 
 phast.ResourceLoader.make = function (serviceUrl, shortParamsMappings) {
-    var storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
-    var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
-    var cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
-    var cache = new phast.ResourceLoader.StorageCache(cacheParams, storage);
+    var cache = makeCache();
     var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl, shortParamsMappings);
     return new phast.ResourceLoader(client, cache);
+
+    function makeCache() {
+        var userAgent = navigator.userAgent;
+        if (/safari/i.test(userAgent) && !/chrome|android/i.test(userAgent)) {
+            console.log("[Phast] Not using IndexedDB cache on Safari");
+            return new phast.ResourceLoader.BlackholeCache();
+        } else {
+            var storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
+            var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
+            var cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
+            return new phast.ResourceLoader.StorageCache(cacheParams, storage);
+        }
+    }
 };
 
 
