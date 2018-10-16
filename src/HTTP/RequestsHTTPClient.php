@@ -14,7 +14,7 @@ class RequestsHTTPClient implements Client {
     }
 
     public function post(URL $url, $data, array $headers = []) {
-        $options = ['connect_timeout' => 2, 'timeout' => 10];
+        $options = ['connect_timeout' => 10, 'timeout' => 20];
         $response = \Requests::post((string)$url, $headers, $data, $options);
         $response->throw_for_status();
         return $this->makePhastResponse($response);
