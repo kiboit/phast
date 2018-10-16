@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Unreleased
+## 1.12.2 - 2018-10-16
 
 ### Fixed
 * Increase timeouts for API connection.
