@@ -6,7 +6,7 @@
         "phpunit/phpunit": "5.7.*",
         "facebook/webdriver": "^1.5"
     },
-    "license": "proprietary",
+    "license": "AGPL-3.0-or-later",
     "require": {
         "php": ">=5.6",
         "mrclay/jsmin-php": "2.3.2",
