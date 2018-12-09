@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.13.0 - 2018-12-09
+
+### Added
+* Remove query strings from URLs to stylesheets and scripts loaded from the local server. It is redundant, since we add the modification time to the URL ourselves.
+
+
 ## 1.12.2 - 2018-10-16
 
 ### Fixed
