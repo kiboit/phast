@@ -7,7 +7,7 @@ use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
-use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\Bundler\ServiceParams;
 use Kibo\Phast\Services\ServiceRequest;
@@ -28,7 +28,7 @@ class Filter extends BaseHTMLStreamFilter {
     private $signature;
 
     /**
-     * @var Retriever
+     * @var LocalRetriever
      */
     private $retriever;
 
@@ -42,17 +42,10 @@ class Filter extends BaseHTMLStreamFilter {
      */
     private $didInject = false;
 
-    /**
-     * Filter constructor.
-     * @param array $config
-     * @param ServiceSignature $signature
-     * @param Retriever $retriever
-     * @param ObjectifiedFunctions $functions
-     */
     public function __construct(
         array $config,
         ServiceSignature $signature,
-        Retriever $retriever,
+        LocalRetriever $retriever,
         ObjectifiedFunctions $functions = null
     ) {
         $this->config = $config;
@@ -81,22 +74,30 @@ class Filter extends BaseHTMLStreamFilter {
         }
         $src = trim($element->getAttribute('src'));
         $absolute = $this->getAbsoluteURL($src);
-        if (!$this->shouldProxyURL($absolute)) {
-            $this->logger()->info('Not proxying {src}', ['src' => $src]);
+        $rewritten = $this->makeProxiedURL($absolute);
+        if (!$rewritten) {
             return;
         }
-        $this->logger()->info('Proxying {src}', ['src' => $src]);
-        $rewritten = $this->makeProxiedURL($absolute);
         $element->setAttribute('src', $rewritten);
         $element->setAttribute('data-phast-original-src', $src);
         $element->setAttribute('data-phast-params', $this->makeServiceParams($absolute));
     }
 
-    private function makeProxiedURL($url) {
+    /**
+     * @return ServiceRequest|null
+     */
+    private function makeProxiedURL(URL $url) {
+        $cacheMarker = $this->retriever->getCacheSalt($url);
+
+        if (!$cacheMarker) {
+            return null;
+        }
+
         $params = [
             'src' => (string) $url,
-            'cacheMarker' => $this->retriever->getCacheSalt($url)
+            'cacheMarker' => $cacheMarker
         ];
+
         return (new ServiceRequest())
             ->withUrl(URL::fromString($this->config['serviceUrl']))
             ->withParams($params)
@@ -108,19 +109,6 @@ class Filter extends BaseHTMLStreamFilter {
             fromArray(['src' => (string) $url, 'isScript' => '1'])
             ->sign($this->signature)
             ->serialize();
-    }
-
-    private function shouldProxyURL(URL $url) {
-        if ($url->isLocalTo($this->context->getBaseUrl())) {
-            return true;
-        }
-        $str = (string) $url;
-        foreach ($this->config['match'] as $pattern) {
-            if (preg_match($pattern, $str)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private function addScript() {

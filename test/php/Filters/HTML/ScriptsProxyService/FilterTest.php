@@ -4,11 +4,14 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
-use Kibo\Phast\Retrievers\Retriever;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
+    
+    const MODIFICATION_TIME = 1337;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -24,22 +27,21 @@ class FilterTest extends HTMLFilterTestCase {
         'urlRefreshTime' => 7200
     ];
 
-    private $modTime;
-
     public function setUp() {
         parent::setUp();
         ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
-
-        $this->modTime = false;
 
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
             ->willReturn('the-token');
 
-        $this->retriever = $this->createMock(Retriever::class);
+        $this->retriever = $this->createMock(LocalRetriever::class);
         $this->retriever->method('getCacheSalt')
-            ->willReturnCallback(function () {
-                return $this->modTime;
+            ->willReturnCallback(function (URL $url) {
+                if (!URL::fromString($url)->isLocalTo(URL::fromString(self::BASE_URL))) {
+                    return false;
+                }
+                return self::MODIFICATION_TIME;
             });
 
         $functions = new ObjectifiedFunctions();
@@ -58,7 +60,6 @@ class FilterTest extends HTMLFilterTestCase {
      * @dataProvider rewriteData
      */
     public function testRewrite($attributes, $shouldRewrite) {
-        $this->modTime = 2;
         $element = $this->makeMarkedElement('script');
         foreach ($attributes as $name => $value) {
             $element->setAttribute($name, $value);
@@ -78,7 +79,7 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertArrayHasKey('src', $query);
             $this->assertArrayHasKey('cacheMarker', $query);
             $this->assertEquals($attributes['src'], $query['src']);
-            $this->assertEquals($this->modTime, $query['cacheMarker']);
+            $this->assertEquals(self::MODIFICATION_TIME, $query['cacheMarker']);
         } else {
             $this->assertEquals($attributes['src'], $newElement->getAttribute('src'));
         }
@@ -86,10 +87,12 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function rewriteData() {
         return [
-            [['src' => 'http://example.com/script.js', 'type' => 'application/javascript'], true],
-            [['src'  => 'http://test.com/script.js'], true],
             [['src'  => self::BASE_URL . '/rewrite.js'], true],
-            [['src'  => 'http://example.com/script1.cs', 'type' => 'application/coffeesctipt'], false],
+            [['src'  => self::BASE_URL . '/script1.cs', 'type' => 'application/coffeescript'], false],
+            [['src'  => self::BASE_URL . '/rewrite.js', 'type' => 'application/javascript'], true],
+            [['src' => 'http://example.com/script.js', 'type' => 'application/javascript'], false],
+            [['src'  => 'http://test.com/script.js'], false],
+            [['src'  => 'http://example.com/script1.cs', 'type' => 'application/coffeescript'], false],
             [['src'  => 'http://norewrite.com/script.js'], false],
         ];
     }
@@ -133,7 +136,6 @@ class FilterTest extends HTMLFilterTestCase {
         $script = $this->makeMarkedElement('script');
         $script->setAttribute('src', self::BASE_URL . '/rewrite.js');
         $this->head->appendChild($script);
-        $this->modTime = 123;
 
         $this->applyFilter();
 
@@ -141,12 +143,12 @@ class FilterTest extends HTMLFilterTestCase {
         $url = parse_url($script->getAttribute('src'));
         $query = [];
         parse_str($url['query'], $query);
-        $this->assertEquals(123, $query['cacheMarker']);
+        $this->assertEquals(self::MODIFICATION_TIME, $query['cacheMarker']);
     }
 
     public function testRewriteSrcWithSpaces() {
         $script = $this->makeMarkedElement('script');
-        $script->setAttribute('src', ' /hello/ ');
+        $script->setAttribute('src', ' ' . self::BASE_URL . '/hello/ ');
 
         $this->head->appendChild($script);
 
@@ -159,7 +161,6 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testRespectingBaseTag() {
-        $this->modTime = 2;
         $this->addBaseTag('/new-root/');
         $script = $this->makeMarkedElement('script');
         $script->setAttribute('src', 'the-script.js');
@@ -175,7 +176,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertArrayHasKey('src', $query);
         $this->assertArrayHasKey('cacheMarker', $query);
         $this->assertEquals(self::BASE_URL . '/new-root/the-script.js', $query['src']);
-        $this->assertEquals(2, $query['cacheMarker']);
+        $this->assertEquals(self::MODIFICATION_TIME, $query['cacheMarker']);
     }
 
     public function testInjectScript() {
