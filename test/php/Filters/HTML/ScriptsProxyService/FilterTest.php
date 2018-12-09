@@ -78,7 +78,7 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertEquals('script-proxy.php', $url['path']);
             $this->assertArrayHasKey('src', $query);
             $this->assertArrayHasKey('cacheMarker', $query);
-            $this->assertEquals($attributes['src'], $query['src']);
+            $this->assertEquals(preg_replace('/\?.*/', '', $attributes['src']), $query['src']);
             $this->assertEquals(self::MODIFICATION_TIME, $query['cacheMarker']);
         } else {
             $this->assertEquals($attributes['src'], $newElement->getAttribute('src'));
@@ -87,13 +87,14 @@ class FilterTest extends HTMLFilterTestCase {
 
     public function rewriteData() {
         return [
-            [['src'  => self::BASE_URL . '/rewrite.js'], true],
-            [['src'  => self::BASE_URL . '/script1.cs', 'type' => 'application/coffeescript'], false],
-            [['src'  => self::BASE_URL . '/rewrite.js', 'type' => 'application/javascript'], true],
+            [['src' => self::BASE_URL . '/rewrite.js'], true],
+            [['src' => self::BASE_URL . '/script1.cs', 'type' => 'application/coffeescript'], false],
+            [['src' => self::BASE_URL . '/rewrite.js', 'type' => 'application/javascript'], true],
+            [['src' => self::BASE_URL . '/rewrite.js?abc'], true],
             [['src' => 'http://example.com/script.js', 'type' => 'application/javascript'], false],
-            [['src'  => 'http://test.com/script.js'], false],
-            [['src'  => 'http://example.com/script1.cs', 'type' => 'application/coffeescript'], false],
-            [['src'  => 'http://norewrite.com/script.js'], false],
+            [['src' => 'http://test.com/script.js'], false],
+            [['src' => 'http://example.com/script1.cs', 'type' => 'application/coffeescript'], false],
+            [['src' => 'http://norewrite.com/script.js?abc'], false],
         ];
     }
 

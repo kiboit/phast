@@ -94,7 +94,7 @@ class Filter extends BaseHTMLStreamFilter {
         }
 
         $params = [
-            'src' => (string) $url,
+            'src' => (string) $url->withoutQuery(),
             'cacheMarker' => $cacheMarker
         ];
 
