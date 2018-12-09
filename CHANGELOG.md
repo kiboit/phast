@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.13.1 - 2018-12-09
+
+### Fixed
+* Remove query strings from the URLs passed to the JS, CSS bundler.
+
+
 ## 1.13.0 - 2018-12-09
 
 ### Added
