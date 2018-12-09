@@ -14,8 +14,10 @@ use Kibo\Phast\ValueObjects\URL;
 class Factory implements HTMLFilterFactory {
 
     public function make(array $config) {
+        $localRetriever = new LocalRetriever($config['retrieverMap']);
+
         $retriever = new UniversalRetriever();
-        $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
+        $retriever->addRetriever($localRetriever);
         $retriever->addRetriever(
             new CachingRetriever(
                 new Cache($config['cache'], 'css')
@@ -38,6 +40,7 @@ class Factory implements HTMLFilterFactory {
             (new ServiceSignatureFactory())->make($config),
             URL::fromString($config['documents']['baseUrl']),
             $config['documents']['filters'][Filter::class],
+            $localRetriever,
             $retriever,
             new OptimizerFactory($config),
             (new CSSCompositeFactory())->make($config)

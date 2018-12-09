@@ -4,6 +4,7 @@ namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
+use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
@@ -497,10 +498,32 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals('the-css-content', $styles->item(0)->textContent);
     }
 
+    public function testStripQueryString() {
+        $this->retrieverLastModificationTime = 123;
+        $this->files['/styles.css'] = 'the-css-content';
+        $html = '<html><head><link rel="stylesheet" href="styles.css?abc"></head><body></body></html>';
+
+        $this->applyFilter($html);
+
+        $link = $this->dom->getElementsByTagName('style')->item(0);
+        $params = json_decode($link->getAttribute('data-phast-params'), true);
+        $this->assertEquals(self::BASE_URL . '/styles.css', $params['src']);
+    }
+
     protected function applyFilter($htmlInput = null, $skipResultParsing = false) {
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
             ->willReturn('the-token');
+
+        $localRetriever = $this->createMock(LocalRetriever::class);
+        $localRetriever->method('getCacheSalt')
+            ->willReturnCallback(function (URL $url) {
+                if ($url->isLocalTo(URL::fromString(self::BASE_URL))) {
+                    return $this->retrieverLastModificationTime;
+                } else {
+                    return false;
+                }
+            });
 
         $retriever = $this->createMock(Retriever::class);
         $retriever->method('getCacheSalt')
@@ -544,6 +567,7 @@ class FilterTest extends HTMLFilterTestCase {
             $signature,
             URL::fromString(self::BASE_URL),
             $this->config,
+            $localRetriever,
             $retriever,
             $optimizerFactory,
             $cssFilter

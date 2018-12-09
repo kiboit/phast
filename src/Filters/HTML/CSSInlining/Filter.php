@@ -66,6 +66,11 @@ class Filter extends BaseHTMLStreamFilter {
     /**
      * @var Retriever
      */
+    private $localRetriever;
+
+    /**
+     * @var Retriever
+     */
     private $retriever;
 
     /**
@@ -87,6 +92,7 @@ class Filter extends BaseHTMLStreamFilter {
         ServiceSignature $signature,
         URL $baseURL,
         array $config,
+        Retriever $localRetriever,
         Retriever $retriever,
         OptimizerFactory $optimizerFactory,
         ServiceFilter $cssFilter
@@ -100,6 +106,7 @@ class Filter extends BaseHTMLStreamFilter {
             URL::fromString((string)$config['bundlerUrl'])
         )->serialize(ServiceRequest::FORMAT_QUERY);
         $this->optimizerSizeDiffThreshold = (int)$config['optimizerSizeDiffThreshold'];
+        $this->localRetriever = $localRetriever;
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;
         $this->cssFilter = $cssFilter;
@@ -331,9 +338,14 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function makeServiceParams(URL $originalLocation, $stripImports = false) {
+        if ($cacheMarker = $this->localRetriever->getCacheSalt($originalLocation)) {
+            $originalLocation = $originalLocation->withoutQuery();
+        } else {
+            $cacheMarker = $this->retriever->getCacheSalt($originalLocation);
+        }
         $params = [
             'src' => (string) $originalLocation,
-            'cacheMarker' => $this->retriever->getCacheSalt($originalLocation)
+            'cacheMarker' => $cacheMarker
         ];
         if ($stripImports) {
             $params['strip-imports'] = 1;
