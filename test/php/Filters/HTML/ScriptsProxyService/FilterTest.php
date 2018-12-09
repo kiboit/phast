@@ -70,9 +70,10 @@ class FilterTest extends HTMLFilterTestCase {
         if ($shouldRewrite) {
             $this->assertTrue($newElement->hasAttribute('data-phast-params'));
             $params = json_decode($newElement->getAttribute('data-phast-params'));
-            $this->assertEquals($attributes['src'], $params->src);
+            $this->assertEquals(preg_replace('/\?.*/', '', $attributes['src']), $params->src);
             $this->assertEquals('the-token', $params->token);
             $this->assertEquals('1', $params->isScript);
+            $this->assertEquals(self::MODIFICATION_TIME, $params->cacheMarker);
 
             list ($query, $url) = $this->parseSrc($newElement);
             $this->assertEquals('script-proxy.php', $url['path']);

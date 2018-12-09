@@ -73,23 +73,17 @@ class Filter extends BaseHTMLStreamFilter {
             return;
         }
         $src = trim($element->getAttribute('src'));
-        $absolute = $this->getAbsoluteURL($src);
-        $rewritten = $this->makeProxiedURL($absolute);
-        if (!$rewritten) {
+        $url = $this->getAbsoluteURL($src);
+        $cacheMarker = $this->retriever->getCacheSalt($url);
+        if (!$cacheMarker) {
             return;
         }
-        $element->setAttribute('src', $rewritten);
-        $element->setAttribute('data-phast-original-src', (string) $absolute);
-        $element->setAttribute('data-phast-params', $this->makeServiceParams($absolute));
+        $element->setAttribute('src', $this->makeProxiedURL($url, $cacheMarker));
+        $element->setAttribute('data-phast-original-src', (string) $url);
+        $element->setAttribute('data-phast-params', $this->makeServiceParams($url, $cacheMarker));
     }
 
-    private function makeProxiedURL(URL $url) {
-        $cacheMarker = $this->retriever->getCacheSalt($url);
-
-        if (!$cacheMarker) {
-            return null;
-        }
-
+    private function makeProxiedURL(URL $url, $cacheMarker) {
         $params = [
             'src' => (string) $url->withoutQuery(),
             'cacheMarker' => $cacheMarker
@@ -101,9 +95,13 @@ class Filter extends BaseHTMLStreamFilter {
             ->serialize();
     }
 
-    private function makeServiceParams($url) {
+    private function makeServiceParams(URL $url, $cacheMarker) {
         return ServiceParams::
-            fromArray(['src' => (string) $url, 'isScript' => '1'])
+            fromArray([
+                'src' => (string) $url->withoutQuery(),
+                'cacheMarker' => $cacheMarker,
+                'isScript' => '1'
+            ])
             ->sign($this->signature)
             ->serialize();
     }
