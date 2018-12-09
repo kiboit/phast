@@ -235,6 +235,7 @@ class ServiceRequest {
         return $serialized . '?' . $encoded;
     }
 
+    /** @return string */
     private function serializeToPathFormat(array $params) {
         $encodedSrc = null;
         $values = [];

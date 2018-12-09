@@ -79,13 +79,10 @@ class Filter extends BaseHTMLStreamFilter {
             return;
         }
         $element->setAttribute('src', $rewritten);
-        $element->setAttribute('data-phast-original-src', $src);
+        $element->setAttribute('data-phast-original-src', (string) $absolute);
         $element->setAttribute('data-phast-params', $this->makeServiceParams($absolute));
     }
 
-    /**
-     * @return ServiceRequest|null
-     */
     private function makeProxiedURL(URL $url) {
         $cacheMarker = $this->retriever->getCacheSalt($url);
 
