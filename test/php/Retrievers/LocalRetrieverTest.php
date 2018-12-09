@@ -138,5 +138,11 @@ class LocalRetrieverTest extends TestCase {
         }
     }
 
+    public function testEmptyCacheSaltForNonExistentFile() {
+        $fns = new ObjectifiedFunctions();
+        $retriever = new LocalRetriever(['test.com' => '/test'], $fns);
+        $url = URL::fromString('http://test.com/hello.gif');
+        $this->assertSame('', $retriever->getCacheSalt($url));
+    }
 
 }
