@@ -115,6 +115,25 @@ class URLTest extends PhastTestCase {
         ];
     }
 
+    /**
+     * @dataProvider queryData
+     */
+    public function testWithQuery($input, $query, $output) {
+        $url = URL::fromString($input)->withQuery($query);
+        $this->assertEquals($output, (string) $url);
+    }
 
+    public function queryData() {
+        return [
+            ['http://x/', 'a', 'http://x/?a'],
+            ['http://x/?a', 'b', 'http://x/?b'],
+            ['http://x/?a', '', 'http://x/?'],
+            ['http://x/?a', null, 'http://x/'],
+        ];
+    }
+
+    public function testWithoutQuery() {
+        $this->assertEquals('http://x/', URL::fromString('http://x/')->withoutQuery());
+    }
 
 }

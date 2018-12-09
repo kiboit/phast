@@ -228,6 +228,29 @@ class URL {
         return $this->fragment;
     }
 
+    /**
+     * @param string|null $query
+     * @return self
+     */
+    public function withQuery($query) {
+        $url = clone $this;
+        if ($query === null) {
+            $url->query = null;
+        } else {
+            $url->query = (string) $query;
+        }
+        return $url;
+    }
+
+    /**
+     * @return self
+     */
+    public function withoutQuery() {
+        $url = clone $this;
+        $url->query = null;
+        return $url;
+    }
+
     public function __toString() {
         return $this->toString();
     }
