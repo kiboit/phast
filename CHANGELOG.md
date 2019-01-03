@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 1.15 - 2019-01-03
+
+### Fixed
+* Scripts can now be loaded via `document.write`. This restores normal browser
+  behaviour.
+
+
 ## 1.14 - 2019-01-03
 
 ### Fixed
