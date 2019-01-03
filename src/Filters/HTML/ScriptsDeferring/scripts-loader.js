@@ -18,7 +18,6 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
 };
 
 phast.ScriptsLoader.executeScripts = function (scripts) {
-
     var initializers = scripts.map(function (script) {
         return script.init();
     });
@@ -26,37 +25,41 @@ phast.ScriptsLoader.executeScripts = function (scripts) {
     var lastScript = Promise.resolve();
 
     scripts.forEach(function (script) {
-        var description;
-        try {
-            if (script.describe) {
-                description = script.describe();
-            } else {
-                description = 'unknown script';
-            }
-        } catch (e) {
-            description = 'script.describe() failed';
-        }
-
-        lastScript = lastScript
-            .then(function () {
-                var promise = script.execute();
-                promise.then(function () {
-                    console.debug('✓', description)
-                });
-                return promise;
-            })
-            .catch(function (error) {
-                console.error('✘', description);
-                if (error) {
-                    console.log(error);
-                }
-            });
+        lastScript = phast.ScriptsLoader.chainScript(lastScript, script);
     });
 
     return lastScript.then(function () {
         return Promise.all(initializers).catch(function () {});
     });
+};
 
+phast.ScriptsLoader.chainScript = function (lastScript, script) {
+    var description;
+
+    try {
+        if (script.describe) {
+            description = script.describe();
+        } else {
+            description = 'unknown script';
+        }
+    } catch (e) {
+        description = 'script.describe() failed';
+    }
+
+    return lastScript
+        .then(function () {
+            var promise = script.execute();
+            promise.then(function () {
+                console.debug('✓', description)
+            });
+            return promise;
+        })
+        .catch(function (error) {
+            console.error('✘', description);
+            if (error) {
+                console.log(error);
+            }
+        });
 };
 
 // Capture insertBefore before it get's rewritten
@@ -133,6 +136,9 @@ phast.ScriptsLoader.Utilities = function (document) {
     }
 
     function writeProtectAndCallback(sourceElement, callback) {
+        var insertBefore = sourceElement.nextElementSibling;
+        var lastScript = Promise.resolve();
+
         document.write = function (string) {
             insert(string);
         };
@@ -141,22 +147,41 @@ phast.ScriptsLoader.Utilities = function (document) {
             insert(string + "\n");
         };
 
-        var insertBefore = sourceElement.nextElementSibling;
         function insert(string) {
+            var container = document.createElement('div');
+            container.innerHTML = string;
+            var scripts = getExecutableScriptsInElement(container);
             if (insertBefore && insertBefore.parentNode !== sourceElement.parentNode) {
                 insertBefore = sourceElement.nextElementSibling;
             }
-            if (insertBefore) {
-                insertBefore.insertAdjacentHTML('beforebegin', string);
-            } else {
-                sourceElement.parentNode.insertAdjacentHTML('beforeend', string);
+            while (container.firstChild) {
+                sourceElement.parentNode.insertBefore(container.firstChild, insertBefore);
             }
+            scripts.map(executeScript);
         }
 
-        return callback().finally(function () {
-            delete document.write;
-            delete document.writeln;
-        });
+        function getExecutableScriptsInElement(container) {
+            return Array.prototype.slice.call(container.getElementsByTagName('script'))
+                .filter(function (script) {
+                    var type = script.getAttribute('type');
+                    return !type || /^(text|application)\/javascript(;|$)/i.test(type);
+                });
+        }
+
+        function executeScript(scriptElement) {
+            var scriptsFactory = new phast.ScriptsLoader.Scripts.Factory(document);
+            var script = scriptsFactory.makeScriptFromElement(scriptElement);
+            lastScript = phast.ScriptsLoader.chainScript(lastScript, script);
+        }
+
+        return callback()
+            .then(function () {
+                return lastScript;
+            })
+            .finally(function () {
+                delete document.write;
+                delete document.writeln;
+            });
     }
 
     function addPreload(url) {
@@ -199,7 +224,7 @@ phast.ScriptsLoader.Scripts.InlineScript = function (utils, element) {
 };
 
 phast.ScriptsLoader.Scripts.AsyncBrowserScript = function (utils, element) {
-    
+
     var resolver;
 
     this._utils = utils;
@@ -324,10 +349,10 @@ phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
         if (isProxied(element)) {
             if (isAsync(element)) {
                 fallback = new Scripts.AsyncBrowserScript(utils, element);
-                return new Scripts.AsyncAJAXScript(utils, element, fetch, fallback);
+                return fetch ? new Scripts.AsyncAJAXScript(utils, element, fetch, fallback) : fallback;
             }
             fallback = new Scripts.SyncBrowserScript(utils, element);
-            return new Scripts.SyncAJAXScript(utils, element, fetch, fallback);
+            return fetch ? new Scripts.SyncAJAXScript(utils, element, fetch, fallback) : fallback;
         }
 
         if (isInline(element)) {
