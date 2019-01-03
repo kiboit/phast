@@ -8,5 +8,9 @@
 <div><script>
     document.write('<h2>Hello, ' + 'World!</h2>');
 </script></div>
+<script>
+    document.getElementById('remove').remove();
+    document.write('<h3>Hello, World!</h3>');
+</script><div id=remove></div>
 </body>
 </html>
