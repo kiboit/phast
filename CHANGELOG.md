@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 1.14 - 2019-01-03
+
+### Fixed
+* `document.write` now immediately inserts the HTML into the page. This fixes
+  compatibility with Google AdSense.
+
+
 ## 1.13.1 - 2018-12-09
 
 ### Fixed
@@ -10,7 +17,9 @@
 ## 1.13.0 - 2018-12-09
 
 ### Added
-* Remove query strings from URLs to stylesheets and scripts loaded from the local server. It is redundant, since we add the modification time to the URL ourselves.
+* Remove query strings from URLs to stylesheets and scripts loaded from the
+  local server. It is redundant, since we add the modification time to the URL
+  ourselves.
 
 
 ## 1.12.2 - 2018-10-16
@@ -119,7 +128,8 @@
 ### Added
 * Support for `<PICTURE>` elements.
 * `retrieverMap` path prefixes are now regexes.
-* Bundle the `Requests` library and Mozilla CA certificates and use them as default HTTP client engine.
+* Bundle the `Requests` library and Mozilla CA certificates and use them as
+  default HTTP client engine.
 
 
 ## 1.6.0 - 2018-06-27
@@ -142,8 +152,10 @@
 ## 1.5.5 - 2018-06-18
 
 ### Fixed
-* ~~Phast will now fallback to using REQUEST_URI if DOCUMENT_URI is not available.~~ Reverted in 1.5.6.
-* ~~Phast will now use full DOCUMENT_URI or REQUEST_URI if PHP_SELF is not part of them.~~ Reverted in 1.5.6.
+* ~~Phast will now fallback to using REQUEST_URI if DOCUMENT_URI is not
+  available.~~ Reverted in 1.5.6.
+* ~~Phast will now use full DOCUMENT_URI or REQUEST_URI if PHP_SELF is not part
+  of them.~~ Reverted in 1.5.6.
 
 
 ## 1.5.4 - 2018-06-14
