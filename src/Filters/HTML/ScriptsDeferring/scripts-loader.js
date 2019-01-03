@@ -133,21 +133,30 @@ phast.ScriptsLoader.Utilities = function (document) {
     }
 
     function writeProtectAndCallback(sourceElement, callback) {
-        var writeBuffer = '';
         document.write = function (string) {
-            writeBuffer += string;
+            insert(string);
         };
+
         document.writeln = function (string) {
-            writeBuffer += string + '\n';
+            insert(string + "\n");
         };
-        return callback()
-            .then(function () {
-                sourceElement.insertAdjacentHTML('afterend', writeBuffer);
-            })
-            .finally(function () {
-                delete document.write;
-                delete document.writeln;
-            });
+
+        var insertBefore = sourceElement.nextElementSibling;
+        function insert(string) {
+            if (insertBefore && insertBefore.parentNode !== sourceElement.parentNode) {
+                insertBefore = sourceElement.nextElementSibling;
+            }
+            if (insertBefore) {
+                insertBefore.insertAdjacentHTML('beforebegin', string);
+            } else {
+                sourceElement.parentNode.insertAdjacentHTML('beforeend', string);
+            }
+        }
+
+        return callback().finally(function () {
+            delete document.write;
+            delete document.writeln;
+        });
     }
 
     function addPreload(url) {

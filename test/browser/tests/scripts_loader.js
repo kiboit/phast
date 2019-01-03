@@ -52,9 +52,7 @@ QUnit.module('ScriptsLoader', function () {
 
         QUnit.test('Test writeProtectAndExecuteString()', function (assert) {
             var s1 = testDoc.createElement('script');
-            var s2 = testDoc.createElement('script');
             testDoc.body.appendChild(s1);
-            testDoc.body.appendChild(s2);
             var func = function () {
                 window.TEST_DOC.write('<p>write works</p>');
                 window.TEST_DOC.writeln('<p>writeln works</p>');
@@ -85,6 +83,28 @@ QUnit.module('ScriptsLoader', function () {
             utils.writeProtectAndExecuteString(s, script)
                 .finally(function () {
                     checkWrites();
+                    done();
+                });
+        });
+
+        QUnit.test('Test writeProtectAndExecuteString() with next sibling', function (assert) {
+            var s1 = testDoc.createElement('script');
+            var s2 = testDoc.createElement('script');
+            testDoc.body.appendChild(s1);
+            testDoc.body.appendChild(s2);
+            var func = function () {
+                window.TEST_DOC.write('<p>write works</p>');
+            };
+            var checkWrites = getWriteProtectChecker(assert);
+            assert.timeout(100);
+            var done = assert.async();
+
+            utils.writeProtectAndExecuteString(s1, func2string(func))
+                .then(function () {
+                    checkWrites();
+                    var paragraphs = testDoc.getElementsByTagName('p');
+                    assert.equal(paragraphs.length, 1, 'Paragraph has been written');
+                    assert.ok(s1 === paragraphs[0].previousSibling, 'Paragraph is in the correct position');
                     done();
                 });
         });

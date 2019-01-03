@@ -5,8 +5,8 @@
 <script>
     document.write('<h1>Hello, ' + 'World!</h1>');
 </script>
-<script>
+<div><script>
     document.write('<h2>Hello, ' + 'World!</h2>');
-</script>
+</script></div>
 </body>
 </html>
