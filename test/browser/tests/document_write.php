@@ -9,7 +9,8 @@
     document.write('<h2>Hello, ' + 'World!</h2>');
 </script></div>
 <script>
-    document.getElementById('remove').remove();
+    var el = document.getElementById('remove');
+    el.parentNode.removeChild(el);
     document.write('<h3>Hello, World!</h3>');
 </script><div id=remove></div>
 </body>
