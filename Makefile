@@ -15,7 +15,7 @@ test-local : all
 	vendor/bin/phpunit
 
 update : all
-	vendor/composer.phar update
+	composer update
 
 dist : all
 	bin/package
@@ -24,14 +24,8 @@ clean :
 	rm -f docker/*.image
 
 
-vendor/autoload.php : vendor/composer.phar composer.json composer.lock
-	vendor/composer.phar install
-
-vendor/composer.phar :
-	mkdir -p vendor
-	wget -O $@~ https://github.com/composer/composer/releases/download/1.6.3/composer.phar
-	chmod +x $@~
-	mv $@~ $@
+vendor/autoload.php : composer.json composer.lock
+	composer install
 
 docker/%.image : docker/% docker/entrypoint
 	docker build -q -f $< docker > $@~

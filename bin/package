@@ -3,8 +3,6 @@
 set -euo pipefail
 cd "$(dirname "$0")"/..
 
-composer="$PWD/vendor/composer.phar"
-
 release="$(git tag -l --points-at=HEAD | grep -P '^[0-9]\.' || :)"
 if [[ $release = "" ]]; then
     release=HEAD
@@ -19,7 +17,7 @@ git archive HEAD composer.{json,lock} src certificates | tar xf - -C "$tmp"
 
 (
     cd "$tmp"
-    $composer install -o --no-dev
+    composer install -o --no-dev
     rm -f composer.{json,lock}
     find -not -name . -not -name .. -name '.*' -exec rm -r {} +
     tar cJf - --xform 's/^\./phast/' .
