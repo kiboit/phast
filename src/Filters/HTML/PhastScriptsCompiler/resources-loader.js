@@ -92,7 +92,15 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
 
     var items = {};
 
-    function addToPack(packItem) {
+    this.getLength = function () {
+        var i = 0;
+        for (var token in items) {
+            i++;
+        }
+        return i;
+    };
+
+    this.add = function (packItem) {
         if (!items[packItem.params.token]) {
             items[packItem.params.token] = {
                 params: packItem.params,
@@ -103,9 +111,9 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
                 .requests
                 .push(packItem.request);
         }
-    }
+    };
 
-    function packToQuery() {
+    this.toQuery = function () {
         var parts = [],
             cacheMarkers = [],
             lastSrc = '';
@@ -136,50 +144,49 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
             parts.unshift('c=' + phast.hash(cacheMarkers.join('|'), 23045));
         }
         return parts.join('&');
-    }
+    };
 
     function getSortedTokens() {
         var paramsArr = [];
         for (var token in items) {
             paramsArr.push(items[token].params);
         }
-        return paramsArr
-            .sort(function (a, b) {
-                return a.src > b.src ? 1 : -1
-            })
-            .map(function (item) {
-                return item.token;
-            })
+        paramsArr.sort(function (a, b) {
+            return a.src > b.src ? 1 : -1
+        })
+        return paramsArr.map(function (item) {
+            return item.token;
+        })
     }
 
-     function compressSrc(src, lastSrc) {
-         var prefixLen = 0, maxBase36Val = Math.pow(36, 2) - 1;
-         while (prefixLen < lastSrc.length && src[prefixLen] === lastSrc[prefixLen]) {
-             prefixLen++;
-         }
-         prefixLen = Math.min(prefixLen, maxBase36Val);
-         return toBase36(prefixLen) + '' + src.substr(prefixLen);
-     }
+    function compressSrc(src, lastSrc) {
+        var prefixLen = 0, maxBase36Val = Math.pow(36, 2) - 1;
+        while (prefixLen < lastSrc.length && src[prefixLen] === lastSrc[prefixLen]) {
+            prefixLen++;
+        }
+        prefixLen = Math.min(prefixLen, maxBase36Val);
+        return toBase36(prefixLen) + '' + src.substr(prefixLen);
+    }
 
-     function toBase36(dec) {
-         var charsTable = [
-             '0', '1', '2', '3', '4', '5',
-             '6', '7', '8', '9', 'a', 'b',
-             'c', 'd', 'e', 'f', 'g', 'h',
-             'i', 'j', 'k', 'l', 'm', 'n',
-             'o', 'p', 'q', 'r', 's', 't',
-             'u', 'v', 'w', 'x', 'y', 'z'
-         ];
-         var p1 = dec % 36;
-         var p2 = Math.floor((dec - p1) / 36);
-         return charsTable[p2] + charsTable[p1];
-     }
+    function toBase36(dec) {
+        var charsTable = [
+            '0', '1', '2', '3', '4', '5',
+            '6', '7', '8', '9', 'a', 'b',
+            'c', 'd', 'e', 'f', 'g', 'h',
+            'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't',
+            'u', 'v', 'w', 'x', 'y', 'z'
+        ];
+        var p1 = dec % 36;
+        var p2 = Math.floor((dec - p1) / 36);
+        return charsTable[p2] + charsTable[p1];
+    }
 
-    function handleResponse(responseText) {
+    this.handleResponse = function (responseText) {
         try {
             var responses = JSON.parse(responseText);
         } catch (e) {
-            handleError();
+            this.handleError();
             return;
         }
 
@@ -187,7 +194,7 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
 
         if (responses.length !== tokens.length) {
             console.error("[Phast] Requested", tokens.length, "items from bundler, but got", responses.length, "response(s)");
-            handleError();
+            this.handleError();
             return;
         }
 
@@ -202,23 +209,15 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
                 });
             }
         });
-    }
+    }.bind(this);
 
-    function handleError() {
+    this.handleError = function () {
         for (var k in items) {
             items[k].requests.forEach(function (request) {
                 request.error();
             });
         }
-    }
-
-    this.add = addToPack;
-
-    this.handleResponse = handleResponse;
-
-    this.handleError = handleError;
-
-    this.toQuery = packToQuery;
+    };
 };
 
 phast.ResourceLoader.BundlerServiceClient.RequestsPack.PackItem = function (request, params) {
