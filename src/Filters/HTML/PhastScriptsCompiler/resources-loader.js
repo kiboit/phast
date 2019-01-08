@@ -1,50 +1,21 @@
 var Promise = phast.ES6Promise.Promise;
 
 phast.ResourceLoader = function (client, cache) {
-
-    this.get = addToRequested;
-
-    var requested = [];
-    var executionTimeout;
-
-    function addToRequested(params) {
-        return new Promise(function (resolve, reject) {
-            requested.push({resolve: resolve, reject: reject, params: params});
-            clearTimeout(executionTimeout);
-            executionTimeout = setTimeout(getFromCache);
-        });
-    }
-
-    function getFromCache() {
-        var misses = [];
-        Promise.all(requested.map(function (request) {
-            return cache.get(request.params)
-                .then(function (content) {
-                    if (typeof content === 'string') {
-                        request.resolve(content);
-                    } else {
-                        return Promise.reject();
-                    }
-                })
-                .catch(function () {
-                    misses.push(request);
+    this.get = function (params) {
+        return cache.get(params)
+            .then(function (content) {
+                if (typeof content !== 'string') {
+                    throw new Error("response should be string");
+                }
+                return content;
+            })
+            .catch(function () {
+                var promise = client.get(params);
+                promise.then(function (responseText) {
+                    cache.set(params, responseText);
                 });
-        }))
-        .then(function () {
-            getFromClient(misses);
-        });
-        requested = [];
-    }
-
-    function getFromClient(requests) {
-        requests.forEach(function (request) {
-            client.get(request.params)
-                .then(function (responseText) {
-                    cache.set(request.params, responseText);
-                    request.resolve(responseText);
-                })
-                .catch(request.reject);
-        });
+                return promise;
+            });
     }
 };
 
