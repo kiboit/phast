@@ -36,17 +36,19 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
     var RequestsPack = phast.ResourceLoader.BundlerServiceClient.RequestsPack;
     var PackItem = RequestsPack.PackItem;
 
-    var timeoutHandler;
-    var accumulatingPack = new RequestsPack(shortParamsMappings);
+    var rootPromise = Promise.resolve();
+    var accumulatingPack;
 
     this.get = function (params) {
         return new Promise(function (resolve, reject) {
             if (params === phast.ResourceLoader.RequestParams.FaultyParams) {
                 reject(new Error("Parameters did not parse as JSON"));
             } else {
+                if (accumulatingPack === undefined) {
+                    accumulatingPack = new RequestsPack(shortParamsMappings)
+                }
                 accumulatingPack.add(new PackItem({success: resolve, error: reject}, params));
-                clearTimeout(timeoutHandler);
-                timeoutHandler = setTimeout(flush);
+                rootPromise.then(flush);
                 if (accumulatingPack.toQuery().length > 4500) {
                     console.log("[Phast] Resource loader: Pack got too big; flushing early...");
                     flush();
@@ -56,9 +58,11 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
     };
 
     function flush() {
+        if (accumulatingPack === undefined) {
+            return;
+        }
         var pack = accumulatingPack;
-        accumulatingPack = new RequestsPack(shortParamsMappings);
-        clearTimeout(timeoutHandler);
+        accumulatingPack = undefined;
         makeRequest(pack);
     }
 
