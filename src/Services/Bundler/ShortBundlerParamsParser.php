@@ -20,6 +20,9 @@ class ShortBundlerParamsParser {
 
     public function parse(ServiceRequest $request) {
         $query = $request->getHTTPRequest()->getQueryString();
+        if (preg_match('/(^|&)f=/', $query)) {
+            $query = str_rot13($query);
+        }
         $result = [];
         foreach (preg_split('/&(?=s=)/', $query) as $part) {
             $parsed = $this->map($this->parseQuery($part));
@@ -53,7 +56,7 @@ class ShortBundlerParamsParser {
         $lastUrl = '';
         foreach ($params as &$item) {
             $src = $item['src'];
-            $prefixLength = base_convert(substr($src, 0, 2), 36, 10);
+            $prefixLength = (int) base_convert(substr($src, 0, 2), 36, 10);
             $suffix = substr($src, 2);
             $item['src'] = substr($lastUrl, 0, $prefixLength) . $suffix;
             $lastUrl = $item['src'];

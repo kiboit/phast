@@ -31,8 +31,8 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
             ]
         ];
         $query = 's=00the-source&i&c=the-cache-marker&t=the-token&not-mapped=original&j';
-        $actual = $this->parseString($query);
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals($expected, $this->parseString($query));
+        $this->assertEquals($expected, $this->parseString(str_rot13($query)));
     }
 
     public function testParamsGrouping() {

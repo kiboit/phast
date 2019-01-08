@@ -143,7 +143,9 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
         if (cacheMarkers.length > 0) {
             parts.unshift('c=' + phast.hash(cacheMarkers.join('|'), 23045));
         }
-        return parts.join('&');
+        return parts.join('&').replace(/([A-M])|([N-Z])/gi, function (m, am, nz) {
+            return String.fromCharCode(m.charCodeAt(0) + (am ? 13 : -13));
+        });
     };
 
     function getSortedTokens() {
