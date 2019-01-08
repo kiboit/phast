@@ -7,7 +7,7 @@ phast.on(document, 'DOMContentLoaded').then(function () {
         phast.onStylesLoaded = go;
         setTimeout(go, 4000);
     } else {
-        setTimeout(go);
+        Promise.resolve().then(go);
     }
 });
 
