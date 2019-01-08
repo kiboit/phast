@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Unreleased
+## 1.16 - 2019-01-08
 
 * Encode bundler request query to avoid triggering adblockers.
 * Use a promise to delay bundler requests until the end of the event loop,
