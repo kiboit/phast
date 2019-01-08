@@ -16,7 +16,7 @@ phast.ResourceLoader = function (client, cache) {
                 });
                 return promise;
             });
-    }
+    };
 };
 
 phast.ResourceLoader.RequestParams = {};
@@ -36,23 +36,21 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
     var RequestsPack = phast.ResourceLoader.BundlerServiceClient.RequestsPack;
     var PackItem = RequestsPack.PackItem;
 
-    var rootPromise = Promise.resolve();
     var accumulatingPack;
 
     this.get = function (params) {
+        if (params === phast.ResourceLoader.RequestParams.FaultyParams) {
+            return Promise.reject(new Error("Parameters did not parse as JSON"));
+        }
         return new Promise(function (resolve, reject) {
-            if (params === phast.ResourceLoader.RequestParams.FaultyParams) {
-                reject(new Error("Parameters did not parse as JSON"));
-            } else {
-                if (accumulatingPack === undefined) {
-                    accumulatingPack = new RequestsPack(shortParamsMappings)
-                }
-                accumulatingPack.add(new PackItem({success: resolve, error: reject}, params));
-                rootPromise.then(flush);
-                if (accumulatingPack.toQuery().length > 4500) {
-                    console.log("[Phast] Resource loader: Pack got too big; flushing early...");
-                    flush();
-                }
+            if (accumulatingPack === undefined) {
+                accumulatingPack = new RequestsPack(shortParamsMappings)
+            }
+            accumulatingPack.add(new PackItem({success: resolve, error: reject}, params));
+            setTimeout(flush);
+            if (accumulatingPack.toQuery().length > 4500) {
+                console.log("[Phast] Resource loader: Pack got too big; flushing early...");
+                flush();
             }
         });
     };
