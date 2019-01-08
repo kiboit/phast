@@ -68,6 +68,8 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
         var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
         var query = serviceUrl + glue + pack.toQuery();
         var errorHandler = function () {
+            console.error("[Phast] Request to bundler failed with status", xhr.status);
+            console.log("URL:", query);
             pack.handleError();
         };
         var successHandler = function () {
