@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 1.17 - 2019-01-31
+
+* Restore `script` attributes in sorted order (that is, `src` before `type`) to
+  stop Internet Explorer from running scripts twice when they have `src` and
+  `type` set.
+
+
 ## 1.16 - 2019-01-08
 
 * Encode bundler request query to avoid triggering adblockers.
