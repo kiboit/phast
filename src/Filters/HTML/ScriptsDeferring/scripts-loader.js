@@ -91,20 +91,23 @@ phast.ScriptsLoader.Utilities = function (document) {
     }
 
     function restoreOriginals(element) {
-        var shouldRemoveType = !element.hasAttribute('data-phast-original-type');
         element.removeAttribute('data-phast-params');
+        var attrs = {};
         Array.prototype
             .map.call(element.attributes, function (attr) {
                 return attr.nodeName;
             })
-            .forEach(function (attrName) {
+            .map(function (attrName) {
                 var matches = attrName.match(/^data-phast-original-(.*)/i);
                 if (matches) {
-                    element.setAttribute(matches[1], element.getAttribute(attrName));
+                    attrs[matches[1].toLowerCase()] = element.getAttribute(attrName);
                     element.removeAttribute(attrName);
                 }
             });
-        if (shouldRemoveType) {
+        Object.keys(attrs).sort().map(function (attr) {
+            element.setAttribute(attr, attrs[attr]);
+        });
+        if (!('type' in attrs)) {
             element.removeAttribute('type');
         }
     }
