@@ -4,10 +4,10 @@
  */
 
 test('script_once.php', function (assert, document) {
-    var done = assert.async();
-    setTimeout(function () {
+    wait(assert, function () {
+        return document.defaultView.DONE;
+    }, function () {
         assert.equal(document.defaultView.COUNT || 0, 1,
-                     "The script should have been executed exactly once");
-        done();
-    }, 100);
+            "The script should have been executed exactly once");
+    });
 });
