@@ -88,10 +88,15 @@ class ImageURLRewriterTest extends PhastTestCase {
         ];
     }
 
-    public function testNotRewritingNonWhitelistedUrls() {
-        $css = 'background: url("http://somewhere.else/img.png")';
+    /** @dataProvider dontRewriteData */
+    public function testDontRewrite($css) {
         $actual = $this->getRewriter()->rewriteStyle($css);
         $this->assertEquals($css, $actual);
+    }
+
+    public function dontRewriteData() {
+        yield ['background: url("http://somewhere.else/img.png")'];
+        yield ['background: url(#yolo)'];
     }
 
     public function testNoRewriteForImagesWithInlineSource() {

@@ -82,6 +82,10 @@ class ImageURLRewriter {
      * @return string
      */
     public function rewriteUrl($url, URL $baseUrl = null, array $params = []) {
+        if (strpos($url, '#') === 0) {
+            return $url;
+        }
+
         $this->inlinedResources = [];
         $absolute = $this->makeURLAbsoluteToBase($url, $baseUrl);
         if (!$this->shouldRewriteUrl($absolute)) {
