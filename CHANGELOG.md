@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.18 - 2019-03-04
+
+* Don't rewrite page-relative fragment image URLs like `fill:
+  url(#destination)`.
+
+
 ## 1.17 - 2019-01-31
 
 * Restore `script` attributes in sorted order (that is, `src` before `type`) to
