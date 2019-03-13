@@ -66,6 +66,9 @@ return [
                     '~^https?://maxcdn\.bootstrapcdn\.com/[^?#]*\.css~',
                     '~^https?://idangero\.us/~',
                     '~^https?://[^/]*\.github\.io/~',
+                    '~^https?://\w+\.typekit\.net/~' => [
+                        'ieCompatible' => false
+                    ]
                 ]
             ],
 
