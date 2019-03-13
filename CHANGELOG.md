@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 1.19 - Unreleased
+
+* Add *.typekit.net to CSS whitelist.
+
+
 ## 1.18 - 2019-03-04
 
 * Don't rewrite page-relative fragment image URLs like `fill:
