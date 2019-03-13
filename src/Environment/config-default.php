@@ -68,7 +68,8 @@ return [
                     '~^https?://[^/]*\.github\.io/~',
                     '~^https?://\w+\.typekit\.net/~' => [
                         'ieCompatible' => false
-                    ]
+                    ],
+                    '~^https?://stackpath\.bootstrapcdn\.com/~'
                 ]
             ],
 
