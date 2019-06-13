@@ -1,9 +1,10 @@
 # Changelog
 
 
-## 1.19 - Unreleased
+## 1.19 - 2019-06-13
 
-* Add *.typekit.net to CSS whitelist.
+* Add *.typekit.net, stackpath.bootstrapcdn.com to CSS whitelist.
+* Don't apply rot13 on url-encoded characters.
 
 
 ## 1.18 - 2019-03-04
