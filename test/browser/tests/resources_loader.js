@@ -233,6 +233,11 @@ QUnit.module('ResourcesLoader', function (hooks) {
                 assert.notEqual(query1, query2, 'Cache markers are different');
             });
 
+            QUnit.test('Test not rotating encoded characters', function (assert) {
+                pack.add(new PackItem({}, {src: 'http://google.com'}));
+                assert.equal(pack.toQuery(), 'f=00uggc%3A%2F%2Ftbbtyr.pbz');
+            });
+
             function rot13(s) {
                 return s.replace(/([a-m])|([n-z])/gi, function (m, am, nz) {
                     return String.fromCharCode(m.charCodeAt(0) + (am ? 13 : -13));

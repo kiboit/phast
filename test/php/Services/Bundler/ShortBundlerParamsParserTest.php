@@ -22,7 +22,7 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
     public function testParamsMapping() {
         $expected = [
             [
-                'src' => 'the-source',
+                'src' => 'the://source',
                 'strip-imports' => '1',
                 'cacheMarker' => 'the-cache-marker',
                 'token' => 'the-token',
@@ -30,9 +30,14 @@ class ShortBundlerParamsParserTest extends PhastTestCase {
                 'not-mapped' => 'original'
             ]
         ];
-        $query = 's=00the-source&i&c=the-cache-marker&t=the-token&not-mapped=original&j';
+        $query = 's=00the%3A%2F%2Fsource&i&c=the-cache-marker&t=the-token&not-mapped=original&j';
         $this->assertEquals($expected, $this->parseString($query));
         $this->assertEquals($expected, $this->parseString(str_rot13($query)));
+        $this->assertEquals($expected, $this->parseString(
+            preg_replace_callback('/(%..)|([A-Z])/i', function($match) {
+                return $match[1] ? $match[1] : str_rot13($match[2]);
+            }, $query)
+        ));
     }
 
     public function testParamsGrouping() {

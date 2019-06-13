@@ -22,6 +22,11 @@ class ShortBundlerParamsParser {
         $query = $request->getHTTPRequest()->getQueryString();
         if (preg_match('/(^|&)f=/', $query)) {
             $query = str_rot13($query);
+            if (strpos($query, '%2S') !== false) {
+                $query = preg_replace_callback('/%../', function ($match) {
+                    return str_rot13($match[0]);
+                }, $query);
+            }
         }
         $result = [];
         foreach (preg_split('/&(?=s=)/', $query) as $part) {
