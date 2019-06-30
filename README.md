@@ -12,6 +12,9 @@ A free integration for WordPress is available as
 [PhastPress](https://wordpress.org/plugins/phastpress/)
 ([GitHub](https://github.com/kiboit/phastpress)).
 
+Van der Let & Partners have contributed a [OctoberCMS plugin for
+Phast](https://octobercms.com/plugin/vdlp-phast).
+
 __[Contact Kibo IT](https://www.kiboit.com/contact)__
 ([email](mailto:info@kiboit.com)): We'd love your feedback. We can help you try out
 Phast and provide custom services for website optimization.
