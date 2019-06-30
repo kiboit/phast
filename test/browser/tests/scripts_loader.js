@@ -37,7 +37,7 @@ QUnit.module('ScriptsLoader', function () {
             assert.equal(s.getAttribute('id'), 'the-id', 'id is intact');
 
             s = testDoc.createElement('script');
-            s.setAttribute('type', 'phast-script');
+            s.setAttribute('type', 'text/phast');
             utils.restoreOriginals(s);
             assert.notOk(s.hasAttribute('type'), 'type attribute has been removed when no data-phast-original-type');
         });
@@ -768,10 +768,10 @@ QUnit.module('ScriptsLoader', function () {
         makeElement({'non-phast': ''});
         makeElement({});
         makeElement({}, 'p');
-        var inlineDeferred = makeElement({'type': 'phast-script', 'defer': ''});
-        var deferred = makeElement({'type': 'phast-script', 'defer': '', 'src': 'some-src'});
-        var inline = makeElement({'type': 'phast-script'});
-        var external = makeElement({'type': 'phast-script', 'async': ''});
+        var inlineDeferred = makeElement({'type': 'text/phast', 'defer': ''});
+        var deferred = makeElement({'type': 'text/phast', 'defer': '', 'src': 'some-src'});
+        var inline = makeElement({'type': 'text/phast'});
+        var external = makeElement({'type': 'text/phast', 'async': ''});
 
         var factory = {
             makeScriptFromElement: function (element) {

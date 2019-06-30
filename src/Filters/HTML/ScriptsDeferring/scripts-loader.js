@@ -3,7 +3,7 @@ var Promise = phast.ES6Promise;
 phast.ScriptsLoader = {};
 
 phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
-    var elements = document.querySelectorAll('script[type="phast-script"]');
+    var elements = document.querySelectorAll('script[type="text/phast"]');
     var nonDeferred = [], deferred = [];
     for (var i = 0; i < elements.length; i++) {
         if (getSrc(elements[i]) !== undefined && elements[i].hasAttribute('defer')) {

@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 1.20 - 2019-06-30
+
+* Use valid value for script `type` to quiet W3C validator.
+
+
 ## 1.19 - 2019-06-13
 
 * Add *.typekit.net, stackpath.bootstrapcdn.com to CSS whitelist.

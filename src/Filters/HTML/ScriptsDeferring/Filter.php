@@ -32,7 +32,7 @@ class Filter extends BaseHTMLStreamFilter {
         if ($script->hasAttribute('type')) {
             $script->setAttribute('data-phast-original-type', $script->getAttribute('type'));
         }
-        $script->setAttribute('type', 'phast-script');
+        $script->setAttribute('type', 'text/phast');
         if ($script->hasAttribute('data-phast-params')) {
             $script->removeAttribute('src');
         }

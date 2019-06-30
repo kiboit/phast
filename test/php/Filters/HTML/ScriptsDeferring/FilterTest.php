@@ -34,12 +34,12 @@ class FilterTest extends HTMLFilterTestCase {
         $inline = $this->getMatchingElement($inline);
         $nonJS = $this->getMatchingElement($nonJS);
 
-        $this->assertEquals('phast-script', $notInline->getAttribute('type'));
+        $this->assertEquals('text/phast', $notInline->getAttribute('type'));
         $this->assertEquals('the-src', $notInline->getAttribute('src'));
         $this->assertTrue($notInline->hasAttribute('defer'));
         $this->assertTrue($notInline->hasAttribute('async'));
 
-        $this->assertEquals('phast-script', $inline->getAttribute('type'));
+        $this->assertEquals('text/phast', $inline->getAttribute('type'));
         $this->assertEquals('application/javascript', $inline->getAttribute('data-phast-original-type'));
         $this->assertFalse($inline->hasAttribute('async'));
         $this->assertEquals('the-inline-content', $inline->textContent);
