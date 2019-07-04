@@ -1,18 +1,18 @@
 # Phast
 
-__Phast__ is a unique automated page optimization suite for PHP by [Kibo
+__Phast__ is an unique automated page optimization suite for PHP by [Kibo
 IT](https://www.kiboit.com).
 
 Phast applies advanced optimization techniques to any PHP-based site without
 changing any code. Optimizations are applied in such a way that no changes to
-your site are necessary.  Sites optimized by Phast easily score 90+ in Google
+your site are necessary. Sites optimized by Phast easily score 90+ in Google
 PageSpeed Insights, and usually reach 100/100 with small adjustments.
 
 A free integration for WordPress is available as
 [PhastPress](https://wordpress.org/plugins/phastpress/)
 ([GitHub](https://github.com/kiboit/phastpress)).
 
-Van der Let & Partners have contributed a [OctoberCMS plugin for
+Van der Let & Partners have contributed an [OctoberCMS plugin for
 Phast](https://octobercms.com/plugin/vdlp-phast).
 
 __[Contact Kibo IT](https://www.kiboit.com/contact)__
