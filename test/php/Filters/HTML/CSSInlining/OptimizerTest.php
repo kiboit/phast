@@ -148,6 +148,20 @@ class OptimizerTest extends HTMLFilterTestCase {
         $this->assertEquals('@media print{}', $optimizedCSS);
     }
 
+    public function testNotClass() {
+        $css = '
+            .cls *:not(.x) { font-weight: bold; }
+        ';
+
+        $div = $this->makeElement('div', '');
+        $div->setAttribute('class', 'cls');
+        $this->body->appendChild($div);
+
+        $cssOptimized = $this->optimizeCSS($css);
+
+        $this->assertContains('.cls', $cssOptimized);
+    }
+
     private function makeElement($tag, $content) {
         $el = $this->dom->createElement($tag);
         $el->textContent = $content;
