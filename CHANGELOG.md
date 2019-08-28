@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.21 - 2019-08-26
+
+* Don't attempt to optimize CSS selectors containing parentheses, avoiding a bug
+  removing applicable :not(.class) selectors.
+
+
 ## 1.20 - 2019-06-30
 
 * Use valid value for script `type` to quiet W3C validator.
