@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\HTTP;
 
-use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\HTTP\Exceptions\HTTPError;
 use Kibo\Phast\HTTP\Exceptions\NetworkError;
 use Kibo\Phast\ValueObjects\URL;
@@ -10,14 +9,22 @@ use Kibo\Phast\ValueObjects\URL;
 class CURLClient implements Client {
 
     public function get(URL $url, array $headers = []) {
+        $this->checkCURL();
         return $this->request($url, $headers);
     }
 
     public function post(URL $url, $data, array $headers = []) {
+        $this->checkCURL();
         return $this->request($url, $headers, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $data
         ]);
+    }
+
+    private function checkCURL() {
+        if (!function_exists('curl_init')) {
+            throw new NetworkError("cURL is not installed");
+        }
     }
 
     private function request(URL $url, array $headers = [], array $opts = []) {
@@ -33,9 +40,6 @@ class CURLClient implements Client {
             }
             return strlen($headerLine);
         };
-        if (!function_exists('curl_init')) {
-            throw new NetworkError("cURL is not installed");
-        }
         $ch = curl_init((string)$url);
         curl_setopt_array($ch, $opts + [
             CURLOPT_RETURNTRANSFER => true,
