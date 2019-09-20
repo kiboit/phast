@@ -11,7 +11,7 @@ class CURLClient implements Client {
 
     public function __construct() {
         if (!function_exists('curl_init')) {
-            throw new RuntimeException("cURL must be installed to use RemoteCURLBackend");
+            throw new RuntimeException("cURL must be installed to use " . __CLASS__);
         }
     }
 
@@ -45,7 +45,8 @@ class CURLClient implements Client {
             CURLOPT_HTTPHEADER => $this->makeHeaders($headers),
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-            CURLOPT_HEADERFUNCTION => $readHeader
+            CURLOPT_HEADERFUNCTION => $readHeader,
+            CURLOPT_CAINFO => __DIR__ . '/../../certificates/mozilla-cacert.pem',
         ]);
         $responseText = @curl_exec($ch);
         if ($responseText === false) {
