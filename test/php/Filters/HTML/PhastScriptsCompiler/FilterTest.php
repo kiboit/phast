@@ -35,7 +35,7 @@ class FilterTest extends HTMLFilterTestCase {
                     yield $element;
                 }
                 if ($this->addScripts) {
-                    $context->addPhastJavascript(new PhastJavaScript('some-file'));
+                    $context->addPhastJavascript(PhastJavaScript::fromFile('some-file'));
                 }
             });
     }

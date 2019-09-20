@@ -37,7 +37,7 @@ class Filter extends BaseHTMLStreamFilter {
 
     protected function afterLoop() {
         if ($this->addScript) {
-            $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/iframe-loader.js'));
+            $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/iframe-loader.js'));
         }
     }
 

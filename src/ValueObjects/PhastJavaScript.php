@@ -1,8 +1,5 @@
 <?php
-
-
 namespace Kibo\Phast\ValueObjects;
-
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 
@@ -29,15 +26,21 @@ class PhastJavaScript {
     private $funcs;
 
     /**
-     * PhastJavaScript constructor.
      * @param string $filename
-     * @param ObjectifiedFunctions $funcs
+     * @param ObjectifiedFunctions|null $funcs
      */
-    public function __construct($filename, ObjectifiedFunctions $funcs = null) {
+    private function __construct($filename, ObjectifiedFunctions $funcs = null) {
         $this->filename = $filename;
         $this->funcs = $funcs ? $funcs : new ObjectifiedFunctions();
     }
 
+    /**
+     * @param string $filename
+     * @param ObjectifiedFunctions|null $funcs
+     */
+    public static function fromFile($filename, ObjectifiedFunctions $funcs = null) {
+        return new self($filename, $funcs);
+    }
 
     /**
      * @return string
@@ -89,8 +92,5 @@ class PhastJavaScript {
     public function getConfig() {
         return $this->config;
     }
-
-
-
 
 }

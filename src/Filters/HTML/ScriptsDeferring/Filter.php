@@ -24,8 +24,8 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function afterLoop() {
-        $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/scripts-loader.js'));
-        $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/rewrite.js'));
+        $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/scripts-loader.js'));
+        $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/rewrite.js'));
     }
 
     private function rewrite(Tag $script) {

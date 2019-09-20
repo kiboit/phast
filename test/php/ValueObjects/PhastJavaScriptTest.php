@@ -17,7 +17,7 @@ class PhastJavaScriptTest extends TestCase {
             $called = true;
             return 'the-content';
         };
-        $js = new PhastJavaScript($filename, $funcs);
+        $js = PhastJavaScript::fromFile($filename, $funcs);
         $this->assertEquals($filename, $js->getFilename());
         $this->assertEquals('the-content', $js->getContents());
         $this->assertTrue($called);

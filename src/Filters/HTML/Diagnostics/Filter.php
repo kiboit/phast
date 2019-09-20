@@ -20,7 +20,7 @@ class Filter implements HTMLStreamFilter{
 
     public function transformElements(\Traversable $elements, HTMLPageContext $context) {
         $url = (new ServiceRequest())->withUrl(URL::fromString($this->serviceUrl))->serialize();
-        $script = new PhastJavaScript(__DIR__ . '/diagnostics.js');
+        $script = PhastJavaScript::fromFile(__DIR__ . '/diagnostics.js');
         $script->setConfig('diagnostics', ['serviceUrl' => $url]);
         $context->addPhastJavaScript($script);
         foreach ($elements as $element) {

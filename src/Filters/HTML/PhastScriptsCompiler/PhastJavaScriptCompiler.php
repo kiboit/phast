@@ -66,17 +66,17 @@ class PhastJavaScriptCompiler {
     public function compileScriptsWithConfig(array $scripts) {
         $bundlerMappings = ShortBundlerParamsParser::getParamsMappings();
         $jsMappings = array_combine(array_values($bundlerMappings), array_keys($bundlerMappings));
-        $resourcesLoader = new PhastJavaScript(__DIR__ . '/resources-loader.js');
+        $resourcesLoader = PhastJavaScript::fromFile(__DIR__ . '/resources-loader.js');
         $resourcesLoader->setConfig('resourcesLoader', [
             'serviceUrl' => (string) $this->bundlerUrl,
             'shortParamsMappings' => $jsMappings
         ]);
         $scripts = array_merge([
-            new PhastJavaScript(__DIR__ . '/runner.js'),
-            new PhastJavaScript(__DIR__ . '/es6-promise.js'),
-            new PhastJavaScript(__DIR__ . '/hash.js'),
+            PhastJavaScript::fromFile(__DIR__ . '/runner.js'),
+            PhastJavaScript::fromFile(__DIR__ . '/es6-promise.js'),
+            PhastJavaScript::fromFile(__DIR__ . '/hash.js'),
             $resourcesLoader,
-            new PhastJavaScript(__DIR__ . '/phast.js')
+            PhastJavaScript::fromFile(__DIR__ . '/phast.js')
         ], $scripts);
         $compiled = $this->compileScripts($scripts);
         return '(' . $compiled . ')(' . $this->compileConfig($scripts) . ');';

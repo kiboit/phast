@@ -43,7 +43,7 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $funcs2->filemtime = function () {
             return 123;
         };
-        $scripts = [new PhastJavaScript('f1', $funcs1), new PhastJavaScript('f2', $funcs2)];
+        $scripts = [PhastJavaScript::fromFile('f1', $funcs1), PhastJavaScript::fromFile('f2', $funcs2)];
         $compiled = $this->compiler->compileScripts($scripts);
 
         $this->assertStringStartsWith('function phastScripts', $compiled);
@@ -63,7 +63,7 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $funcs1->filemtime = function () {
             return 123;
         };
-        $script = new PhastJavaScript('f1', $funcs1);
+        $script = PhastJavaScript::fromFile('f1', $funcs1);
         $script->setConfig('configKey1', ['item' => 'value']);
         $compiled = $this->compiler->compileScriptsWithConfig([$script]);
 
@@ -90,9 +90,9 @@ class PhastJavaScriptCompilerTest extends TestCase {
             return 234;
         };
 
-        $s1 = new PhastJavaScript('f1', $funcs1);
-        $s2 = new PhastJavaScript('f2', $funcs1);
-        $s3 = new PhastJavaScript('f2', $funcs2);
+        $s1 = PhastJavaScript::fromFile('f1', $funcs1);
+        $s2 = PhastJavaScript::fromFile('f2', $funcs1);
+        $s3 = PhastJavaScript::fromFile('f2', $funcs2);
 
         $compiler = new PhastJavaScriptCompiler($this->cache, '');
         $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));

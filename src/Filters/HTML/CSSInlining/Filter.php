@@ -295,12 +295,12 @@ class Filter extends BaseHTMLStreamFilter {
 
     private function addIEFallbackScript() {
         $this->logger()->info('Adding IE fallback script');
-        $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/ie-fallback.js'));
+        $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/ie-fallback.js'));
     }
 
     private function addInlinedRetrieverScript() {
         $this->logger()->info('Adding inlined retriever script');
-        $this->context->addPhastJavaScript(new PhastJavaScript(__DIR__ . '/inlined-css-retriever.js'));
+        $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/inlined-css-retriever.js'));
     }
 
     private function getImportedURLs($cssContent) {

@@ -112,7 +112,7 @@ class Filter extends BaseHTMLStreamFilter {
             'urlRefreshTime' => $this->config['urlRefreshTime'],
             'whitelist' => $this->config['match']
         ];
-        $script = new PhastJavaScript(__DIR__ . '/rewrite-function.js');
+        $script = PhastJavaScript::fromFile(__DIR__ . '/rewrite-function.js');
         $script->setConfig('script-proxy-service', $config);
         $this->context->addPhastJavaScript($script);
     }
