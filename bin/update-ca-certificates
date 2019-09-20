@@ -7,3 +7,5 @@ file="certificates/mozilla-cacert.pem"
 
 wget -O "$file~" "https://curl.haxx.se/ca/cacert.pem"
 mv "$file~" "$file"
+
+git commit -m "Update CA certificates" "$file"
