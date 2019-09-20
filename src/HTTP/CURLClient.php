@@ -9,12 +9,6 @@ use Kibo\Phast\ValueObjects\URL;
 
 class CURLClient implements Client {
 
-    public function __construct() {
-        if (!function_exists('curl_init')) {
-            throw new RuntimeException("cURL must be installed to use " . __CLASS__);
-        }
-    }
-
     public function get(URL $url, array $headers = []) {
         return $this->request($url, $headers);
     }
@@ -39,6 +33,9 @@ class CURLClient implements Client {
             }
             return strlen($headerLine);
         };
+        if (!function_exists('curl_init')) {
+            throw new NetworkError("cURL is not installed");
+        }
         $ch = curl_init((string)$url);
         curl_setopt_array($ch, $opts + [
             CURLOPT_RETURNTRANSFER => true,

@@ -28,7 +28,7 @@ class Request {
 
     public static function fromGlobals() {
         $get = [];
-        $parsed = parse_url($_SERVER['REQUEST_URI']);
+        $parsed = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
         if (isset ($parsed['query'])) {
             parse_str($parsed['query'], $get);
         }
@@ -86,6 +86,20 @@ class Request {
         if (isset ($parsed['query'])) {
             return $parsed['query'];
         }
+    }
+
+    public function getAbsoluteURI() {
+        return
+            ($this->getEnvValue('HTTPS') ? 'https' : 'http') . '://' .
+            $this->getHost() . $this->getURI();
+    }
+
+    public function getHost() {
+        return $this->getHeader('Host');
+    }
+
+    public function getURI() {
+        return $this->getEnvValue('REQUEST_URI');
     }
 
     private function getEnvValue($key) {

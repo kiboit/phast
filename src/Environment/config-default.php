@@ -3,20 +3,17 @@
 use Kibo\Phast\Common\System;
 use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\HTTP\Request;
-use Kibo\Phast\HTTP\RequestsHTTPClient;
+use Kibo\Phast\HTTP\CURLClient;
 
 return [
 
     'securityToken' => null,
 
     'retrieverMap' => [
-        $_SERVER['HTTP_HOST'] => Request::fromGlobals()->getDocumentRoot()
+        Request::fromGlobals()->getHost() => Request::fromGlobals()->getDocumentRoot(),
     ],
 
-    'httpClient' => function () {
-        Requests::set_certificate_path(__DIR__ . '/../../certificates/mozilla-cacert.pem');
-        return new RequestsHTTPClient();
-    },
+    'httpClient' => CURLClient::class,
 
     'cache' => [
         'cacheRoot' => sys_get_temp_dir() . '/phast-cache-' . (new System())->getUserId(),
@@ -44,8 +41,7 @@ return [
     'documents' => [
         'maxBufferSizeToApply' => pow(1024, 2),
 
-        'baseUrl' => (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://'
-            . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+        'baseUrl' => Request::fromGlobals()->getAbsoluteURI(),
 
         'filters' => [
 
@@ -58,7 +54,7 @@ return [
             \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
                 'optimizerSizeDiffThreshold' => 1024,
                 'whitelist' => [
-                    '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
+                    '~^https?://' . preg_quote(Request::fromGlobals()->getHost(), '~') . '/~',
                     '~^https?://fonts\.googleapis\.com/~' => [
                         'ieCompatible' => false
                     ],
@@ -102,15 +98,16 @@ return [
         'maxImageInliningSize' => 512,
 
         'whitelist' => [
-            '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/[^#?]*\.(jpe?g|gif|png)~i',
+            '~^https?://' . preg_quote(Request::fromGlobals()->getHost(), '~')
+                . '/[^#?]*\.(jpe?g|gif|png)~i',
             '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~'
         ],
 
         'filters' => [
             \Kibo\Phast\Filters\Image\ImageAPIClient\Filter::class => [
                 'api-url' => 'https://optimize.phast.io/?service=images',
-                'host-name' => $_SERVER['HTTP_HOST'],
-                'request-uri' => $_SERVER['REQUEST_URI'],
+                'host-name' => Request::fromGlobals()->getHost(),
+                'request-uri' => Request::fromGlobals()->getURI(),
                 'plugin-version' => 'phast-core-1.0'
             ]
         ]
@@ -156,7 +153,7 @@ return [
     'scripts' => [
         'removeLicenseHeaders' => false,
         'whitelist' => [
-            '~^https?://' . preg_quote($_SERVER['HTTP_HOST'], '~') . '/~',
+            '~^https?://' . preg_quote(Request::fromGlobals()->getHost(), '~') . '/~',
             '~^https?://(ssl|www)\.google-analytics\.com/(analytics|ga)\.js~',
             '~^https?://www\.googletagmanager\.com/~',
             '~^https?://www\.googleadservices\.com/~',
