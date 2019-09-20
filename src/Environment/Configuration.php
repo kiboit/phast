@@ -21,7 +21,7 @@ class Configuration {
      * @return Configuration
      */
     public static function fromDefaults() {
-        return new self(require __DIR__ . '/config-default.php');
+        return new self(DefaultConfiguration::get());
     }
 
     /**
