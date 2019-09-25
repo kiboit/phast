@@ -4,7 +4,6 @@
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 use Kibo\Phast\Cache\Cache;
-use Kibo\Phast\Common\JSMinifier;
 use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
 use Kibo\Phast\Services\ServiceRequest;
@@ -90,8 +89,7 @@ class PhastJavaScriptCompiler {
         $compiled = implode(',', array_map(function (PhastJavaScript $script) {
             return $this->interpolate($script->getContents());
         }, $scripts));
-        $compiled = 'function phastScripts(phast){phast.scripts=[' . $compiled . '];(phast.scripts.shift())();}';
-        return (new JSMinifier($compiled))->min();
+        return 'function phastScripts(phast){phast.scripts=[' . $compiled . '];(phast.scripts.shift())();}';
     }
 
     /**

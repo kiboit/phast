@@ -1,0 +1,10 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+if (!chdir(__DIR__ . '/..')) {
+    throw new RuntimeException("Could not change dir into project root");
+}
+
+echo (new Kibo\Phast\Build\Compiler())->run();

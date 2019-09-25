@@ -2,6 +2,7 @@
 namespace Kibo\Phast\ValueObjects;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Common\JSMinifier;
 
 class PhastJavaScript {
 
@@ -9,6 +10,11 @@ class PhastJavaScript {
      * @var string
      */
     private $filename;
+
+    /**
+     * @var string
+     */
+    private $contents;
 
     /**
      * @var string
@@ -29,9 +35,9 @@ class PhastJavaScript {
      * @param string $filename
      * @param ObjectifiedFunctions|null $funcs
      */
-    private function __construct($filename, ObjectifiedFunctions $funcs = null) {
+    private function __construct($filename, $contents) {
         $this->filename = $filename;
-        $this->funcs = $funcs ? $funcs : new ObjectifiedFunctions();
+        $this->contents = $contents;
     }
 
     /**
@@ -39,7 +45,21 @@ class PhastJavaScript {
      * @param ObjectifiedFunctions|null $funcs
      */
     public static function fromFile($filename, ObjectifiedFunctions $funcs = null) {
-        return new self($filename, $funcs);
+        $funcs = $funcs ? $funcs : new ObjectifiedFunctions();
+        $contents = $funcs->file_get_contents($filename);
+        if ($contents === false) {
+            throw new \RuntimeException("Failed to read script: $filename");
+        }
+        $contents = (new JSMinifier($contents))->min();
+        return new self($filename, $contents);
+    }
+
+    /**
+     * @param string $filename
+     * @param string $contents
+     */
+    public static function fromString($filename, $contents) {
+        return new self($filename, $contents);
     }
 
     /**
@@ -53,14 +73,15 @@ class PhastJavaScript {
      * @return bool|string
      */
     public function getContents() {
-        return $this->funcs->file_get_contents($this->filename);
+        return $this->contents;
     }
 
     /**
      * @return int
      */
     public function getCacheSalt() {
-        return $this->funcs->filemtime($this->filename);
+        $hash = md5($this->getContents(), true);
+        return substr(preg_replace('/^[a-z0-9]/i', '', base64_encode($hash)), 0, 16);
     }
 
     /**

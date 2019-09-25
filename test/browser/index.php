@@ -1,20 +1,23 @@
 <?php
-    require_once __DIR__ . '/../../vendor/autoload.php';
-    $config = require_once __DIR__ . '/../../src/Environment/config-default.php';
-    $signature = (new \Kibo\Phast\Security\ServiceSignatureFactory())->make($config);
 
-    $bundlerTestParams = [];
-    foreach ([1, 2, 3] as $i) {
-        $file = sprintf(
-            'http://%s%s/res/text-%s.txt',
-            $_SERVER['HTTP_HOST'],
-            dirname($_SERVER['PHP_SELF']),
-            $i
-        );
-        $bundlerTestParams[] = \Kibo\Phast\Services\Bundler\ServiceParams::fromArray(['src' => $file])
-            ->sign($signature)
-            ->serialize();
-    }
+require_once __DIR__ . '/../../build/phast.php';
+
+$signature = (new Kibo\Phast\Security\ServiceSignatureFactory())
+    ->make(Kibo\Phast\Environment\DefaultConfiguration::get());
+
+$bundlerTestParams = [];
+foreach ([1, 2, 3] as $i) {
+    $file = sprintf(
+        'http://%s%s/res/text-%s.txt',
+        $_SERVER['HTTP_HOST'],
+        dirname($_SERVER['PHP_SELF']),
+        $i
+    );
+    $bundlerTestParams[] = Kibo\Phast\Services\Bundler\ServiceParams::fromArray(['src' => $file])
+        ->sign($signature)
+        ->serialize();
+}
+
 ?>
 <!DOCTYPE html>
 <html>

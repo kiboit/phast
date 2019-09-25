@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-file="certificates/mozilla-cacert.pem"
+file="src/HTTP/cacert.pem"
 
 wget -O "$file~" "https://curl.haxx.se/ca/cacert.pem"
 mv "$file~" "$file"

@@ -1,0 +1,180 @@
+<?php
+namespace Kibo\Phast\Build;
+
+use PhpParser\Node\Name;
+use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassLike;
+use PhpParser\Node\Stmt\Interface_;
+use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor\NameResolver;
+use PhpParser\ParserFactory;
+
+class Compiler {
+
+    const INCLUDE_DIRS = [
+        'src',
+        'vendor/mrclay/jsmin-php/src',
+    ];
+
+    const EXCLUDE_DIRS = [
+        'src/Build',
+    ];
+
+    public function run() {
+        $combinedTree = [];
+
+        /** @var SplFileInfo $fileinfo */
+        foreach ($this->getSourceFiles() as $fileinfo) {
+            $tree = $this->parseFile($fileinfo);
+            $namespace = $this->getSingleNamespace($tree, $fileinfo);
+            $nameResolver = new NameResolver;
+            $nodeTraverser = new NodeTraverser;
+            $nodeTraverser->addVisitor($nameResolver);
+            $nodeTraverser->traverse([$namespace]);
+            $nodeTraverser = new NodeTraverser;
+            $nodeTraverser->addVisitor(new ScriptInliner());
+            $nodeTraverser->traverse([$namespace]);
+            $namespace->stmts = [$this->getClassLike($namespace)];
+            $combinedTree[] = $namespace;
+        }
+
+        $combinedTree = iterator_to_array($this->reorderDefinitions($combinedTree), false);
+
+        return (new ASCIIPrettyPrinter)->prettyPrintFile($combinedTree);
+    }
+
+    private function getSourceFiles() {
+        foreach (self::INCLUDE_DIRS as $dir) {
+            /** @var SplFileInfo $fileinfo */
+            foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir))
+                     as $fileinfo
+            ) {
+                foreach (self::EXCLUDE_DIRS as $exclude) {
+                    if (strpos($fileinfo->getPathname(), $exclude . '/') === 0) {
+                        continue 2;
+                    }
+                }
+                if (preg_match('/^[A-Z].*\.php$/', $fileinfo->getFilename())) {
+                    yield $fileinfo;
+                }
+            }
+        }
+    }
+
+    private function parseFile(\SplFileInfo $fileinfo) {
+        $php = file_get_contents($fileinfo->getPathname());
+        if ($php === false) {
+            throw new \RuntimeException(sprintf("%s: Could not read source file", $fileinfo->getPathname()));
+        }
+        $parser = (new ParserFactory)->create(ParserFactory::ONLY_PHP5);
+        $tree = $parser->parse($php);
+        return $tree;
+    }
+
+    /** @return Namespace_ */
+    private function getSingleNamespace(array $tree, \SplFileInfo $fileinfo) {
+        if (sizeof($tree) !== 1
+            || !($tree[0] instanceof Namespace_)
+        ) {
+            throw new \RuntimeException(sprintf(
+                "Expected a single namespace {}, instead got %s",
+                $tree ? implode(', ', array_map('get_class', $tree)) : 'none'
+            ));
+        }
+        return $tree[0];
+    }
+
+    /** @return ClassLike */
+    private function getClassLike(Namespace_ $namespace) {
+        $classes = [];
+        foreach ($namespace->stmts as $node) {
+            if ($node instanceof Use_);
+            elseif ($node instanceof ClassLike) {
+                $classes[] = $node;
+            } else {
+                throw new \RuntimeException("Unexpected top-level node: {$node}");
+            }
+        }
+        if (sizeof($classes) !== 1) {
+            $names = array_map(function (ClassLike $class) {
+                return $class->name;
+            }, $classes);
+            throw new \RuntimeException(sprintf(
+                "Expected a single declaration, instead got %s",
+                $classes ? implode(', ', $names) : 'none'
+            ));
+        }
+        return $classes[0];
+    }
+
+    /** @param Namespace_[] $namespaces */
+    private function reorderDefinitions(array $namespaces) {
+        $allNames = [];
+        foreach ($namespaces as $namespace) {
+            $allNames[$this->getClassLike($namespace)->namespacedName->toString()] = true;
+        }
+        foreach ($namespaces as $namespace) {
+            $class = $this->getClassLike($namespace);
+            foreach ($this->getFullyQualifiedNames($this->getDependencies($class)) as $dependency) {
+                if (strpos($dependency, '\\') !== false && !isset($allNames[$dependency])) {
+                    throw new \RuntimeException("{$class->namespacedName} depends on undeclared {$dependency}");
+                }
+            }
+        }
+        return $this->doReorderDefinitions($namespaces);
+    }
+
+    private function doReorderDefinitions(array $namespaces, array $declared = []) {
+        $undeclared = [];
+        foreach ($namespaces as $namespace) {
+            $class = $this->getClassLike($namespace);
+            $dependencies = $this->getFullyQualifiedNames($this->getDependencies($class));
+            $undeclaredDependencies = iterator_to_array($this->getUndeclaredDependencies($dependencies, $declared), false);
+            if (!$undeclaredDependencies) {
+                $declared[] = $class->namespacedName->toString();
+                yield $namespace;
+            } else {
+                $undeclared[] = $namespace;
+            }
+        }
+        if ($undeclared) {
+            yield from $this->doReorderDefinitions($undeclared, $declared);
+        }
+    }
+
+    /**
+     * @param \Traversable|Name[] $names
+     * @return \Generator|string[]
+     */
+    private function getFullyQualifiedNames($names) {
+        foreach ($names as $name) {
+            if (!$name->isFullyQualified()) {
+                throw new \RuntimeException("Got unresolved name {$name}");
+            }
+            yield $name->toString();
+        }
+    }
+
+    private function getDependencies(ClassLike $class) {
+        if ($class instanceof Interface_) {
+            yield from $class->extends;
+        }
+        if ($class instanceof Class_) {
+            if ($class->extends) {
+                yield $class->extends;
+            }
+            yield from $class->implements;
+        }
+    }
+
+    private function getUndeclaredDependencies($names, $declared) {
+        foreach ($names as $name) {
+            if (strpos($name, '\\') !== false && !in_array($name, $declared)) {
+                yield $name;
+            }
+        }
+    }
+
+}

@@ -33,15 +33,9 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $funcs1->file_get_contents = function () {
             return 'var    a;';
         };
-        $funcs1->filemtime = function () {
-            return 123;
-        };
         $funcs2 = new ObjectifiedFunctions();
         $funcs2->file_get_contents = function () {
             return 'var    b;';
-        };
-        $funcs2->filemtime = function () {
-            return 123;
         };
         $scripts = [PhastJavaScript::fromFile('f1', $funcs1), PhastJavaScript::fromFile('f2', $funcs2)];
         $compiled = $this->compiler->compileScripts($scripts);
@@ -59,9 +53,6 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $funcs1 = new ObjectifiedFunctions();
         $funcs1->file_get_contents = function () {
             return 'var a;';
-        };
-        $funcs1->filemtime = function () {
-            return 123;
         };
         $script = PhastJavaScript::fromFile('f1', $funcs1);
         $script->setConfig('configKey1', ['item' => 'value']);
@@ -82,12 +73,12 @@ class PhastJavaScriptCompilerTest extends TestCase {
             });
 
         $funcs1 = new ObjectifiedFunctions();
-        $funcs1->filemtime = function () {
-            return 123;
+        $funcs1->file_get_contents = function () {
+            return 'abc';
         };
         $funcs2 = new ObjectifiedFunctions();
-        $funcs2->filemtime = function () {
-            return 234;
+        $funcs2->file_get_contents = function () {
+            return 'def';
         };
 
         $s1 = PhastJavaScript::fromFile('f1', $funcs1);
