@@ -1,18 +1,25 @@
 <?php
 namespace Kibo\Phast\Build;
 
-use Kibo\Phast\Common\JSMinifier;
 use PhpParser\Node;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassLike;
+use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
 
 class ScriptInliner extends NodeVisitorAbstract {
+
+    /** @var Namespace_|null */
+    private $namespace;
 
     /** @var ClassLike|null */
     private $class;
 
     public function enterNode(Node $node) {
+        if ($node instanceof Namespace_) {
+            $this->namespace = $node;
+            return;
+        }
         if ($node instanceof ClassLike) {
             $this->class = $node;
             return;
@@ -37,10 +44,6 @@ class ScriptInliner extends NodeVisitorAbstract {
     }
 
     private function inlineValue($value, &$filename = null) {
-        if (!$this->class) {
-            throw new \RuntimeException(
-                "Expected to be inside class when seeing call with filename");
-        }
         $file = $this->getFilenameFromValue($value);
         if ($file === null) {
             return;
@@ -82,9 +85,15 @@ class ScriptInliner extends NodeVisitorAbstract {
         if ($node instanceof ClassLike) {
             $this->class = null;
         }
+        if ($node instanceof Namespace_) {
+            $this->namespace = null;
+        }
     }
 
     private function getFilenameFromValue($value) {
+        if (!isset($this->namespace->file)) {
+            throw new \RuntimeException("Namespace is missing file property");
+        }
         if (!$value instanceof Node\Expr\BinaryOp\Concat) {
             return;
         }
@@ -97,10 +106,7 @@ class ScriptInliner extends NodeVisitorAbstract {
         if (strpos($value->right->value, '/') !== 0) {
             return;
         }
-        $nsParts = explode('\\', $this->class->namespacedName);
-        $nsParts = array_slice($nsParts, 2);
-        array_pop($nsParts);
-        return implode('/', array_merge(['src'], $nsParts, [substr($value->right->value, 1)]));
+        return $this->namespace->file->getPath() . $value->right->value;
     }
 
 }

@@ -13,22 +13,36 @@ use PhpParser\ParserFactory;
 
 class Compiler {
 
-    const INCLUDE_DIRS = [
-        'src',
-        'vendor/mrclay/jsmin-php/src',
-    ];
+    private $include = [];
+    private $exclude = [];
 
-    const EXCLUDE_DIRS = [
-        'src/Build',
-    ];
+    public static function getPhastCompiler(): self {
+        $root = __DIR__ . '/../..';
 
-    public function run() {
+        return (new self)
+            ->include($root . '/src')
+            ->exclude($root . '/src/Build')
+            ->include($root . '/vendor/mrclay/jsmin-php/src');
+    }
+
+    public function include(string $dir): self {
+        $this->include[] = $dir;
+        return $this;
+    }
+
+    public function exclude(string $dir): self {
+        $this->exclude[] = $dir;
+        return $this;
+    }
+
+    public function getResult(): string {
         $combinedTree = [];
 
         /** @var SplFileInfo $fileinfo */
         foreach ($this->getSourceFiles() as $fileinfo) {
             $tree = $this->parseFile($fileinfo);
             $namespace = $this->getSingleNamespace($tree, $fileinfo);
+            $namespace->file = $fileinfo;
             $nameResolver = new NameResolver;
             $nodeTraverser = new NodeTraverser;
             $nodeTraverser->addVisitor($nameResolver);
@@ -46,12 +60,12 @@ class Compiler {
     }
 
     private function getSourceFiles() {
-        foreach (self::INCLUDE_DIRS as $dir) {
+        foreach ($this->include as $dir) {
             /** @var SplFileInfo $fileinfo */
             foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir))
                      as $fileinfo
             ) {
-                foreach (self::EXCLUDE_DIRS as $exclude) {
+                foreach ($this->exclude as $exclude) {
                     if (strpos($fileinfo->getPathname(), $exclude . '/') === 0) {
                         continue 2;
                     }
