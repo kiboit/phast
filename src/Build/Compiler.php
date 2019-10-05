@@ -83,7 +83,16 @@ class Compiler {
             throw new \RuntimeException(sprintf("%s: Could not read source file", $fileinfo->getPathname()));
         }
         $parser = (new ParserFactory)->create(ParserFactory::ONLY_PHP5);
-        $tree = $parser->parse($php);
+        try {
+            $tree = $parser->parse($php);
+        } catch (\Exception $e) {
+            throw new \RuntimeException(sprintf(
+                "%s: Caught %s: %s",
+                $fileinfo->getPathname(),
+                get_class($e),
+                $e->getMessage()
+            ), 0, $e);
+        }
         return $tree;
     }
 
