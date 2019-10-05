@@ -32,7 +32,8 @@ Create `http://your.site/phast.php` to serve optimized versions of resources:
 
 ~~~php
 <?php
-require 'vendor/kiboit/phast/src/services.php';
+require 'vendor/autoload.php';
+\Kibo\Phast\PhastServices::serve();
 ~~~
 
 Load Phast on all of your pages:
@@ -40,7 +41,8 @@ Load Phast on all of your pages:
 ~~~php
 <?php
 // At the top of your index.php
-require 'vendor/kiboit/phast/src/html-filters.php';
+require 'vendor/autoload.php';
+\Kibo\Phast\PhastDocumentFilters::deploy();
 ~~~
 
 Test your site!

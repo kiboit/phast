@@ -14,7 +14,10 @@ use Kibo\Phast\Services\ServiceRequest;
 
 class PhastServices {
 
-    public static function serve(callable $getConfig) {
+    /**
+     * @param callable|null $getConfig
+     */
+    public static function serve(callable $getConfig = null) {
         $httpRequest = Request::fromGlobals();
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $serviceParams = $serviceRequest->getParams();
@@ -34,7 +37,13 @@ class PhastServices {
             header('Cache-Control: max-age=86400');
         }
 
-        $userConfig = new Configuration($getConfig());
+        if ($getConfig === null) {
+            $config = [];
+        } else {
+            $config = $getConfig();
+        }
+
+        $userConfig = new Configuration($config);
 
         $runtimeConfig = Configuration::fromDefaults()
             ->withUserConfiguration($userConfig)

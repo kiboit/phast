@@ -21,7 +21,7 @@ class PhastDocumentFilters {
         ( </body> | </html> )
     ~xsiA";
 
-    public static function deploy(array $userConfig) {
+    public static function deploy(array $userConfig = []) {
         $runtimeConfig = self::configure($userConfig);
         if (!$runtimeConfig) {
             return;
