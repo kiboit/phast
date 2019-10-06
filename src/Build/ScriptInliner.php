@@ -6,6 +6,7 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
+use Kibo\Phast\Cache\File\Cache;
 
 class ScriptInliner extends NodeVisitorAbstract {
 
@@ -14,6 +15,26 @@ class ScriptInliner extends NodeVisitorAbstract {
 
     /** @var ClassLike|null */
     private $class;
+
+    /** @var Cache */
+    private $cache;
+
+    public function __construct() {
+        $this->cache = new Cache([
+            'cacheRoot' => sys_get_temp_dir() . '/Phast.ScriptInliner.' . posix_geteuid(),
+            'shardingDepth' => 0,
+            'garbageCollection' => [
+                'maxAge' => 86400*365,
+                'maxItems' => 1e6,
+                'probability' => 0,
+            ],
+            'diskCleanup' => [
+                'maxSize' => 1e9,
+                'probability' => 0,
+                'portionToFree' => 0,
+            ],
+        ], 'ScriptInliner');
+    }
 
     public function enterNode(Node $node) {
         if ($node instanceof Namespace_) {
@@ -60,25 +81,27 @@ class ScriptInliner extends NodeVisitorAbstract {
     }
 
     private function minifyScript(string $source): string {
-        $proc = proc_open(__DIR__ . '/../../node_modules/.bin/uglifyjs --rename',
-                          [['pipe', 'r'], ['pipe', 'w'], STDERR], $pipes);
+        return $this->cache->get('uglify:' . sha1($source), function () use ($source) {
+            $proc = proc_open(__DIR__ . '/../../node_modules/.bin/uglifyjs --rename',
+                              [['pipe', 'r'], ['pipe', 'w'], STDERR], $pipes);
 
-        if (!$proc) {
-            throw new \RuntimeException("Failed to start uglifyjs");
-        }
+            if (!$proc) {
+                throw new \RuntimeException("Failed to start uglifyjs");
+            }
 
-        fwrite($pipes[0], $source);
-        fclose($pipes[0]);
+            fwrite($pipes[0], $source);
+            fclose($pipes[0]);
 
-        $output = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
+            $output = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
 
-        $status = proc_close($proc);
-        if ($status) {
-            throw new RuntimeException("uglifyjs exited with status {$status}");
-        }
+            $status = proc_close($proc);
+            if ($status) {
+                throw new \RuntimeException("uglifyjs exited with status {$status}");
+            }
 
-        return $output;
+            return $output;
+        });
     }
 
     public function leaveNode(Node $node) {
