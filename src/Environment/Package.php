@@ -50,7 +50,7 @@ class Package {
      * @return bool
      */
     public function hasFactory() {
-        return class_exists($this->getFactoryClassName());
+        return $this->classExists($this->getFactoryClassName());
     }
 
     /**
@@ -68,7 +68,7 @@ class Package {
      * @return bool
      */
     public function hasDiagnostics() {
-        return class_exists($this->getDiagnosticsClassName());
+        return $this->classExists($this->getDiagnosticsClassName());
     }
 
     /**
@@ -92,6 +92,13 @@ class Package {
 
     private function getClassName($class) {
         return $this->namespace . '\\' . $class;
+    }
+
+    private function classExists($class) {
+        // Don't trigger any autoloaders if Phast has been compiled into a
+        // single file, and avoid triggering Magento code generation.
+        $useAutoloader = basename(__FILE__) == 'Package.php';
+        return class_exists($class, $useAutoloader);
     }
 
 }
