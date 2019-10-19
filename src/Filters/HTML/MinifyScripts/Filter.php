@@ -31,7 +31,7 @@ class Filter implements HTMLStreamFilter {
                 if ($this->isJSElement($element)
                     && preg_match('~[()[\]{};]\s~', $content)
                 ) {
-                    $content = $this->cache->get(uniqid(), function () use ($content) {
+                    $content = $this->cache->get(md5($content), function () use ($content) {
                         return (new JSMinifier($content, true))->min();
                     });
                 } elseif(($data = @json_decode($content)) !== null
