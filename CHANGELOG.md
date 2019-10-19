@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.22 - 2019-10-20
+
+* Remove empty media queries from optimize CSS.
+* Use token to refer to bundled resources, to shorten URL length.
+* Clean up server-side statistics.
+* Add HTML minification (whitespace removal).
+* Add inline JavaScript and JSON minification (whitespace removal.)
+* Add a build system to generate a single PHP file with minified scripts.
+
 
 ## 1.21 - 2019-08-26
 
