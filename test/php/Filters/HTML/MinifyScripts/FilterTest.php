@@ -2,12 +2,17 @@
 namespace Kibo\Phast\Filters\HTML\MinifyScripts;
 
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
+use Kibo\Phast\Cache\File\Cache;
 
 class FilterTest extends HTMLFilterTestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->filter = new Filter();
+        $cache = $this->createMock(Cache::class);
+        $cache->method('get')->will($this->returnCallback(function ($k, $cb) {
+            return $cb();
+        }));
+        $this->filter = new Filter($cache);
     }
 
     public function testMinifyScripts() {

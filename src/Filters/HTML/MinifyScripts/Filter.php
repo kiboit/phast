@@ -6,9 +6,16 @@ use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
+use Kibo\Phast\Cache\File\Cache;
 
 class Filter implements HTMLStreamFilter {
     use JSDetectorTrait;
+
+    private $cache;
+
+    public function __construct(Cache $cache) {
+        $this->cache = $cache;
+    }
 
     public function transformElements(\Traversable $elements, HTMLPageContext $context) {
         $inTags = [
@@ -21,8 +28,12 @@ class Filter implements HTMLStreamFilter {
                 && ($content = $element->getTextContent()) !== ''
             ) {
                 $content = trim($content);
-                if ($this->isJSElement($element)) {
-                    $content = (new JSMinifier($content, true))->min();
+                if ($this->isJSElement($element)
+                    && preg_match('~[()[\]{};]\s~', $content)
+                ) {
+                    $content = $this->cache->get(uniqid(), function () use ($content) {
+                        return (new JSMinifier($content, true))->min();
+                    });
                 } elseif(($data = @json_decode($content)) !== null
                          && ($newContent = json_encode($data,
                                  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false
