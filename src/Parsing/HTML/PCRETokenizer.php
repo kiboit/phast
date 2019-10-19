@@ -6,7 +6,7 @@ use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Comment;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Junk;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class PCRETokenizer {
@@ -84,7 +84,7 @@ class PCRETokenizer {
 
         while (preg_match($this->mainPattern, $data, $match, PREG_OFFSET_CAPTURE, $offset)) {
             if ($match[0][1] > $offset) {
-                $element = new Element();
+                $element = new Junk();
                 $element->originalString = substr($data, $offset, $match[0][1] - $offset);
                 yield $element;
             }
@@ -113,7 +113,7 @@ class PCRETokenizer {
         }
 
         if ($offset < strlen($data) - 1) {
-            $element = new Element();
+            $element = new Junk();
             $element->originalString = substr($data, $offset);
             yield $element;
         }

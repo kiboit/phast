@@ -15,7 +15,7 @@ class ClosingTag extends Element {
      * @param string $tagName
      */
     public function __construct($tagName) {
-        $this->tagName = $tagName;
+        $this->tagName = strtolower($tagName);
     }
 
     /**

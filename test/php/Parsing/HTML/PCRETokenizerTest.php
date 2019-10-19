@@ -4,7 +4,7 @@ namespace Kibo\Phast\Parsing\HTML;
 
 
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
-use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
+use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Junk;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
@@ -29,7 +29,7 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
             [Tag::class, '<html>'],
             [Tag::class, '<head>'],
             [Tag::class, '<title>'],
-            [Element::class, 'Hello, World!'],
+            [Junk::class, 'Hello, World!'],
             [ClosingTag::class, '</title>'],
             [ClosingTag::class, '</head>'],
             [Tag::class, '<body>'],
@@ -40,7 +40,7 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
 
     private function checkTokens(array $expected, \Traversable $actual) {
         foreach ($actual as $token) {
-            if ($token instanceof Element && trim((string) $token) === '') {
+            if ($token instanceof Junk && trim((string) $token) === '') {
                 continue;
             }
             $this->assertNotEmpty($expected);
