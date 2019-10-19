@@ -120,7 +120,7 @@ class FilterTest extends PhastTestCase {
         $buffer = '<html><body></body></html>';
         $this->shouldTransform();
         $actual = $this->filter->apply($buffer);
-        $this->assertContains("<!--\n[Phast] Server-side performance metrics\n", $actual);
+        $this->assertContains("<!-- [Phast] Document optimized", $actual);
     }
 
     public function testShouldNotAddStats() {
@@ -128,7 +128,7 @@ class FilterTest extends PhastTestCase {
         $buffer = '<html><body></body></html>';
         $this->shouldTransform();
         $actual = $this->filter->apply($buffer);
-        $this->assertNotContains("<!--\n[Phast] Server-side performance metrics\n", $actual);
+        $this->assertNotContains("<!-- [Phast] Document optimized", $actual);
     }
 
     private function shouldTransform() {
