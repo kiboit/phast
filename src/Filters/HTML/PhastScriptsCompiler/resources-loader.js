@@ -103,15 +103,21 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
     };
 
     this.add = function (packItem) {
-        if (!items[packItem.params.token]) {
-            items[packItem.params.token] = {
+        var key;
+        if (packItem.params.token) {
+            key = 'token=' + packItem.params.token;
+        } else if (packItem.params.ref) {
+            key = 'ref=' + packItem.params.ref;
+        } else {
+            key = '';
+        }
+        if(!items[key]) {
+            items[key] = {
                 params: packItem.params,
                 requests: [packItem.request]
             };
         } else {
-            items[packItem.params.token]
-                .requests
-                .push(packItem.request);
+            items[key].requests.push(packItem.request);
         }
     };
 
@@ -149,16 +155,17 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
     };
 
     function getSortedTokens() {
-        var paramsArr = [];
-        for (var token in items) {
-            paramsArr.push(items[token].params);
+        return Object.keys(items).sort(function (a, b) {
+            return gt(a, b) ? 1 : (gt(b, a) ? -1 : 0);
+        });
+        function gt(a, b) {
+            if (typeof items[a].params.src !== 'undefined'
+                && typeof items[b].params.src !== 'undefined'
+            ) {
+                return items[a].params.src > items[b].params.src;
+            }
+            return a > b;
         }
-        paramsArr.sort(function (a, b) {
-            return a.src > b.src ? 1 : -1
-        })
-        return paramsArr.map(function (item) {
-            return item.token;
-        })
     }
 
     function compressSrc(src, lastSrc) {

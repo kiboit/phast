@@ -6,7 +6,7 @@ QUnit.module('ResourcesLoader', function (hooks) {
 
     var client,
         documentParams = [],
-        paramsMappings = {'src': 's', 'strip-imports': 'i', 'cacheMarker': 'c', 'token': 't'};
+        paramsMappings = {'ref': 'r', 'src': 's', 'strip-imports': 'i', 'cacheMarker': 'c', 'token': 't'};
 
     function makeClient (serviceUrl) {
         return new phast.ResourceLoader.BundlerServiceClient(serviceUrl, paramsMappings);
@@ -198,9 +198,11 @@ QUnit.module('ResourcesLoader', function (hooks) {
                 };
                 var params = [
                     {src: 'aaaaaaaaaaaaaaa', token: 1},
+                    {ref: 'reffyref'},
                     {src: 'bbbbbbbbbbbbbbb', token: 2},
                     {src: 'aaaaaaaaaaaaaaaaaaa', token: 3},
                     {src: 'bbbbbbbbbbbbbbbcccc', token: 4},
+                    {ref: 'raffyrof'},
                     {src: 'bbbbbbbd', token: 5},
                     {src: repeat('c', 1297), token: 6},
                     {src: repeat('c', 1297) + 'd', token: 7}
@@ -209,7 +211,9 @@ QUnit.module('ResourcesLoader', function (hooks) {
                     pack.add(new PackItem({}, item));
                 });
                 var expected
-                    = 's=00aaaaaaaaaaaaaaa&t=1'
+                    = 'r=raffyrof'
+                    + '&r=reffyref'
+                    + '&s=00aaaaaaaaaaaaaaa&t=1'
                     + '&s=0faaaa&t=3'
                     + '&s=00bbbbbbbbbbbbbbb&t=2'
                     + '&s=0fcccc&t=4'
