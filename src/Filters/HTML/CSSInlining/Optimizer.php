@@ -58,6 +58,8 @@ class Optimizer {
             }
         }
 
+        $output = $this->removeEmptyMediaQueries($output);
+
         return trim($output);
     }
 
@@ -163,6 +165,10 @@ class Optimizer {
         }
 
         return $classes;
+    }
+
+    private function removeEmptyMediaQueries($css) {
+        return preg_replace('~@media\s++[A-Z0-9():,\s-]++\s*+{}~i', '', $css);
     }
 
 }

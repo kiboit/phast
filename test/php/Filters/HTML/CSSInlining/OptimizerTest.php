@@ -141,11 +141,11 @@ class OptimizerTest extends HTMLFilterTestCase {
      * a media query, because it was preceded by '{' and thus ignored.
      */
     public function testOptimizeCSSInMediaQuery() {
-        $css = '@media print{.hidden-print{display:none}}';
+        $css = '@media print{.hidden-print{display:none}}a{display:block;}';
 
         $optimizedCSS = $this->optimizeCSS($css);
 
-        $this->assertEquals('@media print{}', $optimizedCSS);
+        $this->assertEquals('a{display:block;}', $optimizedCSS);
     }
 
     public function testNotClass() {
@@ -160,6 +160,19 @@ class OptimizerTest extends HTMLFilterTestCase {
         $cssOptimized = $this->optimizeCSS($css);
 
         $this->assertContains('.cls', $cssOptimized);
+    }
+
+    public function testRemoveEmptyMediaQueries() {
+        $css = '@media screen{.present{color:blue;}}' .
+               '@media print and (max-width: 640px){.not-present{color:green;}}';
+
+        $div = $this->makeElement('div', '');
+        $div->setAttribute('class', 'present');
+        $this->body->appendChild($div);
+
+        $cssOptimized = $this->optimizeCSS($css);
+
+        $this->assertEquals('@media screen{.present{color:blue;}}', $cssOptimized);
     }
 
     private function makeElement($tag, $content) {
