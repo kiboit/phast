@@ -2,10 +2,13 @@ PHP56 = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php56.i
 PHP56MIN = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php56-min.image)
 
 
-.PHONY : all test test-local dist build clean
+.PHONY : all watch test test-local dist clean
 
 
-all : vendor/autoload.php
+all : build/phast.php build/cacert.pem
+
+watch :
+	git ls-files src | entr make
 
 test : all docker/php56.image docker/php56-min.image
 	$(PHP56) vendor/bin/phpunit
@@ -17,18 +20,16 @@ test-local : all
 dist : all
 	bin/package
 
-build : build/phast.php build/cacert.pem
+clean :
+	rm -rf build
 
-build/phast.php : vendor/autoload.php
+
+build/phast.php : vendor/autoload.php $(shell git ls-files src)
 	mkdir -p $(dir $@)
 	bin/compile > $@
 
 build/cacert.pem : src/HTTP/cacert.pem
 	cp $< $@
-
-clean :
-	rm -rf build
-
 
 vendor/autoload.php : composer.json composer.lock
 	composer install
