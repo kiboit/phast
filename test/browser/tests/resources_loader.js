@@ -181,11 +181,11 @@ QUnit.module('ResourcesLoader', function (hooks) {
 
             QUnit.test('Test skipping the value for `strip-imports`', function (assert) {
                 pack.add(new PackItem({}, {'strip-imports': 1}));
-                assert.equal(rot13(pack.toQuery()), 'i', 'Skips value for default mapping');
+                assert.equal(pack.toQuery(), 'i', 'Skips value for default mapping');
 
                 var otherPack = new RequestsPack({'strip-imports': 'm'});
                 otherPack.add(new PackItem({}, {'strip-imports': 1}));
-                assert.equal(rot13(otherPack.toQuery()), 'm', 'Skips value for alternate mapping');
+                assert.equal(otherPack.toQuery(), 'm', 'Skips value for alternate mapping');
             });
 
             QUnit.test('Test src compression and grouping', function (assert) {
@@ -221,13 +221,13 @@ QUnit.module('ResourcesLoader', function (hooks) {
 
             QUnit.test('Test building big cache marker', function (assert) {
                 pack.add(new PackItem({}, {cacheMarker: 'a', token: 1}));
-                var query1 = rot13(pack.toQuery());
+                var query1 = pack.toQuery();
 
                 var cacheMarkerPattern = /^c=\d+/;
                 assert.ok(cacheMarkerPattern.test(query1), 'Has set cache marker 1');
 
                 pack.add(new PackItem({}, {cacheMarker: 'b', token: 2}));
-                var query2 = rot13(pack.toQuery());
+                var query2 = pack.toQuery();
 
                 assert.ok(cacheMarkerPattern.test(query2), 'Has set cache marker 2');
                 assert.notEqual(query1, query2, 'Cache markers are different');
