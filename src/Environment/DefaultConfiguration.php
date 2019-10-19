@@ -52,6 +52,10 @@ class DefaultConfiguration {
 
                     \Kibo\Phast\Filters\HTML\CommentsRemoval\Filter::class => [],
 
+                    \Kibo\Phast\Filters\HTML\Minify\Filter::class => [],
+
+                    \Kibo\Phast\Filters\HTML\MinifyScripts\Filter::class => [],
+
                     \Kibo\Phast\Filters\HTML\BaseURLSetter\Filter::class => [],
 
                     \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [],
