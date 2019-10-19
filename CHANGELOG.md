@@ -6,7 +6,7 @@
 * Use token to refer to bundled resources, to shorten URL length.
 * Clean up server-side statistics.
 * Add HTML minification (whitespace removal).
-* Add inline JavaScript and JSON minification (whitespace removal.)
+* Add inline JavaScript and JSON minification (whitespace removal).
 * Add a build system to generate a single PHP file with minified scripts.
 
 
