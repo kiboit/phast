@@ -8,7 +8,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\Bundler\ServiceParams;
-use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
+use Kibo\Phast\Services\Bundler\TokenRefMaker;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
@@ -88,6 +88,11 @@ class Filter extends BaseHTMLStreamFilter {
      */
     private $optimizer;
 
+    /**
+     * @var TokenRefMaker
+     */
+    private $tokenRefMaker;
+
     public function __construct(
         ServiceSignature $signature,
         URL $baseURL,
@@ -95,7 +100,8 @@ class Filter extends BaseHTMLStreamFilter {
         Retriever $localRetriever,
         Retriever $retriever,
         OptimizerFactory $optimizerFactory,
-        ServiceFilter $cssFilter
+        ServiceFilter $cssFilter,
+        TokenRefMaker $tokenRefMaker
     ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
@@ -110,6 +116,7 @@ class Filter extends BaseHTMLStreamFilter {
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;
         $this->cssFilter = $cssFilter;
+        $this->tokenRefMaker = $tokenRefMaker;
 
         foreach ($config['whitelist'] as $key => $value) {
             if (!is_array($value)) {
@@ -318,6 +325,7 @@ class Filter extends BaseHTMLStreamFilter {
             $style->setAttribute('media', $media);
         }
         if ($optimized) {
+            $style->setAttribute('data-phast-original-src', $url->toString());
             $style->setAttribute('data-phast-params', $this->makeServiceParams($url, $stripImports));
         }
         $style->setTextContent($content);
@@ -352,6 +360,7 @@ class Filter extends BaseHTMLStreamFilter {
         }
         return ServiceParams::fromArray($params)
                 ->sign($this->signature)
+                ->replaceByTokenRef($this->tokenRefMaker)
                 ->serialize();
     }
 

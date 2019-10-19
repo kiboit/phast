@@ -8,6 +8,7 @@ use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
+use Kibo\Phast\Services\Bundler\TokenRefMaker;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
@@ -563,6 +564,9 @@ class FilterTest extends HTMLFilterTestCase {
                 return $css;
             });
 
+        $tokenRefCache = $this->createMock(Cache::class);
+        $tokenRefMaker = new TokenRefMaker($tokenRefCache);
+
         $filter = new Filter(
             $signature,
             URL::fromString(self::BASE_URL),
@@ -570,7 +574,8 @@ class FilterTest extends HTMLFilterTestCase {
             $localRetriever,
             $retriever,
             $optimizerFactory,
-            $cssFilter
+            $cssFilter,
+            $tokenRefMaker
         );
         $this->filter = $filter;
         return parent::applyFilter($htmlInput, $skipResultParsing);

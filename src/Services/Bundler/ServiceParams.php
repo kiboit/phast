@@ -81,4 +81,12 @@ class ServiceParams {
         });
         return $signature->sign(json_encode($params));
     }
+
+    public function replaceByTokenRef(TokenRefMaker $maker) {
+        if (!isset($this->token)) {
+            return $this;
+        }
+        $ref = $maker->getRef($this->token, $this->toArray());
+        return $ref ? ServiceParams::fromArray(['ref' => $ref]) : $this;
+    }
 }

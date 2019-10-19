@@ -1,3 +1,5 @@
+/* global phast */
+
 var Promise = phast.ES6Promise;
 
 var go = phast.once(loadScripts);

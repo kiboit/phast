@@ -10,6 +10,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\Bundler\ServiceParams;
+use Kibo\Phast\Services\Bundler\TokenRefMaker;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
@@ -32,6 +33,8 @@ class Filter extends BaseHTMLStreamFilter {
      */
     private $retriever;
 
+    private $tokenRefMaker;
+
     /**
      * @var ObjectifiedFunctions
      */
@@ -46,11 +49,13 @@ class Filter extends BaseHTMLStreamFilter {
         array $config,
         ServiceSignature $signature,
         LocalRetriever $retriever,
+        TokenRefMaker $tokenRefMaker,
         ObjectifiedFunctions $functions = null
     ) {
         $this->config = $config;
         $this->signature = $signature;
         $this->retriever = $retriever;
+        $this->tokenRefMaker = $tokenRefMaker;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
@@ -103,6 +108,7 @@ class Filter extends BaseHTMLStreamFilter {
                 'isScript' => '1'
             ])
             ->sign($this->signature)
+            ->replaceByTokenRef($this->tokenRefMaker)
             ->serialize();
     }
 

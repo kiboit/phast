@@ -1,3 +1,5 @@
+/* globals phast */
+
 var Promise = phast.ES6Promise;
 
 phast.ScriptsLoader = {};
@@ -306,7 +308,7 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
     };
 
     this.describe = function () {
-        return 'bundled async script at ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
+        return 'bundled async script at ' + element.getAttribute('data-phast-original-src');
     };
 };
 
@@ -336,7 +338,7 @@ phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fa
     };
 
     this.describe = function () {
-        return 'bundled sync script at ' + JSON.parse(element.getAttribute('data-phast-params'))['src'];
+        return 'bundled sync script at ' + element.getAttribute('data-phast-original-src');
     };
 };
 

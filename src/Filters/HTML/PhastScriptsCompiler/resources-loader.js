@@ -1,3 +1,5 @@
+/* globals phast */
+
 var Promise = phast.ES6Promise.Promise;
 
 phast.ResourceLoader = function (client, cache) {
@@ -143,12 +145,7 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
         if (cacheMarkers.length > 0) {
             parts.unshift('c=' + phast.hash(cacheMarkers.join('|'), 23045));
         }
-        return parts.join('&').replace(/(%..)|([A-M])|([N-Z])/gi, function (m, e, am, nz) {
-            if (e) {
-                return m;
-            }
-            return String.fromCharCode(m.charCodeAt(0) + (am ? 13 : -13));
-        });
+        return obfuscateQuery(parts.join('&'));
     };
 
     function getSortedTokens() {
@@ -185,6 +182,18 @@ phast.ResourceLoader.BundlerServiceClient.RequestsPack = function (shortParamsMa
         var p1 = dec % 36;
         var p2 = Math.floor((dec - p1) / 36);
         return charsTable[p2] + charsTable[p1];
+    }
+
+    function obfuscateQuery(query) {
+        if (!/(^|&)s=/.test(query)) {
+            return query;
+        }
+        return query.replace(/(%..)|([A-M])|([N-Z])/gi, function (m, e, am, nz) {
+            if (e) {
+                return m;
+            }
+            return String.fromCharCode(m.charCodeAt(0) + (am ? 13 : -13));
+        });
     }
 
     this.handleResponse = function (responseText) {

@@ -41,26 +41,22 @@ class Service {
      */
     private $jsFilter;
 
-    /**
-     * Service constructor.
-     * @param ServiceSignature $signature
-     * @param Retriever $cssRetriever
-     * @param ServiceFilter $cssFilter
-     * @param Retriever $jsRetriever
-     * @param ServiceFilter $jsFilter
-     */
+    private $tokenRefMaker;
+
     public function __construct(
         ServiceSignature $signature,
         Retriever $cssRetriever,
         ServiceFilter $cssFilter,
         Retriever $jsRetriever,
-        ServiceFilter $jsFilter
+        ServiceFilter $jsFilter,
+        TokenRefMaker $tokenRefMaker
     ) {
         $this->signature = $signature;
         $this->cssRetriever = $cssRetriever;
         $this->cssFilter = $cssFilter;
         $this->jsRetriever = $jsRetriever;
         $this->jsFilter = $jsFilter;
+        $this->tokenRefMaker = $tokenRefMaker;
     }
 
 
@@ -79,6 +75,15 @@ class Service {
         yield '[';
         $firstRow = true;
         foreach ($this->getParams($request) as $key => $params) {
+            if (isset ($params['ref'])) {
+                $ref = $params['ref'];
+                $params = $this->tokenRefMaker->getParams($ref);
+                if (!$params) {
+                    $this->logger()->error('Could not resolve ref {ref}', ['ref' => $ref]);
+                    yield $this->generateJSONRow(['status' => 404], $firstRow);
+                    continue;
+                }
+            }
             if (!isset ($params['src'])) {
                 $this->logger()->error('No src found for set {key}', ['key' => $key]);
                 yield $this->generateJSONRow(['status' => 404], $firstRow);

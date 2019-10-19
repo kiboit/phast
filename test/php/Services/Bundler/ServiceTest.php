@@ -9,6 +9,7 @@ use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\Bundler\TokenRefMaker;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\Resource;
@@ -59,13 +60,16 @@ class ServiceTest extends PhastTestCase {
                 return $resource->withContent($newContent);
             });
 
+        $tokenCache = $this->createMock(Cache::class);
+        $tokenRefMaker = new TokenRefMaker($tokenCache);
+
         $this->service = new Service(
             $this->signature,
             $this->retriever,
             $this->filter,
             $this->retriever,
             $this->filter,
-            ['/^scripts\.only\.here/']
+            $tokenRefMaker
         );
     }
 
@@ -142,13 +146,13 @@ class ServiceTest extends PhastTestCase {
         $this->assertEquals(500, $content[1]->status);
     }
 
-    public function test404OnMissingSrc() {
+    public function testEmptyResultOnMissingSrc() {
         $params = $this->makeParams([
             ['key' => 'val']
         ]);
         $content = $this->doRequest($params);
 
-        $this->assertEquals(404, $content[0]->status);
+        $this->assertEmpty($content);
     }
 
     public function testIgnoreMalformedParams() {
@@ -177,7 +181,7 @@ class ServiceTest extends PhastTestCase {
             $this->filter,
             $jsRetriever,
             $jsFilter,
-            ['//']
+            new TokenRefMaker($this->createMock(Cache::class))
         );
 
         $params = $this->makeParams([['src' => 'some-src', 'isScript' => '1']]);

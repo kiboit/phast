@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
+use Kibo\Phast\Services\Bundler\TokenRefMakerFactory;
 
 class Factory implements HTMLFilterFactory {
 
@@ -18,7 +19,8 @@ class Factory implements HTMLFilterFactory {
         return new Filter(
             $filterConfig,
             (new ServiceSignatureFactory())->make($config),
-            new LocalRetriever($config['retrieverMap'])
+            new LocalRetriever($config['retrieverMap']),
+            (new TokenRefMakerFactory())->make($config)
         );
     }
 

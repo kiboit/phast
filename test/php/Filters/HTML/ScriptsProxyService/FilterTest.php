@@ -2,10 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
+use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\Services\Bundler\TokenRefMaker;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
@@ -52,6 +54,7 @@ class FilterTest extends HTMLFilterTestCase {
             $this->config,
             $signature,
             $this->retriever,
+            new TokenRefMaker($this->createMock(Cache::class)),
             $functions
         );
     }

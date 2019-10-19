@@ -14,59 +14,80 @@ class ShortBundlerParamsParser {
             'i' => 'strip-imports',
             'c' => 'cacheMarker',
             't' => 'token',
-            'j' => 'isScript'
+            'j' => 'isScript',
+            'r' => 'ref',
         ];
     }
 
     public function parse(ServiceRequest $request) {
         $query = $request->getHTTPRequest()->getQueryString();
         if (preg_match('/(^|&)f=/', $query)) {
-            $query = str_rot13($query);
-            if (strpos($query, '%2S') !== false) {
-                $query = preg_replace_callback('/%../', function ($match) {
-                    return str_rot13($match[0]);
-                }, $query);
-            }
+            $query = $this->unobfuscateQuery($query);
         }
+        $query = $this->parseQuery($query);
+        $query = $this->unshortenParams($query);
+        $query = $this->uncompressSrcs($query);
         $result = [];
-        foreach (preg_split('/&(?=s=)/', $query) as $part) {
-            $parsed = $this->map($this->parseQuery($part));
-            if (isset ($parsed['src'])) {
-                $result[] = $parsed;
+        $current = null;
+        foreach ($query as $key => $value) {
+            if (in_array($key, ['src', 'ref'])) {
+                if ($current) {
+                    $result[] = $current;
+                }
+                $current = [];
+            }
+            if ($current !== null) {
+                $current[$key] = $value;
             }
         }
-        return empty ($result) ? [$parsed] : $this->uncompressSrcs($result);
+        if ($current) {
+            $result[] = $current;
+        }
+        return $result;
+    }
+
+    private function unobfuscateQuery($query) {
+        $query = str_rot13($query);
+        if (strpos($query, '%2S') !== false) {
+            $query = preg_replace_callback('/%../', function ($match) {
+                return str_rot13($match[0]);
+            }, $query);
+        }
+        return $query;
     }
 
     private function parseQuery($string) {
-        $parsed = [];
-        parse_str($string, $parsed);
-        return $parsed;
+        $pieces = explode('&', $string);
+        foreach ($pieces as $piece) {
+            $element = explode('=', $piece, 2);
+            $key = urldecode($element[0]);
+            $value = isset($element[1]) ? urldecode($element[1]) : '';
+            yield $key => $value;
+        }
     }
 
-    private function map($parsed) {
-        $mapped = [];
+    private function unshortenParams(\Generator $query) {
         $mappings = self::getParamsMappings();
-        foreach ($parsed as $key => $value) {
+        foreach ($query as $key => $value) {
             if (isset ($mappings[$key])) {
-                $mapped[$mappings[$key]] = $value === '' ? '1' : $value;
+                yield $mappings[$key] => $value === '' ? '1' : $value;
             } else {
-                $mapped[$key] = $value;
+                yield $key => $value;
             }
         }
-        return $mapped;
     }
 
-    private function uncompressSrcs(array $params) {
+    private function uncompressSrcs(\Generator $query) {
         $lastUrl = '';
-        foreach ($params as &$item) {
-            $src = $item['src'];
-            $prefixLength = (int) base_convert(substr($src, 0, 2), 36, 10);
-            $suffix = substr($src, 2);
-            $item['src'] = substr($lastUrl, 0, $prefixLength) . $suffix;
-            $lastUrl = $item['src'];
+        foreach ($query as $key => $value) {
+            if ($key === 'src') {
+                $prefixLength = (int) base_convert(substr($value, 0, 2), 36, 10);
+                $suffix = substr($value, 2);
+                $value = substr($lastUrl, 0, $prefixLength) . $suffix;
+                $lastUrl = $value;
+            }
+            yield $key => $value;
         }
-        return $params;
     }
 
 }

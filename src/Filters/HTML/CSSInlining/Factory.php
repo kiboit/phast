@@ -10,6 +10,7 @@ use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\ValueObjects\URL;
+use Kibo\Phast\Services\Bundler\TokenRefMakerFactory;
 
 class Factory implements HTMLFilterFactory {
 
@@ -43,7 +44,8 @@ class Factory implements HTMLFilterFactory {
             $localRetriever,
             $retriever,
             new OptimizerFactory($config),
-            (new CSSCompositeFactory())->make($config)
+            (new CSSCompositeFactory())->make($config),
+            (new TokenRefMakerFactory())->make($config)
         );
     }
 
