@@ -57,7 +57,8 @@ class Configuration {
         $switchables = [
             &$config['documents']['filters'],
             &$config['images']['filters'],
-            &$config['logging']['logWriters']
+            &$config['logging']['logWriters'],
+            &$config['styles']['filters'],
         ];
         foreach ($switchables as &$switchable) {
             $switchable = array_filter($switchable, function ($item) {
