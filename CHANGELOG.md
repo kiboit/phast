@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.23 - 2019-11-12
+
+* Make CSS filters configurable using switches.
+
+
 ## 1.22 - 2019-10-20
 
 * Remove empty media queries from optimize CSS.
