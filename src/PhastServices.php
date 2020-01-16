@@ -119,7 +119,9 @@ class PhastServices {
             'Expires' => gmdate('D, d M Y H:i:s', time() + $maxAge) . ' GMT',
             'X-Accel-Expires' => $maxAge,
             'Access-Control-Allow-Origin' => '*',
-            'ETag' => self::generateETag($headers, $content)
+            'ETag' => self::generateETag($headers, $content),
+            'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => "default-src 'none'",
         ];
 
         $funcs->http_response_code($response->getCode());
