@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24 - 2020-01-16
+
+* Send Content-Security-Policy and X-Content-Type-Options headers on resources
+  to speculatively prevent any XSS attacks via MIME sniffing.
+
+
 ## 1.23 - 2019-11-12
 
 * Make CSS filters configurable using switches.
