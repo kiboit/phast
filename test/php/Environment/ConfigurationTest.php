@@ -38,6 +38,10 @@ class ConfigurationTest extends TestCase {
             ]
         ],
 
+        'styles' => [
+            'filters' => [],
+        ],
+
         'switches' => [
             'phast' => true,
             'diagnostics' => false

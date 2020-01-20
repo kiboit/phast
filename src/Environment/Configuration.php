@@ -61,6 +61,9 @@ class Configuration {
             &$config['styles']['filters'],
         ];
         foreach ($switchables as &$switchable) {
+            if (!is_array($switchable)) {
+                continue;
+            }
             $switchable = array_filter($switchable, function ($item) {
                 if (!isset ($item['enabled'])) {
                     return true;
