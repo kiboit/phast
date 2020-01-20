@@ -29,7 +29,7 @@ class FilterTest extends HTMLFilterTestCase {
             </html>
         ';
         $actual = $this->applyFilter($html, true);
-        $expected = ' <html> <head> <title>Hello, World!</title> </head> <body> <h1> Here we go! </h1> <textarea>  And  some  more  </TEXTAREA> Minify this <pre>  This is <b>v  e  r  y</b> cool  </pre> </body> </html>';
+        $expected = "\n<html>\n<head>\n<title>Hello, World!</title>\n</head>\n<body>\n<h1>\nHere\nwe\ngo!\n</h1>\n<textarea>  And  some  more  </TEXTAREA>\nMinify this\n<pre>  This is <b>v  e  r  y</b> cool  </pre>\n</body>\n</html>";
         $this->assertStringStartsWith($expected, $actual);
     }
 

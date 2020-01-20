@@ -20,7 +20,9 @@ class Filter implements HTMLStreamFilter {
             } elseif ($element instanceof ClosingTag && !empty($inTags[$element->getTagName()])) {
                 $inTags[$element->getTagName()]--;
             } elseif ($element instanceof Junk && !array_sum($inTags)) {
-                $element->originalString = preg_replace('~\s++~', ' ', $element->originalString);
+                $element->originalString = preg_replace_callback('~\s++~', function ($match) {
+                    return strpos($match[0], "\n") === false ? ' ' : "\n";
+                }, $element->originalString);
             }
             yield $element;
         }
