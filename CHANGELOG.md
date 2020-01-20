@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.25 - 2020-01-20
+
+* Keep newlines when minifying HTML.
+
+
 ## 1.24 - 2020-01-16
 
 * Send Content-Security-Policy and X-Content-Type-Options headers on resources
