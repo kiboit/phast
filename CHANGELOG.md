@@ -1,5 +1,14 @@
 # Changelog
 
+
+## 1.27 - 2020-01-22
+
+* Don't send WebP images via Cloudflare.  Cloudflare [does not support `Vary:
+  Accept`](https://serverfault.com/questions/780882/impossible-to-serve-webp-images-using-cloudflare), so sending WebP via Cloudflare can cause browsers that don't support
+  WebP to download the wrong image type.  [Use Cloudflare Polish
+  instead.](https://support.cloudflare.com/hc/en-us/articles/360000607372-Using-Cloudflare-Polish-to-compress-images)
+
+
 ## 1.26 - 2020-01-22
 
 * Keep `id` attributes on `style` elements.
