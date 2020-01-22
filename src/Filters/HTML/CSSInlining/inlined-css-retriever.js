@@ -39,3 +39,16 @@ phast.forEachSelectedElement('style[data-phast-params]', function (style) {
             }
         });
 });
+
+(function () {
+    var ids = [];
+
+    phast.forEachSelectedElement('style[data-phast-original-id]', function (style) {
+        var id = style.getAttribute('data-phast-original-id');
+        if (ids[id]) {
+            return;
+        }
+        ids[id] = true;
+        console.warn("[Phast] The style element with id", id, "has been split into multiple style tags due to @import statements and the id attribute has been removed. Normally, this does not cause any issues.");
+    });
+})();

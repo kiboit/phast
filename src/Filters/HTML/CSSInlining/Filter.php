@@ -178,6 +178,15 @@ class Filter extends BaseHTMLStreamFilter {
             $style->getAttribute('media'),
             false
         );
+        if (($id = $style->getAttribute('id')) != '') {
+            if (sizeof($elements) == 1) {
+                $elements[0]->setAttribute('id', $id);
+            } else {
+                foreach ($elements as $element) {
+                    $element->setAttribute('data-phast-original-id', $id);
+                }
+            }
+        }
         return $elements;
     }
 

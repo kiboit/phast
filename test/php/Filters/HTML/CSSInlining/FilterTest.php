@@ -511,6 +511,42 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals(self::BASE_URL . '/styles.css', $params['src']);
     }
 
+    public function testInlineStyleIds() {
+        $this->files['/external.css'] = 'body{hello:world;}';
+        $html = '
+            <html>
+            <head>
+            <style>whatever{}</style>
+            <style id=simple-inlined-style>something{}</style>
+            <style id=imported-inline-style>
+                @import url(/external.css);
+                something{}
+            </style>
+            </head>
+            <body></body>
+            </html>
+        ';
+
+        $this->applyFilter($html);
+
+        $styles = $this->dom->getElementsByTagName('style');
+        $this->assertCount(4, $styles);
+
+        $style = $this->dom->getElementsByTagName('style')->item(0);
+        $this->assertFalse($style->hasAttribute('id'));
+        $this->assertFalse($style->hasAttribute('data-phast-original-id'));
+
+        $style = $this->dom->getElementsByTagName('style')->item(1);
+        $this->assertEquals('simple-inlined-style', $style->getAttribute('id'));
+        $this->assertFalse($style->hasAttribute('data-phast-original-id'));
+
+        for ($i = 2; $i <= 3; $i++) {
+            $style = $this->dom->getElementsByTagName('style')->item($i);
+            $this->assertFalse($style->hasAttribute('id'));
+            $this->assertEquals('imported-inline-style', $style->getAttribute('data-phast-original-id'));
+        }
+    }
+
     protected function applyFilter($htmlInput = null, $skipResultParsing = false) {
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
