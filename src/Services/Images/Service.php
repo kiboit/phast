@@ -13,9 +13,12 @@ class Service extends BaseService {
 
     protected function getParams(ServiceRequest $request) {
         $params = parent::getParams($request);
-        if ($this->canSendWebp($request->getHTTPRequest())) {
-            $params['preferredType'] = Image::TYPE_WEBP;
-            Log::info('WebP will be served if possible!');
+        if ($this->proxySupportsAccept($request->getHTTPRequest())) {
+            $params['varyAccept'] = true;
+            if ($this->browserSupportsWebp($request->getHTTPRequest())) {
+                $params['preferredType'] = Image::TYPE_WEBP;
+                Log::info('WebP will be served if possible!');
+            }
         }
         return $params;
     }
@@ -26,7 +29,7 @@ class Service extends BaseService {
         $response->setHeader('Link', "<$srcUrl>; rel=\"canonical\"");
         $response->setHeader('Content-Type', $resource->getMimeType());
         if ($resource->getMimeType() != Image::TYPE_PNG
-            && @$request['preferredType'] == Image::TYPE_WEBP
+            && @$request['varyAccept']
         ) {
             $response->setHeader('Vary', 'Accept');
         }
@@ -45,10 +48,12 @@ class Service extends BaseService {
         }
     }
 
-    private function canSendWebp(Request $request) {
-        return
-            strpos($request->getHeader('accept'), 'image/webp') !== false
-            && !$request->getHeader('cf-ray');
+    private function browserSupportsWebp(Request $request) {
+        return strpos($request->getHeader('accept'), 'image/webp') !== false;
+    }
+
+    private function proxySupportsAccept(Request $request) {
+        return !$request->getHeader('cf-ray');
     }
 
 }
