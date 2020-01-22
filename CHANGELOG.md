@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 1.28 - 2020-01-22
+
+* Regression fix: Send `Vary: Accept` for JPEGs that could be WebPs.
+
+
 ## 1.27 - 2020-01-22
 
 * Don't send WebP images via Cloudflare.  Cloudflare [does not support `Vary:
