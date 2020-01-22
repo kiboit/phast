@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.26 - 2020-01-22
+
+* Keep `id` attributes on `style` elements.
+
+
 ## 1.25 - 2020-01-20
 
 * Keep newlines when minifying HTML.
