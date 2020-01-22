@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Services\Images;
 
 use Kibo\Phast\Filters\Image\Image;
+use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Services\BaseService;
 use Kibo\Phast\Services\ServiceRequest;
@@ -12,7 +13,7 @@ class Service extends BaseService {
 
     protected function getParams(ServiceRequest $request) {
         $params = parent::getParams($request);
-        if (strpos($request->getHTTPRequest()->getHeader('Accept'), 'image/webp') !== false) {
+        if ($this->canSendWebp($request->getHTTPRequest())) {
             $params['preferredType'] = Image::TYPE_WEBP;
             Log::info('WebP will be served if possible!');
         }
@@ -24,7 +25,9 @@ class Service extends BaseService {
         $srcUrl = $resource->getUrl();
         $response->setHeader('Link', "<$srcUrl>; rel=\"canonical\"");
         $response->setHeader('Content-Type', $resource->getMimeType());
-        if ($resource->getMimeType() != Image::TYPE_PNG) {
+        if ($resource->getMimeType() != Image::TYPE_PNG
+            && @$request['preferredType'] == Image::TYPE_WEBP
+        ) {
             $response->setHeader('Vary', 'Accept');
         }
         return $response;
@@ -41,4 +44,11 @@ class Service extends BaseService {
             parent::validateWhitelisted($request);
         }
     }
+
+    private function canSendWebp(Request $request) {
+        return
+            strpos($request->getHeader('accept'), 'image/webp') !== false
+            && !$request->getHeader('cf-ray');
+    }
+
 }
