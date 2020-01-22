@@ -530,7 +530,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter($html);
 
         $styles = $this->dom->getElementsByTagName('style');
-        $this->assertCount(4, $styles);
+        $this->assertEquals(4, $styles->length);
 
         $style = $this->dom->getElementsByTagName('style')->item(0);
         $this->assertFalse($style->hasAttribute('id'));
