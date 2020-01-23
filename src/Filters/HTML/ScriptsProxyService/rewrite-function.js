@@ -60,7 +60,7 @@ function processNode(el) {
     var originalSrc = el.src;
 
     el.src = config.serviceUrl +
-        '&src=' + encodeURIComponent(originalSrc) +
+        '&src=' + encodeURIComponent(originalSrc.replace(/^http/, 'hxxp')) +
         '&cacheMarker=' + encodeURIComponent(cacheMarker);
 
     return function () {

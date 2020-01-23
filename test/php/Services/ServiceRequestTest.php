@@ -279,13 +279,22 @@ class ServiceRequestTest extends TestCase {
         $this->assertEquals((string)$url, $querySerialization);
     }
 
-    
     private function checkRequest(ServiceRequest $request, $expectedQuery, $expectedPath) {
         $actualQuery = $request->serialize(ServiceRequest::FORMAT_QUERY);
         $actualPath = $request->serialize(ServiceRequest::FORMAT_PATH);
 
         $this->assertEquals($expectedQuery, $actualQuery);
         $this->assertEquals($expectedPath, $actualPath);
+    }
+
+    public function testHxxp() {
+        $request = Request::fromArray(['src' => 'hxxp://yolo']);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($request);
+        $this->assertEquals('http://yolo', $serviceRequest->getParams()['src']);
+
+        $request = Request::fromArray(['src' => 'hxxps://yolo']);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($request);
+        $this->assertEquals('https://yolo', $serviceRequest->getParams()['src']);
     }
 
 }

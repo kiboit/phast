@@ -69,6 +69,9 @@ class ServiceRequest {
 
     public static function fromHTTPRequest(Request $request) {
         $params = $request->getGet();
+        if (isset($params['src'])) {
+            $params['src'] = preg_replace('~^hxxp(?=s?://)~', 'http', $params['src']);
+        }
         $pathInfo = $request->getPathInfo();
         if ($pathInfo) {
             $params = array_merge($params, self::parsePathInfo($pathInfo));
