@@ -4,7 +4,7 @@
 ## 1.29 - 2020-01-23
 
 * Trick mod_security into accepting script proxy requests by replacing
-  `src=http://...` by `src=hxxp://...`.
+  `src=http://...` with `src=hxxp://...`.
 
 
 ## 1.28 - 2020-01-22
