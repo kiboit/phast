@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 1.29 - 2020-01-23
+
+* Trick mod_security into accepting script proxy requests by replacing
+  `src=http://...` by `src=hxxp://...`.
+
+
 ## 1.28 - 2020-01-22
 
 * Regression fix: Send `Vary: Accept` for JPEGs that could be WebPs.
