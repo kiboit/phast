@@ -364,18 +364,17 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function makeServiceParams(URL $originalLocation, $stripImports = false) {
-        $cacheMarker = null;
-        if ($cacheMarker = $this->localRetriever->getCacheSalt($originalLocation)) {
-            $originalLocation = $originalLocation->withoutQuery();
-        }
         if (isset($this->cacheMarkers[$originalLocation->toString()])) {
             $cacheMarker = $this->cacheMarkers[$originalLocation->toString()];
-        }
-        if ($cacheMarker === null) {
+        } else {
             $cacheMarker = $this->retriever->getCacheSalt($originalLocation);
         }
+        $src = $originalLocation;
+        if ($this->localRetriever->getCacheSalt($src)) {
+            $src = $originalLocation->withoutQuery();
+        }
         $params = [
-            'src' => (string) $originalLocation,
+            'src' => (string) $src,
             'cacheMarker' => $cacheMarker
         ];
         if ($stripImports) {

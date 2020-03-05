@@ -556,6 +556,14 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals($thirdCacheMarker, $firstCacheMarker);
     }
 
+    public function testUseHashCacheMarker() {
+        $this->retrieverLastModificationTime = 123;
+        $html = '<html><head><link rel=stylesheet href=/external.css?test></head><body></body></html>';
+        $this->files['/external.css'] = 'body{background:url(/image.jpg);}';
+        $this->applyFilter($html);
+        $this->assertRegExp('/^[a-z0-9]{16}$/i', (string) $this->getCacheMarker());
+    }
+
     private function getCacheMarker() {
         return json_decode(
             $this->dom->getElementsByTagName('style')->item(0)->getAttribute('data-phast-params')
