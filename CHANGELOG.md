@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.31 - 2020-03-05
+
+* Use hash-based cached marker (see last release) when local files are addressed
+  with a query string.
+
+
 ## 1.30 - 2020-03-05
 
 * Change CSS cache marker when dependencies (eg, images) change.  This prevents
