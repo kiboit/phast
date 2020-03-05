@@ -93,6 +93,11 @@ class Filter extends BaseHTMLStreamFilter {
      */
     private $tokenRefMaker;
 
+    /**
+     * @var string[]
+     */
+    private $cacheMarkers = [];
+
     public function __construct(
         ServiceSignature $signature,
         URL $baseURL,
@@ -206,7 +211,7 @@ class Filter extends BaseHTMLStreamFilter {
      * @param boolean $ieCompatible
      * @param int $currentLevel
      * @param string[] $seen
-     * @return Tag[]
+     * @return Tag[]|null
      * @throws \Kibo\Phast\Exceptions\ItemNotFoundException
      */
     private function inlineURL(URL $url, $media, $ieCompatible = true, $currentLevel = 0, $seen = []) {
@@ -243,11 +248,14 @@ class Filter extends BaseHTMLStreamFilter {
             );
         }
 
+        $content = $this->cssFilter->apply(Resource::makeWithContent($url, $content), [])->getContent();
 
-        $content = $this->cssFilter->apply(Resource::makeWithContent($url, $content), [])
-            ->getContent();
+        $this->cacheMarkers[$url->toString()] =
+            substr(str_replace(['+', '/'], '', base64_encode(md5($content, true))), 0, 16);
+
         $optimized = $this->optimizer->optimizeCSS($content);
-        if (is_null($optimized)) {
+        if ($optimized === null) {
+            $this->logger()->error('CSS optimizer failed for {url}', ['url' => (string) $url]);
             return null;
         }
         $isOptimized = false;
@@ -277,14 +285,15 @@ class Filter extends BaseHTMLStreamFilter {
         $currentLevel = 0,
         $seen = []
     ) {
-
         $urlMatches = $this->getImportedURLs($content);
         $elements = [];
         foreach ($urlMatches as $match) {
-            $content = str_replace($match[0], '', $content);
             $matchedUrl = URL::fromString($match['url'])->withBase($url);
             $replacement = $this->inlineURL($matchedUrl, $media, $ieCompatible, $currentLevel + 1, $seen);
-            $elements = array_merge($elements, $replacement);
+            if ($replacement !== null) {
+                $content = str_replace($match[0], '', $content);
+                $elements = array_merge($elements, $replacement);
+            }
         }
 
         $elements[] = $this->makeStyle($url, $content, $media, $optimized);
@@ -355,9 +364,14 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function makeServiceParams(URL $originalLocation, $stripImports = false) {
+        $cacheMarker = null;
         if ($cacheMarker = $this->localRetriever->getCacheSalt($originalLocation)) {
             $originalLocation = $originalLocation->withoutQuery();
-        } else {
+        }
+        if (isset($this->cacheMarkers[$originalLocation->toString()])) {
+            $cacheMarker = $this->cacheMarkers[$originalLocation->toString()];
+        }
+        if ($cacheMarker === null) {
             $cacheMarker = $this->retriever->getCacheSalt($originalLocation);
         }
         $params = [
@@ -368,9 +382,9 @@ class Filter extends BaseHTMLStreamFilter {
             $params['strip-imports'] = 1;
         }
         return ServiceParams::fromArray($params)
-                ->sign($this->signature)
-                ->replaceByTokenRef($this->tokenRefMaker)
-                ->serialize();
+            ->sign($this->signature)
+            ->replaceByTokenRef($this->tokenRefMaker)
+            ->serialize();
     }
 
     protected function makeServiceURL(URL $originalLocation) {

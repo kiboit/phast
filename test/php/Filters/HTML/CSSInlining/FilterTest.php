@@ -63,7 +63,6 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testInliningCSS() {
-
         $this->makeLink($this->head, 'the-file-contents', '/the-file-1.css');
         $this->makeLink($this->body, 'the-file-2-contents', '/the-file-2.css');
 
@@ -198,16 +197,6 @@ class FilterTest extends HTMLFilterTestCase {
         $actualParams = null;
         parse_str($parsedHref['query'], $actualParams);
         $this->assertEquals($expectedParams, $actualParams);
-    }
-
-    public function testSettingRightCacheMarkerOnLocalScripts() {
-        $this->retrieverLastModificationTime = 123;
-        $this->makeLink($this->head, 'css');
-        $this->applyFilter();
-
-        $style = $this->head->getElementsByTagName('style')->item(0);
-        $query = json_decode($style->getAttribute('data-phast-params'), JSON_OBJECT_AS_ARRAY);
-        $this->assertEquals(123, $query['cacheMarker']);
     }
 
     public function testMinifyingBeforeOptimizing() {
@@ -545,6 +534,32 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertFalse($style->hasAttribute('id'));
             $this->assertEquals('imported-inline-style', $style->getAttribute('data-phast-original-id'));
         }
+    }
+
+    public function testChangeCacheMarkerOnDependencyChange() {
+        $html = '<html><head><link rel=stylesheet href=/external.css></head><body></body></html>';
+        $css = 'body{background:url(/image.jpg);}';
+
+        $this->files['/external.css'] = $css;
+        $this->applyFilter($html);
+        $firstCacheMarker = $this->getCacheMarker();
+
+        $this->files['/external.css'] = 'head{color:blue;}';
+        $this->applyFilter($html);
+        $secondCacheMarker = $this->getCacheMarker();
+
+        $this->files['/external.css'] = $css;
+        $this->applyFilter($html);
+        $thirdCacheMarker = $this->getCacheMarker();
+
+        $this->assertNotEquals($secondCacheMarker, $firstCacheMarker);
+        $this->assertEquals($thirdCacheMarker, $firstCacheMarker);
+    }
+
+    private function getCacheMarker() {
+        return json_decode(
+            $this->dom->getElementsByTagName('style')->item(0)->getAttribute('data-phast-params')
+        )->cacheMarker;
     }
 
     protected function applyFilter($htmlInput = null, $skipResultParsing = false) {
