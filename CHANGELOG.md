@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.30 - 2020-03-05
+
+* Change CSS cache marker when dependencies (eg, images) change.  This prevents
+  showing old images because CSS referencing an old optimized version is cached.
+
 
 ## 1.29 - 2020-01-23
 
