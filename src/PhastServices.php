@@ -99,6 +99,7 @@ class PhastServices {
         }
 
         $fp = fopen('php://output', 'wb');
+        $zipping = false;
         if (self::shouldZip($request, $response)) {
             $zipping = @$funcs->stream_filter_append(
                 $fp,
@@ -123,6 +124,10 @@ class PhastServices {
             'X-Content-Type-Options' => 'nosniff',
             'Content-Security-Policy' => "default-src 'none'",
         ];
+
+        if (is_array($content) && !$zipping) {
+            $headers['Content-Length'] = (string) array_sum(array_map('strlen', $content));
+        }
 
         $funcs->http_response_code($response->getCode());
         foreach ($headers as $name => $value) {
