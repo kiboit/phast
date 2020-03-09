@@ -24,10 +24,14 @@ class FilterTest extends HTMLFilterTestCase {
                 }
             </script>
             <script>{ nope }</script>
+            <script><!--
+            { yah }
+            --></script>
         ';
         $actual = $this->applyFilter($html, true);
         $this->assertContains('<script type=json>{"hello":"wörld","a/b":"<\/script>"}</script>', $actual);
         $this->assertContains('<script>{nope}</script>', $actual);
+        $this->assertContains('<script>{yah}</script>', $actual);
     }
 
 }

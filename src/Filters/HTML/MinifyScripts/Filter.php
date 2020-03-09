@@ -31,6 +31,7 @@ class Filter implements HTMLStreamFilter {
                 if ($this->isJSElement($element)
                     && preg_match('~[()[\]{};]\s~', $content)
                 ) {
+                    $content = preg_replace('~^\s*<!--\s*\n(.*)\n\s*-->\s*$~s', '$1', $content);
                     $content = $this->cache->get(md5($content), function () use ($content) {
                         return (new JSMinifier($content, true))->min();
                     });
