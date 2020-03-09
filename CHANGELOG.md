@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.32 - 2020-03-09
+
+* Remove comment tags (`<!-- ... -->`) from inline scripts.
+* Send `Content-Length` header for images.
+
+
 ## 1.31 - 2020-03-05
 
 * Use hash-based cached marker (see last release) when local files are addressed
