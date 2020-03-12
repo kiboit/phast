@@ -1,7 +1,12 @@
+/* global
+       Element
+       Node
+       phast
+*/
+
 var config = phast.config['script-proxy-service'];
 var urlPattern = /^(https?:)?\/\//;
 var cacheMarker = Math.floor((new Date).getTime() / 1000 / config.urlRefreshTime);
-var ids = {};
 var whitelist = compileWhitelistPatterns(config.whitelist);
 
 phast.scripts.push(function () {
@@ -38,12 +43,18 @@ function checkWhitelist(value) {
 
 function overrideDOMMethod(name) {
     var original = Element.prototype[name];
-    Element.prototype[name] = function () {
+    var proxy = function () {
         var postprocess = processNode(arguments[0]);
         var result = original.apply(this, arguments);
         postprocess();
         return result;
     };
+    Element.prototype[name] = proxy;
+    window.addEventListener('load', function () {
+        if (Element.prototype[name] === proxy) {
+            delete Element.prototype[name];
+        }
+    });
 }
 
 function processNode(el) {
