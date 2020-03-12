@@ -549,8 +549,13 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter($html);
         $thirdCacheMarker = $this->getCacheMarker();
 
+        $this->retrieverLastModificationTime = 123;
+        $this->applyFilter($html);
+        $fourthCacheMarker = $this->getCacheMarker();
+
         $this->assertNotEquals($secondCacheMarker, $firstCacheMarker);
         $this->assertEquals($thirdCacheMarker, $firstCacheMarker);
+        $this->assertNotEquals($fourthCacheMarker, $thirdCacheMarker);
     }
 
     public function testUseHashCacheMarker() {

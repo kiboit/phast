@@ -251,7 +251,10 @@ class Filter extends BaseHTMLStreamFilter {
         $content = $this->cssFilter->apply(Resource::makeWithContent($url, $content), [])->getContent();
 
         $this->cacheMarkers[$url->toString()] =
-            substr(str_replace(['+', '/'], '', base64_encode(md5($content, true))), 0, 16);
+            substr(str_replace(['+', '/'], '', base64_encode(md5(implode("\0", [
+                $this->retriever->getCacheSalt($url),
+                $content,
+            ]), true))), 0, 16);
 
         $optimized = $this->optimizer->optimizeCSS($content);
         if ($optimized === null) {
