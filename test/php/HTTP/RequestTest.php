@@ -3,7 +3,6 @@
 namespace Kibo\Phast\HTTP;
 
 class RequestTest extends \PHPUnit_Framework_TestCase {
-
     /** @dataProvider pathInfoData */
     public function testPathInfo($env) {
         $req = Request::fromArray([], $env, []);
@@ -34,37 +33,36 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     public function documentRootData() {
         yield [
             [
-                'DOCUMENT_ROOT' => '/var/www'
+                'DOCUMENT_ROOT' => '/var/www',
             ],
-            '/var/www'
+            '/var/www',
         ];
 
         yield [
             [
                 'DOCUMENT_ROOT' => '/var/www',
                 'SCRIPT_FILENAME' => '/var/www/subdomain/index.php',
-                'SCRIPT_NAME' => '/index.php'
+                'SCRIPT_NAME' => '/index.php',
             ],
-            '/var/www/subdomain'
+            '/var/www/subdomain',
         ];
 
         yield [
             [
                 'DOCUMENT_ROOT' => '/var/www',
                 'SCRIPT_FILENAME' => '/var/www/subdomain/index.php',
-                'SCRIPT_NAME' => '/mismatch.php'
+                'SCRIPT_NAME' => '/mismatch.php',
             ],
-            '/var/www'
+            '/var/www',
         ];
 
         yield [
             [
                 'DOCUMENT_ROOT' => 'C:\\var\\www',
                 'SCRIPT_FILENAME' => 'C:\\var\\www\\subdomain\\index.php',
-                'SCRIPT_NAME' => '/index.php'
+                'SCRIPT_NAME' => '/index.php',
             ],
             'C:/var/www/subdomain',
         ];
     }
-
 }

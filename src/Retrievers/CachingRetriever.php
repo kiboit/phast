@@ -63,5 +63,4 @@ class CachingRetriever implements Retriever {
     private function getCacheKey(URL $url) {
         return $url . '-' . $this->getCacheSalt($url);
     }
-
 }

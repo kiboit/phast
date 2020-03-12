@@ -3,5 +3,5 @@
 
 namespace Kibo\Phast\Exceptions;
 
-
-class LogicException extends \LogicException {}
+class LogicException extends \LogicException {
+}

@@ -2,13 +2,12 @@
 
 namespace Kibo\Phast\Logging\LogWriters\PHPError;
 
-use PHPUnit\Framework\TestCase;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogLevel;
+use PHPUnit\Framework\TestCase;
 
 class WriterTest extends TestCase {
-
     public function testParamsFromConfig() {
         $functions = new ObjectifiedFunctions();
         $args = [];
@@ -45,14 +44,12 @@ class WriterTest extends TestCase {
             'class'     => 'the-class',
             'method'    => 'the-method',
             'line'      => 20,
-            'param'     => 'v2'
+            'param'     => 'v2',
         ];
         $writer->writeEntry(new LogEntry(LogLevel::DEBUG, $message, $context));
         $this->assertEquals(
             "ID\tthe-service\tthe-class\tthe-method\t20\tThe message with v2 here {nothing}",
             $actualMessage
         );
-
     }
-
 }

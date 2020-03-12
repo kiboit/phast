@@ -5,7 +5,6 @@ namespace Kibo\Phast\Environment;
 use Kibo\Phast\Services\ServiceRequest;
 
 class Configuration {
-
     /**
      * @var array
      */
@@ -15,7 +14,6 @@ class Configuration {
      * @var Switches
      */
     private $switches;
-
 
     /**
      * @return Configuration
@@ -30,7 +28,7 @@ class Configuration {
      */
     public function __construct(array $sourceConfig) {
         $this->sourceConfig = $sourceConfig;
-        if (!isset ($this->sourceConfig['switches'])) {
+        if (!isset($this->sourceConfig['switches'])) {
             $this->switches = new Switches();
         } else {
             $this->switches = Switches::fromArray($this->sourceConfig['switches']);
@@ -65,7 +63,7 @@ class Configuration {
                 continue;
             }
             $switchable = array_filter($switchable, function ($item) {
-                if (!isset ($item['enabled'])) {
+                if (!isset($item['enabled'])) {
                     return true;
                 }
                 if ($item['enabled'] === false) {
@@ -74,7 +72,7 @@ class Configuration {
                 return $this->switches->isOn($item['enabled']);
             });
         }
-        if (isset ($config['images']['enable-cache']) && is_string($config['images']['enable-cache'])) {
+        if (isset($config['images']['enable-cache']) && is_string($config['images']['enable-cache'])) {
             $config['images']['enable-cache'] = $this->switches->isOn($config['images']['enable-cache']);
         }
         $config['switches'] = $this->switches->toArray();
@@ -87,9 +85,9 @@ class Configuration {
 
     private function recursiveMerge(array $a1, array $a2) {
         foreach ($a2 as $key => $value) {
-            if (isset ($a1[$key]) && is_array($a1[$key]) && is_array($value)) {
+            if (isset($a1[$key]) && is_array($a1[$key]) && is_array($value)) {
                 $a1[$key] = $this->recursiveMerge($a1[$key], $value);
-            } else if (is_string($key)) {
+            } elseif (is_string($key)) {
                 $a1[$key] = $value;
             } else {
                 $a1[] = $value;
@@ -97,5 +95,4 @@ class Configuration {
         }
         return $a1;
     }
-
 }

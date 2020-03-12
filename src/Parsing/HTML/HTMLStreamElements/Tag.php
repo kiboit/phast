@@ -6,7 +6,6 @@ namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 use Kibo\Phast\Parsing\HTML\HTMLInfo;
 
 class Tag extends Element {
-
     /**
      * @var string
      */
@@ -51,7 +50,7 @@ class Tag extends Element {
         } elseif (is_array($attributes)) {
             $this->attributeReader = new \ArrayIterator($attributes);
         } else {
-            throw new \InvalidArgumentException("Attributes must be array or Iterator");
+            throw new \InvalidArgumentException('Attributes must be array or Iterator');
         }
     }
 
@@ -160,7 +159,7 @@ class Tag extends Element {
     }
 
     private function getOpening() {
-        if ($this->dirty || !isset ($this->originalString)) {
+        if ($this->dirty || !isset($this->originalString)) {
             return $this->generateOpeningTag();
         }
         return parent::__toString();
@@ -201,13 +200,12 @@ class Tag extends Element {
     private function quoteAttributeValue($value) {
         if (strpos($value, '"') === false) {
             return '"' . htmlspecialchars($value) . '"';
-        } else {
-            return "'" . str_replace(
+        }
+        return "'" . str_replace(
                 ['&',     "'"],
                 ['&amp;', '&#039;'],
                 $value
             ) . "'";
-        }
     }
 
     private function mustHaveClosing() {
@@ -215,14 +213,14 @@ class Tag extends Element {
     }
 
     private function isFromParser() {
-        return isset ($this->originalString);
+        return isset($this->originalString);
     }
 
     public function dumpValue() {
         $o = $this->tagName;
 
         foreach ($this->attributes as $name => $_) {
-            $o .= " $name=\"" . $this->getAttribute($name) . "\"";
+            $o .= " $name=\"" . $this->getAttribute($name) . '"';
         }
 
         if ($this->textContent) {
@@ -231,5 +229,4 @@ class Tag extends Element {
 
         return $o;
     }
-
 }

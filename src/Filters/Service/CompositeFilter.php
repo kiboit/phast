@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Filters\Service;
 
-
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Services\ServiceFilter;
@@ -50,7 +49,7 @@ class CompositeFilter implements CachedResultServiceFilter {
                         'message' => $e->getMessage(),
                         'code' => $e->getCode(),
                         'file' => $e->getFile(),
-                        'line' => $e->getLine()
+                        'line' => $e->getLine(),
                     ]);
                     return $resource;
                 }

@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Services\Scripts;
 
-use Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter;
 use Kibo\Phast\Filters\JavaScript\Minification\JSMinifierFilter;
 use Kibo\Phast\Filters\Service\CompositeFilter;
 use Kibo\Phast\Security\ServiceSignatureFactory;
@@ -32,5 +31,4 @@ class Factory {
         $filter->addFilter(new JSMinifierFilter(@$config['scripts']['removeLicenseHeaders']));
         return $filter;
     }
-
 }

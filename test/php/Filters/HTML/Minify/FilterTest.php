@@ -4,7 +4,6 @@ namespace Kibo\Phast\Filters\HTML\Minify;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
-
     public function setUp() {
         parent::setUp();
         $this->filter = new Filter();
@@ -32,5 +31,4 @@ class FilterTest extends HTMLFilterTestCase {
         $expected = "\n<html>\n<head>\n<title>Hello, World!</title>\n</head>\n<body>\n<h1>\nHere\nwe\ngo!\n</h1>\n<textarea>  And  some  more  </TEXTAREA>\nMinify this\n<pre>  This is <b>v  e  r  y</b> cool  </pre>\n</body>\n</html>";
         $this->assertStringStartsWith($expected, $actual);
     }
-
 }

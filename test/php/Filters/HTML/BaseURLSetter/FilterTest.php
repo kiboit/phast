@@ -2,14 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\BaseURLSetter;
 
-
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class FilterTest extends HTMLFilterTestCase {
-
     public function testBaseURLSetting() {
         $checkPoint1 = $this->makeMarkedElement('meta');
         $checkPoint1->setAttribute('data-expected-base', self::BASE_URL);

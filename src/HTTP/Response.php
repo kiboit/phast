@@ -3,7 +3,6 @@
 namespace Kibo\Phast\HTTP;
 
 class Response {
-
     /**
      * @var int
      */
@@ -65,5 +64,4 @@ class Response {
     public function setContent($content) {
         $this->content = $content;
     }
-
 }

@@ -59,7 +59,6 @@ class Filter extends BaseHTMLStreamFilter {
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }
 
-
     protected function isTagOfInterest(Tag $tag) {
         return $tag->getTagName() == 'script' && $this->isJSElement($tag);
     }
@@ -91,7 +90,7 @@ class Filter extends BaseHTMLStreamFilter {
     private function makeProxiedURL(URL $url, $cacheMarker) {
         $params = [
             'src' => (string) $url->withoutQuery(),
-            'cacheMarker' => $cacheMarker
+            'cacheMarker' => $cacheMarker,
         ];
 
         return (new ServiceRequest())
@@ -105,7 +104,7 @@ class Filter extends BaseHTMLStreamFilter {
             fromArray([
                 'src' => (string) $url->withoutQuery(),
                 'cacheMarker' => $cacheMarker,
-                'isScript' => '1'
+                'isScript' => '1',
             ])
             ->sign($this->signature)
             ->replaceByTokenRef($this->tokenRefMaker)
@@ -116,7 +115,7 @@ class Filter extends BaseHTMLStreamFilter {
         $config = [
             'serviceUrl' => $this->config['serviceUrl'],
             'urlRefreshTime' => $this->config['urlRefreshTime'],
-            'whitelist' => $this->config['match']
+            'whitelist' => $this->config['match'],
         ];
         $script = PhastJavaScript::fromFile(__DIR__ . '/rewrite-function.js');
         $script->setConfig('script-proxy-service', $config);
@@ -126,5 +125,4 @@ class Filter extends BaseHTMLStreamFilter {
     private function getAbsoluteURL($url) {
         return URL::fromString($url)->withBase($this->context->getBaseUrl());
     }
-
 }

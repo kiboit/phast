@@ -3,12 +3,10 @@
 
 namespace Kibo\Phast\Filters\CSS\FontSwap;
 
-
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
 class Filter implements ServiceFilter {
-
     const FONT_FACE_REGEXP = '/@font-face\s*\{/i';
 
     public function apply(Resource $resource, array $request) {

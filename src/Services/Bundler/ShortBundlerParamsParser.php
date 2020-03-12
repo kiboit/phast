@@ -3,11 +3,9 @@
 
 namespace Kibo\Phast\Services\Bundler;
 
-
 use Kibo\Phast\Services\ServiceRequest;
 
 class ShortBundlerParamsParser {
-
     public static function getParamsMappings() {
         return [
             's' => 'src',
@@ -69,7 +67,7 @@ class ShortBundlerParamsParser {
     private function unshortenParams(\Generator $query) {
         $mappings = self::getParamsMappings();
         foreach ($query as $key => $value) {
-            if (isset ($mappings[$key])) {
+            if (isset($mappings[$key])) {
                 yield $mappings[$key] => $value === '' ? '1' : $value;
             } else {
                 yield $key => $value;
@@ -89,5 +87,4 @@ class ShortBundlerParamsParser {
             yield $key => $value;
         }
     }
-
 }

@@ -12,7 +12,6 @@ use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
-    
     const MODIFICATION_TIME = 1337;
 
     /**
@@ -23,10 +22,10 @@ class FilterTest extends HTMLFilterTestCase {
     private $config = [
         'match' => [
             '/example\.com/',
-            '/test\.com/'
+            '/test\.com/',
         ],
         'serviceUrl' => 'script-proxy.php',
-        'urlRefreshTime' => 7200
+        'urlRefreshTime' => 7200,
     ];
 
     public function setUp() {
@@ -78,7 +77,7 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertEquals('1', $params->isScript);
             $this->assertEquals(self::MODIFICATION_TIME, $params->cacheMarker);
 
-            list ($query, $url) = $this->parseSrc($newElement);
+            list($query, $url) = $this->parseSrc($newElement);
             $this->assertEquals('script-proxy.php', $url['path']);
             $this->assertArrayHasKey('src', $query);
             $this->assertArrayHasKey('cacheMarker', $query);
@@ -195,7 +194,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $expectedConfig = $this->config;
         $expectedConfig['whitelist'] = $expectedConfig['match'];
-        unset ($expectedConfig['match']);
+        unset($expectedConfig['match']);
         $this->assertCompiledConfigEquals($expectedConfig, 'script-proxy-service');
     }
 
@@ -222,5 +221,4 @@ class FilterTest extends HTMLFilterTestCase {
         parse_str($url['query'], $query);
         return [$query, $url];
     }
-
 }

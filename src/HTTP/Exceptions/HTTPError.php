@@ -3,5 +3,5 @@
 
 namespace Kibo\Phast\HTTP\Exceptions;
 
-
-class HTTPError extends \RuntimeException {}
+class HTTPError extends \RuntimeException {
+}

@@ -3,12 +3,10 @@
 
 namespace Kibo\Phast\Logging\LogWriters;
 
-
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogWriter;
 
 abstract class BaseLogWriter implements LogWriter {
-
     protected $levelMask = ~0;
 
     abstract protected function doWriteEntry(LogEntry $entry);
@@ -22,6 +20,4 @@ abstract class BaseLogWriter implements LogWriter {
             $this->doWriteEntry($entry);
         }
     }
-
-
 }

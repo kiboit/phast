@@ -10,8 +10,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Junk;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class PCRETokenizer {
-
-    private $mainPattern = "~
+    private $mainPattern = '~
         # Allow duplicate names for subpatterns
         (?J)
 
@@ -22,16 +21,16 @@ class PCRETokenizer {
             @@CLOSING_TAG |
             @@TAG
         )
-    ~Xxsi";
+    ~Xxsi';
 
-    private $attributePattern = "~
+    private $attributePattern = '~
         @attr
-    ~Xxsi";
+    ~Xxsi';
 
     private $subroutines = [
-        'COMMENT' => "
+        'COMMENT' => '
             <!--.*?-->
-        ",
+        ',
         'SCRIPT' => "
             (?= <script[\s>]) @@TAG
             (?'body' .*? )
@@ -48,9 +47,9 @@ class PCRETokenizer {
         'tag_name' => "
             [^\s>]++
         ",
-        'attrs' => "
+        'attrs' => '
             (?: @attr )*+
-        ",
+        ',
         'attr' => "
             \s*+
             @@attr_name
@@ -69,9 +68,9 @@ class PCRETokenizer {
         'tag_end' => "
             \s*+ >
         ",
-        'CLOSING_TAG' => "
+        'CLOSING_TAG' => '
             </ @@tag_name [^>]*+ >
-        "
+        ',
     ];
 
     public function __construct() {
@@ -138,7 +137,7 @@ class PCRETokenizer {
         }
 
         if ($offset < strlen($subject) - 1) {
-            throw new RuntimeException("Unmatched part of subject: " . substr($subject, $offset));
+            throw new RuntimeException('Unmatched part of subject: ' . substr($subject, $offset));
         }
     }
 
@@ -152,7 +151,8 @@ class PCRETokenizer {
 
             if (!isset($subroutines[$ref])) {
                 throw new RuntimeException(
-                    "Unknown pattern '$ref' used, or circular reference");
+                    "Unknown pattern '$ref' used, or circular reference"
+                );
             }
 
             $subroutine = $subroutines[$ref];
@@ -169,5 +169,4 @@ class PCRETokenizer {
             return $replace;
         }, $pattern);
     }
-
 }

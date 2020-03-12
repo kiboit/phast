@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Retrievers;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\ValueObjects\URL;
 
 class PostDataRetrieverTest extends PhastTestCase {
-
     public function testRetriever() {
         $funcs =  new ObjectifiedFunctions();
 
@@ -32,5 +30,4 @@ class PostDataRetrieverTest extends PhastTestCase {
         $this->assertEquals($actualSalt, $retriever->getCacheSalt($url));
         $this->assertFalse($openedFile);
     }
-
 }

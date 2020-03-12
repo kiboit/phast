@@ -1,11 +1,10 @@
 <?php
 namespace Kibo\Phast\ValueObjects;
 
-use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Common\JSMinifier;
+use Kibo\Phast\Common\ObjectifiedFunctions;
 
 class PhastJavaScript {
-
     /**
      * @var string
      */
@@ -97,7 +96,7 @@ class PhastJavaScript {
      * @return bool
      */
     public function hasConfig() {
-        return isset ($this->configKey);
+        return isset($this->configKey);
     }
 
     /**
@@ -113,5 +112,4 @@ class PhastJavaScript {
     public function getConfig() {
         return $this->config;
     }
-
 }

@@ -5,7 +5,6 @@ namespace Kibo\Phast\Logging;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 
 class Logger {
-
     /**
      * @var LogWriter
      */

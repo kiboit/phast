@@ -2,9 +2,7 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
-
 class TagTest extends \PHPUnit_Framework_TestCase {
-
     private $opening = '<sPaN claSS="SoMe\"Class\"">';
 
     private $text = 'Text';
@@ -86,5 +84,4 @@ class TagTest extends \PHPUnit_Framework_TestCase {
         $tag->setAttribute('test', '"<>&\'');
         $this->assertContains('\'"<>&amp;&#039;\'', $tag->toString());
     }
-
 }

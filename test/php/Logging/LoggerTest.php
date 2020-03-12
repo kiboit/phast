@@ -2,12 +2,10 @@
 
 namespace Kibo\Phast\Logging;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use PHPUnit\Framework\TestCase;
 
 class LoggerTest extends TestCase {
-
     /**
      * @var LogEntry
      */
@@ -60,7 +58,7 @@ class LoggerTest extends TestCase {
             ['warning',   LogLevel::WARNING],
             ['notice',    LogLevel::NOTICE],
             ['info',      LogLevel::INFO],
-            ['debug',     LogLevel::DEBUG]
+            ['debug',     LogLevel::DEBUG],
         ];
     }
 

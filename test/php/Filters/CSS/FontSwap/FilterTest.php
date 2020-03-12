@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Filters\CSS\FontSwap;
 
-
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends PhastTestCase {
-
     /**
      * @var Filter
      */
@@ -26,5 +24,4 @@ class FilterTest extends PhastTestCase {
         $actual = $this->filter->apply($resource, []);
         $this->assertEquals($expected, $actual->getContent());
     }
-
 }

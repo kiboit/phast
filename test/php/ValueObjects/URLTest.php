@@ -3,10 +3,8 @@
 namespace Kibo\Phast\ValueObjects;
 
 use Kibo\Phast\PhastTestCase;
-use PHPUnit\Framework\TestCase;
 
 class URLTest extends PhastTestCase {
-
     public function testParsing() {
         $string = 'http://user:pass@test.com:8080/path/file.php?query#hash';
         $parsed = parse_url($string);
@@ -22,7 +20,7 @@ class URLTest extends PhastTestCase {
     public function testCompiling() {
         $string = 'http://user:pass@test.com:8080/path/file.php?query#hash';
         $url = URL::fromString($string);
-        $this->assertEquals($string, (string)$url);
+        $this->assertEquals($string, (string) $url);
     }
 
     /**
@@ -43,7 +41,7 @@ class URLTest extends PhastTestCase {
             ['?q#f', 'http://test.com/path/index.php?q#f'],
             ['//example.com', 'http://example.com'],
             ['relative/path', 'http://test.com/path/relative/path', 'http://test.com/path/?query#hash'],
-            ['relative/path', 'http://test.com/path/relative/path', 'http://test.com/path/sub-path']
+            ['relative/path', 'http://test.com/path/relative/path', 'http://test.com/path/sub-path'],
         ];
     }
 
@@ -63,7 +61,7 @@ class URLTest extends PhastTestCase {
             ['//test.com/path4', true],
             ['/path5', true],
             ['http://test.com/path1', false, '/path5'],
-            ['http://example.com/path1', false]
+            ['http://example.com/path1', false],
         ];
     }
 
@@ -87,7 +85,7 @@ class URLTest extends PhastTestCase {
             ['/../some-path/', '/../some-path/'],
             ['/some-path/../other/', '/other/'],
             ['/some-path/../', '/'],
-            ['', '']
+            ['', ''],
         ];
     }
 
@@ -111,7 +109,7 @@ class URLTest extends PhastTestCase {
             ['http://example.com/the-style.CSS', 'CSS'],
             ['http://example.com/the-image.png', 'png'],
             ['http://example.com/the-style.css?query'],
-            ['http://example.com/the-style', '']
+            ['http://example.com/the-style', ''],
         ];
     }
 
@@ -135,5 +133,4 @@ class URLTest extends PhastTestCase {
     public function testWithoutQuery() {
         $this->assertEquals('http://x/', URL::fromString('http://x/')->withoutQuery());
     }
-
 }

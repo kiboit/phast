@@ -6,7 +6,6 @@ use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
 class Filter implements ServiceFilter {
-
     /**
      * @param Resource $resource
      * @param array $request
@@ -30,5 +29,4 @@ class Filter implements ServiceFilter {
 
         return $resource->withContent(trim($content));
     }
-
 }

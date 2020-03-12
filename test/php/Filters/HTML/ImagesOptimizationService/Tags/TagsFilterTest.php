@@ -12,7 +12,6 @@ use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class TagsFilterTest extends HTMLFilterTestCase {
-
     const SERVICE_URL = 'http://the-service.org/service.php';
 
     public function setUp() {
@@ -75,16 +74,16 @@ class TagsFilterTest extends HTMLFilterTestCase {
 
     public function testPictureSourceRewriting() {
         $html = '<html><body>';
-            $html .= '<picture>';
-                $html .= '<source srcset="/img1">';
-                $html .= '<source src="/img2">';
-                $html .= '<a src="/img3">something</a>';
-                $html .= '<source src="/img4" srcset="/img5">';
-                $html .= '<img src="/img6">';
-            $html .= '</picture>';
-            $html .= '<video>';
-                $html .= '<source srcset="/img7">';
-            $html .= '</video>';
+        $html .= '<picture>';
+        $html .= '<source srcset="/img1">';
+        $html .= '<source src="/img2">';
+        $html .= '<a src="/img3">something</a>';
+        $html .= '<source src="/img4" srcset="/img5">';
+        $html .= '<img src="/img6">';
+        $html .= '</picture>';
+        $html .= '<video>';
+        $html .= '<source srcset="/img7">';
+        $html .= '</video>';
         $html .= '</body></html>';
 
         $filtered = $this->applyFilter($html, true);
@@ -116,8 +115,10 @@ class TagsFilterTest extends HTMLFilterTestCase {
     public function testRewriteSrcWithSpace() {
         $html = '<html><body><img src=" /img "></body></html>';
         $this->applyFilter($html);
-        $this->checkSrc($this->dom->getElementsByTagName('img')->item(0)->getAttribute('src'),
-                        ['src' => self::BASE_URL . '/img']);
+        $this->checkSrc(
+            $this->dom->getElementsByTagName('img')->item(0)->getAttribute('src'),
+            ['src' => self::BASE_URL . '/img']
+        );
     }
 
     public function testNoRewriteForImagesWithNoSrcAttrSet() {
@@ -198,13 +199,9 @@ class TagsFilterTest extends HTMLFilterTestCase {
 
         $this->assertEquals(12345678, $query['cacheMarker']);
 
-        unset ($query['token']);
-        unset ($query['cacheMarker']);
+        unset($query['token']);
+        unset($query['cacheMarker']);
 
         $this->assertEquals($expectedParams, $query);
-        
     }
-
-
-
 }

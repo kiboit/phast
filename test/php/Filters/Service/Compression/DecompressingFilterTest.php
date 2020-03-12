@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\Service\Compression;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\PhastTestCase;
@@ -10,7 +9,6 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class DecompressingFilterTest extends PhastTestCase {
-
     private $funcs;
 
     /**
@@ -57,7 +55,7 @@ class DecompressingFilterTest extends PhastTestCase {
         return [
             ['identity', true],
             ['identity, gzip', false],
-            ['*', true]
+            ['*', true],
         ];
     }
 
@@ -72,5 +70,4 @@ class DecompressingFilterTest extends PhastTestCase {
         $this->expectException(RuntimeException::class);
         $this->filter->apply($resource, []);
     }
-
 }

@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\HTML\ScriptsDeferring;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
-
     public function setUp() {
         parent::setUp();
         $this->filter = new Filter();
@@ -63,5 +62,4 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals('text/javascript', $script->getAttribute('type'));
         $this->assertFalse($script->hasAttribute('data-phast-no-defer'));
     }
-
 }

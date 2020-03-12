@@ -3,11 +3,10 @@ namespace Kibo\Phast\Environment;
 
 use Kibo\Phast\Common\System;
 use Kibo\Phast\Filters\Image\ImageFactory;
-use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\CURLClient;
+use Kibo\Phast\HTTP\Request;
 
 class DefaultConfiguration {
-
     public static function get() {
         $request = Request::fromGlobals();
 
@@ -26,13 +25,13 @@ class DefaultConfiguration {
                 'garbageCollection' => [
                     'maxItems'    => 100,
                     'probability' => 0.1,
-                    'maxAge' => 86400 * 365
+                    'maxAge' => 86400 * 365,
                 ],
                 'diskCleanup' => [
                     'maxSize' => 500 * pow(1024, 2),
                     'probability' => 0.02,
-                    'portionToFree' => 0.5
-                ]
+                    'portionToFree' => 0.5,
+                ],
             ],
 
             'servicesUrl' => '/phast.php',
@@ -65,17 +64,17 @@ class DefaultConfiguration {
                         'whitelist' => [
                             '~^https?://' . preg_quote($request->getHost(), '~') . '/~',
                             '~^https?://fonts\.googleapis\.com/~' => [
-                                'ieCompatible' => false
+                                'ieCompatible' => false,
                             ],
                             '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
                             '~^https?://maxcdn\.bootstrapcdn\.com/[^?#]*\.css~',
                             '~^https?://idangero\.us/~',
                             '~^https?://[^/]*\.github\.io/~',
                             '~^https?://\w+\.typekit\.net/~' => [
-                                'ieCompatible' => false
+                                'ieCompatible' => false,
                             ],
-                            '~^https?://stackpath\.bootstrapcdn\.com/~'
-                        ]
+                            '~^https?://stackpath\.bootstrapcdn\.com/~',
+                        ],
                     ],
 
                     \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
@@ -83,18 +82,18 @@ class DefaultConfiguration {
                     \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
 
                     \Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter::class => [
-                        'urlRefreshTime' => 7200
+                        'urlRefreshTime' => 7200,
                     ],
 
                     \Kibo\Phast\Filters\HTML\Diagnostics\Filter::class => [
-                        'enabled' => 'diagnostics'
+                        'enabled' => 'diagnostics',
                     ],
 
                     \Kibo\Phast\Filters\HTML\ScriptsDeferring\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\PhastScriptsCompiler\Filter::class => []
+                    \Kibo\Phast\Filters\HTML\PhastScriptsCompiler\Filter::class => [],
 
-                ]
+                ],
             ],
 
             'images' => [
@@ -109,7 +108,7 @@ class DefaultConfiguration {
                 'whitelist' => [
                     '~^https?://' . preg_quote($request->getHost(), '~')
                         . '/[^#?]*\.(jpe?g|gif|png)~i',
-                    '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~'
+                    '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
                 ],
 
                 'filters' => [
@@ -117,9 +116,9 @@ class DefaultConfiguration {
                         'api-url' => 'https://optimize.phast.io/?service=images',
                         'host-name' => $request->getHost(),
                         'request-uri' => $request->getURI(),
-                        'plugin-version' => 'phast-core-1.0'
-                    ]
-                ]
+                        'plugin-version' => 'phast-core-1.0',
+                    ],
+                ],
             ],
 
             'styles' => [
@@ -129,10 +128,10 @@ class DefaultConfiguration {
                     \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
                     \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => [],
                     \Kibo\Phast\Filters\CSS\ImageURLRewriter\Filter::class => [
-                        'maxImageInliningSize' => 512
+                        'maxImageInliningSize' => 512,
                     ],
-                    \Kibo\Phast\Filters\CSS\FontSwap\Filter::class => []
-                ]
+                    \Kibo\Phast\Filters\CSS\FontSwap\Filter::class => [],
+                ],
             ],
 
             'logging' => [
@@ -144,19 +143,19 @@ class DefaultConfiguration {
                             | \Kibo\Phast\Logging\LogLevel::ALERT
                             | \Kibo\Phast\Logging\LogLevel::CRITICAL
                             | \Kibo\Phast\Logging\LogLevel::ERROR
-                            | \Kibo\Phast\Logging\LogLevel::WARNING
+                            | \Kibo\Phast\Logging\LogLevel::WARNING,
                     ],
                     [
                         'enabled' => 'diagnostics',
                         'class' => \Kibo\Phast\Logging\LogWriters\JSONLFile\Writer::class,
-                        'logRoot' => sys_get_temp_dir() . '/phast-logs'
-                    ]
-                ]
+                        'logRoot' => sys_get_temp_dir() . '/phast-logs',
+                    ],
+                ],
             ],
 
             'switches' => [
                 'phast' => true,
-                'diagnostics' => false
+                'diagnostics' => false,
             ],
 
             'scripts' => [
@@ -170,10 +169,9 @@ class DefaultConfiguration {
                     '~^https?://connect\.facebook\.net/~',
                     '~^https?://static\.hotjar\.com/~',
                     '~^https?://v2\.zopim\.com/~',
-                    '~^https?://stats\.g\.doubleclick\.net/dc\.js$~'
-                ]
-            ]
+                    '~^https?://stats\.g\.doubleclick\.net/dc\.js$~',
+                ],
+            ],
         ];
     }
-
 }

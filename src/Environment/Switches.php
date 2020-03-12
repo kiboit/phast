@@ -3,27 +3,26 @@
 namespace Kibo\Phast\Environment;
 
 class Switches {
-
     const SWITCH_PHAST = 'phast';
 
     const SWITCH_DIAGNOSTICS = 'diagnostics';
 
     private static $defaults = [
         self::SWITCH_PHAST => true,
-        self::SWITCH_DIAGNOSTICS => false
+        self::SWITCH_DIAGNOSTICS => false,
     ];
 
     private $switches = [];
 
     public static function fromArray(array $switches) {
-         $instance = new self();
-         $instance->switches = array_merge($instance->switches, $switches);
-         return $instance;
+        $instance = new self();
+        $instance->switches = array_merge($instance->switches, $switches);
+        return $instance;
     }
 
     public static function fromString($switches) {
         $instance = new self();
-        if (empty ($switches)) {
+        if (empty($switches)) {
             return $instance;
         }
         foreach (explode(',', $switches) as $switch) {
@@ -43,11 +42,11 @@ class Switches {
     }
 
     public function isOn($switch) {
-        if (isset ($this->switches[$switch])) {
-            return (bool)$this->switches[$switch];
+        if (isset($this->switches[$switch])) {
+            return (bool) $this->switches[$switch];
         }
-        if (isset (self::$defaults[$switch])) {
-            return (bool)self::$defaults[$switch];
+        if (isset(self::$defaults[$switch])) {
+            return (bool) self::$defaults[$switch];
         }
         return true;
     }
@@ -55,5 +54,4 @@ class Switches {
     public function toArray() {
         return array_merge(self::$defaults, $this->switches);
     }
-
 }

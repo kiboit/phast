@@ -48,7 +48,7 @@ class CachingServiceFilter implements ServiceFilter {
      */
     public function apply(Resource $resource, array $request) {
         $key = $this->cachedFilter->getCacheSalt($resource, $request);
-        $this->logger()->info('Trying to get {url} from cache', ['url' => (string)$resource->getUrl()]);
+        $this->logger()->info('Trying to get {url} from cache', ['url' => (string) $resource->getUrl()]);
         $result = $this->cache->get($key);
         if ($result && $this->checkDependencies($result)) {
             return $this->deserializeCachedData($result);
@@ -88,7 +88,7 @@ class CachingServiceFilter implements ServiceFilter {
             'mimeType' => $resource->getMimeType(),
             'encoding' => $resource->getEncoding(),
             'blob' => base64_encode($resource->getContent()),
-            'dependencies' => $this->serializeDependencies($resource)
+            'dependencies' => $this->serializeDependencies($resource),
         ];
     }
 
@@ -96,7 +96,7 @@ class CachingServiceFilter implements ServiceFilter {
         return array_map(function (Resource $dep) {
             return [
                 'url' => $dep->getUrl()->toString(),
-                'cacheMarker' => $dep->getCacheSalt()
+                'cacheMarker' => $dep->getCacheSalt(),
             ];
         }, $resource->getDependencies());
     }
@@ -105,9 +105,9 @@ class CachingServiceFilter implements ServiceFilter {
         $params = [
             URL::fromString($data['url']),
             base64_decode($data['blob']),
-            $data['mimeType']
+            $data['mimeType'],
         ];
-        if (isset ($data['encoding'])) {
+        if (isset($data['encoding'])) {
             $params[] = $data['encoding'];
         }
         return Resource::makeWithContent(...$params);
@@ -133,5 +133,4 @@ class CachingServiceFilter implements ServiceFilter {
             )
         );
     }
-
 }

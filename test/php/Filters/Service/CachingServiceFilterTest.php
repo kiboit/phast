@@ -10,7 +10,6 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class CachingServiceFilterTest extends TestCase {
-
     private $cachedData;
 
     private $cacheKey;
@@ -37,7 +36,7 @@ class CachingServiceFilterTest extends TestCase {
         $cache = $this->createMock(Cache::class);
         $cache->method('get')
             ->willReturnCallback(function ($key, callable $cb = null, $ttl = 0) {
-                if (!isset ($this->cachedData[$key])) {
+                if (!isset($this->cachedData[$key])) {
                     if ($cb) {
                         $data = $cb();
                         $this->cachedData[$key] = ['data' => $data, 'ttl' => $ttl];

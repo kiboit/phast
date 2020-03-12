@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
-use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Security\ServiceSignature;
@@ -11,7 +10,6 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageURLRewriterTest extends PhastTestCase {
-
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
@@ -58,7 +56,7 @@ class ImageURLRewriterTest extends PhastTestCase {
                 . self::BASE_URL . '/images.php?src='
                 . urlencode(self::BASE_URL . '/css/images/image1')
                 . '&cacheMarker=123&token=the-token'
-                . '")'
+                . '")',
             ],
             [
                 'background: url(" images/image1 ")',
@@ -66,7 +64,7 @@ class ImageURLRewriterTest extends PhastTestCase {
                 . self::BASE_URL . '/images.php?src='
                 . urlencode(self::BASE_URL . '/css/images/image1')
                 . '&cacheMarker=123&token=the-token'
-                . '")'
+                . '")',
             ],
             [
                 "border-image: url('/images/image2')",
@@ -74,17 +72,17 @@ class ImageURLRewriterTest extends PhastTestCase {
                 . self::BASE_URL . '/images.php?src='
                 . urlencode(self::BASE_URL . '/images/image2')
                 . '&cacheMarker=123&token=the-token'
-                . '\')'
+                . '\')',
             ],
             [
-                "border-image: url(/images/image2), url(/images/image2)",
+                'border-image: url(/images/image2), url(/images/image2)',
                 sprintf(
                     'border-image: url(%1$s), url(%1$s)',
                     self::BASE_URL . '/images.php?src='
                     . urlencode(self::BASE_URL . '/images/image2')
                     . '&cacheMarker=123&token=the-token'
-                )
-            ]
+                ),
+            ],
         ];
     }
 
@@ -135,7 +133,6 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->assertContains($inputUrl1, (string) $inlined[1]->getUrl());
     }
 
-
     public function testNotInliningWhenManagerReturnsNull() {
         $rewriter = $this->getRewriter();
         $url = $rewriter->rewriteUrl('some-url.jpg');
@@ -177,7 +174,7 @@ class ImageURLRewriterTest extends PhastTestCase {
             'baseUrl' => self::BASE_URL . '/base-url',
             'serviceUrl' => self::BASE_URL . '/service-url',
             'whitelist' => ['key' => 'val'],
-            'maxImageSize' => 512
+            'maxImageSize' => 512,
         ];
         yield [$params];
         foreach ($params as $key => $val) {
@@ -191,7 +188,6 @@ class ImageURLRewriterTest extends PhastTestCase {
             yield [$params];
         }
     }
-
 
     /**
      * @param int|null $rewriteFormat

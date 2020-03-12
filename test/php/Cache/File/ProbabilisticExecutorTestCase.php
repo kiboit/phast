@@ -2,9 +2,7 @@
 
 namespace Kibo\Phast\Cache\File;
 
-
 abstract class ProbabilisticExecutorTestCase extends CacheTestCase {
-
     /**
      * @return ProbabilisticExecutor
      */
@@ -14,7 +12,7 @@ abstract class ProbabilisticExecutorTestCase extends CacheTestCase {
      * @param float $probability
      */
     abstract protected function setProbability($probability);
-    
+
     abstract protected function setUpCacheContents();
 
     abstract protected function getCacheContents();
@@ -44,8 +42,7 @@ abstract class ProbabilisticExecutorTestCase extends CacheTestCase {
         $contents = $this->getCacheContents();
         $gc = $this->makeExecutor();
         $this->assertEquals($contents, $this->getCacheContents());
-        unset ($gc);
+        unset($gc);
         $this->assertNotEquals($contents, $this->getCacheContents());
     }
-
 }

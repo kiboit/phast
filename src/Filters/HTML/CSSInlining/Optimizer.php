@@ -7,7 +7,6 @@ use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class Optimizer {
-
     private $classNamePattern = '-?[_a-zA-Z]++[_a-zA-Z0-9-]*+';
 
     /**
@@ -170,5 +169,4 @@ class Optimizer {
     private function removeEmptyMediaQueries($css) {
         return preg_replace('~@media\s++[A-Z0-9():,\s-]++\s*+{}~i', '', $css);
     }
-
 }

@@ -6,7 +6,6 @@ use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\ValueObjects\URL;
 
 class LocalRetriever implements Retriever {
-
     /**
      * @var array
      */
@@ -40,7 +39,6 @@ class LocalRetriever implements Retriever {
         return $this->guard($url, function ($file) {
             return @$this->funcs->file_get_contents($file);
         });
-
     }
 
     public function getCacheSalt(URL $url) {
@@ -80,7 +78,7 @@ class LocalRetriever implements Retriever {
     }
 
     private function getFileForURL(URL $url) {
-        if (!isset ($this->map[$url->getHost()])) {
+        if (!isset($this->map[$url->getHost()])) {
             return false;
         }
         $submap = $this->map[$url->getHost()];
@@ -127,5 +125,4 @@ class LocalRetriever implements Retriever {
 
         return $target . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $absolutes);
     }
-
 }

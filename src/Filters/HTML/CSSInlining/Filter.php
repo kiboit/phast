@@ -111,12 +111,12 @@ class Filter extends BaseHTMLStreamFilter {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
         $this->serviceUrl = (new ServiceRequest())->withUrl(
-            URL::fromString((string)$config['serviceUrl'])
+            URL::fromString((string) $config['serviceUrl'])
         )->serialize(ServiceRequest::FORMAT_QUERY);
         $this->bundlerUrl = (new ServiceRequest())->withUrl(
-            URL::fromString((string)$config['bundlerUrl'])
+            URL::fromString((string) $config['bundlerUrl'])
         )->serialize(ServiceRequest::FORMAT_QUERY);
-        $this->optimizerSizeDiffThreshold = (int)$config['optimizerSizeDiffThreshold'];
+        $this->optimizerSizeDiffThreshold = (int) $config['optimizerSizeDiffThreshold'];
         $this->localRetriever = $localRetriever;
         $this->retriever = $retriever;
         $this->optimizerFactory = $optimizerFactory;
@@ -130,7 +130,7 @@ class Filter extends BaseHTMLStreamFilter {
             } else {
                 $this->whitelist[$key] = $value;
             }
-            if (!isset ($this->whitelist[$key]['ieCompatible'])) {
+            if (!isset($this->whitelist[$key]['ieCompatible'])) {
                 $this->whitelist[$key] = true;
             }
         }
@@ -144,7 +144,7 @@ class Filter extends BaseHTMLStreamFilter {
     protected function isTagOfInterest(Tag $tag) {
         return $tag->getTagName() == 'style'
                || (
-                  $tag->getTagName() == 'link'
+                   $tag->getTagName() == 'link'
                   && $tag->getAttribute('rel') == 'stylesheet'
                   && $tag->hasAttribute('href')
                );
@@ -196,7 +196,7 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function findInWhitelist(URL $url) {
-        $stringUrl = (string)$url;
+        $stringUrl = (string) $url;
         foreach ($this->whitelist as $pattern => $settings) {
             if (preg_match($pattern, $stringUrl)) {
                 return $settings;
@@ -239,7 +239,7 @@ class Filter extends BaseHTMLStreamFilter {
 
         $seen[] = $url;
 
-        $this->logger()->info('Inlining {url}.', ['url' => (string)$url]);
+        $this->logger()->info('Inlining {url}.', ['url' => (string) $url]);
         $content = $this->retriever->retrieve($url);
         if ($content === false) {
             return $this->addIEFallback(
@@ -310,10 +310,10 @@ class Filter extends BaseHTMLStreamFilter {
             $element->setAttribute('data-phast-nested-inlined', '');
         }
 
-        $element->setAttribute('data-phast-ie-fallback-url', (string)$fallbackUrl);
+        $element->setAttribute('data-phast-ie-fallback-url', (string) $fallbackUrl);
         $element->removeAttribute('data-phast-nested-inlined');
 
-        $this->logger()->info('Set {url} as IE fallback URL', ['url' => (string)$fallbackUrl]);
+        $this->logger()->info('Set {url} as IE fallback URL', ['url' => (string) $fallbackUrl]);
 
         return $elements;
     }
@@ -329,7 +329,8 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function getImportedURLs($cssContent) {
-        preg_match_all(self::CSS_IMPORTS_REGEXP,
+        preg_match_all(
+            self::CSS_IMPORTS_REGEXP,
             $cssContent,
             $matches,
             PREG_SET_ORDER
@@ -375,7 +376,7 @@ class Filter extends BaseHTMLStreamFilter {
         }
         $params = [
             'src' => (string) $src,
-            'cacheMarker' => $cacheMarker
+            'cacheMarker' => $cacheMarker,
         ];
         if ($stripImports) {
             $params['strip-imports'] = 1;
@@ -389,7 +390,7 @@ class Filter extends BaseHTMLStreamFilter {
     protected function makeServiceURL(URL $originalLocation) {
         $params = [
             'src' => (string) $originalLocation,
-            'cacheMarker' => $this->retriever->getCacheSalt($originalLocation)
+            'cacheMarker' => $this->retriever->getCacheSalt($originalLocation),
         ];
 
         return (new ServiceRequest())->withParams($params)

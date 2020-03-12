@@ -12,7 +12,6 @@ use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends PhastTestCase {
-
     /**
      * @var Filter
      */
@@ -80,13 +79,13 @@ class FilterTest extends PhastTestCase {
             ["<script>document.write('<div></div>');</script>"],
             ["<script type=\"text/javascript\">document.write('<div></div>');</script>"],
             ["<script>document.write('<script><\\/script>');</script>"],
-            ["<script>document.write('<script><@/script>');</script>"]
+            ["<script>document.write('<script><@/script>');</script>"],
         ];
     }
 
     public function testShouldAllowSelfClosingDiv() {
         $this->shouldTransform();
-        $div = "<div /><span></span></div>";
+        $div = '<div /><span></span></div>';
         $buffer = "<html><body>$div</body></html>";
         $filtered = $this->filter->apply($buffer);
         $this->assertContains('<div /><span></span></div>', $filtered);
@@ -120,7 +119,7 @@ class FilterTest extends PhastTestCase {
         $buffer = '<html><body></body></html>';
         $this->shouldTransform();
         $actual = $this->filter->apply($buffer);
-        $this->assertContains("<!-- [Phast] Document optimized", $actual);
+        $this->assertContains('<!-- [Phast] Document optimized', $actual);
     }
 
     public function testShouldNotAddStats() {
@@ -128,7 +127,7 @@ class FilterTest extends PhastTestCase {
         $buffer = '<html><body></body></html>';
         $this->shouldTransform();
         $actual = $this->filter->apply($buffer);
-        $this->assertNotContains("<!-- [Phast] Document optimized", $actual);
+        $this->assertNotContains('<!-- [Phast] Document optimized', $actual);
     }
 
     private function shouldTransform() {
@@ -151,5 +150,4 @@ class FilterTest extends PhastTestCase {
         $this->filter->addHTMLFilter($filterMock);
         return $filterMock;
     }
-
 }

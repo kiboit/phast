@@ -2,15 +2,13 @@
 
 namespace Kibo\Phast\Parsing\HTML;
 
-
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Junk;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
-
     public function testSimpleDocument() {
-        $html = "
+        $html = '
             <!doctype html>
             <html>
             <head>
@@ -19,7 +17,7 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
             <body>
             </body>
             </html>
-        ";
+        ';
 
         $tokenizer = new PCRETokenizer();
         $tokens = $tokenizer->tokenize($html);
@@ -34,7 +32,7 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
             [ClosingTag::class, '</head>'],
             [Tag::class, '<body>'],
             [ClosingTag::class, '</body>'],
-            [ClosingTag::class, '</html>']
+            [ClosingTag::class, '</html>'],
         ], $tokens);
     }
 
@@ -147,5 +145,4 @@ class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
 
         return $tag;
     }
-
 }

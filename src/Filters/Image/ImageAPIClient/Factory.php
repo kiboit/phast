@@ -9,7 +9,6 @@ use Kibo\Phast\HTTP\ClientFactory;
 use Kibo\Phast\Security\ServiceSignature;
 
 class Factory implements ImageFilterFactory {
-
     public function make(array $config) {
         $signature = new ServiceSignature(new Cache($config['cache'], 'api-service-signature'));
         return new Filter(
@@ -18,6 +17,4 @@ class Factory implements ImageFilterFactory {
             (new ClientFactory())->make($config)
         );
     }
-
-
 }

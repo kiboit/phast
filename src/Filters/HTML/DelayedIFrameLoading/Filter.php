@@ -40,5 +40,4 @@ class Filter extends BaseHTMLStreamFilter {
             $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/iframe-loader.js'));
         }
     }
-
 }

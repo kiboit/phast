@@ -7,14 +7,12 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
-use Kibo\Phast\Services\Bundler\ShortBundlerParamsParser;
 use Kibo\Phast\Services\Bundler\TokenRefMaker;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class FilterTest extends HTMLFilterTestCase {
-
     const SERVICE_URL = self::BASE_URL . '/service.php';
 
     const BUNDLER_URL = self::BASE_URL . '/bundler.php';
@@ -52,13 +50,13 @@ class FilterTest extends HTMLFilterTestCase {
             'whitelist' => [
                 '~' . preg_quote(self::BASE_URL) . '~',
                 '~https?://fonts\.googleapis\.com~' => [
-                    'ieCompatible' => false
-                ]
+                    'ieCompatible' => false,
+                ],
             ],
             'serviceUrl' => self::SERVICE_URL,
             'bundlerUrl' => self::BUNDLER_URL,
             'urlRefreshTime' => self::URL_REFRESH_TIME,
-            'optimizerSizeDiffThreshold' => -1
+            'optimizerSizeDiffThreshold' => -1,
         ];
     }
 
@@ -175,7 +173,7 @@ class FilterTest extends HTMLFilterTestCase {
     public function testRedirectingToProxyServiceOnReadError() {
         $this->retrieverLastModificationTime = 123;
         $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
-        unset ($this->files[self::BASE_URL . '/the-css.css']);
+        unset($this->files[self::BASE_URL . '/the-css.css']);
 
         $this->applyFilter();
 
@@ -188,7 +186,7 @@ class FilterTest extends HTMLFilterTestCase {
         $expectedParams = [
             'src' => self::BASE_URL . '/the-css.css',
             'cacheMarker' => 123,
-            'token' => 'the-token'
+            'token' => 'the-token',
         ];
 
         $parsedHref = parse_url($newLink->getAttribute('href'));
@@ -226,7 +224,7 @@ class FilterTest extends HTMLFilterTestCase {
 
         $css = [];
         foreach ($formats as $i => $fmt) {
-            $css[] = sprintf("@import %s;", sprintf($fmt, "file$i"));
+            $css[] = sprintf('@import %s;', sprintf($fmt, "file$i"));
             $this->files["/file$i"] = "the-file-$i";
         }
         $css[] = 'the-style-itself{directive: true;}';
@@ -242,7 +240,7 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertEquals("the-file-$i", $styles[$i]->textContent);
         }
 
-        $this->assertEquals("the-style-itself{directive: true;}", trim($styles[sizeof($formats)]->textContent));
+        $this->assertEquals('the-style-itself{directive: true;}', trim($styles[sizeof($formats)]->textContent));
     }
 
     public function testInliningNestedStyles() {
@@ -303,7 +301,6 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals('style', $style->tagName);
         $this->assertEquals('some, other, screen', $style->getAttribute('media'));
         $this->assertEquals($css, $style->textContent);
-
     }
 
     public function testNotAddingNonsenseMedia() {
@@ -324,7 +321,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files['https://fonts.googleapis.com/css3'] = 'the-import';
         $this->makeLink($this->head, 'css3');
         $this->makeLink($this->head, 'css4', 'https://fonts.googleapis.com/missing');
-        unset ($this->files['https://fonts.googleapis.com/missing']);
+        unset($this->files['https://fonts.googleapis.com/missing']);
 
         $this->applyFilter();
 
@@ -394,7 +391,7 @@ class FilterTest extends HTMLFilterTestCase {
         $urls = [
             'https://fonts.googleapis.com/css',
             'https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700',
-            '//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700'
+            '//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700',
         ];
 
         $formats = [
@@ -402,7 +399,7 @@ class FilterTest extends HTMLFilterTestCase {
             "@import '%s';",
             '@import url(%s);',
             '@import url("%s");',
-            "@import url('%s');"
+            "@import url('%s');",
         ];
 
         foreach ($urls as $url) {
@@ -580,9 +577,8 @@ class FilterTest extends HTMLFilterTestCase {
             ->willReturnCallback(function (URL $url) {
                 if ($url->isLocalTo(URL::fromString(self::BASE_URL))) {
                     return $this->retrieverLastModificationTime;
-                } else {
-                    return false;
                 }
+                return false;
             });
 
         $retriever = $this->createMock(Retriever::class);
@@ -592,11 +588,11 @@ class FilterTest extends HTMLFilterTestCase {
             });
         $retriever->method('retrieve')
             ->willReturnCallback(function (URL $url) {
-                if (isset ($this->files[$url->getPath()])) {
+                if (isset($this->files[$url->getPath()])) {
                     return $this->files[$url->getPath()];
                 }
-                if (isset ($this->files[(string)$url])) {
-                    return $this->files[(string)$url];
+                if (isset($this->files[(string) $url])) {
+                    return $this->files[(string) $url];
                 }
                 return false;
             });
@@ -664,5 +660,4 @@ class FilterTest extends HTMLFilterTestCase {
     private function getTheStyles() {
         return iterator_to_array($this->dom->getElementsByTagName('style'));
     }
-
 }

@@ -11,7 +11,6 @@ use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
 class PhastJavaScriptCompiler {
-
     /**
      * @var Cache
      */
@@ -35,10 +34,10 @@ class PhastJavaScriptCompiler {
     public function __construct(Cache $cache, $bundlerUrl) {
         $this->cache = $cache;
         $this->bundlerUrl = (new ServiceRequest())->withUrl(
-            URL::fromString((string)$bundlerUrl)
-        )->serialize(ServiceRequest::FORMAT_QUERY);;
+            URL::fromString((string) $bundlerUrl)
+        )->serialize(ServiceRequest::FORMAT_QUERY);
+        ;
     }
-
 
     /**
      * @return \stdClass|null
@@ -46,7 +45,6 @@ class PhastJavaScriptCompiler {
     public function getLastCompiledConfig() {
         return $this->lastCompiledConfig;
     }
-
 
     /**
      * @param PhastJavaScript[] $scripts
@@ -68,14 +66,14 @@ class PhastJavaScriptCompiler {
         $resourcesLoader = PhastJavaScript::fromFile(__DIR__ . '/resources-loader.js');
         $resourcesLoader->setConfig('resourcesLoader', [
             'serviceUrl' => (string) $this->bundlerUrl,
-            'shortParamsMappings' => $jsMappings
+            'shortParamsMappings' => $jsMappings,
         ]);
         $scripts = array_merge([
             PhastJavaScript::fromFile(__DIR__ . '/runner.js'),
             PhastJavaScript::fromFile(__DIR__ . '/es6-promise.js'),
             PhastJavaScript::fromFile(__DIR__ . '/hash.js'),
             $resourcesLoader,
-            PhastJavaScript::fromFile(__DIR__ . '/phast.js')
+            PhastJavaScript::fromFile(__DIR__ . '/phast.js'),
         ], $scripts);
         $compiled = $this->compileScripts($scripts);
         return '(' . $compiled . ')(' . $this->compileConfig($scripts) . ');';
@@ -125,5 +123,4 @@ class PhastJavaScriptCompiler {
             return $carry;
         }, '');
     }
-
 }

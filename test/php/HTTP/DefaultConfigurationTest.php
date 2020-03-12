@@ -5,7 +5,6 @@ use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\ValueObjects\URL;
 
 class DefaultConfigurationTest extends \PHPUnit_Framework_TestCase {
-
     public function testRetrieveURL() {
         $clientFactory = new ClientFactory();
         $config = Configuration::fromDefaults()->toArray();
@@ -17,5 +16,4 @@ class DefaultConfigurationTest extends \PHPUnit_Framework_TestCase {
         $response = $client->get($url);
         $this->assertContains('<html', $response->getContent());
     }
-
 }

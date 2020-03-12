@@ -4,13 +4,12 @@ namespace Kibo\Phast\Build;
 use PhpParser\PrettyPrinter;
 
 class ASCIIPrettyPrinter extends PrettyPrinter\Standard {
-
     protected function escapeString($string, $quote) {
         if (null === $quote) {
             // For doc strings, don't escape newlines
             $escaped = addcslashes($string, "\t\f\v$\\");
         } else {
-            $escaped = addcslashes($string, "\n\r\t\f\v$" . $quote . "\\");
+            $escaped = addcslashes($string, "\n\r\t\f\v$" . $quote . '\\');
         }
 
         // Escape other control characters
@@ -23,5 +22,4 @@ class ASCIIPrettyPrinter extends PrettyPrinter\Standard {
             return '\\' . $oct;
         }, $escaped);
     }
-
 }

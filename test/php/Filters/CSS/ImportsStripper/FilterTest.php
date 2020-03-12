@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Filters\CSS\ImportsStripper;
 
-
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class FilterTest extends TestCase {
-
     private $css = '
 @import url("fineprint.css") print
 ;
@@ -52,5 +50,4 @@ selector { rule: value }
     private function makeResource() {
         return Resource::makeWithContent(URL::fromString('http://phast.test'), $this->css);
     }
-
 }

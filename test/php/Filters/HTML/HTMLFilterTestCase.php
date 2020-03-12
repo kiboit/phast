@@ -3,16 +3,12 @@
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Cache\Cache;
-use Kibo\Phast\Filters\HTML\BaseURLSetter;
-use Kibo\Phast\Filters\HTML\Composite;
-use Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 use Kibo\Phast\Filters\HTML\PhastScriptsCompiler\PhastJavaScriptCompiler;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class HTMLFilterTestCase extends PhastTestCase {
-
     /**
      * @var \DOMDocument
      */
@@ -76,7 +72,6 @@ class HTMLFilterTestCase extends PhastTestCase {
     }
 
     protected function applyFilter($inputHtml = null, $skipResultParsing = false) {
-
         $composite = new Composite\Filter(URL::fromString(self::BASE_URL), true);
         $composite->addHTMLFilter(new BaseURLSetter\Filter());
         $composite->addHTMLFilter($this->filter);
@@ -125,7 +120,7 @@ class HTMLFilterTestCase extends PhastTestCase {
         $compiled = array_values(array_filter(iterator_to_array($allScripts), function (\DOMElement $element) {
             return $element->hasAttribute('data-phast-compiled-js-names');
         }));
-        return empty ($compiled) ? null : $compiled[0];
+        return empty($compiled) ? null : $compiled[0];
     }
 
     /**
@@ -179,8 +174,5 @@ class HTMLFilterTestCase extends PhastTestCase {
             $actual->getAttribute('id'),
             'Failed asserting elements match.'
         );
-
     }
-
-
 }

@@ -9,11 +9,10 @@ use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
-use Kibo\Phast\ValueObjects\URL;
 use Kibo\Phast\Services\Bundler\TokenRefMakerFactory;
+use Kibo\Phast\ValueObjects\URL;
 
 class Factory implements HTMLFilterFactory {
-
     public function make(array $config) {
         $localRetriever = new LocalRetriever($config['retrieverMap']);
 
@@ -25,13 +24,13 @@ class Factory implements HTMLFilterFactory {
             )
         );
 
-        if (!isset ($config['documents']['filters'][Filter::class]['serviceUrl'])) {
+        if (!isset($config['documents']['filters'][Filter::class]['serviceUrl'])) {
             $url = $config['servicesUrl'];
             $config['documents']['filters'][Filter::class]['serviceUrl']
             = strpos($url, '?') === false ? $url . '?service=css' : $url;
         }
 
-        if (!isset ($config['documents']['filters'][Filter::class]['bundlerUrl'])) {
+        if (!isset($config['documents']['filters'][Filter::class]['bundlerUrl'])) {
             $url = $config['servicesUrl'];
             $config['documents']['filters'][Filter::class]['bundlerUrl']
                 = strpos($url, '?') === false ? $url . '?service=bundler' : $url;
@@ -48,5 +47,4 @@ class Factory implements HTMLFilterFactory {
             (new TokenRefMakerFactory())->make($config)
         );
     }
-
 }

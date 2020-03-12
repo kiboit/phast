@@ -10,7 +10,7 @@ use Kibo\Phast\Logging\LoggingTrait;
 class Cache implements CacheInterface {
     use LoggingTrait;
 
-    const VERSION = "2";
+    const VERSION = '2';
 
     /**
      * @var GarbageCollector
@@ -66,7 +66,7 @@ class Cache implements CacheInterface {
 
         $this->system = new System($this->functions);
 
-        if (!isset (self::$garbageCollector)) {
+        if (!isset(self::$garbageCollector)) {
             self::$garbageCollector = new GarbageCollector($config, $this->functions);
             self::$diskCleanup = new DiskCleanup($config, $this->functions);
         }
@@ -103,7 +103,6 @@ class Cache implements CacheInterface {
         return self::$diskCleanup;
     }
 
-
     private function getCacheDir($key) {
         $hashedKey = $this->getHashedKey($key);
         $parts = [$this->cacheRoot];
@@ -134,7 +133,7 @@ class Cache implements CacheInterface {
                 [
                     'cacheRoot' => $this->cacheRoot,
                     'fileOwner' => fileowner($this->cacheRoot),
-                    'userId' => $uid
+                    'userId' => $uid,
                 ]
             );
             return;
@@ -150,7 +149,7 @@ class Cache implements CacheInterface {
                 [
                     'filename' => $tmpFile,
                     'written' => json_encode($result),
-                    'total' => strlen($serialized)
+                    'total' => strlen($serialized),
                 ]
             );
             @unlink($tmpFile);
@@ -167,12 +166,12 @@ class Cache implements CacheInterface {
         }
         $contents = @file_get_contents($file);
         if ($contents === false) {
-            $this->logger()->critical("Phast: FileCache: Could not read file {file}", ['file' => $file]);
+            $this->logger()->critical('Phast: FileCache: Could not read file {file}', ['file' => $file]);
             return null;
         }
-        list ($expirationTime, $version, $data) = explode(" ", $contents, 3);
+        list($expirationTime, $version, $data) = explode(' ', $contents, 3);
         if ($version !== self::VERSION) {
-            $this->logger()->debug("Phast: FileCache: Refusing to read old cache file {file}", ['file' => $file]);
+            $this->logger()->debug('Phast: FileCache: Refusing to read old cache file {file}', ['file' => $file]);
             return null;
         }
         if ($expirationTime > $this->functions->time() || $expirationTime == 0) {

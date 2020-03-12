@@ -3,12 +3,10 @@
 
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
-
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 
 class Factory implements HTMLFilterFactory {
-
     public function make(array $config) {
         $glue = strpos($config['servicesUrl'], '?') === false ? '?' : '&';
         $bundlerUrl = $config['servicesUrl'] . $glue . 'service=bundler';
@@ -16,6 +14,4 @@ class Factory implements HTMLFilterFactory {
         $compiler = new PhastJavaScriptCompiler($cache, $bundlerUrl);
         return new Filter($compiler);
     }
-
-
 }

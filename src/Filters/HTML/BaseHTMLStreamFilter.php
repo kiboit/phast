@@ -3,12 +3,10 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Element;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
-abstract class BaseHTMLStreamFilter implements HTMLStreamFilter{
-
+abstract class BaseHTMLStreamFilter implements HTMLStreamFilter {
     /**
      * @var HTMLPageContext
      */
@@ -49,10 +47,9 @@ abstract class BaseHTMLStreamFilter implements HTMLStreamFilter{
         return true;
     }
 
+    protected function beforeLoop() {
+    }
 
-    protected function beforeLoop() {}
-
-    protected function afterLoop() {}
-
-
+    protected function afterLoop() {
+    }
 }

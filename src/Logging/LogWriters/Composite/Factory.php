@@ -3,11 +3,10 @@
 
 namespace Kibo\Phast\Logging\LogWriters\Composite;
 
-use Kibo\Phast\Logging\LogWriters\Factory AS WritersFactory;
+use Kibo\Phast\Logging\LogWriters\Factory as WritersFactory;
 use Kibo\Phast\Services\ServiceRequest;
 
 class Factory {
-
     public function make(array $config, ServiceRequest $request) {
         $writer = new Writer();
         $factory = new WritersFactory();
@@ -16,5 +15,4 @@ class Factory {
         }
         return $writer;
     }
-
 }

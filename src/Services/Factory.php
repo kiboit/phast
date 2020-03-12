@@ -5,7 +5,6 @@ namespace Kibo\Phast\Services;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 
 class Factory {
-
     /**
      * @param string $service
      * @param array $config

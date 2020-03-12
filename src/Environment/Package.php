@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Environment;
 
-
 use Kibo\Phast\Diagnostics\Diagnostics;
 use Kibo\Phast\Environment\Exceptions\PackageHasNoDiagnosticsException;
 use Kibo\Phast\Environment\Exceptions\PackageHasNoFactoryException;
 
 class Package {
-
     /**
      * @var string
      */
@@ -27,7 +25,7 @@ class Package {
     public static function fromPackageClass($className, $type = null) {
         $instance = new self();
         $lastSeparatorPosition = strrpos($className, '\\');
-        $instance->type = empty ($type) ? substr($className, $lastSeparatorPosition + 1) : $type;
+        $instance->type = empty($type) ? substr($className, $lastSeparatorPosition + 1) : $type;
         $instance->namespace = substr($className, 0, $lastSeparatorPosition);
         return $instance;
     }
@@ -100,5 +98,4 @@ class Package {
         $useAutoloader = basename(__FILE__) == 'Package.php';
         return class_exists($class, $useAutoloader);
     }
-
 }

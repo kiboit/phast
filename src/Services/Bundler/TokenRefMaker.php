@@ -5,7 +5,6 @@ use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\Base64url;
 
 class TokenRefMaker {
-
     private $cache;
 
     public function __construct(Cache $cache) {
@@ -26,5 +25,4 @@ class TokenRefMaker {
     public function getParams($ref) {
         return $this->cache->get(bin2hex(Base64url::decode($ref)));
     }
-
 }

@@ -2,12 +2,10 @@
 
 namespace Kibo\Phast\ValueObjects;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use PHPUnit\Framework\TestCase;
 
 class PhastJavaScriptTest extends TestCase {
-
     public function testGetters() {
         $funcs = new ObjectifiedFunctions();
         $filename = 'the-test';
@@ -22,5 +20,4 @@ class PhastJavaScriptTest extends TestCase {
         $this->assertEquals('the-content', $js->getContents());
         $this->assertTrue($called);
     }
-
 }

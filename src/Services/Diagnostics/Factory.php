@@ -6,7 +6,6 @@ namespace Kibo\Phast\Services\Diagnostics;
 use Kibo\Phast\Logging\LogWriters\JSONLFile\Writer;
 
 class Factory {
-
     public function make(array $config) {
         $logRoot = null;
         foreach ($config['logging']['logWriters'] as $writerConfig) {
@@ -17,5 +16,4 @@ class Factory {
         }
         return new Service($logRoot);
     }
-
 }

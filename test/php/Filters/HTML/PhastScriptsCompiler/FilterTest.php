@@ -2,15 +2,12 @@
 
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
-
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
-
 class FilterTest extends HTMLFilterTestCase {
-
     /**
      * @var Filter
      */
@@ -61,5 +58,4 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
         $this->assertHasNotCompiledScripts();
     }
-
 }

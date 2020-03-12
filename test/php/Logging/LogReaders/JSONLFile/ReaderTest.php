@@ -7,7 +7,6 @@ use Kibo\Phast\Logging\LogWriters\JSONLFile\Writer;
 use PHPUnit\Framework\TestCase;
 
 class ReaderTest extends TestCase {
-
     public function testReading() {
         $dir = sys_get_temp_dir();
         $file = 'json-l-reader-test';
@@ -25,13 +24,13 @@ class ReaderTest extends TestCase {
             [
                 'level' => 1,
                 'message' => 'm1',
-                'context' => ['k1' => 'v1']
+                'context' => ['k1' => 'v1'],
             ],
             [
                 'level' => 2,
                 'message' => 'm2',
-                'context' => ['k2' => 'v2']
-            ]
+                'context' => ['k2' => 'v2'],
+            ],
         ];
         $this->assertEquals($expected, $actual);
         $this->assertFileNotExists("$dir/log-$file.jsonl");
@@ -63,5 +62,4 @@ class ReaderTest extends TestCase {
             @unlink("$dir/i$i.jsonl");
         }
     }
-
 }

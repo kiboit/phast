@@ -12,12 +12,12 @@ return call_user_func(function () {
         'chrome' => '62',
         'firefox' => '56',
         'safari' => '5.1',
-        'ie' => '11'
+        'ie' => '11',
     ];
 
     $min_os_versions = [
         'android' => '5',
-        'ios' => '8'
+        'ios' => '8',
     ];
 
     $seen = [];

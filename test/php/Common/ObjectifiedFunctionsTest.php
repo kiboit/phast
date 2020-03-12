@@ -6,7 +6,6 @@ use Kibo\Phast\Exceptions\UndefinedObjectifiedFunction;
 use PHPUnit\Framework\TestCase;
 
 class ObjectifiedFunctionsTest extends TestCase {
-
     private $funcs;
 
     public function setUp() {
@@ -37,5 +36,4 @@ class ObjectifiedFunctionsTest extends TestCase {
         $this->expectException(UndefinedObjectifiedFunction::class);
         $this->funcs->nop();
     }
-
 }

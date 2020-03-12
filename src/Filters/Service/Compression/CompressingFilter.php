@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Filters\Service\Compression;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
@@ -23,7 +22,6 @@ class CompressingFilter implements CachedResultServiceFilter {
         return $this->canApply() ? 'gzip' : 'identity';
     }
 
-
     public function apply(Resource $resource, array $request) {
         if (!$this->canApply()) {
             throw new RuntimeException('Function gzencode() does not exist');
@@ -40,5 +38,4 @@ class CompressingFilter implements CachedResultServiceFilter {
     private function canApply() {
         return $this->funcs->function_exists('gzencode');
     }
-
 }

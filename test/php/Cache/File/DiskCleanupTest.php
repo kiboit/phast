@@ -2,9 +2,7 @@
 
 namespace Kibo\Phast\Cache\File;
 
-
 class DiskCleanupTest extends ProbabilisticExecutorTestCase {
-
     public function testDiskCleanup() {
         $this->setUpCacheContents();
         $this->setProbability(1);
@@ -42,6 +40,4 @@ class DiskCleanupTest extends ProbabilisticExecutorTestCase {
         }
         return $sum;
     }
-
-
 }

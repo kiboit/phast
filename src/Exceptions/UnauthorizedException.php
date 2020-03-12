@@ -2,4 +2,5 @@
 
 namespace Kibo\Phast\Exceptions;
 
-class UnauthorizedException extends \Exception {}
+class UnauthorizedException extends \Exception {
+}

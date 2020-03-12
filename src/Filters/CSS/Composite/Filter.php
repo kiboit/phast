@@ -8,9 +8,7 @@ use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\Filters\Service\CompositeFilter;
 
 class Filter extends CompositeFilter implements CachedResultServiceFilter {
-
     public function __construct() {
         $this->addFilter(new CommentsRemoval\Filter());
     }
-
 }

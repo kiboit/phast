@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\Service\Compression;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\PhastTestCase;
@@ -10,7 +9,6 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class CompressingFilterTest extends PhastTestCase {
-
     private $resource;
 
     public function setUp() {
@@ -55,5 +53,4 @@ class CompressingFilterTest extends PhastTestCase {
         };
         return $funcs;
     }
-
 }

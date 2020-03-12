@@ -6,7 +6,6 @@ use Kibo\Phast\Common\JSON;
 use Kibo\Phast\Security\ServiceSignature;
 
 class ServiceParams {
-
     /**
      * @var string
      */
@@ -17,7 +16,8 @@ class ServiceParams {
      */
     private $params;
 
-    private function __construct() {}
+    private function __construct() {
+    }
 
     /**
      * @param array $params
@@ -25,9 +25,9 @@ class ServiceParams {
      */
     public static function fromArray(array $params) {
         $instance = new self();
-        if (isset ($params['token'])) {
+        if (isset($params['token'])) {
             $instance->token = $params['token'];
-            unset ($params['token']);
+            unset($params['token']);
         }
         $instance->params = $params;
         return $instance;
@@ -49,7 +49,7 @@ class ServiceParams {
      * @return bool
      */
     public function verify(ServiceSignature $signature) {
-        if (!isset ($this->token)) {
+        if (!isset($this->token)) {
             return false;
         }
         return $this->token == $this->makeToken($signature);
@@ -72,8 +72,8 @@ class ServiceParams {
 
     private function makeToken(ServiceSignature $signature) {
         $params = $this->params;
-        if (isset ($params['cacheMarker'])) {
-            unset ($params['cacheMarker']);
+        if (isset($params['cacheMarker'])) {
+            unset($params['cacheMarker']);
         }
         ksort($params);
         array_walk($params, function (&$item) {

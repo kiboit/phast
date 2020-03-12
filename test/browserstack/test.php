@@ -15,7 +15,7 @@ $caps = parse_options(array_slice($argv, 1));
 
 if (!$caps) {
     foreach ($tests as $test) {
-        echo escapeshellcmd($argv[0]), " ", generate_options($test), "\n";
+        echo escapeshellcmd($argv[0]), ' ', generate_options($test), "\n";
     }
 } else {
     $username = getenv('BROWSERSTACK_USERNAME');
@@ -34,7 +34,7 @@ if (!$caps) {
         [
             0 => STDIN,
             1 => STDOUT,
-            2 => STDERR
+            2 => STDERR,
         ],
         $pipes
     );
@@ -74,23 +74,23 @@ if (!$caps) {
         $status = 1;
 
         try {
-            $driver->get("http://phast-browser.test/");
+            $driver->get('http://phast-browser.test/');
             $driver->wait()->until(
                 WebDriverExpectedCondition::not(
                     WebDriverExpectedCondition::titleIs('Phast Unit Tests')
                 )
             );
             $failed = get_failed($driver);
-            if (empty ($failed)) {
+            if (empty($failed)) {
                 $status = 0;
             } else {
                 print_failed('', $caps);
                 print_errors($failed);
             }
         } catch (TimeOutException $e) {
-            print_failed("Timed out: " . $e->getMessage(), $caps);
+            print_failed('Timed out: ' . $e->getMessage(), $caps);
         } catch (Exception $e) {
-            print_failed("Unknown error: " . $e->getMessage(), $caps);
+            print_failed('Unknown error: ' . $e->getMessage(), $caps);
         } finally {
             $driver->quit();
         }
@@ -114,13 +114,13 @@ function print_errors(array $tests) {
         echo "    Test: $name\n";
         $assertions = $test->findElements(WebDriverBy::cssSelector('.qunit-assert-list .fail .test-message'));
         foreach ($assertions as $assertion) {
-            echo "        - " . $assertion->getText() . "\n";
+            echo '        - ' . $assertion->getText() . "\n";
         }
     }
 }
 
 function print_failed($error, array $caps) {
-    echo "Failed: " . generate_options($caps) . "\n";
+    echo 'Failed: ' . generate_options($caps) . "\n";
     if ($error) {
         echo "$error\n";
     }

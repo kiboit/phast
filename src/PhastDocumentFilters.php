@@ -10,7 +10,6 @@ use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Services\ServiceRequest;
 
 class PhastDocumentFilters {
-
     const DOCUMENT_PATTERN = "~
         \s* (<\?xml[^>]*>)?
         (\s* <!--(.*?)-->)*
@@ -89,5 +88,4 @@ class PhastDocumentFilters {
         }
         return strpos($buffer, '<') !== false;
     }
-
 }

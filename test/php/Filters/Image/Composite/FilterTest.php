@@ -19,7 +19,6 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class FilterTest extends TestCase {
-
     /**
      * @var Resource
      */
@@ -154,7 +153,7 @@ class FilterTest extends TestCase {
             ['http://phast.test', 234],
             ['http://phast-1.test', 123],
             ['http://phast-1.test', 234],
-            ['http://phast-1.test', 234, 2, 'some-salt']
+            ['http://phast-1.test', 234, 2, 'some-salt'],
         ];
     }
 

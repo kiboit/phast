@@ -6,12 +6,10 @@ namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 use Kibo\Phast\Common\JSON;
 
 class Element {
-
     /**
      * @var string
      */
     public $originalString;
-
 
     /**
      * @param string $originalString
@@ -39,7 +37,7 @@ class Element {
     }
 
     public function __toString() {
-        return isset ($this->originalString) ? $this->originalString : '';
+        return isset($this->originalString) ? $this->originalString : '';
     }
 
     public function dump() {
@@ -49,5 +47,4 @@ class Element {
     public function dumpValue() {
         return JSON::encode($this->originalString);
     }
-
 }

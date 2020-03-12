@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Filters\CSS\ImportsStripper;
 
-
 use Kibo\Phast\Filters\HTML\CSSInlining;
 use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -27,7 +26,6 @@ class Filter implements CachedResultServiceFilter {
     }
 
     private function shouldStripImports(array $request) {
-        return isset ($request['strip-imports']);
+        return isset($request['strip-imports']);
     }
-
 }

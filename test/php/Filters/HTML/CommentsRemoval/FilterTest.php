@@ -2,11 +2,9 @@
 
 namespace Kibo\Phast\Filters\HTML\CommentsRemoval;
 
-
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
-
     public function setUp() {
         parent::setUp();
         $this->filter = new Filter();
@@ -24,5 +22,4 @@ class FilterTest extends HTMLFilterTestCase {
         $actual = $this->applyFilter($html, true);
         $this->assertStringStartsWith($html, $actual);
     }
-
 }

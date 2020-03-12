@@ -10,7 +10,6 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageFactory {
-
     private $config;
 
     public function __construct(array $config) {
@@ -35,5 +34,4 @@ class ImageFactory {
     public function getForResource(Resource $resource) {
         return $this->getForURL($resource->getUrl());
     }
-
 }

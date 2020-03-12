@@ -34,6 +34,4 @@ class Reader implements LogReader {
             }
         }
     }
-
-
 }

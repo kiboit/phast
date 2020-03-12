@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Logging;
 
-
-use Kibo\Phast\Logging\LogWriters\Factory;
 use Kibo\Phast\Logging\LogWriters\Dummy\Writer;
+use Kibo\Phast\Logging\LogWriters\Factory;
 use Kibo\Phast\Services\ServiceRequest;
 
 class Log {
-
     /**
      * @var Logger
      */
@@ -28,7 +26,7 @@ class Log {
         self::$logger = $logger->withContext([
             'documentRequestId' => $request->getDocumentRequestId(),
             'requestId' => mt_rand(0, 99999999),
-            'service' => $service
+            'service' => $service,
         ]);
     }
 
@@ -36,7 +34,7 @@ class Log {
      * @return Logger
      */
     public static function get() {
-        if (!isset (self::$logger)) {
+        if (!isset(self::$logger)) {
             self::initWithDummy();
         }
         return self::$logger;
@@ -156,5 +154,4 @@ class Log {
     public static function debug($message, array $context = []) {
         self::get()->debug($message, $context);
     }
-
 }

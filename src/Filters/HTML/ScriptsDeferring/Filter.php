@@ -37,5 +37,4 @@ class Filter extends BaseHTMLStreamFilter {
             $script->removeAttribute('src');
         }
     }
-
 }

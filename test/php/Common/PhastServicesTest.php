@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\Response;
 
 class PhastServicesTest extends PhastTestCase {
-
     const EXAMPLE_CONTENT = 'This is the content we have to send';
 
     /**
@@ -56,7 +54,6 @@ class PhastServicesTest extends PhastTestCase {
         };
     }
 
-
     public function testOutputString() {
         $this->response->setCode(201);
         $this->response->setHeader('X-Test-running', 'it-is-running');
@@ -78,7 +75,6 @@ class PhastServicesTest extends PhastTestCase {
     }
 
     public function testETagGeneration() {
-
         $pattern = '/^"[a-f0-9]{32}"$/';
 
         $this->executeTest();
@@ -181,5 +177,4 @@ class PhastServicesTest extends PhastTestCase {
         }
         return $etag;
     }
-
 }

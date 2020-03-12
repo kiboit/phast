@@ -5,13 +5,12 @@ namespace Kibo\Phast\Common;
 use Kibo\Phast\Exceptions\UndefinedObjectifiedFunction;
 
 class ObjectifiedFunctions {
-
     /**
      * @param string $name
      * @param array $arguments
      */
     public function __call($name, array $arguments) {
-        if (isset ($this->$name) && is_callable($this->$name)) {
+        if (isset($this->$name) && is_callable($this->$name)) {
             $fn = $this->$name;
             return $fn(...$arguments);
         }
@@ -20,5 +19,4 @@ class ObjectifiedFunctions {
         }
         throw new UndefinedObjectifiedFunction("Undefined objectified function $name");
     }
-
 }

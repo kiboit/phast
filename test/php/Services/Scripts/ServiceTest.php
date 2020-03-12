@@ -14,7 +14,6 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class ServiceTest extends TestCase {
-
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
@@ -72,7 +71,7 @@ class ServiceTest extends TestCase {
         $this->retriever->expects($this->once())
             ->method('retrieve')
             ->willReturnCallback(function (URL $url) {
-                $this->assertEquals('http://allowed.com/the-script', (string)$url);
+                $this->assertEquals('http://allowed.com/the-script', (string) $url);
                 return 'the-content';
             });
         $result = $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
@@ -130,5 +129,4 @@ class ServiceTest extends TestCase {
         yield [Resource::makeWithContent(URL::fromString(''), '', '', 'gzip'), 'gzip'];
         yield [Resource::makeWithContent(URL::fromString(''), '', ''), null];
     }
-
 }

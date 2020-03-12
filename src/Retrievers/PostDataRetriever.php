@@ -3,12 +3,10 @@
 
 namespace Kibo\Phast\Retrievers;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\ValueObjects\URL;
 
 class PostDataRetriever implements Retriever {
-
     /**
      * @var ObjectifiedFunctions
      */
@@ -24,9 +22,8 @@ class PostDataRetriever implements Retriever {
         $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
 
-
     public function retrieve(URL $url) {
-        if (!isset ($this->content)) {
+        if (!isset($this->content)) {
             $this->content = $this->funcs->file_get_contents('php://input');
         }
         return $this->content;
@@ -35,6 +32,4 @@ class PostDataRetriever implements Retriever {
     public function getCacheSalt(URL $url) {
         return md5($this->retrieve($url));
     }
-
-
 }

@@ -12,7 +12,6 @@ use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements ImageFilter {
-
     /**
      * @var array
      */
@@ -44,13 +43,12 @@ class Filter implements ImageFilter {
     public function getCacheSalt(array $request) {
         $result = 'api-call';
         foreach (['width', 'height', 'preferredType'] as $key) {
-            if (isset ($request[$key])) {
+            if (isset($request[$key])) {
                 $result .= "-$key-{$request[$key]}";
             }
         }
         return $result;
     }
-
 
     public function transformImage(Image $image, array $request) {
         $url = $this->getRequestURL($request);
@@ -81,7 +79,7 @@ class Filter implements ImageFilter {
     private function getRequestURL(array $request) {
         $params = [];
         foreach (['width', 'height'] as $key) {
-            if (isset ($request[$key])) {
+            if (isset($request[$key])) {
                 $params[$key] = $request[$key];
             }
         }
@@ -95,9 +93,9 @@ class Filter implements ImageFilter {
     private function getRequestHeaders(Image $image, array $request) {
         $headers = [
             'X-Phast-Image-API-Client' => $this->getRequestToken(),
-            'Content-Type' => 'application/octet-stream'
+            'Content-Type' => 'application/octet-stream',
         ];
-        if (isset ($request['preferredType']) && $request['preferredType'] == Image::TYPE_WEBP) {
+        if (isset($request['preferredType']) && $request['preferredType'] == Image::TYPE_WEBP) {
             $headers['Accept'] = 'image/webp';
         }
         return $headers;
@@ -110,6 +108,4 @@ class Filter implements ImageFilter {
         }
         return json_encode($token_parts);
     }
-
-
 }

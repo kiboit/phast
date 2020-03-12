@@ -3,12 +3,10 @@
 
 namespace Kibo\Phast\Filters\HTML;
 
-
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
 class HTMLPageContext {
-
     /**
      * @var URL
      */
@@ -26,7 +24,6 @@ class HTMLPageContext {
     public function __construct(URL $baseUrl) {
         $this->baseUrl = $baseUrl;
     }
-
 
     /**
      * @param URL $baseUrl

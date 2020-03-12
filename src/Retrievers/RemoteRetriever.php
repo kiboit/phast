@@ -19,14 +19,14 @@ class RemoteRetriever implements Retriever {
     public function retrieve(URL $url) {
         try {
             $response = $this->client->get($url, [
-                'User-Agent' => 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0'
+                'User-Agent' => 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0',
             ]);
         } catch (\Exception $e) {
-            $this->logger()->warning("Caught {cls} while fetching {url}: ({code}) {message}", [
+            $this->logger()->warning('Caught {cls} while fetching {url}: ({code}) {message}', [
                 'cls' => get_class($e),
                 'url' => (string) $url,
                 'code' => $e->getCode(),
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
             return false;
         }

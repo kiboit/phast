@@ -6,11 +6,10 @@ namespace Kibo\Phast;
  * @runTestsInSeparateProcesses
  */
 class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
-
     public function setUp() {
         $_SERVER += [
             'HTTP_HOST' => 'example.com',
-            'REQUEST_URI' => '/'
+            'REQUEST_URI' => '/',
         ];
     }
 
@@ -32,7 +31,7 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function shouldApplyData() {
-        yield ["<!doctype html><html><head><title>Hello, World!</title></head><body></body></html>"];
+        yield ['<!doctype html><html><head><title>Hello, World!</title></head><body></body></html>'];
         yield ["<!DOCTYPE html>\n<html>\n<body></body>\n</html>"];
         yield ["<?xml version=\"1.0\"?\><!DOCTYPE html>\n<html>\n<body></body>\n</html>"];
         yield ["<!doctype html>\n<html>\n<body></body>\n</html>"];
@@ -40,7 +39,7 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
         yield ["    \n<!doctype       html>\n<html>\n<body></body>\n</html>"];
         yield ["<!doctype html>\n<!-- hello -->\n<html>\n<body></body>\n</html>"];
         yield ["<!-- hello -->\n<!doctype html>\n<html>\n<body></body>\n</html>"];
-        yield ["<b>Yup</b>", false];
+        yield ['<b>Yup</b>', false];
     }
 
     /**
@@ -68,6 +67,4 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
     private function assertFiltersNotApplied($out) {
         $this->assertNotContains('[Phast]', $out);
     }
-
-
 }

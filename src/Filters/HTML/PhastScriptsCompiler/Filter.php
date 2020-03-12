@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
-
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
@@ -12,7 +11,6 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 
 class Filter implements HTMLStreamFilter {
-
     /**
      * @var PhastJavaScriptCompiler
      */
@@ -47,7 +45,7 @@ class Filter implements HTMLStreamFilter {
         }
 
         $scripts = $context->getPhastJavaScripts();
-        if (!empty ($scripts)) {
+        if (!empty($scripts)) {
             yield $this->compileScript($scripts);
         }
 

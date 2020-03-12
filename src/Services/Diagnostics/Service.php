@@ -9,8 +9,7 @@ use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\LogReaders\JSONLFile\Reader;
 use Kibo\Phast\Services\ServiceRequest;
 
-class Service  {
-
+class Service {
     private $logRoot;
 
     public function __construct($logRoot) {
@@ -19,7 +18,7 @@ class Service  {
 
     public function serve(ServiceRequest $request) {
         $params = $request->getParams();
-        if (isset ($params['documentRequestId'])) {
+        if (isset($params['documentRequestId'])) {
             $items = $this->getRequestLog($params['documentRequestId']);
         } else {
             $items = $this->getSystemDiagnostics();
@@ -38,6 +37,4 @@ class Service  {
     private function getSystemDiagnostics() {
         return (new SystemDiagnostics())->run(require PHAST_CONFIG_FILE);
     }
-
-
 }

@@ -5,7 +5,6 @@ namespace Kibo\Phast\Diagnostics;
 use Kibo\Phast\Environment\Package;
 
 class Status implements \JsonSerializable {
-
     /**
      * @var Package
      */
@@ -75,17 +74,15 @@ class Status implements \JsonSerializable {
         return [
             'package' => [
                 'type' => $this->package->getType(),
-                'name' => $this->package->getNamespace()
+                'name' => $this->package->getNamespace(),
             ],
             'available' => $this->available,
             'reason' => $this->reason,
-            'enabled' => $this->enabled
+            'enabled' => $this->enabled,
         ];
     }
 
     public function jsonSerialize() {
         return $this->toArray();
     }
-
-
 }

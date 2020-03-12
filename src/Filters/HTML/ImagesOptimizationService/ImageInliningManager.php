@@ -53,7 +53,7 @@ class ImageInliningManager {
         } catch (ItemNotFoundException $e) {
             $this->logger()->warning('Could not fetch contents for {url}. Message is {message}', [
                 'url' => $resource->getUrl()->toString(),
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
         return null;

@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Diagnostics;
 
-
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\Environment\Exceptions\PackageHasNoDiagnosticsException;
@@ -12,7 +11,6 @@ use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Filters\Service\Compression\CompressingFilter;
 
 class SystemDiagnostics {
-
     /**
      * @param array $userConfigArr
      * @return Status[]
@@ -58,27 +56,27 @@ class SystemDiagnostics {
             'HTMLFilter' => [
                 'items' => array_keys($configArr['documents']['filters']),
                 'enabled' => function ($filter) use ($runtimeConfig) {
-                    return isset ($runtimeConfig['documents']['filters'][$filter]);
-                }
+                    return isset($runtimeConfig['documents']['filters'][$filter]);
+                },
             ],
             'ImageFilter' => [
                 'items' => array_keys($configArr['images']['filters']),
                 'enabled' => function ($filter) use ($runtimeConfig) {
-                    return isset ($runtimeConfig['images']['filters'][$filter]);
-                }
+                    return isset($runtimeConfig['images']['filters'][$filter]);
+                },
             ],
             'Cache' => [
                 'items' => [Cache::class],
                 'enabled' => function () {
                     return true;
-                }
+                },
             ],
             'Compression' => [
                 'items' => [CompressingFilter::class],
                 'enabled' => function () {
                     return true;
-                }
-            ]
+                },
+            ],
         ];
     }
 }

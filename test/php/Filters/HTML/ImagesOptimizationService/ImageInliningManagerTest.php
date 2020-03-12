@@ -8,7 +8,6 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageInliningManagerTest extends PhastTestCase {
-
     const MAX_INLINING_SIZE = 512;
 
     /**
@@ -58,7 +57,7 @@ class ImageInliningManagerTest extends PhastTestCase {
             ['image/png'],
             ['image/svg+xml'],
             ['image/webp', self::MAX_INLINING_SIZE, false],
-            ['image/jpeg', self::MAX_INLINING_SIZE + 1, false]
+            ['image/jpeg', self::MAX_INLINING_SIZE + 1, false],
         ];
     }
 
@@ -80,7 +79,7 @@ class ImageInliningManagerTest extends PhastTestCase {
         return [
             ['image/jpeg'],
             ['image/gif'],
-            ['image/png']
+            ['image/png'],
         ];
     }
 
@@ -95,11 +94,9 @@ class ImageInliningManagerTest extends PhastTestCase {
         $this->assertEquals($small->toDataURL(), $this->manager->getUrlForInlining($small));
     }
 
-
     private function getExpectedCacheKey(Resource $resource) {
         return $resource->getUrl()->toString()
             . '|' . $resource->getCacheSalt()
             . '|' . self::MAX_INLINING_SIZE;
     }
-
 }

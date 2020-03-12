@@ -3,5 +3,5 @@
 
 namespace Kibo\Phast\HTTP\Exceptions;
 
-
-class NetworkError extends \RuntimeException {}
+class NetworkError extends \RuntimeException {
+}

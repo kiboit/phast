@@ -2,15 +2,13 @@
 
 namespace Kibo\Phast\HTTP;
 
-
 use Kibo\Phast\ValueObjects\URL;
 
 class CURLClientTest extends \PHPUnit_Framework_TestCase {
-
     public function setUp() {
         parent::setUp();
         if (!function_exists('curl_init')) {
-            $this->markTestSkipped("cURL is missing");
+            $this->markTestSkipped('cURL is missing');
         }
     }
 
@@ -26,8 +24,7 @@ class CURLClientTest extends \PHPUnit_Framework_TestCase {
         $client = new CURLClient();
         $data = str_repeat('x', 5e6);
         $result = $client->post(URL::fromString('http://optimize.phast.io/?service=images'), $data);
-        $this->assertNotContains("HTTP/", $result->getContent());
+        $this->assertNotContains('HTTP/', $result->getContent());
         $this->assertNotEmpty($result->getHeaders());
     }
-
 }

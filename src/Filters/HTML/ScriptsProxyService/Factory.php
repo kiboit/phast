@@ -8,9 +8,8 @@ use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Services\Bundler\TokenRefMakerFactory;
 
 class Factory implements HTMLFilterFactory {
-
     public function make(array $config) {
-        if (!isset ($config['documents']['filters'][Filter::class]['serviceUrl'])) {
+        if (!isset($config['documents']['filters'][Filter::class]['serviceUrl'])) {
             $config['documents']['filters'][Filter::class]['serviceUrl']
             = $config['servicesUrl'] . '?service=scripts';
         }
@@ -23,5 +22,4 @@ class Factory implements HTMLFilterFactory {
             (new TokenRefMakerFactory())->make($config)
         );
     }
-
 }

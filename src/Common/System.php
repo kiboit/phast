@@ -5,7 +5,6 @@ namespace Kibo\Phast\Common;
 use Kibo\Phast\Exceptions\UndefinedObjectifiedFunction;
 
 class System {
-
     private $functions;
 
     public function __construct(ObjectifiedFunctions $functions = null) {
@@ -23,5 +22,4 @@ class System {
             return 0;
         }
     }
-
 }

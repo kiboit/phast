@@ -5,7 +5,6 @@ namespace Kibo\Phast\Retrievers;
 use Kibo\Phast\ValueObjects\URL;
 
 class UniversalRetriever implements Retriever {
-
     /**
      * @var Retriever[]
      */
@@ -36,5 +35,4 @@ class UniversalRetriever implements Retriever {
     public function addRetriever(Retriever $retriever) {
         $this->retrievers[] = $retriever;
     }
-
 }

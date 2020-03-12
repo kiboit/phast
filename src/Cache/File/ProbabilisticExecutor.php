@@ -3,11 +3,9 @@
 
 namespace Kibo\Phast\Cache\File;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 
 abstract class ProbabilisticExecutor {
-
     /**
      * @var string
      */
@@ -56,7 +54,7 @@ abstract class ProbabilisticExecutor {
                 foreach ($this->getCacheFiles($item->getRealPath()) as $item) {
                     yield $item;
                 }
-            } else if ($this->isCacheEntry($item)) {
+            } elseif ($this->isCacheEntry($item)) {
                 yield $item;
             }
         }

@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\HTML\Helpers;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 trait JSDetectorTrait {
-
     /**
      * @param Tag $element
      * @return bool
@@ -16,5 +15,4 @@ trait JSDetectorTrait {
         }
         return (bool) preg_match('~^(text|application)/javascript(;|$)~i', $element->getAttribute('type'));
     }
-
 }

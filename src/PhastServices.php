@@ -13,7 +13,6 @@ use Kibo\Phast\Services\Factory;
 use Kibo\Phast\Services\ServiceRequest;
 
 class PhastServices {
-
     /**
      * @param callable|null $getConfig
      */
@@ -24,14 +23,14 @@ class PhastServices {
 
         if (defined('PHAST_SERVICE')) {
             $service = PHAST_SERVICE;
-        } else if (!isset ($serviceParams['service'])) {
+        } elseif (!isset($serviceParams['service'])) {
             http_response_code(404);
             exit;
         } else {
             $service = $serviceParams['service'];
         }
 
-        if (isset ($serviceParams['src']) && !headers_sent())  {
+        if (isset($serviceParams['src']) && !headers_sent()) {
             http_response_code(301);
             header('Location: ' . $serviceParams['src']);
             header('Cache-Control: max-age=86400');
@@ -74,7 +73,7 @@ class PhastServices {
                     'type' => get_class($e),
                     'message' => $e->getMessage(),
                     'file' => $e->getFile(),
-                    'line' => $e->getLine()
+                    'line' => $e->getLine(),
                 ]
             );
             exit();
@@ -83,7 +82,6 @@ class PhastServices {
         header_remove('Location');
         header_remove('Cache-Control');
         self::output($httpRequest, $response);
-
     }
 
     public static function output(Request $request, Response $response, ObjectifiedFunctions $funcs = null) {
@@ -144,10 +142,10 @@ class PhastServices {
             return false;
         }
         $headers = $response->getHeaders();
-        if (isset ($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') === 0) {
+        if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') === 0) {
             return false;
         }
-        return !isset ($headers['Content-Encoding']) || $headers['Content-Encoding'] == 'identity';
+        return !isset($headers['Content-Encoding']) || $headers['Content-Encoding'] == 'identity';
     }
 
     private static function generateETag(array $headers, $content) {
@@ -159,5 +157,4 @@ class PhastServices {
     private static function isIterable($thing) {
         return is_array($thing) || ($thing instanceof \Iterator) || ($thing instanceof \Generator);
     }
-
 }

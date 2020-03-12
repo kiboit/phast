@@ -6,14 +6,13 @@ use Kibo\Phast\Services\ServiceRequest;
 use PHPUnit\Framework\TestCase;
 
 class ConfigurationTest extends TestCase {
-
     private $configTemplate = [
         'documents' => [
             'filters' => [
                 'filter1' => [],
                 'filter2' => [],
-                'filter3' => []
-            ]
+                'filter3' => [],
+            ],
         ],
 
         'images' => [
@@ -23,19 +22,19 @@ class ConfigurationTest extends TestCase {
             'filters' => [
                 'filter1' => [
                     'item1',
-                    'item2'
+                    'item2',
                 ],
                 'filter2' => [],
-                'filter3' => []
-            ]
+                'filter3' => [],
+            ],
         ],
 
         'logging' => [
             'logWriters' => [
                 'writer1' => [],
                 'writer2' => [],
-                'writer3' => []
-            ]
+                'writer3' => [],
+            ],
         ],
 
         'styles' => [
@@ -44,8 +43,8 @@ class ConfigurationTest extends TestCase {
 
         'switches' => [
             'phast' => true,
-            'diagnostics' => false
-        ]
+            'diagnostics' => false,
+        ],
     ];
 
     public function testToArray() {
@@ -60,22 +59,22 @@ class ConfigurationTest extends TestCase {
             'documents' => [
                 'filters' => [
                     'filter1' => [
-                        'setting' => 'value'
-                    ]
-                ]
+                        'setting' => 'value',
+                    ],
+                ],
             ],
             'images' => [
                 'enable-cache' => false,
                 'filters' => [
                     'filter1' => [
-                        'item3'
-                    ]
-                ]
+                        'item3',
+                    ],
+                ],
             ],
             'switches' => [
                 'diagnostics' => true,
-                'aux' => true
-            ]
+                'aux' => true,
+            ],
         ];
         $expected = $this->configTemplate;
         $expected['documents']['filters']['filter1']['setting'] = 'value';
@@ -100,10 +99,10 @@ class ConfigurationTest extends TestCase {
         $config['logging']['logWriters']['writer1']['enabled'] = false;
 
         $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
-        unset ($config['documents']['filters']['filter2']);
-        unset ($config['images']['filters']['filter1']);
-        unset ($config['images']['filters']['filter3']);
-        unset ($config['logging']['logWriters']['writer1']);
+        unset($config['documents']['filters']['filter2']);
+        unset($config['images']['filters']['filter1']);
+        unset($config['images']['filters']['filter3']);
+        unset($config['logging']['logWriters']['writer1']);
 
         $this->assertEquals($config, $actual);
     }
@@ -120,9 +119,9 @@ class ConfigurationTest extends TestCase {
         $config['switches']['s2'] = true;
 
         $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
-        unset ($config['documents']['filters']['filter1']);
-        unset ($config['images']['filters']['filter3']);
-        unset ($config['logging']['logWriters']['writer1']);
+        unset($config['documents']['filters']['filter1']);
+        unset($config['images']['filters']['filter3']);
+        unset($config['logging']['logWriters']['writer1']);
 
         $this->assertEquals($config, $actual);
     }
@@ -142,9 +141,9 @@ class ConfigurationTest extends TestCase {
             ->withServiceRequest($request)
             ->getRuntimeConfig()
             ->toArray();
-        unset ($config['documents']['filters']['filter1']);
-        unset ($config['documents']['filters']['filter2']);
-        unset ($config['images']['filters']['filter1']);
+        unset($config['documents']['filters']['filter1']);
+        unset($config['documents']['filters']['filter2']);
+        unset($config['images']['filters']['filter1']);
 
         $config['switches']['s'] = false;
         $config['switches']['m1'] = false;
@@ -156,7 +155,7 @@ class ConfigurationTest extends TestCase {
 
     public function testDefaultPhastSwitch() {
         $config = $this->configTemplate;
-        unset ($config['switches']);
+        unset($config['switches']);
         $actual = (new Configuration($config))->getRuntimeConfig()->toArray();
         $this->assertArrayHasKey('switches', $actual);
         $this->assertArrayHasKey('phast', $actual['switches']);

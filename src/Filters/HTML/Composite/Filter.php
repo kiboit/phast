@@ -35,7 +35,6 @@ class Filter {
         $this->outputStats = $outputStats;
     }
 
-
     /**
      * @param string $buffer
      * @return string
@@ -53,7 +52,7 @@ class Filter {
                     'message' => $e->getMessage(),
                     'code' => $e->getCode(),
                     'file' => $e->getFile(),
-                    'line' => $e->getLine()
+                    'line' => $e->getLine(),
                 ]
             );
             return $buffer;
@@ -87,5 +86,4 @@ class Filter {
 
         return $output;
     }
-
 }

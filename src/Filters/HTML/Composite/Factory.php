@@ -7,7 +7,6 @@ use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\ValueObjects\URL;
 
 class Factory {
-
     use LoggingTrait;
 
     public function make(array $config) {
@@ -27,5 +26,4 @@ class Factory {
         }
         return $composite;
     }
-
 }

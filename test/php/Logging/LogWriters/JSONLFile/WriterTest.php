@@ -2,23 +2,22 @@
 
 namespace Kibo\Phast\Logging\LogWriters\JSONLFile;
 
-use PHPUnit\Framework\TestCase;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogLevel;
+use PHPUnit\Framework\TestCase;
 
 class WriterTest extends TestCase {
-
     /**
      * @dataProvider getWriteMessageTestData
      */
     public function testWriteMessage($suffix) {
         $dir = sys_get_temp_dir() . '/phast-test';
 
-        $fileSuffix = preg_replace('/[^0-9A-Za-z_-]/', '', (string)$suffix);
-        if (!empty ($fileSuffix)) {
+        $fileSuffix = preg_replace('/[^0-9A-Za-z_-]/', '', (string) $suffix);
+        if (!empty($fileSuffix)) {
             $fileSuffix = '-' . $fileSuffix;
         }
-        $filename = $dir . '/log' . $fileSuffix .'.jsonl';
+        $filename = $dir . '/log' . $fileSuffix . '.jsonl';
 
         @unlink($filename);
 
@@ -37,5 +36,4 @@ class WriterTest extends TestCase {
     public function getWriteMessageTestData() {
         return [[null], ['123'], ['../../123zxcZXC-_']];
     }
-
 }

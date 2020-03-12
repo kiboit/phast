@@ -6,12 +6,10 @@ use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Exceptions\LogicException;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManagerFactory;
-use Kibo\Phast\Filters\Image\ImageFactory;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Retrievers\LocalRetriever;
 
 class Factory {
-
     /**
      * @var array
      */
@@ -52,5 +50,4 @@ class Factory {
         }
         return $composite;
     }
-
 }

@@ -10,7 +10,6 @@ use Kibo\Phast\Retrievers\UniversalRetriever;
 use Kibo\Phast\Security\ServiceSignatureFactory;
 
 class Factory {
-
     public function make(array $config) {
         if ($config['images']['api-mode']) {
             $retriever = new PostDataRetriever();
@@ -27,5 +26,4 @@ class Factory {
             $config
         );
     }
-
 }

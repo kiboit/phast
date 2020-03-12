@@ -82,5 +82,4 @@ class OutputBufferHandler {
         $this->buffer = null;
         return $result;
     }
-
 }

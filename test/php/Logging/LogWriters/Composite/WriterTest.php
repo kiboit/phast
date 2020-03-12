@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Logging\LogWriters\Composite;
 
-
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogLevel;
 use PHPUnit\Framework\TestCase;
 
 class WriterTest extends TestCase {
-
     public function testCallingOthers() {
         $message = new LogEntry(LogLevel::ERROR, '', []);
         $writer = new Writer();
@@ -21,5 +19,4 @@ class WriterTest extends TestCase {
         }
         $writer->writeEntry($message);
     }
-
 }

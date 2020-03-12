@@ -7,7 +7,6 @@ use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class DiagnosticsRetriever implements Retriever {
-
     /**
      * @var string
      */
@@ -21,7 +20,6 @@ class DiagnosticsRetriever implements Retriever {
         $this->file = $file;
     }
 
-
     public function retrieve(URL $url) {
         return file_get_contents($this->file);
     }
@@ -29,6 +27,4 @@ class DiagnosticsRetriever implements Retriever {
     public function getCacheSalt(URL $url) {
         return '';
     }
-
-
 }

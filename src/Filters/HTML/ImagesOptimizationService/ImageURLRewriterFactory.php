@@ -8,24 +8,23 @@ use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\ValueObjects\URL;
 
 class ImageURLRewriterFactory {
-
     public function make(array $config, $filterClass = '') {
         $signature = (new ServiceSignatureFactory())->make($config);
 
-        if (isset ($config['documents']['filters'][$filterClass])) {
+        if (isset($config['documents']['filters'][$filterClass])) {
             $classConfig = $config['documents']['filters'][$filterClass];
-        } else if (isset ($config['styles']['filters'][$filterClass])) {
+        } elseif (isset($config['styles']['filters'][$filterClass])) {
             $classConfig = $config['styles']['filters'][$filterClass];
         } else {
             $classConfig = [];
         }
 
-        if (isset ($classConfig['serviceUrl'])) {
+        if (isset($classConfig['serviceUrl'])) {
             $serviceUrl = $classConfig['serviceUrl'];
         } else {
             $serviceUrl = $config['servicesUrl'] . '?service=images';
         }
-        $rewriter = new ImageURLRewriter(
+        return new ImageURLRewriter(
             $signature,
             new LocalRetriever($config['retrieverMap']),
             (new ImageInliningManagerFactory())->make($config),
@@ -33,7 +32,5 @@ class ImageURLRewriterFactory {
             URL::fromString($serviceUrl),
             $config['images']['whitelist']
         );
-        return $rewriter;
     }
-
 }

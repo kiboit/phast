@@ -47,14 +47,12 @@ class Filter implements CachedResultServiceFilter {
         $salts = array_map(function (ImageFilter $filter) use ($request) {
             return $filter->getCacheSalt($request);
         }, $this->filters);
-        $key = implode("\n", array_merge(
+        return implode("\n", array_merge(
             $filters,
             $salts,
             [$this->inliningManager->getMaxImageInliningSize(), $resource->getUrl(), $resource->getCacheSalt()]
         ));
-        return $key;
     }
-
 
     /**
      * @param Resource $resource
@@ -76,7 +74,7 @@ class Filter implements CachedResultServiceFilter {
                     'message' => $e->getMessage(),
                     'code' => $e->getCode(),
                     'file' => $e->getFile(),
-                    'line' => $e->getLine()
+                    'line' => $e->getLine(),
                 ]);
             }
         }
@@ -98,5 +96,4 @@ class Filter implements CachedResultServiceFilter {
         $this->inliningManager->maybeStoreForInlining($processedResource);
         return $processedResource;
     }
-
 }

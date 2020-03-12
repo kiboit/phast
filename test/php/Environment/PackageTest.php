@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Environment;
 
-
 use Kibo\Phast\Environment\Exceptions\PackageHasNoDiagnosticsException;
 use Kibo\Phast\Environment\Exceptions\PackageHasNoFactoryException;
 use PHPUnit\Framework\TestCase;
 
 class PackageTest extends TestCase {
-
     /**
      * @var Package
      */
@@ -67,5 +65,4 @@ class PackageTest extends TestCase {
         $this->expectException(PackageHasNoDiagnosticsException::class);
         $this->p2->getDiagnostics();
     }
-
 }

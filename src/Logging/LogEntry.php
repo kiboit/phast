@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Logging;
 
 class LogEntry implements \JsonSerializable {
-
     /**
      * @var int
      */
@@ -26,7 +25,7 @@ class LogEntry implements \JsonSerializable {
      * @param array $context
      */
     public function __construct($level, $message, array $context) {
-        $this->level = (int)$level;
+        $this->level = (int) $level;
         $this->message = $message;
         $this->context = $context;
     }
@@ -56,13 +55,11 @@ class LogEntry implements \JsonSerializable {
         return [
             'level' => $this->level,
             'message' => $this->message,
-            'context' => $this->context
+            'context' => $this->context,
         ];
     }
 
     public function jsonSerialize() {
         return $this->toArray();
     }
-
-
 }

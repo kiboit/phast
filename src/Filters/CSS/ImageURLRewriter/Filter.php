@@ -7,7 +7,6 @@ use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
 class Filter implements CachedResultServiceFilter {
-
     /**
      * @var ImageURLRewriter
      */
@@ -25,12 +24,10 @@ class Filter implements CachedResultServiceFilter {
         return $this->rewriter->getCacheSalt();
     }
 
-
     public function apply(Resource $resource, array $request) {
         $content = $this->rewriter->rewriteStyle($resource->getContent());
         $dependencies = $this->rewriter->getInlinedResources();
         return $resource->withContent($content)
                         ->withDependencies($dependencies);
     }
-
 }

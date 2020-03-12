@@ -7,7 +7,6 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Parsing\HTML\PCRETokenizer;
 
 class OptimizerTest extends HTMLFilterTestCase {
-
     /**
      * @var Cache
      */
@@ -85,7 +84,7 @@ class OptimizerTest extends HTMLFilterTestCase {
             [true,  'a + .class2'],
             [true,  '.class2 input[disabled]'],
             [false, 'input[disabled]'],
-            [false, '.class2 a[rel*="class2"]']
+            [false, '.class2 a[rel*="class2"]'],
         ];
     }
 
@@ -196,5 +195,4 @@ class OptimizerTest extends HTMLFilterTestCase {
     private function optimizeCSS($css) {
         return $this->makeOptimizer()->optimizeCSS($css);
     }
-
 }

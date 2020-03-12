@@ -4,7 +4,6 @@
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
 class ClosingTag extends Element {
-
     /**
      * @var string
      */
@@ -32,5 +31,4 @@ class ClosingTag extends Element {
     public function dumpValue() {
         return $this->tagName;
     }
-
 }

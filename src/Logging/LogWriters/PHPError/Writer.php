@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Logging\LogWriters\PHPError;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogWriters\BaseLogWriter;
 
 class Writer extends BaseLogWriter {
-
     private $messageType = 0;
 
     private $destination = null;
@@ -27,13 +25,12 @@ class Writer extends BaseLogWriter {
      */
     public function __construct(array $config, ObjectifiedFunctions $funcs = null) {
         foreach (['messageType', 'destination', 'extraHeaders'] as $field) {
-            if (isset ($config[$field])) {
+            if (isset($config[$field])) {
                 $this->$field = $config[$field];
             }
         }
         $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
-
 
     protected function doWriteEntry(LogEntry $entry) {
         if ($this->levelMask & $entry->getLevel()) {
@@ -53,10 +50,10 @@ class Writer extends BaseLogWriter {
             'service',
             'class',
             'method',
-            'line'
+            'line',
         ];
         foreach ($prefixKeys as $key) {
-            if (isset ($context[$key])) {
+            if (isset($context[$key])) {
                 $prefix .= '{' . $key . "}\t";
             }
         }
@@ -64,6 +61,4 @@ class Writer extends BaseLogWriter {
             return array_key_exists($match[1], $context) ? $context[$match[1]] : $match[0];
         }, $prefix . $message);
     }
-
-
 }

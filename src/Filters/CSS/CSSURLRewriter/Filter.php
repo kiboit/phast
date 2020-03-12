@@ -8,8 +8,6 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class Filter implements ServiceFilter {
-
-
     /**
      * @param Resource $resource
      * @param array $request
@@ -17,7 +15,7 @@ class Filter implements ServiceFilter {
      */
     public function apply(Resource $resource, array $request) {
         $baseUrl = $resource->getUrl();
-        $callback = function($match) use ($baseUrl) {
+        $callback = function ($match) use ($baseUrl) {
             if (preg_match('~^[a-z]+:~i', $match[3])) {
                 return $match[0];
             }
@@ -47,5 +45,4 @@ class Filter implements ServiceFilter {
 
         return $resource->withContent($cssContent);
     }
-
 }

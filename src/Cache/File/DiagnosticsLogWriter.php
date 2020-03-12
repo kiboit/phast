@@ -3,14 +3,13 @@
 
 namespace Kibo\Phast\Cache\File;
 
-
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogWriter;
 
 class DiagnosticsLogWriter implements LogWriter {
-
-    public function setLevelMask($mask) {}
+    public function setLevelMask($mask) {
+    }
 
     public function writeEntry(LogEntry $entry) {
         if ($entry->getLevel() > 2) {
@@ -21,6 +20,4 @@ class DiagnosticsLogWriter implements LogWriter {
             throw new RuntimeException("Error: Level: {$entry->getLevel()}, Msg: $message");
         }
     }
-
-
 }

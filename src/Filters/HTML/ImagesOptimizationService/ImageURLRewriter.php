@@ -49,7 +49,6 @@ class ImageURLRewriter {
      */
     protected $inlinedResources;
 
-
     /**
      * ImageURLRewriter constructor.
      * @param ServiceSignature $signature
@@ -130,7 +129,7 @@ class ImageURLRewriter {
             ~xiS',
             function ($match) use (&$allInlined) {
                 $url = $match[1] . $this->rewriteUrl($match[2]);
-                if (!empty ($this->inlinedResources)) {
+                if (!empty($this->inlinedResources)) {
                     $inlined = $this->inlinedResources[0];
                     $allInlined[$inlined->getUrl()->toString()] = $inlined;
                 }
@@ -156,7 +155,7 @@ class ImageURLRewriter {
             $this->baseUrl->toString(),
             $this->serviceUrl->toString(),
             $this->inliningManager->getMaxImageInliningSize(),
-            '20180413'
+            '20180413',
         ], array_keys($this->whitelist), array_values($this->whitelist));
         return join('-', $parts);
     }

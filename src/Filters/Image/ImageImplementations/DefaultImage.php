@@ -11,7 +11,6 @@ use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
 
 class DefaultImage extends BaseImage implements Image {
-
     /**
      * @var URL
      */
@@ -44,15 +43,15 @@ class DefaultImage extends BaseImage implements Image {
     }
 
     public function getWidth() {
-        return isset ($this->width) ? $this->width : $this->getImageInfo()[0];
+        return isset($this->width) ? $this->width : $this->getImageInfo()[0];
     }
 
     public function getHeight() {
-        return isset ($this->height) ? $this->height : $this->getImageInfo()[1];
+        return isset($this->height) ? $this->height : $this->getImageInfo()[1];
     }
 
     public function getType() {
-        if (isset ($this->type)) {
+        if (isset($this->type)) {
             return $this->type;
         }
         $type = @image_type_to_mime_type($this->getImageInfo()[2]);
@@ -67,7 +66,7 @@ class DefaultImage extends BaseImage implements Image {
     }
 
     private function getImageString() {
-        if (!isset ($this->imageString)) {
+        if (!isset($this->imageString)) {
             $imageString = $this->retriever->retrieve($this->imageURL);
             if ($imageString === false) {
                 throw new ItemNotFoundException('Could not find image: ' . $this->imageURL, 0, null, $this->imageURL);
@@ -78,7 +77,7 @@ class DefaultImage extends BaseImage implements Image {
     }
 
     private function getImageInfo() {
-        if (!isset ($this->imageInfo)) {
+        if (!isset($this->imageInfo)) {
             if ($this->getImageString() === '') {
                 throw new ImageProcessingException('Image is empty');
             }
@@ -92,7 +91,6 @@ class DefaultImage extends BaseImage implements Image {
     }
 
     protected function __clone() {
-        throw new LogicException("No operations may be performed on DefaultImage");
+        throw new LogicException('No operations may be performed on DefaultImage');
     }
-
 }

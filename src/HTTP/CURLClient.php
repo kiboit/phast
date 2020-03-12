@@ -7,7 +7,6 @@ use Kibo\Phast\HTTP\Exceptions\NetworkError;
 use Kibo\Phast\ValueObjects\URL;
 
 class CURLClient implements Client {
-
     public function get(URL $url, array $headers = []) {
         $this->checkCURL();
         return $this->request($url, $headers);
@@ -17,13 +16,13 @@ class CURLClient implements Client {
         $this->checkCURL();
         return $this->request($url, $headers, [
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $data
+            CURLOPT_POSTFIELDS => $data,
         ]);
     }
 
     private function checkCURL() {
         if (!function_exists('curl_init')) {
-            throw new NetworkError("cURL is not installed");
+            throw new NetworkError('cURL is not installed');
         }
     }
 
@@ -33,14 +32,14 @@ class CURLClient implements Client {
             if (strpos($headerLine, 'HTTP/') === 0) {
                 $response->setHeaders([]);
             } else {
-                list ($name, $value) = explode(':', $headerLine, 2);
+                list($name, $value) = explode(':', $headerLine, 2);
                 if (trim($name) !== '') {
                     $response->setHeader($name, trim($value));
                 }
             }
             return strlen($headerLine);
         };
-        $ch = curl_init((string)$url);
+        $ch = curl_init((string) $url);
         curl_setopt_array($ch, $opts + [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $this->makeHeaders($headers),
@@ -69,5 +68,4 @@ class CURLClient implements Client {
         }
         return $result;
     }
-
 }

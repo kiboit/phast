@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Logging;
 
 interface LogWriter {
-
     /**
      * Set a bit-mask to filter entries that are actually written
      *
@@ -19,5 +18,4 @@ interface LogWriter {
      * @return void
      */
     public function writeEntry(LogEntry $entry);
-
 }

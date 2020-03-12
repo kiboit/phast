@@ -2,13 +2,11 @@
 
 namespace Kibo\Phast\Logging\LogWriters\Composite;
 
-
 use Kibo\Phast\Logging\LogEntry;
 use Kibo\Phast\Logging\LogWriter;
 use Kibo\Phast\Logging\LogWriters\BaseLogWriter;
 
 class Writer extends BaseLogWriter {
-
     /**
      * @var Writer[]
      */
@@ -23,6 +21,4 @@ class Writer extends BaseLogWriter {
             $writer->writeEntry($entry);
         }
     }
-
-
 }

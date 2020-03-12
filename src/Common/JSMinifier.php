@@ -5,7 +5,6 @@ namespace Kibo\Phast\Common;
 use JSMin\JSMin;
 
 class JSMinifier extends JSMin {
-
     protected $removeLicenseHeaders;
 
     public function __construct($input, $removeLicenseHeaders = false) {

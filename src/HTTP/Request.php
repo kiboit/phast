@@ -3,7 +3,6 @@
 namespace Kibo\Phast\HTTP;
 
 class Request {
-
     /**
      * @var array
      */
@@ -24,19 +23,20 @@ class Request {
      */
     private $query;
 
-    private function __construct() {}
+    private function __construct() {
+    }
 
     public static function fromGlobals() {
         $get = [];
         $parsed = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
-        if (isset ($parsed['query'])) {
+        if (isset($parsed['query'])) {
             parse_str($parsed['query'], $get);
         }
         return self::fromArray($get, $_SERVER, $_COOKIE);
     }
 
     public static function fromArray(array $get = [], array $env = [], array $cookie = []) {
-        $instance = new self;
+        $instance = new self();
         $instance->get = $get;
         $instance->env = $env;
         $instance->cookie = $cookie;
@@ -76,14 +76,14 @@ class Request {
     }
 
     public function getCookie($name) {
-        if (isset ($this->cookie[$name])) {
+        if (isset($this->cookie[$name])) {
             return $this->cookie[$name];
         }
     }
 
     public function getQueryString() {
         $parsed = parse_url($this->getEnvValue('REQUEST_URI'));
-        if (isset ($parsed['query'])) {
+        if (isset($parsed['query'])) {
             return $parsed['query'];
         }
     }
@@ -103,7 +103,7 @@ class Request {
     }
 
     private function getEnvValue($key) {
-        if (isset ($this->env[$key])) {
+        if (isset($this->env[$key])) {
             return $this->env[$key];
         }
     }
@@ -133,5 +133,4 @@ class Request {
     private function isSuffix($suffix, $string) {
         return substr($string, -strlen($suffix)) === $suffix;
     }
-
 }

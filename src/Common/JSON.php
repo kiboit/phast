@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Common;
 
 class JSON {
-
     public static function encode($value) {
         return json_encode(
             $value,
@@ -20,5 +19,4 @@ class JSON {
             JSON_PRETTY_PRINT
         );
     }
-
 }

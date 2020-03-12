@@ -59,7 +59,6 @@ class Service {
         $this->tokenRefMaker = $tokenRefMaker;
     }
 
-
     /**
      * @param ServiceRequest $request
      * @return Response
@@ -75,7 +74,7 @@ class Service {
         yield '[';
         $firstRow = true;
         foreach ($this->getParams($request) as $key => $params) {
-            if (isset ($params['ref'])) {
+            if (isset($params['ref'])) {
                 $ref = $params['ref'];
                 $params = $this->tokenRefMaker->getParams($ref);
                 if (!$params) {
@@ -84,7 +83,7 @@ class Service {
                     continue;
                 }
             }
-            if (!isset ($params['src'])) {
+            if (!isset($params['src'])) {
                 $this->logger()->error('No src found for set {key}', ['key' => $key]);
                 yield $this->generateJSONRow(['status' => 404], $firstRow);
                 continue;
@@ -94,7 +93,7 @@ class Service {
                 yield $this->generateJSONRow(['status' => 401], $firstRow);
                 continue;
             }
-            list ($retriever, $filter) = $this->getRetrieverAndFilter($params);
+            list($retriever, $filter) = $this->getRetrieverAndFilter($params);
             $resource = Resource::makeWithRetriever(
                 URL::fromString($params['src']),
                 $retriever
@@ -104,7 +103,7 @@ class Service {
                 $filtered = $filter->apply($resource, $params);
                 yield $this->generateJSONRow([
                     'status' => 200,
-                    'content' => $this->cleanUTF8($filtered->getContent())
+                    'content' => $this->cleanUTF8($filtered->getContent()),
                 ], $firstRow);
             } catch (ItemNotFoundException $e) {
                 $this->logger()->error(
@@ -120,7 +119,7 @@ class Service {
                         'type' => get_class($e),
                         'message' => $e->getMessage(),
                         'file' => $e->getFile(),
-                        'line' => $e->getLine()
+                        'line' => $e->getLine(),
                     ]
                 );
                 yield $this->generateJSONRow(['status' => 500], $firstRow);
@@ -131,7 +130,7 @@ class Service {
 
     private function getParams(ServiceRequest $request) {
         $params = $request->getParams();
-        if (isset ($params['src_0'])) {
+        if (isset($params['src_0'])) {
             return (new BundlerParamsParser())->parse($request);
         }
         return (new ShortBundlerParamsParser())->parse($request);
@@ -142,7 +141,7 @@ class Service {
     }
 
     private function getRetrieverAndFilter(array $params) {
-        if (isset ($params['isScript'])) {
+        if (isset($params['isScript'])) {
             return [$this->jsRetriever, $this->jsFilter];
         }
         return [$this->cssRetriever, $this->cssFilter];
@@ -161,12 +160,11 @@ class Service {
               |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
               | (.)
             ~xs',
-            function($match) {
+            function ($match) {
                 if (isset($match[1]) && strlen($match[1])) {
                     return '';
-                } else {
-                    return $match[0];
                 }
+                return $match[0];
             },
             $buffer
         );
@@ -181,5 +179,4 @@ class Service {
         }
         return $prepend . JSON::encode($content);
     }
-
 }

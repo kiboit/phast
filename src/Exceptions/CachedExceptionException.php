@@ -2,4 +2,5 @@
 
 namespace Kibo\Phast\Exceptions;
 
-class CachedExceptionException extends \Exception {}
+class CachedExceptionException extends \Exception {
+}

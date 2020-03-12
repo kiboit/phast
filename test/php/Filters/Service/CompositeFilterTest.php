@@ -2,7 +2,6 @@
 
 namespace Kibo\Phast\Filters\Service;
 
-
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Retrievers\Retriever;
@@ -11,7 +10,6 @@ use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class CompositeFilterTest extends PhastTestCase {
-
     /**
      * @var CompositeFilter
      */
@@ -112,11 +110,10 @@ class CompositeFilterTest extends PhastTestCase {
             $this->assertNotEmpty($hash, "Hash $idx is an empty string");
         }
 
-        $this->assertEquals($hashes, array_unique($hashes), "Hashed has duplicates");
+        $this->assertEquals($hashes, array_unique($hashes), 'Hashed has duplicates');
     }
 
     protected function makeResource() {
         return Resource::makeWithContent(URL::fromString('http://phast.test'), 'content');
     }
-
 }

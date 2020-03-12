@@ -6,7 +6,6 @@ namespace Kibo\Phast\Cache\File;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 
 class GarbageCollector extends ProbabilisticExecutor {
-
     /**
      * @var integer
      */
@@ -21,7 +20,6 @@ class GarbageCollector extends ProbabilisticExecutor {
      * @var integer
      */
     private $gcMaxItems;
-
 
     public function __construct(array $config, ObjectifiedFunctions $functions = null) {
         $this->shardingDepth = $config['shardingDepth'];
@@ -57,5 +55,4 @@ class GarbageCollector extends ProbabilisticExecutor {
             }
         }
     }
-
 }

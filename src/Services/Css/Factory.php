@@ -6,7 +6,6 @@ use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFilterFactory;
 use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Services\ServiceFactoryTrait;
 
-
 class Factory {
     use ServiceFactoryTrait;
 
@@ -30,5 +29,4 @@ class Factory {
     public function makeFilter(array $config) {
         return (new CSSCompositeFilterFactory())->make($config);
     }
-
 }

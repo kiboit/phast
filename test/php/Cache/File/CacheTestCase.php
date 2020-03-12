@@ -2,12 +2,10 @@
 
 namespace Kibo\Phast\Cache\File;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\PhastTestCase;
 
 class CacheTestCase extends PhastTestCase {
-
     /**
      * @var array
      */
@@ -27,18 +25,20 @@ class CacheTestCase extends PhastTestCase {
             'garbageCollection' => [
                 'probability' => 0,
                 'maxItems' => 100,
-                'maxAge' => 20
+                'maxAge' => 20,
             ],
             'diskCleanup' => [
                 'maxSize' => 10000,
                 'probability' => 0,
-                'portionToFree' => 0.5
-            ]
+                'portionToFree' => 0.5,
+            ],
         ];
         $this->rmDir($this->config['cacheRoot']);
         $this->functions = new ObjectifiedFunctions();
-        $this->functions->register_shutdown_function = function () {};
-        $this->functions->error_log = function () {};
+        $this->functions->register_shutdown_function = function () {
+        };
+        $this->functions->error_log = function () {
+        };
     }
 
     protected function rmDir($dir) {
@@ -62,5 +62,4 @@ class CacheTestCase extends PhastTestCase {
         }
         rmdir($dir);
     }
-
 }

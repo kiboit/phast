@@ -12,14 +12,14 @@ use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
 
 class Compiler {
-
     private $include = [];
+
     private $exclude = [];
 
     public static function getPhastCompiler(): self {
         $root = __DIR__ . '/../..';
 
-        return (new self)
+        return (new self())
             ->include($root . '/src')
             ->exclude($root . '/src/Build')
             ->include($root . '/vendor/mrclay/jsmin-php/src');
@@ -43,11 +43,11 @@ class Compiler {
             $tree = $this->parseFile($fileinfo);
             $namespace = $this->getSingleNamespace($tree, $fileinfo);
             $namespace->file = $fileinfo;
-            $nameResolver = new NameResolver;
-            $nodeTraverser = new NodeTraverser;
+            $nameResolver = new NameResolver();
+            $nodeTraverser = new NodeTraverser();
             $nodeTraverser->addVisitor($nameResolver);
             $nodeTraverser->traverse([$namespace]);
-            $nodeTraverser = new NodeTraverser;
+            $nodeTraverser = new NodeTraverser();
             $nodeTraverser->addVisitor(new ScriptInliner());
             $nodeTraverser->traverse([$namespace]);
             $namespace->stmts = [$this->getClassLike($namespace)];
@@ -56,7 +56,7 @@ class Compiler {
 
         $combinedTree = iterator_to_array($this->reorderDefinitions($combinedTree), false);
 
-        return (new ASCIIPrettyPrinter)->prettyPrintFile($combinedTree);
+        return (new ASCIIPrettyPrinter())->prettyPrintFile($combinedTree);
     }
 
     private function getSourceFiles() {
@@ -80,14 +80,14 @@ class Compiler {
     private function parseFile(\SplFileInfo $fileinfo) {
         $php = file_get_contents($fileinfo->getPathname());
         if ($php === false) {
-            throw new \RuntimeException(sprintf("%s: Could not read source file", $fileinfo->getPathname()));
+            throw new \RuntimeException(sprintf('%s: Could not read source file', $fileinfo->getPathname()));
         }
-        $parser = (new ParserFactory)->create(ParserFactory::ONLY_PHP5);
+        $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP5);
         try {
             $tree = $parser->parse($php);
         } catch (\Exception $e) {
             throw new \RuntimeException(sprintf(
-                "%s: Caught %s: %s",
+                '%s: Caught %s: %s',
                 $fileinfo->getPathname(),
                 get_class($e),
                 $e->getMessage()
@@ -102,7 +102,7 @@ class Compiler {
             || !($tree[0] instanceof Namespace_)
         ) {
             throw new \RuntimeException(sprintf(
-                "Expected a single namespace {}, instead got %s",
+                'Expected a single namespace {}, instead got %s',
                 $tree ? implode(', ', array_map('get_class', $tree)) : 'none'
             ));
         }
@@ -113,8 +113,7 @@ class Compiler {
     private function getClassLike(Namespace_ $namespace) {
         $classes = [];
         foreach ($namespace->stmts as $node) {
-            if ($node instanceof Use_);
-            elseif ($node instanceof ClassLike) {
+            if ($node instanceof Use_); elseif ($node instanceof ClassLike) {
                 $classes[] = $node;
             } else {
                 throw new \RuntimeException("Unexpected top-level node: {$node}");
@@ -125,7 +124,7 @@ class Compiler {
                 return $class->name;
             }, $classes);
             throw new \RuntimeException(sprintf(
-                "Expected a single declaration, instead got %s",
+                'Expected a single declaration, instead got %s',
                 $classes ? implode(', ', $names) : 'none'
             ));
         }
@@ -199,5 +198,4 @@ class Compiler {
             }
         }
     }
-
 }

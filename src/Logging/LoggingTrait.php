@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Logging;
 
 trait LoggingTrait {
-
     protected function logger($method = null, $line = null) {
         $context = ['class' => get_class($this)];
         if (!is_null($method)) {
@@ -14,5 +13,4 @@ trait LoggingTrait {
         }
         return Log::context($context);
     }
-
 }

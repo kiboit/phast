@@ -9,7 +9,6 @@ use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Logging\Logger;
 
 class Diagnostics implements DiagnosticsInterface {
-
     public function diagnose(array $config) {
         Log::setLogger(new Logger(new DiagnosticsLogWriter()));
         $cache = new Cache($config['cache'], 'cache-self-diagnosis');
@@ -20,9 +19,7 @@ class Diagnostics implements DiagnosticsInterface {
             return 2;
         }, 2);
         if ($v1 != $v2) {
-            throw new RuntimeException("Cache failed, but no error was reported!");
+            throw new RuntimeException('Cache failed, but no error was reported!');
         }
     }
-
-
 }

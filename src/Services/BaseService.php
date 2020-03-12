@@ -69,7 +69,7 @@ abstract class BaseService {
         $this->validateRequest($request);
         $request = $this->getParams($request);
         $resource = Resource::makeWithRetriever(
-            URL::fromString(isset ($request['src']) ? $request['src'] : ''),
+            URL::fromString(isset($request['src']) ? $request['src'] : ''),
             $this->retriever
         );
         $filtered = $this->filter->apply($resource, $request);
@@ -98,7 +98,7 @@ abstract class BaseService {
         return $response;
     }
 
-    protected  function validateRequest(ServiceRequest $request) {
+    protected function validateRequest(ServiceRequest $request) {
         $this->validateIntegrity($request);
         $this->validateToken($request);
         $this->validateWhitelisted($request);
@@ -106,7 +106,7 @@ abstract class BaseService {
 
     protected function validateIntegrity(ServiceRequest $request) {
         $params = $request->getParams();
-        if (!isset ($params['src'])) {
+        if (!isset($params['src'])) {
             throw new ItemNotFoundException('No source is set!');
         }
     }

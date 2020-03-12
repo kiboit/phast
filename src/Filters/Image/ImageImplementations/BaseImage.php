@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\Image\ImageImplementations;
 
 abstract class BaseImage {
-
     /**
      * @var integer
      */

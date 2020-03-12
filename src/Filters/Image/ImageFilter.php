@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\Image;
 
 interface ImageFilter {
-
     /**
      * @param array $request
      * @return string
@@ -16,5 +15,4 @@ interface ImageFilter {
      * @return Image
      */
     public function transformImage(Image $image, array $request);
-
 }

@@ -5,7 +5,6 @@ namespace Kibo\Phast\HTTP;
 use Kibo\Phast\ValueObjects\URL;
 
 interface Client {
-
     /**
      * Retrieve a URL using the GET HTTP method
      *
@@ -26,5 +25,4 @@ interface Client {
      * @throws \Exception
      */
     public function post(URL $url, $data, array $headers = []);
-
 }

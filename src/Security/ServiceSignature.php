@@ -5,7 +5,6 @@ namespace Kibo\Phast\Security;
 use Kibo\Phast\Cache\Cache;
 
 class ServiceSignature {
-
     const AUTO_TOKEN_SIZE = 128;
 
     const SIGNATURE_LENGTH = 16;
@@ -51,14 +50,14 @@ class ServiceSignature {
     public function sign($value) {
         $identities = $this->getIdentities();
         $users = array_keys($identities);
-        list ($user, $token) = [array_shift($users), array_shift($identities)];
+        list($user, $token) = [array_shift($users), array_shift($identities)];
         return $user . substr(md5($token . $value), 0, self::SIGNATURE_LENGTH);
     }
 
     public function verify($signature, $value) {
         $user = substr($signature, 0, -self::SIGNATURE_LENGTH);
         $identities = $this->getIdentities();
-        if (!isset ($identities[$user])) {
+        if (!isset($identities[$user])) {
             return false;
         }
         $token = $identities[$user];
@@ -76,7 +75,7 @@ class ServiceSignature {
     }
 
     private function getIdentities() {
-        if (!isset ($this->identities)) {
+        if (!isset($this->identities)) {
             $token = $this->cache->get('security-token', function () {
                 return self::generateToken();
             });
@@ -84,5 +83,4 @@ class ServiceSignature {
         }
         return $this->identities;
     }
-
 }

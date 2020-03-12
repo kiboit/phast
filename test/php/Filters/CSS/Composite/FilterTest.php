@@ -7,7 +7,6 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class FilterTest extends TestCase {
-
     /**
      * @var Filter
      */
@@ -24,5 +23,4 @@ class FilterTest extends TestCase {
         $filtered = $this->filter->apply($resource, []);
         $this->assertEquals(' selector {rule:  value}', $filtered->getContent());
     }
-
 }

@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Services\Bundler;
 
-
 use \Kibo\Phast\Services\Css;
 use \Kibo\Phast\Services\Scripts;
 use Kibo\Phast\Security\ServiceSignatureFactory;
@@ -37,5 +36,4 @@ class Factory {
             (new TokenRefMakerFactory())->make($config)
         );
     }
-
 }

@@ -15,9 +15,7 @@ namespace Kibo\Phast\Parsing\HTML;
  *       naming that this could significantly shrink the size and maybe make it
  *       faster. See the Go teams implementation at https://code.google.com/p/go/source/browse/html/atom.
  */
-class HTMLInfo
-{
-
+class HTMLInfo {
     /**
      * Indicates an element is described in the specification.
      */
@@ -26,12 +24,14 @@ class HTMLInfo
     // From section 8.1.2: "script", "style"
     // From 8.2.5.4.7 ("in body" insertion mode): "noembed"
     // From 8.4 "style", "xmp", "iframe", "noembed", "noframes"
+
     /**
      * Indicates the contained text should be processed as raw text.
      */
     const TEXT_RAW = 2;
 
     // From section 8.1.2: "textarea", "title"
+
     /**
      * Indicates the contained text should be processed as RCDATA.
      */
@@ -49,6 +49,7 @@ class HTMLInfo
     // "pre", "listing"
     // "form"
     // "plaintext"
+
     /**
      * Indicates that if a previous event is for a P tag, that element
      * should be considered closed.
@@ -61,6 +62,7 @@ class HTMLInfo
     const TEXT_PLAINTEXT = 32;
 
     // See https://developer.mozilla.org/en-US/docs/HTML/Block-level_elements
+
     /**
      * Indicates that the tag is a block.
      */
@@ -76,117 +78,117 @@ class HTMLInfo
      *
      * @var array
      */
-    public static $html5 = array(
-        "a" => 1,
-        "abbr" => 1,
-        "address" => 65, // NORMAL | BLOCK_TAG
-        "area" => 9, // NORMAL | VOID_TAG
-        "article" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "aside" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "audio" => 65, // NORMAL | BLOCK_TAG
-        "b" => 1,
-        "base" => 9, // NORMAL | VOID_TAG
-        "bdi" => 1,
-        "bdo" => 1,
-        "blockquote" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "body" => 1,
-        "br" => 9, // NORMAL | VOID_TAG
-        "button" => 1,
-        "canvas" => 65, // NORMAL | BLOCK_TAG
-        "caption" => 1,
-        "cite" => 1,
-        "code" => 1,
-        "col" => 9, // NORMAL | VOID_TAG
-        "colgroup" => 1,
-        "command" => 9, // NORMAL | VOID_TAG
+    public static $html5 = [
+        'a' => 1,
+        'abbr' => 1,
+        'address' => 65, // NORMAL | BLOCK_TAG
+        'area' => 9, // NORMAL | VOID_TAG
+        'article' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'aside' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'audio' => 65, // NORMAL | BLOCK_TAG
+        'b' => 1,
+        'base' => 9, // NORMAL | VOID_TAG
+        'bdi' => 1,
+        'bdo' => 1,
+        'blockquote' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'body' => 1,
+        'br' => 9, // NORMAL | VOID_TAG
+        'button' => 1,
+        'canvas' => 65, // NORMAL | BLOCK_TAG
+        'caption' => 1,
+        'cite' => 1,
+        'code' => 1,
+        'col' => 9, // NORMAL | VOID_TAG
+        'colgroup' => 1,
+        'command' => 9, // NORMAL | VOID_TAG
         // "data" => 1, // This is highly experimental and only part of the whatwg spec (not w3c). See https://developer.mozilla.org/en-US/docs/HTML/Element/data
-        "datalist" => 1,
-        "dd" => 65, // NORMAL | BLOCK_TAG
-        "del" => 1,
-        "details" => 17, // NORMAL | AUTOCLOSE_P,
-        "dfn" => 1,
-        "dialog" => 17, // NORMAL | AUTOCLOSE_P,
-        "div" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "dl" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "dt" => 1,
-        "em" => 1,
-        "embed" => 9, // NORMAL | VOID_TAG
-        "fieldset" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "figcaption" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "figure" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "footer" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "form" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "h1" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "h2" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "h3" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "h4" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "h5" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "h6" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "head" => 1,
-        "header" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "hgroup" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "hr" => 73, // NORMAL | VOID_TAG
-        "html" => 1,
-        "i" => 1,
-        "iframe" => 3, // NORMAL | TEXT_RAW
-        "img" => 9, // NORMAL | VOID_TAG
-        "input" => 9, // NORMAL | VOID_TAG
-        "kbd" => 1,
-        "ins" => 1,
-        "keygen" => 9, // NORMAL | VOID_TAG
-        "label" => 1,
-        "legend" => 1,
-        "li" => 1,
-        "link" => 9, // NORMAL | VOID_TAG
-        "map" => 1,
-        "mark" => 1,
-        "menu" => 17, // NORMAL | AUTOCLOSE_P,
-        "meta" => 9, // NORMAL | VOID_TAG
-        "meter" => 1,
-        "nav" => 17, // NORMAL | AUTOCLOSE_P,
-        "noscript" => 65, // NORMAL | BLOCK_TAG
-        "object" => 1,
-        "ol" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "optgroup" => 1,
-        "option" => 1,
-        "output" => 65, // NORMAL | BLOCK_TAG
-        "p" => 209, // NORMAL | AUTOCLOSE_P | BLOCK_TAG | BLOCK_ONLY_INLINE
-        "param" => 9, // NORMAL | VOID_TAG
-        "pre" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "progress" => 1,
-        "q" => 1,
-        "rp" => 1,
-        "rt" => 1,
-        "ruby" => 1,
-        "s" => 1,
-        "samp" => 1,
-        "script" => 3, // NORMAL | TEXT_RAW
-        "section" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "select" => 1,
-        "small" => 1,
-        "source" => 9, // NORMAL | VOID_TAG
-        "span" => 1,
-        "strong" => 1,
-        "style" => 3, // NORMAL | TEXT_RAW
-        "sub" => 1,
-        "summary" => 17, // NORMAL | AUTOCLOSE_P,
-        "sup" => 1,
-        "table" => 65, // NORMAL | BLOCK_TAG
-        "tbody" => 1,
-        "td" => 1,
-        "textarea" => 5, // NORMAL | TEXT_RCDATA
-        "tfoot" => 65, // NORMAL | BLOCK_TAG
-        "th" => 1,
-        "thead" => 1,
-        "time" => 1,
-        "title" => 5, // NORMAL | TEXT_RCDATA
-        "tr" => 1,
-        "track" => 9, // NORMAL | VOID_TAG
-        "u" => 1,
-        "ul" => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
-        "var" => 1,
-        "video" => 65, // NORMAL | BLOCK_TAG
-        "wbr" => 9, // NORMAL | VOID_TAG
+        'datalist' => 1,
+        'dd' => 65, // NORMAL | BLOCK_TAG
+        'del' => 1,
+        'details' => 17, // NORMAL | AUTOCLOSE_P,
+        'dfn' => 1,
+        'dialog' => 17, // NORMAL | AUTOCLOSE_P,
+        'div' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'dl' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'dt' => 1,
+        'em' => 1,
+        'embed' => 9, // NORMAL | VOID_TAG
+        'fieldset' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'figcaption' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'figure' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'footer' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'form' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'h1' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'h2' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'h3' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'h4' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'h5' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'h6' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'head' => 1,
+        'header' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'hgroup' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'hr' => 73, // NORMAL | VOID_TAG
+        'html' => 1,
+        'i' => 1,
+        'iframe' => 3, // NORMAL | TEXT_RAW
+        'img' => 9, // NORMAL | VOID_TAG
+        'input' => 9, // NORMAL | VOID_TAG
+        'kbd' => 1,
+        'ins' => 1,
+        'keygen' => 9, // NORMAL | VOID_TAG
+        'label' => 1,
+        'legend' => 1,
+        'li' => 1,
+        'link' => 9, // NORMAL | VOID_TAG
+        'map' => 1,
+        'mark' => 1,
+        'menu' => 17, // NORMAL | AUTOCLOSE_P,
+        'meta' => 9, // NORMAL | VOID_TAG
+        'meter' => 1,
+        'nav' => 17, // NORMAL | AUTOCLOSE_P,
+        'noscript' => 65, // NORMAL | BLOCK_TAG
+        'object' => 1,
+        'ol' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'optgroup' => 1,
+        'option' => 1,
+        'output' => 65, // NORMAL | BLOCK_TAG
+        'p' => 209, // NORMAL | AUTOCLOSE_P | BLOCK_TAG | BLOCK_ONLY_INLINE
+        'param' => 9, // NORMAL | VOID_TAG
+        'pre' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'progress' => 1,
+        'q' => 1,
+        'rp' => 1,
+        'rt' => 1,
+        'ruby' => 1,
+        's' => 1,
+        'samp' => 1,
+        'script' => 3, // NORMAL | TEXT_RAW
+        'section' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'select' => 1,
+        'small' => 1,
+        'source' => 9, // NORMAL | VOID_TAG
+        'span' => 1,
+        'strong' => 1,
+        'style' => 3, // NORMAL | TEXT_RAW
+        'sub' => 1,
+        'summary' => 17, // NORMAL | AUTOCLOSE_P,
+        'sup' => 1,
+        'table' => 65, // NORMAL | BLOCK_TAG
+        'tbody' => 1,
+        'td' => 1,
+        'textarea' => 5, // NORMAL | TEXT_RCDATA
+        'tfoot' => 65, // NORMAL | BLOCK_TAG
+        'th' => 1,
+        'thead' => 1,
+        'time' => 1,
+        'title' => 5, // NORMAL | TEXT_RCDATA
+        'tr' => 1,
+        'track' => 9, // NORMAL | VOID_TAG
+        'u' => 1,
+        'ul' => 81, // NORMAL | AUTOCLOSE_P | BLOCK_TAG
+        'var' => 1,
+        'video' => 65, // NORMAL | BLOCK_TAG
+        'wbr' => 9, // NORMAL | VOID_TAG
 
         // Legacy?
         'basefont' => 8, // VOID_TAG
@@ -202,8 +204,8 @@ class HTMLInfo
         'marquee' => 0,
         'isindex' => 8, // VOID_TAG
         'xmp' => 20, // AUTOCLOSE_P | VOID_TAG | RAW_TEXT
-        'noembed' => 2 // RAW_TEXT
-    );
+        'noembed' => 2, // RAW_TEXT
+    ];
 
     /**
      * The MathML elements.
@@ -214,47 +216,47 @@ class HTMLInfo
      *
      * @var array
      */
-    public static $mathml = array(
-        "maction" => 1,
-        "maligngroup" => 1,
-        "malignmark" => 1,
-        "math" => 1,
-        "menclose" => 1,
-        "merror" => 1,
-        "mfenced" => 1,
-        "mfrac" => 1,
-        "mglyph" => 1,
-        "mi" => 1,
-        "mlabeledtr" => 1,
-        "mlongdiv" => 1,
-        "mmultiscripts" => 1,
-        "mn" => 1,
-        "mo" => 1,
-        "mover" => 1,
-        "mpadded" => 1,
-        "mphantom" => 1,
-        "mroot" => 1,
-        "mrow" => 1,
-        "ms" => 1,
-        "mscarries" => 1,
-        "mscarry" => 1,
-        "msgroup" => 1,
-        "msline" => 1,
-        "mspace" => 1,
-        "msqrt" => 1,
-        "msrow" => 1,
-        "mstack" => 1,
-        "mstyle" => 1,
-        "msub" => 1,
-        "msup" => 1,
-        "msubsup" => 1,
-        "mtable" => 1,
-        "mtd" => 1,
-        "mtext" => 1,
-        "mtr" => 1,
-        "munder" => 1,
-        "munderover" => 1
-    );
+    public static $mathml = [
+        'maction' => 1,
+        'maligngroup' => 1,
+        'malignmark' => 1,
+        'math' => 1,
+        'menclose' => 1,
+        'merror' => 1,
+        'mfenced' => 1,
+        'mfrac' => 1,
+        'mglyph' => 1,
+        'mi' => 1,
+        'mlabeledtr' => 1,
+        'mlongdiv' => 1,
+        'mmultiscripts' => 1,
+        'mn' => 1,
+        'mo' => 1,
+        'mover' => 1,
+        'mpadded' => 1,
+        'mphantom' => 1,
+        'mroot' => 1,
+        'mrow' => 1,
+        'ms' => 1,
+        'mscarries' => 1,
+        'mscarry' => 1,
+        'msgroup' => 1,
+        'msline' => 1,
+        'mspace' => 1,
+        'msqrt' => 1,
+        'msrow' => 1,
+        'mstack' => 1,
+        'mstyle' => 1,
+        'msub' => 1,
+        'msup' => 1,
+        'msubsup' => 1,
+        'mtable' => 1,
+        'mtd' => 1,
+        'mtext' => 1,
+        'mtr' => 1,
+        'munder' => 1,
+        'munderover' => 1,
+    ];
 
     /**
      * The svg elements.
@@ -268,88 +270,88 @@ class HTMLInfo
      *
      * @var array
      */
-    public static $svg = array(
-        "a" => 1,
-        "altGlyph" => 1,
-        "altGlyphDef" => 1,
-        "altGlyphItem" => 1,
-        "animate" => 1,
-        "animateColor" => 1,
-        "animateMotion" => 1,
-        "animateTransform" => 1,
-        "circle" => 1,
-        "clipPath" => 1,
-        "color-profile" => 1,
-        "cursor" => 1,
-        "defs" => 1,
-        "desc" => 1,
-        "ellipse" => 1,
-        "feBlend" => 1,
-        "feColorMatrix" => 1,
-        "feComponentTransfer" => 1,
-        "feComposite" => 1,
-        "feConvolveMatrix" => 1,
-        "feDiffuseLighting" => 1,
-        "feDisplacementMap" => 1,
-        "feDistantLight" => 1,
-        "feFlood" => 1,
-        "feFuncA" => 1,
-        "feFuncB" => 1,
-        "feFuncG" => 1,
-        "feFuncR" => 1,
-        "feGaussianBlur" => 1,
-        "feImage" => 1,
-        "feMerge" => 1,
-        "feMergeNode" => 1,
-        "feMorphology" => 1,
-        "feOffset" => 1,
-        "fePointLight" => 1,
-        "feSpecularLighting" => 1,
-        "feSpotLight" => 1,
-        "feTile" => 1,
-        "feTurbulence" => 1,
-        "filter" => 1,
-        "font" => 1,
-        "font-face" => 1,
-        "font-face-format" => 1,
-        "font-face-name" => 1,
-        "font-face-src" => 1,
-        "font-face-uri" => 1,
-        "foreignObject" => 1,
-        "g" => 1,
-        "glyph" => 1,
-        "glyphRef" => 1,
-        "hkern" => 1,
-        "image" => 1,
-        "line" => 1,
-        "linearGradient" => 1,
-        "marker" => 1,
-        "mask" => 1,
-        "metadata" => 1,
-        "missing-glyph" => 1,
-        "mpath" => 1,
-        "path" => 1,
-        "pattern" => 1,
-        "polygon" => 1,
-        "polyline" => 1,
-        "radialGradient" => 1,
-        "rect" => 1,
-        "script" => 3, // NORMAL | RAW_TEXT
-        "set" => 1,
-        "stop" => 1,
-        "style" => 3, // NORMAL | RAW_TEXT
-        "svg" => 1,
-        "switch" => 1,
-        "symbol" => 1,
-        "text" => 1,
-        "textPath" => 1,
-        "title" => 1,
-        "tref" => 1,
-        "tspan" => 1,
-        "use" => 1,
-        "view" => 1,
-        "vkern" => 1
-    );
+    public static $svg = [
+        'a' => 1,
+        'altGlyph' => 1,
+        'altGlyphDef' => 1,
+        'altGlyphItem' => 1,
+        'animate' => 1,
+        'animateColor' => 1,
+        'animateMotion' => 1,
+        'animateTransform' => 1,
+        'circle' => 1,
+        'clipPath' => 1,
+        'color-profile' => 1,
+        'cursor' => 1,
+        'defs' => 1,
+        'desc' => 1,
+        'ellipse' => 1,
+        'feBlend' => 1,
+        'feColorMatrix' => 1,
+        'feComponentTransfer' => 1,
+        'feComposite' => 1,
+        'feConvolveMatrix' => 1,
+        'feDiffuseLighting' => 1,
+        'feDisplacementMap' => 1,
+        'feDistantLight' => 1,
+        'feFlood' => 1,
+        'feFuncA' => 1,
+        'feFuncB' => 1,
+        'feFuncG' => 1,
+        'feFuncR' => 1,
+        'feGaussianBlur' => 1,
+        'feImage' => 1,
+        'feMerge' => 1,
+        'feMergeNode' => 1,
+        'feMorphology' => 1,
+        'feOffset' => 1,
+        'fePointLight' => 1,
+        'feSpecularLighting' => 1,
+        'feSpotLight' => 1,
+        'feTile' => 1,
+        'feTurbulence' => 1,
+        'filter' => 1,
+        'font' => 1,
+        'font-face' => 1,
+        'font-face-format' => 1,
+        'font-face-name' => 1,
+        'font-face-src' => 1,
+        'font-face-uri' => 1,
+        'foreignObject' => 1,
+        'g' => 1,
+        'glyph' => 1,
+        'glyphRef' => 1,
+        'hkern' => 1,
+        'image' => 1,
+        'line' => 1,
+        'linearGradient' => 1,
+        'marker' => 1,
+        'mask' => 1,
+        'metadata' => 1,
+        'missing-glyph' => 1,
+        'mpath' => 1,
+        'path' => 1,
+        'pattern' => 1,
+        'polygon' => 1,
+        'polyline' => 1,
+        'radialGradient' => 1,
+        'rect' => 1,
+        'script' => 3, // NORMAL | RAW_TEXT
+        'set' => 1,
+        'stop' => 1,
+        'style' => 3, // NORMAL | RAW_TEXT
+        'svg' => 1,
+        'switch' => 1,
+        'symbol' => 1,
+        'text' => 1,
+        'textPath' => 1,
+        'title' => 1,
+        'tref' => 1,
+        'tspan' => 1,
+        'use' => 1,
+        'view' => 1,
+        'vkern' => 1,
+    ];
 
     /**
      * Some attributes in SVG are case sensetitive.
@@ -357,7 +359,7 @@ class HTMLInfo
      * This map contains key/value pairs with the key as the lowercase attribute
      * name and the value with the correct casing.
      */
-    public static $svgCaseSensitiveAttributeMap = array(
+    public static $svgCaseSensitiveAttributeMap = [
         'attributename' => 'attributeName',
         'attributetype' => 'attributeType',
         'basefrequency' => 'baseFrequency',
@@ -419,8 +421,8 @@ class HTMLInfo
         'viewtarget' => 'viewTarget',
         'xchannelselector' => 'xChannelSelector',
         'ychannelselector' => 'yChannelSelector',
-        'zoomandpan' => 'zoomAndPan'
-    );
+        'zoomandpan' => 'zoomAndPan',
+    ];
 
     /**
      * Some SVG elements are case sensetitive.
@@ -429,7 +431,7 @@ class HTMLInfo
      * The map contains key/value store of the name is lowercase as the keys and
      * the correct casing as the value.
      */
-    public static $svgCaseSensitiveElementMap = array(
+    public static $svgCaseSensitiveElementMap = [
         'altglyph' => 'altGlyph',
         'altglyphdef' => 'altGlyphDef',
         'altglyphitem' => 'altGlyphItem',
@@ -465,8 +467,8 @@ class HTMLInfo
         'glyphref' => 'glyphRef',
         'lineargradient' => 'linearGradient',
         'radialgradient' => 'radialGradient',
-        'textpath' => 'textPath'
-    );
+        'textpath' => 'textPath',
+    ];
 
     /**
      * Check whether the given element meets the given criterion.
@@ -483,8 +485,7 @@ class HTMLInfo
      *            One of the constants on this class.
      * @return boolean true if the element matches the mask, false otherwise.
      */
-    public static function isA($name, $mask)
-    {
+    public static function isA($name, $mask) {
         if (! static::isElement($name)) {
             return false;
         }
@@ -500,8 +501,7 @@ class HTMLInfo
      *
      * @return bool True if a html5 element and false otherwise.
      */
-    public static function isHtml5Element($name)
-    {
+    public static function isHtml5Element($name) {
         // html5 element names are case insensetitive. Forcing lowercase for the check.
         // Do we need this check or will all data passed here already be lowercase?
         return isset(static::$html5[strtolower($name)]);
@@ -515,8 +515,7 @@ class HTMLInfo
      *
      * @return bool True if a MathML name and false otherwise.
      */
-    public static function isMathMLElement($name)
-    {
+    public static function isMathMLElement($name) {
         // MathML is case-sensetitive unlike html5 elements.
         return isset(static::$mathml[$name]);
     }
@@ -529,8 +528,7 @@ class HTMLInfo
      *
      * @return boolean True if a SVG element and false otherise.
      */
-    public static function isSvgElement($name)
-    {
+    public static function isSvgElement($name) {
         // SVG is case-sensetitive unlike html5 elements.
         return isset(static::$svg[$name]);
     }
@@ -546,8 +544,7 @@ class HTMLInfo
      *
      * @return bool True if valid and false otherwise.
      */
-    public static function isElement($name)
-    {
+    public static function isElement($name) {
         return static::isHtml5Element($name) || static::isMathMLElement($name) || static::isSvgElement($name);
     }
 
@@ -559,8 +556,7 @@ class HTMLInfo
      *
      * @return int|bool The element mask or false if element does not exist.
      */
-    public static function element($name)
-    {
+    public static function element($name) {
         if (isset(static::$html5[$name])) {
             return static::$html5[$name];
         }
@@ -582,8 +578,7 @@ class HTMLInfo
      *
      * @return string The normalized form of the element name.
      */
-    public static function normalizeSvgElement($name)
-    {
+    public static function normalizeSvgElement($name) {
         $name = strtolower($name);
         if (isset(static::$svgCaseSensitiveElementMap[$name])) {
             $name = static::$svgCaseSensitiveElementMap[$name];
@@ -600,8 +595,7 @@ class HTMLInfo
      *
      * @return string The normalized form of the attribute name.
      */
-    public static function normalizeSvgAttribute($name)
-    {
+    public static function normalizeSvgAttribute($name) {
         $name = strtolower($name);
         if (isset(static::$svgCaseSensitiveAttributeMap[$name])) {
             $name = static::$svgCaseSensitiveAttributeMap[$name];
@@ -620,8 +614,7 @@ class HTMLInfo
      *
      * @return string The normalized form of the attribute name.
      */
-    public static function normalizeMathMlAttribute($name)
-    {
+    public static function normalizeMathMlAttribute($name) {
         $name = strtolower($name);
 
         // Only one attribute has a mixed case form for MathML.

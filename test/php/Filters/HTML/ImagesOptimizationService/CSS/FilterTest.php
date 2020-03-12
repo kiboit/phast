@@ -6,7 +6,6 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 
 class FilterTest extends HTMLFilterTestCase {
-
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
@@ -30,5 +29,4 @@ class FilterTest extends HTMLFilterTestCase {
         $div = $this->getMatchingElement($div);
         $this->assertEquals('rewritten-style', $div->getAttribute('style'));
     }
-
 }

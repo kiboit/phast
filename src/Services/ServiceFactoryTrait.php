@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Services;
 
-
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Filters\Service\CompositeFilter;
@@ -15,7 +14,6 @@ use Kibo\Phast\Retrievers\RemoteRetrieverFactory;
 use Kibo\Phast\Retrievers\UniversalRetriever;
 
 trait ServiceFactoryTrait {
-
     /**
      * @param array $config
      * @param $cacheNamespace
@@ -49,5 +47,4 @@ trait ServiceFactoryTrait {
         $wrapperComposite->addFilter(new DecompressingFilter());
         return $wrapperComposite;
     }
-
 }

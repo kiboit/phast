@@ -5,7 +5,6 @@ namespace Kibo\Phast\Filters\Image\ImageImplementations;
 use Kibo\Phast\Filters\Image\Image;
 
 class DummyImage extends BaseImage implements Image {
-
     /**
      * @var string
      */
@@ -51,6 +50,7 @@ class DummyImage extends BaseImage implements Image {
     public function setType($type) {
         $this->type = $type;
     }
+
     /**
      * @return int
      */

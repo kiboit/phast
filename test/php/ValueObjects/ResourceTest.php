@@ -6,10 +6,8 @@ use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
-use PHPUnit\Framework\TestCase;
 
 class ResourceTest extends PhastTestCase {
-
     /**
      * @var URL
      */
@@ -91,7 +89,7 @@ class ResourceTest extends PhastTestCase {
 
         $deps = [
             Resource::makeWithContent($this->url, $this->content),
-            Resource::makeWithContent($this->url, $this->content)
+            Resource::makeWithContent($this->url, $this->content),
         ];
         $new = $resource->withDependencies($deps);
         $this->assertNotSame($resource, $new);
@@ -138,7 +136,7 @@ class ResourceTest extends PhastTestCase {
             ['svg', 'image/svg+xml'],
             ['css', 'text/css'],
             ['js', 'application/javascript'],
-            ['json', 'application/json']
+            ['json', 'application/json'],
         ];
     }
 
@@ -163,7 +161,6 @@ class ResourceTest extends PhastTestCase {
         $resource = Resource::makeWithContent($this->url, $content, $mime);
         $encoded = $resource->toDataURL();
         $this->assertEquals("data:$mime;base64," . base64_encode($content), $encoded);
-
     }
 
     private function makeContentRetriever($content = null) {
@@ -182,5 +179,4 @@ class ResourceTest extends PhastTestCase {
         $this->assertSame($this->content, $resource->getContent());
         $this->assertSame($this->encoding, $resource->getEncoding());
     }
-
 }

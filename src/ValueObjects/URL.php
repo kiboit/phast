@@ -3,7 +3,6 @@
 namespace Kibo\Phast\ValueObjects;
 
 class URL {
-
     /**
      * @var string
      */
@@ -87,9 +86,9 @@ class URL {
         foreach (['scheme', 'host', 'port', 'user', 'pass', 'path'] as $key) {
             if ($key == 'path') {
                 $new->path = $this->resolvePath($base->path, $this->path);
-            } elseif (!isset ($this->$key) && isset ($base->$key)) {
+            } elseif (!isset($this->$key) && isset($base->$key)) {
                 $new->$key = $base->$key;
-            } elseif (isset ($this->$key)) {
+            } elseif (isset($this->$key)) {
                 break;
             }
         }
@@ -104,7 +103,7 @@ class URL {
      * @return bool
      */
     public function isLocalTo(URL $url) {
-        return empty ($this->host) || $this->host === $url->host;
+        return empty($this->host) || $this->host === $url->host;
     }
 
     /**
@@ -132,14 +131,14 @@ class URL {
             }
             if (!is_null($head) && $part == '..' && $head != '..') {
                 array_pop($stack);
-                $head = empty ($stack) ? null : $stack[count($stack) - 1];
+                $head = empty($stack) ? null : $stack[count($stack) - 1];
             } else {
                 $stack[] = $head = $part;
             }
         }
 
         $normalized = substr($path, 0, 1) == '/' ? '/' : '';
-        if (!empty ($stack)) {
+        if (!empty($stack)) {
             $normalized .= join('/', $stack);
             $normalized .= substr($path, -1) == '/' ? '/' : '';
         }
@@ -254,5 +253,4 @@ class URL {
     public function __toString() {
         return $this->toString();
     }
-
 }

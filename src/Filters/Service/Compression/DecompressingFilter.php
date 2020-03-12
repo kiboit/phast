@@ -3,7 +3,6 @@
 
 namespace Kibo\Phast\Filters\Service\Compression;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\RuntimeException;
 use Kibo\Phast\Logging\LoggingTrait;
@@ -45,6 +44,4 @@ class DecompressingFilter implements ServiceFilter {
     private function acceptsCompressed(array $request) {
         return strpos(@$request['accept-encoding'], 'gzip') !== false;
     }
-
-
 }

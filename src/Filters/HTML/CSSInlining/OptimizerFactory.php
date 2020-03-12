@@ -2,11 +2,9 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-
 use Kibo\Phast\Cache\File\Cache;
 
 class OptimizerFactory {
-
     /**
      * @var Cache
      */
@@ -23,5 +21,4 @@ class OptimizerFactory {
     public function makeForElements(\Traversable $elements) {
         return new Optimizer($elements, $this->cache);
     }
-
 }

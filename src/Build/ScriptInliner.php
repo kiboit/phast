@@ -1,15 +1,14 @@
 <?php
 namespace Kibo\Phast\Build;
 
+use Kibo\Phast\Cache\File\Cache;
 use PhpParser\Node;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
-use Kibo\Phast\Cache\File\Cache;
 
 class ScriptInliner extends NodeVisitorAbstract {
-
     /** @var Namespace_|null */
     private $namespace;
 
@@ -82,11 +81,14 @@ class ScriptInliner extends NodeVisitorAbstract {
 
     private function minifyScript(string $source): string {
         return $this->cache->get('uglify:' . sha1($source), function () use ($source) {
-            $proc = proc_open(__DIR__ . '/../../node_modules/.bin/uglifyjs --rename',
-                              [['pipe', 'r'], ['pipe', 'w'], STDERR], $pipes);
+            $proc = proc_open(
+                __DIR__ . '/../../node_modules/.bin/uglifyjs --rename',
+                [['pipe', 'r'], ['pipe', 'w'], STDERR],
+                $pipes
+            );
 
             if (!$proc) {
-                throw new \RuntimeException("Failed to start uglifyjs");
+                throw new \RuntimeException('Failed to start uglifyjs');
             }
 
             fwrite($pipes[0], $source);
@@ -115,7 +117,7 @@ class ScriptInliner extends NodeVisitorAbstract {
 
     private function getFilenameFromValue($value) {
         if (!isset($this->namespace->file)) {
-            throw new \RuntimeException("Namespace is missing file property");
+            throw new \RuntimeException('Namespace is missing file property');
         }
         if (!$value instanceof Node\Expr\BinaryOp\Concat) {
             return;
@@ -131,5 +133,4 @@ class ScriptInliner extends NodeVisitorAbstract {
         }
         return $this->namespace->file->getPath() . $value->right->value;
     }
-
 }

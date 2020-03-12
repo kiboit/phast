@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Cache\File;
 
 class CacheTest extends CacheTestCase {
-
     private $nameSpace = 'test';
 
     /**
@@ -50,7 +49,8 @@ class CacheTest extends CacheTestCase {
         $this->assertEquals("\xff", $this->cache->get('bin', function () {
             return "\xff";
         }));
-        $this->assertEquals("\xff", $this->cache->get('bin', function () {}));
+        $this->assertEquals("\xff", $this->cache->get('bin', function () {
+        }));
     }
 
     public function testCorrectStorage() {
@@ -59,7 +59,9 @@ class CacheTest extends CacheTestCase {
         $this->functions->time = function () {
             return 30;
         };
-        $this->cache->get($key, function () use ($value) { return $value; }, 20);
+        $this->cache->get($key, function () use ($value) {
+            return $value;
+        }, 20);
         $expectedFilename = $this->getCacheFileName($key);
         $this->assertFileExists($expectedFilename);
         $this->assertStringStartsWith('50 ', file_get_contents($expectedFilename));
@@ -106,7 +108,9 @@ class CacheTest extends CacheTestCase {
             $this->assertEquals($this->config['cacheRoot'], $dir);
             return 2000;
         };
-        $this->cache->get('test-key', function () { return 'test-content'; });
+        $this->cache->get('test-key', function () {
+            return 'test-content';
+        });
     }
 
     public function testTouchingUsedFiles() {
@@ -128,15 +132,16 @@ class CacheTest extends CacheTestCase {
         $this->functions->filemtime = function () {
             return $this->functions->time() - round($this->config['cacheMaxAge'] / 20);
         };
-        $this->cache->get('asd', function () {});
+        $this->cache->get('asd', function () {
+        });
         $this->assertFalse($touched);
 
         $this->functions->filemtime = function () {
             return $this->functions->time() - round($this->config['cacheMaxAge'] / 10);
         };
-        $this->cache->get('asd', function () {});
+        $this->cache->get('asd', function () {
+        });
         $this->assertTrue($touched);
-
     }
 
     public function testCreatingASingleGarbageCollectorForAllInstances() {

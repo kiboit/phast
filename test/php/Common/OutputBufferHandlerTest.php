@@ -2,11 +2,9 @@
 
 namespace Kibo\Phast;
 
-
 use Kibo\Phast\Common\OutputBufferHandler;
 
 class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
-
     const MAX_BUFFER_SIZE_TO_APPLY = 1024;
 
     /** @var OutputBufferHandler */

@@ -7,7 +7,6 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class CSSURLRewriterTest extends TestCase {
-
     const BASE_URL = 'http://phast.test';
 
     /**
@@ -19,7 +18,7 @@ class CSSURLRewriterTest extends TestCase {
         $inputs = [
             ['css' => "url($input)", 'path' => '/css/test.css'],
             ['css' => "url('$input')", 'path' => '/css/test2.css'],
-            ['css' => "url(\"$input\")", 'path' => '/css/test3.css']
+            ['css' => "url(\"$input\")", 'path' => '/css/test3.css'],
         ];
 
         $base = URL::fromString(self::BASE_URL);
@@ -37,31 +36,30 @@ class CSSURLRewriterTest extends TestCase {
         $this->assertEquals("url($output)", $outputs[0]);
         $this->assertEquals("url('$output')", $outputs[1]);
         $this->assertEquals("url(\"$output\")", $outputs[2]);
-
     }
 
     public function urlProvider() {
         return [
             [
                 self::BASE_URL . '/style.css',
-                self::BASE_URL . '/style.css'
+                self::BASE_URL . '/style.css',
             ],
             [
                 '/style.css',
-                self::BASE_URL . '/style.css'
+                self::BASE_URL . '/style.css',
             ],
             [
                 'style.css',
-                self::BASE_URL . '/css/style.css'
+                self::BASE_URL . '/css/style.css',
             ],
             [
                 'http://cross-site.org/css/style.css',
-                'http://cross-site.org/css/style.css'
+                'http://cross-site.org/css/style.css',
             ],
             [
                 'data:abcd',
-                'data:abcd'
-            ]
+                'data:abcd',
+            ],
         ];
     }
 }

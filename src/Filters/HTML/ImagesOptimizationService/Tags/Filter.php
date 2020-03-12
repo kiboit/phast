@@ -9,7 +9,6 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class Filter implements HTMLStreamFilter {
-
     /**
      * @var ImageURLRewriter
      */
@@ -29,7 +28,7 @@ class Filter implements HTMLStreamFilter {
         foreach ($elements as $element) {
             if ($element instanceof Tag) {
                 $this->handleTag($element, $context);
-            } else if ($element instanceof ClosingTag) {
+            } elseif ($element instanceof ClosingTag) {
                 $this->handleClosingTag($element);
             }
             yield $element;
@@ -42,9 +41,9 @@ class Filter implements HTMLStreamFilter {
                 $this->rewriteSrc($tag, $context, $prefix . 'src');
                 $this->rewriteSrcset($tag, $context, $prefix . 'srcset');
             }
-        } else if ($tag->getTagName() == 'picture') {
+        } elseif ($tag->getTagName() == 'picture') {
             $this->inPictureTag = true;
-        } else if ($tag->getTagName() == 'video' || $tag->getTagName() == 'audio') {
+        } elseif ($tag->getTagName() == 'video' || $tag->getTagName() == 'audio') {
             $this->inPictureTag = false;
         }
     }
@@ -78,7 +77,7 @@ class Filter implements HTMLStreamFilter {
         }
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) use ($context) {
             $url = $this->rewriter->rewriteUrl($match[1], $context->getBaseUrl());
-            if (isset ($match[2])) {
+            if (isset($match[2])) {
                 return $url . $match[2];
             }
             return $url;

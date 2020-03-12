@@ -10,7 +10,6 @@ use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\Resource;
 
 class Service extends BaseService {
-
     protected function getParams(ServiceRequest $request) {
         $params = parent::getParams($request);
         if ($this->proxySupportsAccept($request->getHTTPRequest())) {
@@ -55,5 +54,4 @@ class Service extends BaseService {
     private function proxySupportsAccept(Request $request) {
         return !$request->getHeader('cf-ray');
     }
-
 }

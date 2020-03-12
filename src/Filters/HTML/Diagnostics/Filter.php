@@ -3,15 +3,13 @@
 
 namespace Kibo\Phast\Filters\HTML\Diagnostics;
 
-
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use Kibo\Phast\ValueObjects\URL;
 
-class Filter implements HTMLStreamFilter{
-
+class Filter implements HTMLStreamFilter {
     private $serviceUrl;
 
     public function __construct($serviceUrl) {
@@ -27,6 +25,4 @@ class Filter implements HTMLStreamFilter{
             yield $element;
         }
     }
-
-
 }

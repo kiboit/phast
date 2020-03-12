@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Filters\Image;
 
 interface Image {
-
     const TYPE_JPEG  = 'image/jpeg';
 
     const TYPE_PNG   = 'image/png';
@@ -53,5 +52,4 @@ interface Image {
      * @return Image
      */
     public function encodeTo($type);
-
 }

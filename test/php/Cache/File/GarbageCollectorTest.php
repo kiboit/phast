@@ -2,9 +2,7 @@
 
 namespace Kibo\Phast\Cache\File;
 
-
 class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
-
     public function setUp() {
         parent::setUp();
         $this->config['garbageCollection']['probability'] = 1;
@@ -68,14 +66,14 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
             'ab' => [
                 $this->getCacheFilename('item1') => 30,
                 $this->getCacheFilename('item2') => 100,
-                $this->getCacheFilename('item3') => 200
+                $this->getCacheFilename('item3') => 200,
             ],
             'cd' => [
                 $this->getCacheFilename('item4') => 40,
                 $this->getCacheFilename('item5') => 45,
                 $this->getCacheFilename('item6') => 90,
-                $this->getCacheFilename('item7') => 70
-            ]
+                $this->getCacheFilename('item7') => 70,
+            ],
         ];
 
         foreach ($items as $dir => $files) {
@@ -127,5 +125,4 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
     private function getCacheFilename($key) {
         return md5($key) . '-ns';
     }
-
 }

@@ -3,11 +3,9 @@
 
 namespace Kibo\Phast\HTTP;
 
-
 use Kibo\Phast\Exceptions\RuntimeException;
 
 class ClientFactory {
-
     const CONFIG_KEY = 'httpClient';
 
     /**
@@ -22,10 +20,9 @@ class ClientFactory {
         } elseif (class_exists($spec)) {
             $client = new $spec();
         } else {
-            throw new RuntimeException(self::CONFIG_KEY . " config value must be either callable or a class name");
+            throw new RuntimeException(self::CONFIG_KEY . ' config value must be either callable or a class name');
         }
 
         return $client;
     }
-
 }

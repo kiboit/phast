@@ -2,9 +2,7 @@
 
 namespace Kibo\Phast\Logging;
 
-
 class LogLevel {
-
     const EMERGENCY = 128;
 
     const ALERT     =  64;
@@ -20,5 +18,4 @@ class LogLevel {
     const INFO      =   2;
 
     const DEBUG     =   1;
-
 }

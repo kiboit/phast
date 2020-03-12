@@ -3,7 +3,6 @@
 namespace Kibo\Phast\Cache;
 
 interface Cache {
-
     /**
      * @param string $key
      * @param callable|null $cached
@@ -19,5 +18,4 @@ interface Cache {
      * @return mixed
      */
     public function set($key, $value, $expiresIn = 0);
-
 }

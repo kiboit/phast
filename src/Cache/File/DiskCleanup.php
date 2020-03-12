@@ -3,11 +3,9 @@
 
 namespace Kibo\Phast\Cache\File;
 
-
 use Kibo\Phast\Common\ObjectifiedFunctions;
 
 class DiskCleanup extends ProbabilisticExecutor {
-
     /**
      * @var integer
      */
@@ -48,5 +46,4 @@ class DiskCleanup extends ProbabilisticExecutor {
         }
         return $size;
     }
-
 }

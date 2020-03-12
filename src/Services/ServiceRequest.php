@@ -8,7 +8,6 @@ use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
 
 class ServiceRequest {
-
     const FORMAT_QUERY = 1;
 
     const FORMAT_PATH  = 2;
@@ -51,7 +50,7 @@ class ServiceRequest {
     private $token;
 
     public function __construct() {
-        if (!isset (self::$switches)) {
+        if (!isset(self::$switches)) {
             self::$switches = new Switches();
         }
     }
@@ -82,26 +81,26 @@ class ServiceRequest {
         if ($request->getCookie('phast')) {
             self::$switches = Switches::fromString($request->getCookie('phast'));
         }
-        if (isset ($params['token'])) {
+        if (isset($params['token'])) {
             $instance->token = $params['token'];
-            unset ($params['token']);
+            unset($params['token']);
         }
         $instance->params = $params;
-        if (isset ($params['phast'])) {
+        if (isset($params['phast'])) {
             self::$propagatedSwitches = $params['phast'];
             $paramsSwitches = Switches::fromString($params['phast']);
             self::$switches = self::$switches->merge($paramsSwitches);
         }
-        if (isset ($params['documentRequestId'])) {
+        if (isset($params['documentRequestId'])) {
             self::$documentRequestId = $params['documentRequestId'];
         } else {
-            self::$documentRequestId = (string)mt_rand(0, 999999999);
+            self::$documentRequestId = (string) mt_rand(0, 999999999);
         }
         return $instance;
     }
 
     public function hasRequestSwitchesSet() {
-        return !empty (self::$propagatedSwitches);
+        return !empty(self::$propagatedSwitches);
     }
 
     /**
@@ -170,9 +169,9 @@ class ServiceRequest {
         $parts = explode('/', preg_replace('~^/~', '', $string));
         foreach ($parts as $part) {
             $pair = explode('=', $part);
-            if (isset ($pair[1])) {
+            if (isset($pair[1])) {
                 $values[$pair[0]] = self::decodeSingleValue($pair[1]);
-            } else if (!preg_match('/^__p__\./', $pair[0])) {
+            } elseif (!preg_match('/^__p__\./', $pair[0])) {
                 $values['src'] = self::decodeSingleValue($pair[0]);
             }
         }
@@ -215,7 +214,7 @@ class ServiceRequest {
             parse_str($this->url->getQuery(), $urlParams);
         }
         $params = array_merge($urlParams, $this->params);
-        if (!empty (self::$propagatedSwitches)) {
+        if (!empty(self::$propagatedSwitches)) {
             $params['phast'] = self::$propagatedSwitches;
         }
         if (self::$switches->isOn(Switches::SWITCH_DIAGNOSTICS)) {
@@ -226,10 +225,10 @@ class ServiceRequest {
 
     private function serializeToQueryFormat(array $params) {
         $encoded = http_build_query($params);
-        if (!isset ($this->url)) {
+        if (!isset($this->url)) {
             return $encoded;
         }
-        $serialized = preg_replace('~\?.*~', '', (string)$this->url);
+        $serialized = preg_replace('~\?.*~', '', (string) $this->url);
         if (self::$defaultSerializationMode === self::FORMAT_PATH
             && !preg_match('~/$~', $serialized)
         ) {
@@ -243,7 +242,7 @@ class ServiceRequest {
         $encodedSrc = null;
         $values = [];
         foreach (explode('&', http_build_query($params)) as $element) {
-            list ($key, $value) = explode('=', $element, 2);
+            list($key, $value) = explode('=', $element, 2);
             $encodedValue = str_replace(['-', '%'], ['%2D', '-'], $value);
             if ($key == 'src') {
                 $encodedSrc = $encodedValue;
@@ -255,7 +254,7 @@ class ServiceRequest {
             array_unshift($values, $encodedSrc);
         }
         $params = '/' . join('/', $values) . '/' . $this->getDummyFilename($params);
-        if (isset ($this->url)) {
+        if (isset($this->url)) {
             return preg_replace(['~\?.*~', '~/$~'], '', $this->url) . $params;
         }
         return $params;
@@ -274,8 +273,7 @@ class ServiceRequest {
         $ext = strtolower($url->getExtension());
         if (preg_match('/^(jpe?g|gif|png|js|css)$/', $ext)) {
             return $ext;
-        } else {
-            return $default;
         }
+        return $default;
     }
 }

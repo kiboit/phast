@@ -7,7 +7,6 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class LocalRetrieverTest extends TestCase {
-
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
@@ -60,8 +59,8 @@ class LocalRetrieverTest extends TestCase {
                 '/dir~' => '/dir-tilde',
                 'dir3' => '/the-dir-3',
                 'dir4/' => '/the-dir-4',
-                '/dir1/subdir' => '/the-sub-dir'
-            ]
+                '/dir1/subdir' => '/the-sub-dir',
+            ],
         ];
         $retriever = new LocalRetriever($map, $this->funcs);
         $retriever->$method(URL::fromString($input));
@@ -78,10 +77,9 @@ class LocalRetrieverTest extends TestCase {
             ['http://kibo.test/dir3/dir3-file.css', '/the-dir-3/dir3-file.css'],
             ['http://kibo.test/not/dir3/dir3-file.css', null],
             ['http://kibo.test/dir4/dir4-file.css', '/the-dir-4/dir4-file.css'],
-            ['http://kibo.test/dir2abc/dir2-file.css', null]
+            ['http://kibo.test/dir2abc/dir2-file.css', null],
         ]);
     }
-
 
     /**
      * @dataProvider notGettingForbiddenData
@@ -98,7 +96,7 @@ class LocalRetrieverTest extends TestCase {
         return $this->allMethodsWithData([
             ['http://kibo.test/../forbidden-path'],
             ['http://kibo.test/forbidden-extension.php'],
-            ['http://unmpapped-domain.test/make.css']
+            ['http://unmpapped-domain.test/make.css'],
         ]);
     }
 
@@ -126,14 +124,14 @@ class LocalRetrieverTest extends TestCase {
         return [
             ['retrieve', 'file_get_contents'],
             ['getCacheSalt', 'filemtime'],
-            ['getSize', 'filesize']
+            ['getSize', 'filesize'],
         ];
     }
 
     private function allMethodsWithData(array $data) {
         foreach ($this->retrieverMethods() as $callables) {
             foreach ($data as $params) {
-                yield array_merge($callables, (array)$params);
+                yield array_merge($callables, (array) $params);
             }
         }
     }
@@ -144,5 +142,4 @@ class LocalRetrieverTest extends TestCase {
         $url = URL::fromString('http://test.com/hello.gif');
         $this->assertSame('', $retriever->getCacheSalt($url));
     }
-
 }

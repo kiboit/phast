@@ -2,4 +2,5 @@
 
 namespace Kibo\Phast\Exceptions;
 
-class UndefinedObjectifiedFunction extends \RuntimeException {}
+class UndefinedObjectifiedFunction extends \RuntimeException {
+}

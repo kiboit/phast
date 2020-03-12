@@ -7,7 +7,6 @@ use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
 class Filter extends BaseHTMLStreamFilter {
-
     /**
      * @var ImageURLRewriter
      */
@@ -30,5 +29,4 @@ class Filter extends BaseHTMLStreamFilter {
         }
         yield $tag;
     }
-
 }

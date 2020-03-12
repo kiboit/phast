@@ -9,14 +9,12 @@ use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\PhastTestCase;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
-use Kibo\Phast\Services\Bundler\TokenRefMaker;
 use Kibo\Phast\Services\ServiceFilter;
 use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
 
 class ServiceTest extends PhastTestCase {
-
     /**
      * @var ServiceSignature
      */
@@ -54,7 +52,7 @@ class ServiceTest extends PhastTestCase {
         $this->filter->method('apply')
             ->willReturnCallback(function (Resource $resource, array $params) {
                 $newContent = $resource->getContent() . '-filtered';
-                if (isset ($params['p1'])) {
+                if (isset($params['p1'])) {
                     $newContent .= '-' . $params['p1'];
                 }
                 return $resource->withContent($newContent);
@@ -77,7 +75,7 @@ class ServiceTest extends PhastTestCase {
         $params = $this->makeParams([
             ['src' => 'file-1', 'p1' => 'pf0'],
             ['src' => 'file-2'],
-            ['src' => 'file-3', 'p1' => 'pf1']
+            ['src' => 'file-3', 'p1' => 'pf1'],
         ]);
         $content = $this->doRequest($params);
 
@@ -86,7 +84,7 @@ class ServiceTest extends PhastTestCase {
             $this->assertEquals(200, $item->status);
 
             $expectedContent = $params['src_' . $idx] . '-content-filtered';
-            if (isset ($params['p1_' . $idx])) {
+            if (isset($params['p1_' . $idx])) {
                 $expectedContent .= '-' . $params['p1_' . $idx];
             }
             $this->assertEquals($expectedContent, $item->content);
@@ -94,7 +92,7 @@ class ServiceTest extends PhastTestCase {
     }
 
     public function testUsingShortenedParams() {
-        $params = $this->signParams([['src' => 'the-file'] ]);
+        $params = $this->signParams([['src' => 'the-file']]);
         $query = http_build_query(['s' => '00' . $params[0]['src'], 't' => $params[0]['token']]);
         $httpRequest = Request::fromArray([], ['REQUEST_URI' => "/?$query"]);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
@@ -102,10 +100,10 @@ class ServiceTest extends PhastTestCase {
         $content = $this->checkCorrectResponse($response);
 
         $expected = [
-            (object)[
+            (object) [
                 'status' => 200,
-                'content' => 'the-file-content-filtered'
-            ]
+                'content' => 'the-file-content-filtered',
+            ],
         ];
         $this->assertEquals($expected, $content);
     }
@@ -114,11 +112,11 @@ class ServiceTest extends PhastTestCase {
         $params = $this->makeParams([
             ['src' => 'will-pass', 'ab' => 'gogo'],
             ['src' => 'will-not-pass', 's' => 'm'],
-            ['src' => 'will-not-pass', 'd' => 'q']
+            ['src' => 'will-not-pass', 'd' => 'q'],
         ]);
 
         $params['token_1'] = 'nonsence';
-        unset ($params['token_2']);
+        unset($params['token_2']);
 
         $content = $this->doRequest($params);
 
@@ -130,7 +128,7 @@ class ServiceTest extends PhastTestCase {
     public function testExceptionHandling() {
         $params = $this->makeParams([
             ['src' => 'not-found'],
-            ['src' => 'critical']
+            ['src' => 'critical'],
         ]);
         $this->filter->method('apply')
             ->willReturnCallback(function (Resource $resource) {
@@ -148,7 +146,7 @@ class ServiceTest extends PhastTestCase {
 
     public function testEmptyResultOnMissingSrc() {
         $params = $this->makeParams([
-            ['key' => 'val']
+            ['key' => 'val'],
         ]);
         $content = $this->doRequest($params);
 
@@ -229,5 +227,4 @@ class ServiceTest extends PhastTestCase {
         }
         return $input;
     }
-
 }

@@ -6,7 +6,6 @@ use Kibo\Phast\Cache\Cache;
 use PHPUnit\Framework\TestCase;
 
 class ServiceSignatureTest extends TestCase {
-
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
@@ -24,7 +23,7 @@ class ServiceSignatureTest extends TestCase {
         $this->cache = $this->createMock(Cache::class);
         $this->cache->method('get')
             ->willReturnCallback(function ($key, callable $cb) {
-                if (!isset ($this->generatedToken)) {
+                if (!isset($this->generatedToken)) {
                     $this->generatedToken = $cb();
                 }
                 return $this->generatedToken;
@@ -104,5 +103,4 @@ class ServiceSignatureTest extends TestCase {
         $this->assertNotEquals($salt1, $salt2);
         $this->assertNotEquals($salt2, $salt3);
     }
-
 }
