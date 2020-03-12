@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.33 - 2020-03-12
+
+* Stop proxying dynamically inserted scripts after onload hits.
+* Combine the hash-based cache marker with the original modification time-based
+  cache marker.
+
+
 ## 1.32 - 2020-03-09
 
 * Remove comment tags (`<!-- ... -->`) from inline scripts.
@@ -8,7 +15,7 @@
 
 ## 1.31 - 2020-03-05
 
-* Use hash-based cached marker (see last release) when local files are addressed
+* Use hash-based cache marker (see last release) when local files are addressed
   with a query string.
 
 
