@@ -6,7 +6,7 @@ interface HTMLFilterFactory {
 
     /**
      * @param array $config
-     * @return HTMLFilter
+     * @return HTMLStreamFilter
      */
     public function make(array $config);
 

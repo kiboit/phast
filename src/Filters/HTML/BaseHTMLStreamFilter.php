@@ -21,7 +21,7 @@ abstract class BaseHTMLStreamFilter implements HTMLStreamFilter{
 
     /**
      * @param Tag $tag
-     * @return Element
+     * @return Element[]|\Generator
      */
     abstract protected function handleTag(Tag $tag);
 
