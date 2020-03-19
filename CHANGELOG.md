@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.34 - 2020-03-19
+
+* Add the option to cancel processing by Phast by calling cancel() on the
+  OutputBufferHandler returned from PhastDocumentFilters::deploy().
+
+
 ## 1.33 - 2020-03-12
 
 * Stop proxying dynamically inserted scripts after onload hits.
