@@ -20,10 +20,13 @@ class PhastDocumentFilters {
         ( </body> | </html> )
     ~xsiA";
 
+    /**
+     * @return ?OutputBufferHandler
+     */
     public static function deploy(array $userConfig = []) {
         $runtimeConfig = self::configure($userConfig);
         if (!$runtimeConfig) {
-            return;
+            return null;
         }
         $handler = new OutputBufferHandler(
             $runtimeConfig['documents']['maxBufferSizeToApply'],
@@ -33,6 +36,7 @@ class PhastDocumentFilters {
         );
         $handler->install();
         Log::info('Phast deployed!');
+        return $handler;
     }
 
     public static function apply($html, array $userConfig) {
