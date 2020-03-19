@@ -18,6 +18,9 @@ class OutputBufferHandler {
 
     private $filterCb;
 
+    /**
+     * @var ?string
+     */
     private $buffer = '';
 
     private $offset = 0;
@@ -26,6 +29,8 @@ class OutputBufferHandler {
      * @var integer
      */
     private $maxBufferSizeToApply;
+
+    private $canceled = false;
 
     public function __construct($maxBufferSizeToApply, callable $filterCb) {
         $this->maxBufferSizeToApply = $maxBufferSizeToApply;
@@ -38,7 +43,7 @@ class OutputBufferHandler {
             while (@ob_end_flush());
         }
         ob_start([$this, 'handleChunk'], 2);
-        ob_implicit_flush(true);
+        ob_implicit_flush(1);
     }
 
     public function handleChunk($chunk, $phase) {
@@ -48,14 +53,16 @@ class OutputBufferHandler {
 
         $this->buffer .= $chunk;
 
+        if ($this->canceled) {
+            return $this->stop();
+        }
+
         if (strlen($this->buffer) > $this->maxBufferSizeToApply) {
             $this->logger()->info(
                 'Buffer exceeds max. size ({buffersize} bytes). Not applying',
                 ['buffersize' => $this->maxBufferSizeToApply]
             );
-            $output = $this->buffer;
-            $this->buffer = null;
-            return $output;
+            return $this->stop();
         }
 
         $output = '';
@@ -81,5 +88,15 @@ class OutputBufferHandler {
         $result = call_user_func($this->filterCb, $input, $this->buffer);
         $this->buffer = null;
         return $result;
+    }
+
+    private function stop() {
+        $output = $this->buffer;
+        $this->buffer = null;
+        return $output;
+    }
+
+    public function cancel() {
+        $this->canceled = true;
     }
 }
