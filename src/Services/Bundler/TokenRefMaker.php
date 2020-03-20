@@ -3,6 +3,7 @@ namespace Kibo\Phast\Services\Bundler;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\Base64url;
+use Kibo\Phast\Common\JSON;
 
 class TokenRefMaker {
     private $cache;
@@ -12,17 +13,18 @@ class TokenRefMaker {
     }
 
     public function getRef($token, array $params) {
-        $cachedParams = $this->cache->get($token);
+        $ref = Base64url::shortHash(JSON::encode($params));
+        $cachedParams = $this->cache->get($ref);
         if (!$cachedParams) {
-            $this->cache->set($token, $params);
-            $cachedParams = $this->cache->get($token);
+            $this->cache->set($ref, $params);
+            $cachedParams = $this->cache->get($ref);
         }
         if ($cachedParams === $params) {
-            return Base64url::encode(hex2bin($token));
+            return $ref;
         }
     }
 
     public function getParams($ref) {
-        return $this->cache->get(bin2hex(Base64url::decode($ref)));
+        return $this->cache->get($ref);
     }
 }

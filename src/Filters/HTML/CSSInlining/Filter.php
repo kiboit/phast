@@ -2,6 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
+use Kibo\Phast\Common\Base64url;
 use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
@@ -250,11 +251,10 @@ class Filter extends BaseHTMLStreamFilter {
 
         $content = $this->cssFilter->apply(Resource::makeWithContent($url, $content), [])->getContent();
 
-        $this->cacheMarkers[$url->toString()] =
-            substr(str_replace(['+', '/'], '', base64_encode(md5(implode("\0", [
-                $this->retriever->getCacheSalt($url),
-                $content,
-            ]), true))), 0, 16);
+        $this->cacheMarkers[$url->toString()] = Base64url::shortHash(implode("\0", [
+            $this->retriever->getCacheSalt($url),
+            $content,
+        ]));
 
         $optimized = $this->optimizer->optimizeCSS($content);
         if ($optimized === null) {
