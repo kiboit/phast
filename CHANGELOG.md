@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.35 - 2020-03-20
+
+* Use all service parameters for hash-based cache marker.
+
+
 ## 1.34 - 2020-03-19
 
 * Add the option to cancel processing by Phast by calling cancel() on the
