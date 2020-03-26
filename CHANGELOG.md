@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.36 - 2020-03-22
+
+* Clean any existing output buffer, instead of flushing it, before starting
+  Phast output buffer.
+
+
 ## 1.35 - 2020-03-20
 
 * Use all service parameters for hash-based cache marker.
