@@ -1,3 +1,4 @@
+'use strict';
 /*
  comment that we shouldn't see
  */
@@ -13,3 +14,5 @@ console.log('Main JS Loaded');
 
 
 console.log('Main minification');
+
+var something = 'yolo';

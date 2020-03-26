@@ -59,10 +59,12 @@ function test(file, fn, withPhast) {
                 && comment.nodeType === 8
                 && /\s*\[Phast\] Document optimized/.test(comment.textContent);
 
-            if (withPhast) {
-                assert.ok(hasLog, "The document should contain Phast's log message");
-            } else {
-                assert.notOk(hasLog, "The document should not contain Phast's log message");
+            if (!/\bSafari\//.exec(navigator.userAgent)) {
+                if (withPhast) {
+                    assert.ok(hasLog, "The document should contain Phast's log message");
+                } else {
+                    assert.notOk(hasLog, "The document should not contain Phast's log message");
+                }
             }
 
             // Remove this workaround if/when the Browserstack issue gets fixed.

@@ -65,22 +65,25 @@ phast.ScriptsLoader.chainScript = function (lastScript, script) {
 };
 
 // Capture insertBefore before it get's rewritten
-var insertBefore = Element.prototype.insertBefore;
+var insertBefore = window.Element.prototype.insertBefore;
 phast.ScriptsLoader.Utilities = function (document) {
 
     this._document = document;
 
     function executeString(string) {
         return new Promise(function (resolve, reject) {
-            try {
-                // See: http://perfectionkills.com/global-eval-what-are-the-options/
-                (1,eval)(string);
-            } catch (e) {
-                console.error("[Phast] Error in eval'ed script:", e);
-                console.log("First 100 bytes of script body:", string.substr(0, 100).replace(/\s+/g, ' '));
-                reject(new Error("" + e));
-            }
-            resolve();
+            var el = document.createElement('script');
+            var blob = new window.Blob([string], {type: 'text/javascript'});
+            var url = window.URL.createObjectURL(blob);
+            el.addEventListener('load', function () {
+                resolve();
+            });
+            el.addEventListener('error', function () {
+                reject();
+            });
+            el.src = url;
+            document.body.appendChild(el);
+            document.body.removeChild(el);
         })
     }
 
