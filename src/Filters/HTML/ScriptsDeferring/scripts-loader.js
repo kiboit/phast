@@ -332,7 +332,7 @@ phast.ScriptsLoader.Scripts.SyncAJAXScript = function (utils, element, fetch, fa
         return promise
             .then(function (execString) {
                 utils.restoreOriginals(element);
-                utils.writeProtectAndExecuteString(element, execString);
+                return utils.writeProtectAndExecuteString(element, execString);
             })
             .catch(function () {
                 fallback.init();
