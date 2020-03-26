@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.38 - 2020-03-26
+
+* Fixed a regression causing external scripts to be executed out of order.
+
+
 ## 1.37 - 2020-03-26
 
 * Execute scripts by inserting a `<script>` tag with a blob URL, instead of
