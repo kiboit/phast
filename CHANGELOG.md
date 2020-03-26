@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.37 - 2020-03-26
+
+* Execute scripts by inserting a `<script>` tag with a blob URL, instead of
+  using global eval, so that global variables defined in strict-mode scripts are
+  globally visible.
+
+
 ## 1.36 - 2020-03-22
 
 * Clean any existing output buffer, instead of flushing it, before starting
