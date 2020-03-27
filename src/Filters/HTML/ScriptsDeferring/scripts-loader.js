@@ -78,12 +78,16 @@ phast.ScriptsLoader.Utilities = function (document) {
             el.addEventListener('load', function () {
                 resolve();
             });
+            el.addEventListener('load', cleanup);
             el.addEventListener('error', function () {
                 reject();
             });
+            el.addEventListener('error', cleanup);
             el.src = url;
             document.body.appendChild(el);
-            document.body.removeChild(el);
+            function cleanup() {
+                document.body.removeChild(el);
+            }
         })
     }
 
