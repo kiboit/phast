@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.39 - 2020-03-27
+
+* Remove blob script only after load.  This fixes issues with scripts sometimes
+  not running in Safari.
+
+
 ## 1.38 - 2020-03-26
 
 * Fixed a regression causing external scripts to be executed out of order.
