@@ -170,6 +170,7 @@ class DefaultConfiguration {
                     '~^https?://static\.hotjar\.com/~',
                     '~^https?://v2\.zopim\.com/~',
                     '~^https?://stats\.g\.doubleclick\.net/dc\.js$~',
+                    '~^https?://s\.pinimg\.com/~',
                 ],
             ],
         ];
