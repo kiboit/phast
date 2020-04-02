@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.41 - 2020-04-02
+
+* Support compressed external resources (ie, proxied styles and scripts).
+
+
 ## 1.40 - 2020-04-02
 
 * Add s.pinimg.com, google-analytics.com/gtm/js to script proxy whitelist.
