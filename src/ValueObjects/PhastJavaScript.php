@@ -32,7 +32,7 @@ class PhastJavaScript {
 
     /**
      * @param string $filename
-     * @param ObjectifiedFunctions|null $funcs
+     * @param string $contents
      */
     private function __construct($filename, $contents) {
         $this->filename = $filename;
@@ -76,7 +76,7 @@ class PhastJavaScript {
     }
 
     /**
-     * @return int
+     * @return string
      */
     public function getCacheSalt() {
         $hash = md5($this->getContents(), true);
