@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.40 - 2020-04-02
+
+* Add s.pinimg.com, google-analytics.com/gtm/js to script proxy whitelist.
+
+
 ## 1.39 - 2020-03-27
 
 * Remove blob script only after load.  This fixes issues with scripts sometimes
