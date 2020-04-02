@@ -47,6 +47,7 @@ class CURLClient implements Client {
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_HEADERFUNCTION => $readHeader,
             CURLOPT_CAINFO => __DIR__ . '/cacert.pem',
+            CURLOPT_ENCODING => '',
         ]);
         $responseText = @curl_exec($ch);
         if ($responseText === false) {
