@@ -162,7 +162,7 @@ class DefaultConfiguration {
                 'removeLicenseHeaders' => false,
                 'whitelist' => [
                     '~^https?://' . preg_quote($request->getHost(), '~') . '/~',
-                    '~^https?://(ssl|www)\.google-analytics\.com/(analytics|ga)\.js~',
+                    '~^https?://(ssl|www)\.google-analytics\.com/(analytics\.js|ga\.js|gtm/js)($|\?)~',
                     '~^https?://www\.googletagmanager\.com/~',
                     '~^https?://www\.googleadservices\.com/~',
                     '~^https?://pixel\.adcrowd\.com/~',
