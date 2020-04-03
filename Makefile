@@ -5,7 +5,7 @@ PHP56MIN = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php5
 .PHONY : all watch test test-local dist clean
 
 
-all : build/phast.php build/cacert.pem
+all : build/phast.php
 
 watch :
 	git ls-files src | entr make
@@ -25,11 +25,7 @@ clean :
 
 
 build/phast.php : vendor/autoload.php $(shell git ls-files src)
-	mkdir -p $(dir $@)
-	bin/compile > $@
-
-build/cacert.pem : src/HTTP/cacert.pem
-	cp $< $@
+	bin/compile $(dir $@)
 
 vendor/autoload.php : composer.json composer.lock
 	composer install

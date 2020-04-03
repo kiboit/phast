@@ -16,13 +16,16 @@ class Compiler {
 
     private $exclude = [];
 
+    private $resources = [];
+
     public static function getPhastCompiler(): self {
         $root = __DIR__ . '/../..';
 
         return (new self())
             ->include($root . '/src')
             ->exclude($root . '/src/Build')
-            ->include($root . '/vendor/mrclay/jsmin-php/src');
+            ->include($root . '/vendor/mrclay/jsmin-php/src')
+            ->addResource('cacert.pem', __DIR__ . '/../HTTP/cacert.pem');
     }
 
     public function include(string $dir): self {
@@ -32,6 +35,15 @@ class Compiler {
 
     public function exclude(string $dir): self {
         $this->exclude[] = $dir;
+        return $this;
+    }
+
+    public function addResource(string $name, string $filename): self {
+        $contents = file_get_contents($filename);
+        if ($contents === false) {
+            throw new \RuntimeException("Could not read file: $filename");
+        }
+        $this->resources[$name] = $contents;
         return $this;
     }
 
@@ -57,6 +69,20 @@ class Compiler {
         $combinedTree = iterator_to_array($this->reorderDefinitions($combinedTree), false);
 
         return (new ASCIIPrettyPrinter())->prettyPrintFile($combinedTree);
+    }
+
+    public function compile(string $outputDirectory): void {
+        @mkdir($outputDirectory);
+        $this->writeFile($outputDirectory . '/phast.php', $this->getResult());
+        foreach ($this->resources as $filename => $contents) {
+            $this->writeFile($outputDirectory . '/' . $filename, $contents);
+        }
+    }
+
+    public function writeFile(string $filename, string $contents): void {
+        if (file_put_contents($filename, $contents) !== strlen($contents)) {
+            throw new \RuntimeException("Could not write output file: $filename");
+        }
     }
 
     private function getSourceFiles() {
