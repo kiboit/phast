@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.42 - 2020-04-15
+
+* Speed up script load, and fix a bug with setTimeout functions running before
+  the next script is loaded.
+
+
 ## 1.41 - 2020-04-02
 
 * Support compressed external resources (ie, proxied styles and scripts).
