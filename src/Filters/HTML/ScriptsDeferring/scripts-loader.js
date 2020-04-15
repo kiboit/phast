@@ -70,25 +70,29 @@ phast.ScriptsLoader.Utilities = function (document) {
 
     this._document = document;
 
+    var completionCallbacks = 0;
+
     function executeString(string) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
+            var callbackName = 'PhastCompleteScript' + (++completionCallbacks);
+
             var el = document.createElement('script');
-            var blob = new window.Blob([string], {type: 'text/javascript'});
-            var url = window.URL.createObjectURL(blob);
-            el.addEventListener('load', function () {
-                resolve();
-            });
-            el.addEventListener('load', cleanup);
-            el.addEventListener('error', function () {
-                reject();
-            });
-            el.addEventListener('error', cleanup);
-            el.src = url;
+            el.textContent = string;
+
+            var trailer = document.createElement('script');
+            trailer.textContent = callbackName + '()';
+
+            window[callbackName] = next;
             document.body.appendChild(el);
-            function cleanup() {
+            document.body.appendChild(trailer);
+
+            function next() {
+                resolve();
                 document.body.removeChild(el);
+                document.body.removeChild(trailer);
+                delete window[callbackName];
             }
-        })
+        });
     }
 
     function copyElement(source) {
