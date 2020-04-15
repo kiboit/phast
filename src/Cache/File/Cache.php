@@ -175,7 +175,7 @@ class Cache implements CacheInterface {
             return null;
         }
         if ($expirationTime > $this->functions->time() || $expirationTime == 0) {
-            if (time() - @$this->functions->filemtime($file) >= round($this->gcMaxAge / 10)) {
+            if (time() - @$this->functions->filectime($file) >= round($this->gcMaxAge / 10)) {
                 $this->functions->touch($file);
             }
             return unserialize($data);

@@ -29,7 +29,7 @@ class Reader implements LogReader {
         $tenMinutesAgo = time() - 600;
         while ($file = @readdir($dir)) {
             $filename = $this->dir . "/$file";
-            if (preg_match('/\.jsonl$/', $file) && @filemtime($filename) < $tenMinutesAgo) {
+            if (preg_match('/\.jsonl$/', $file) && @filectime($filename) < $tenMinutesAgo) {
                 @unlink($filename);
             }
         }

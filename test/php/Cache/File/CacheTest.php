@@ -129,14 +129,14 @@ class CacheTest extends CacheTestCase {
         };
 
 
-        $this->functions->filemtime = function () {
+        $this->functions->filectime = function () {
             return $this->functions->time() - round($this->config['cacheMaxAge'] / 20);
         };
         $this->cache->get('asd', function () {
         });
         $this->assertFalse($touched);
 
-        $this->functions->filemtime = function () {
+        $this->functions->filectime = function () {
             return $this->functions->time() - round($this->config['cacheMaxAge'] / 10);
         };
         $this->cache->get('asd', function () {

@@ -123,7 +123,7 @@ class LocalRetrieverTest extends TestCase {
     public function retrieverMethods() {
         return [
             ['retrieve', 'file_get_contents'],
-            ['getCacheSalt', 'filemtime'],
+            ['getCacheSalt', 'filectime'],
             ['getSize', 'filesize'],
         ];
     }
