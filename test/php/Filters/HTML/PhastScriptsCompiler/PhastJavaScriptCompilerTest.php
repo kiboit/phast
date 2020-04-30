@@ -57,7 +57,9 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $compiled = $this->compiler->compileScriptsWithConfig([$script]);
 
         $this->assertStringStartsWith('(', $compiled);
-        $this->assertStringEndsWith('"configKey1":{"item":"value"}}});', $compiled);
+
+        $this->assertTrue(!!preg_match('/"config":"(.+?)"/', $compiled, $match));
+        $this->assertStringEndsWith('"configKey1":{"item":"value"}}', base64_decode($match[1]));
     }
 
     public function testCaching() {

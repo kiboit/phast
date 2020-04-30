@@ -102,7 +102,7 @@ class PhastJavaScriptCompiler {
             }
         }
         $this->lastCompiledConfig = $config;
-        return JSON::encode(['config' => $config]);
+        return JSON::encode(['config' => base64_encode(JSON::encode($config))]);
     }
 
     /**
