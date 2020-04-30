@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.43 - 2020-04-30
+
+* Base64 encode the config JSON passed to the frontend, to stop Gtranslate or
+  other tools from mangling the service URL that is contained in it.
+
+
 ## 1.42 - 2020-04-15
 
 * Speed up script load, and fix a bug with setTimeout functions running before
