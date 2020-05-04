@@ -15,8 +15,13 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function handleTag(Tag $script) {
-        if ($script->hasAttribute('data-phast-no-defer')) {
+        if ($script->hasAttribute('data-phast-no-defer')
+            || $script->hasAttribute('data-pagespeed-no-defer')
+            || $script->getAttribute('data-cfasync') === 'false'
+        ) {
             $script->removeAttribute('data-phast-no-defer');
+            $script->removeAttribute('data-pagespeed-no-defer');
+            $script->removeAttribute('data-cfasync');
         } elseif ($this->isJSElement($script)) {
             $this->rewrite($script);
         }

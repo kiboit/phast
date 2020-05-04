@@ -48,18 +48,33 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertHasCompiled('ScriptsDeferring/rewrite.js');
     }
 
-    public function testDisableRewriting() {
+    public function disableRewritingData() {
+        yield ['data-phast-no-defer', ''];
+        yield ['data-pagespeed-no-defer', ''];
+        yield ['data-cfasync', 'false'];
+        yield ['data-cfasync', 'yolo', true];
+    }
+
+    /** @dataProvider disableRewritingData */
+    public function testDisableRewriting($attrName, $attrValue, $shouldDefer = false) {
         $script = $this->makeMarkedElement('script');
         $script->setAttribute('type', 'text/javascript');
         $script->setAttribute('src', 'the-src');
-        $script->setAttribute('data-phast-no-defer', '');
+        $script->setAttribute($attrName, $attrValue);
 
         $this->head->appendChild($script);
 
         $this->applyFilter();
 
         $script = $this->getMatchingElement($script);
-        $this->assertEquals('text/javascript', $script->getAttribute('type'));
-        $this->assertFalse($script->hasAttribute('data-phast-no-defer'));
+
+        if ($shouldDefer) {
+            $this->assertEquals('text/phast', $script->getAttribute('type'));
+            $this->assertTrue($script->hasAttribute($attrName));
+            $this->assertEquals($attrValue, $script->getAttribute($attrName));
+        } else {
+            $this->assertEquals('text/javascript', $script->getAttribute('type'));
+            $this->assertFalse($script->hasAttribute($attrName));
+        }
     }
 }
