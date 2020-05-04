@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.44 - 2020-05-04
+
+* Support `data-pagespeed-no-defer` and `data-cfasync="false"` attributes on
+  scripts for disabling script deferral (in addition to `data-phast-no-defer`).
+* Leave `data-{phast,pagespeed}-no-defer` and `data-cfasync` attributes in place
+  to aid debugging.
+
+
 ## 1.43 - 2020-04-30
 
 * Base64 encode the config JSON passed to the frontend, to stop Gtranslate or
