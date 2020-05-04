@@ -15,14 +15,9 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function handleTag(Tag $script) {
-        if ($script->hasAttribute('data-phast-no-defer')
-            || $script->hasAttribute('data-pagespeed-no-defer')
-            || $script->getAttribute('data-cfasync') === 'false'
+        if ($this->isJSElement($script)
+            && !$this->isDeferralDisabled($script)
         ) {
-            $script->removeAttribute('data-phast-no-defer');
-            $script->removeAttribute('data-pagespeed-no-defer');
-            $script->removeAttribute('data-cfasync');
-        } elseif ($this->isJSElement($script)) {
             $this->rewrite($script);
         }
         yield $script;
@@ -41,5 +36,11 @@ class Filter extends BaseHTMLStreamFilter {
         if ($script->hasAttribute('data-phast-params')) {
             $script->removeAttribute('src');
         }
+    }
+
+    private function isDeferralDisabled(Tag $script) {
+        return $script->hasAttribute('data-phast-no-defer')
+               || $script->hasAttribute('data-pagespeed-no-defer')
+               || $script->getAttribute('data-cfasync') === 'false';
     }
 }

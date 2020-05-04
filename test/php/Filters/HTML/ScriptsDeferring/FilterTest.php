@@ -70,11 +70,11 @@ class FilterTest extends HTMLFilterTestCase {
 
         if ($shouldDefer) {
             $this->assertEquals('text/phast', $script->getAttribute('type'));
-            $this->assertTrue($script->hasAttribute($attrName));
-            $this->assertEquals($attrValue, $script->getAttribute($attrName));
         } else {
             $this->assertEquals('text/javascript', $script->getAttribute('type'));
-            $this->assertFalse($script->hasAttribute($attrName));
         }
+
+        $this->assertTrue($script->hasAttribute($attrName));
+        $this->assertEquals($attrValue, $script->getAttribute($attrName));
     }
 }
