@@ -24,4 +24,22 @@ class FilterTest extends PhastTestCase {
         $actual = $this->filter->apply($resource, []);
         $this->assertEquals($expected, $actual->getContent());
     }
+
+    public function swapExceptionsData() {
+        yield ['f o n t a w e s o m e', false];
+        yield ['times new roman', true];
+        yield ['GeNeRaTePrEsS', false];
+    }
+
+    /** @dataProvider swapExceptionsData */
+    public function testSwapExceptions($fontFamily, $shouldSwap) {
+        $css = "@font-face{font-family:\"$fontFamily\"}";
+        $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), $css);
+        $actual = $this->filter->apply($resource, [])->getContent();
+        if ($shouldSwap) {
+            $this->assertContains('font-display:swap', $actual);
+        } else {
+            $this->assertContains('font-display:block', $actual);
+        }
+    }
 }
