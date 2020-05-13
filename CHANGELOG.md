@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.45 - 2020-05-13
+
+* Use `font-display: block` for icon fonts (currently Font Awesome,
+  GeneratePress and Dashicons).
+
+
 ## 1.44 - 2020-05-04
 
 * Support `data-pagespeed-no-defer` and `data-cfasync="false"` attributes on
