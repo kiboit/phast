@@ -74,6 +74,7 @@ class DefaultConfiguration {
                                 'ieCompatible' => false,
                             ],
                             '~^https?://stackpath\.bootstrapcdn\.com/~',
+                            '~^https?://cdnjs\.cloudflare\.com/~',
                         ],
                     ],
 
