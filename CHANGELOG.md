@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.46 - 2020-05-14
+
+* Whitelist `cdnjs.cloudflare.com` for CSS processing.
+
+
 ## 1.45 - 2020-05-13
 
 * Use `font-display: block` for icon fonts (currently Font Awesome,
