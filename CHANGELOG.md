@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.47 - 2020-05-18
+
+* Process image URLs in `data-src`, `data-srcset`, `data-wood-src` and
+  `data-wood-srcset` attributes on `img` tags.
+
 ## 1.46 - 2020-05-14
 
 * Whitelist `cdnjs.cloudflare.com` for CSS processing.
