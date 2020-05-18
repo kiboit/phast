@@ -37,7 +37,7 @@ class Filter implements HTMLStreamFilter {
 
     private function handleTag(Tag $tag, HTMLPageContext $context) {
         if ($tag->getTagName() == 'img' || ($this->inPictureTag && $tag->getTagName() == 'source')) {
-            foreach (['', 'data-lazy-'] as $prefix) {
+            foreach (['', 'data-', 'data-lazy-', 'data-wood-'] as $prefix) {
                 $this->rewriteSrc($tag, $context, $prefix . 'src');
                 $this->rewriteSrcset($tag, $context, $prefix . 'srcset');
             }
