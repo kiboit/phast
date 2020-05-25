@@ -388,16 +388,16 @@ phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
             console.error(logPrefix, 'Dropping DB');
             db.close();
             dbPromise = null;
-            return r2p(indexedDB.deleteDatabase(params.dbName));
+            return r2p(window.indexedDB.deleteDatabase(params.dbName));
         });
     }
 
     function openDB(params) {
-        if (typeof indexedDB === 'undefined') {
+        if (typeof window.indexedDB === 'undefined') {
             return Promise.reject(new Error('IndexedDB is not available'));
         }
 
-        var request = indexedDB.open(params.dbName, params.dbVersion);
+        var request = window.indexedDB.open(params.dbName, params.dbVersion);
         request.onupgradeneeded = function (db) {
             createSchema(request.result, params);
         };
@@ -520,7 +520,7 @@ phast.ResourceLoader.make = function (serviceUrl, shortParamsMappings) {
     return new phast.ResourceLoader(client, cache);
 
     function makeCache() {
-        var userAgent = navigator.userAgent;
+        var userAgent = window.navigator.userAgent;
         if (/safari/i.test(userAgent) && !/chrome|android/i.test(userAgent)) {
             console.log("[Phast] Not using IndexedDB cache on Safari");
             return new phast.ResourceLoader.BlackholeCache();
