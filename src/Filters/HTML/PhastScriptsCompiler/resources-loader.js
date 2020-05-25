@@ -257,47 +257,51 @@ phast.ResourceLoader.IndexedDBStorage = function (params) {
     connect();
 
     this.get = function (key) {
-        return con.get()
-            .then(function (db) {
-                return r2p(getStore(db).get(key));
-            })
-            .catch(function (e) {
-                console.error(logPrefix, 'Error reading from store:', e);
-                resetConnection();
-                throw e;
-            });
+        return openStore('readonly').then(function (store) {
+            return r2p(store.get(key)).catch(makeResetHandler('reading from store'));
+        });
     };
 
     this.store = function (item) {
-        return con.get()
-            .then(function (db) {
-                return r2p(getStore(db, 'readwrite').put(item));
-            })
-            .catch(function (e) {
-                console.error(logPrefix, 'Error writing to store:', e);
-                resetConnection();
-                throw e;
-            });
+        return openStore('readwrite').then(function (store) {
+            return r2p(store.put(item)).catch(makeResetHandler('writing to store'));
+        });
     };
 
     this.clear = function () {
-        return con.get()
-            .then(function (db) {
-                return r2p(getStore(db, 'readwrite').clear());
-            });
+        return openStore('readwrite').then(function (store) {
+            return r2p(store.clear());
+        });
     };
 
     this.iterateOnAll = function (callback) {
-        return con.get()
-            .then(function (db) {
-                return iterateOnRequest(callback, getStore(db).openCursor());
-            })
-            .catch(function (e) {
-                console.error(logPrefix, 'Error iterating on all:', e);
+        return openStore('readonly').then(function (store) {
+            return iterateOnRequest(callback, store.openCursor())
+                .catch(makeResetHandler('iterating on all'));
+        });
+    };
+
+    function openStore(mode) {
+        return con.get().then(function (db) {
+            try {
+                return db
+                    .transaction(params.storeName, mode)
+                    .objectStore(params.storeName);
+            } catch (e) {
+                console.error(logPrefix, 'Could not open store; recreating database:', e);
                 resetConnection();
                 throw e;
-            });
-    };
+            }
+        });
+    }
+
+    function makeResetHandler(description) {
+        return function (e) {
+            console.error(logPrefix, 'Error ' + description + ':', e);
+            resetConnection();
+            throw e;
+        };
+    }
 
     function iterateOnRequest(callback, request) {
         return new Promise(function (resolve, reject) {
@@ -314,25 +318,16 @@ phast.ResourceLoader.IndexedDBStorage = function (params) {
         });
     }
 
-    function getStore(db, mode) {
-        mode = mode || 'readonly';
-        return db
-            .transaction(params.storeName, mode)
-            .objectStore(params.storeName);
-    }
-
     function resetConnection() {
         var dropPromise = con.dropDB().then(connect);
         con = {
             get: function () {
-                return Promise.reject(new Error('Resetting DB'))
+                return Promise.reject(new Error('Database is being dropped and recreated'))
             },
-
             dropDB: function () {
                 return dropPromise;
             }
         };
-
     }
 
     function connect() {
@@ -398,7 +393,8 @@ phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
         }
 
         var request = window.indexedDB.open(params.dbName, params.dbVersion);
-        request.onupgradeneeded = function (db) {
+
+        request.onupgradeneeded = function () {
             createSchema(request.result, params);
         };
 
@@ -414,7 +410,7 @@ phast.ResourceLoader.IndexedDBStorage.Connection = function (params) {
                 return db;
             })
             .catch(function (e) {
-                console.error(logPrefix, "Error while opening database:", e);
+                console.log(logPrefix, "IndexedDB cache is not available. This is usually due to using private browsing mode.");
                 throw e;
             });
     }

@@ -429,7 +429,7 @@ QUnit.module('ResourcesLoader', function (hooks) {
                         return storage.store(testItem);
                     })
                     .catch(function (e) {
-                        assert.equal('Resetting DB', e.message);
+                        assert.equal(e.message, 'Database is being dropped and recreated');
                         return wait(200)();
                     })
                     .then(function () {
