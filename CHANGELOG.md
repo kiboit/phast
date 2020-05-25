@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.48 - 2020-05-25
+
+* Stop excessive error messages when IndexedDB is unavailable.
+
+
 ## 1.47 - 2020-05-18
 
 * Process image URLs in `data-src`, `data-srcset`, `data-wood-src` and
