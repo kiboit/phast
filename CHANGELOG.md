@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.49 - 2020-05-27
+
+* Send uncompressed responses to Cloudflare.  Cloudflare will handle
+  compression.
+
+
 ## 1.48 - 2020-05-25
 
 * Stop excessive error messages when IndexedDB is unavailable.
