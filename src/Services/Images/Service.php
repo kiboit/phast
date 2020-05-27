@@ -52,6 +52,6 @@ class Service extends BaseService {
     }
 
     private function proxySupportsAccept(Request $request) {
-        return !$request->getHeader('cf-ray');
+        return !$request->isCloudflare();
     }
 }

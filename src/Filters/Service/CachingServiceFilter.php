@@ -50,6 +50,9 @@ class CachingServiceFilter implements ServiceFilter {
         $key = $this->cachedFilter->getCacheSalt($resource, $request);
         $this->logger()->info('Trying to get {url} from cache', ['url' => (string) $resource->getUrl()]);
         $result = $this->cache->get($key);
+        if (isset($result['encoding']) && $result['encoding'] != 'identity') {
+            $result = null;
+        }
         if ($result && $this->checkDependencies($result)) {
             return $this->deserializeCachedData($result);
         }
@@ -86,7 +89,6 @@ class CachingServiceFilter implements ServiceFilter {
             'dataType' => 'resource',
             'url' => $resource->getUrl()->toString(),
             'mimeType' => $resource->getMimeType(),
-            'encoding' => $resource->getEncoding(),
             'blob' => base64_encode($resource->getContent()),
             'dependencies' => $this->serializeDependencies($resource),
         ];
@@ -107,9 +109,6 @@ class CachingServiceFilter implements ServiceFilter {
             base64_decode($data['blob']),
             $data['mimeType'],
         ];
-        if (isset($data['encoding'])) {
-            $params[] = $data['encoding'];
-        }
         return Resource::makeWithContent(...$params);
     }
 

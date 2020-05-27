@@ -11,7 +11,7 @@ class Factory {
 
     public function make(array $config) {
         $cssComposite = $this->makeFilter($config);
-        $composite = $this->makeCachingServiceFilterWithCompression($config, $cssComposite, 'css-processing-2');
+        $composite = $this->makeCachingServiceFilter($config, $cssComposite, 'css-processing-2');
 
         return new Service(
             (new ServiceSignatureFactory())->make($config),

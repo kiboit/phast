@@ -6,8 +6,6 @@ namespace Kibo\Phast\Services;
 use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Filters\Service\CompositeFilter;
-use Kibo\Phast\Filters\Service\Compression\CompressingFilter;
-use Kibo\Phast\Filters\Service\Compression\DecompressingFilter;
 use Kibo\Phast\Retrievers\CachingRetriever;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\RemoteRetrieverFactory;
@@ -37,14 +35,5 @@ trait ServiceFactoryTrait {
             $compositeFilter,
             new LocalRetriever($config['retrieverMap'])
         );
-    }
-
-    public function makeCachingServiceFilterWithCompression($config, CompositeFilter $compositeFilter, $cacheNamespace) {
-        $compositeFilter->addFilter(new CompressingFilter());
-        $caching = $this->makeCachingServiceFilter($config, $compositeFilter, $cacheNamespace);
-        $wrapperComposite = new CompositeFilter();
-        $wrapperComposite->addFilter($caching);
-        $wrapperComposite->addFilter(new DecompressingFilter());
-        return $wrapperComposite;
     }
 }

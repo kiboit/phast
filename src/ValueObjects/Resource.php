@@ -41,11 +41,6 @@ class Resource {
     private $mimeType;
 
     /**
-     * @var string
-     */
-    private $encoding;
-
-    /**
      * @var Resource[]
      */
     private $dependencies = [];
@@ -53,21 +48,19 @@ class Resource {
     private function __construct() {
     }
 
-    public static function makeWithContent(URL $url, $content, $mimeType = null, $encoding = 'identity') {
+    public static function makeWithContent(URL $url, $content, $mimeType = null) {
         $instance = new self();
         $instance->url = $url;
         $instance->mimeType = $mimeType;
         $instance->content = $content;
-        $instance->encoding = $encoding;
         return $instance;
     }
 
-    public static function makeWithRetriever(URL $url, Retriever $retriever, $mimeType = null, $encoding = 'identity') {
+    public static function makeWithRetriever(URL $url, Retriever $retriever, $mimeType = null) {
         $instance = new self();
         $instance->url = $url;
         $instance->mimeType = $mimeType;
         $instance->retriever = $retriever;
-        $instance->encoding = $encoding;
         return $instance;
     }
 
@@ -125,13 +118,6 @@ class Resource {
     }
 
     /**
-     * @return string
-     */
-    public function getEncoding() {
-        return $this->encoding;
-    }
-
-    /**
      * @return Resource[]
      */
     public function getDependencies() {
@@ -146,19 +132,15 @@ class Resource {
     }
 
     /**
-     * @param $content
-     * @param null $mimeType
-     * @param null $encoding
+     * @param string $content
+     * @param string|null $mimeType
      * @return Resource
      */
-    public function withContent($content, $mimeType = null, $encoding = null) {
+    public function withContent($content, $mimeType = null) {
         $new = clone $this;
         $new->content = $content;
         if (!is_null($mimeType)) {
             $new->mimeType = $mimeType;
-        }
-        if (!is_null($encoding)) {
-            $new->encoding = $encoding;
         }
         return $new;
     }

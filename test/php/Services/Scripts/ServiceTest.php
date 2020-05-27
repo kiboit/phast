@@ -100,33 +100,4 @@ class ServiceTest extends TestCase {
         $this->expectException(ItemNotFoundException::class);
         $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
     }
-
-    public function testParsingAcceptEncoding() {
-        $encoding = 'deflate, gzip;q=1.0, *;q=0.5';
-        $httpRequest = Request::fromArray(
-            ['src' => 'http://allowed.com/the-script'],
-            ['HTTP_ACCEPT_ENCODING' => $encoding]
-        );
-        $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
-        $this->assertEquals($encoding, $this->calledWithParams['accept-encoding']);
-    }
-
-    /**
-     * @dataProvider compressionHeadersData
-     */
-    public function testCompressionHeaders($resource, $expectedEncoding) {
-        $this->returnResource = $resource;
-        $request = Request::fromArray(['src' => 'http://allowed.com/the-script']);
-        $response = $this->service->serve(ServiceRequest::fromHTTPRequest($request));
-        if ($expectedEncoding === null) {
-            $this->assertArrayNotHasKey('Content-Encoding', $response->getHeaders());
-        } else {
-            $this->assertArraySubset(['Content-Encoding' => $expectedEncoding], $response->getHeaders());
-        }
-    }
-
-    public function compressionHeadersData() {
-        yield [Resource::makeWithContent(URL::fromString(''), '', '', 'gzip'), 'gzip'];
-        yield [Resource::makeWithContent(URL::fromString(''), '', ''), null];
-    }
 }

@@ -16,3 +16,7 @@ console.log('Main JS Loaded');
 console.log('Main minification');
 
 var something = 'yolo';
+
+var injectedScript = document.createElement('script');
+injectedScript.src = 'js/injected.js';
+document.body.appendChild(injectedScript);

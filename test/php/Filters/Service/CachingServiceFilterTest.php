@@ -88,12 +88,11 @@ class CachingServiceFilterTest extends TestCase {
             static $timesCalled = 1;
             return $resource->withContent($timesCalled++);
         };
-        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 0, 'the-mime', 'the-encoding');
+        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 0, 'the-mime');
         $this->filter->apply($resource, []);
         $actual = $this->filter->apply($resource, []);
         $this->assertEquals(1, $actual->getContent());
         $this->assertEquals('the-mime', $actual->getMimeType());
-        $this->assertEquals('the-encoding', $actual->getEncoding());
     }
 
     public function testIgnoringCacheWhenDependencyIsOld() {

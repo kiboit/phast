@@ -117,16 +117,6 @@ class PhastServicesTest extends PhastTestCase {
         );
     }
 
-    public function testNotZippingAlreadyZipped() {
-        if (!function_exists('gzencode')) {
-            $this->markTestSkipped('gzencode() does not exist');
-        }
-        $this->response->setContent(gzencode(self::EXAMPLE_CONTENT));
-        $this->response->setHeader('Content-Encoding', 'gzip');
-        $this->executeTest();
-        $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
-    }
-
     public function testNotSettingContentEncodingIfNoGzipLib() {
         $this->functions->stream_filter_append = function () {
             return false;

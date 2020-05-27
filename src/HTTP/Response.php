@@ -39,6 +39,19 @@ class Response {
         return $this->headers;
     }
 
+    /**
+     * @param string $name
+     * @return string|null
+     */
+    public function getHeader($name) {
+        foreach ($this->headers as $k => $v) {
+            if (strcasecmp($name, $k) === 0) {
+                return $v;
+            }
+        }
+        return null;
+    }
+
     public function setHeaders(array $headers) {
         $this->headers = $headers;
     }
@@ -63,5 +76,9 @@ class Response {
      */
     public function setContent($content) {
         $this->content = $content;
+    }
+
+    public function isCompressible() {
+        return strpos($this->getHeader('Content-Type'), 'image/') === false;
     }
 }

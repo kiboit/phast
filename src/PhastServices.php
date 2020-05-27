@@ -98,7 +98,7 @@ class PhastServices {
 
         $fp = fopen('php://output', 'wb');
         $zipping = false;
-        if (self::shouldZip($request, $response)) {
+        if ($response->isCompressible() && self::shouldZip($request)) {
             $zipping = @$funcs->stream_filter_append(
                 $fp,
                 'zlib.deflate',
@@ -137,15 +137,9 @@ class PhastServices {
         fclose($fp);
     }
 
-    private static function shouldZip(Request $request, Response $response) {
-        if (strpos($request->getHeader('Accept-Encoding'), 'gzip') === false) {
-            return false;
-        }
-        $headers = $response->getHeaders();
-        if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') === 0) {
-            return false;
-        }
-        return !isset($headers['Content-Encoding']) || $headers['Content-Encoding'] == 'identity';
+    private static function shouldZip(Request $request) {
+        return !$request->isCloudflare()
+               && strpos($request->getHeader('Accept-Encoding'), 'gzip') !== false;
     }
 
     private static function generateETag(array $headers, $content) {

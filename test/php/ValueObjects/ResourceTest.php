@@ -17,21 +17,19 @@ class ResourceTest extends PhastTestCase {
 
     private $mimeType = 'text/css';
 
-    private $encoding = 'gzip';
-
     public function setUp() {
         parent::setUp();
         $this->url = URL::fromString('http://phast.test');
     }
 
     public function testMakeWithContent() {
-        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType, $this->encoding);
+        $resource = Resource::makeWithContent($this->url, $this->content, $this->mimeType);
         $this->checkResource($resource);
     }
 
     public function testMakeWithRetriever() {
         $retriever = $this->makeContentRetriever();
-        $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType, $this->encoding);
+        $resource = Resource::makeWithRetriever($this->url, $retriever, $this->mimeType);
         $this->checkResource($resource);
     }
 
@@ -71,16 +69,6 @@ class ResourceTest extends PhastTestCase {
         $newResource = $resource->withContent('new-content', 'new-mime-type');
         $this->assertSame('new-content', $newResource->getContent());
         $this->assertSame('new-mime-type', $newResource->getMimeType());
-        $this->assertEquals('identity', $newResource->getEncoding());
-    }
-
-    public function testEncodingModification() {
-        $resource = Resource::makeWithContent($this->url, $this->content, 'the-mime-type');
-        $this->assertEquals('identity', $resource->getEncoding());
-        $new = $resource->withContent($resource->getContent(), null, 'new-encoding');
-        $this->assertEquals($resource->getContent(), $new->getContent());
-        $this->assertEquals('the-mime-type', $new->getMimeType());
-        $this->assertEquals('new-encoding', $new->getEncoding());
     }
 
     public function testDependenciesAdding() {
@@ -177,6 +165,5 @@ class ResourceTest extends PhastTestCase {
         $this->assertSame($this->url, $resource->getUrl());
         $this->assertSame($this->mimeType, $resource->getMimeType());
         $this->assertSame($this->content, $resource->getContent());
-        $this->assertSame($this->encoding, $resource->getEncoding());
     }
 }

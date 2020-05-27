@@ -133,4 +133,8 @@ class Request {
     private function isSuffix($suffix, $string) {
         return substr($string, -strlen($suffix)) === $suffix;
     }
+
+    public function isCloudflare() {
+        return !!$this->getHeader('CF-Ray');
+    }
 }
