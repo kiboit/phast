@@ -164,7 +164,13 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function inlineLink(Tag $link, URL $baseUrl) {
-        $location = URL::fromString(trim($link->getAttribute('href')))->withBase($baseUrl);
+        $href = trim($link->getAttribute('href'));
+
+        if (trim($href, '/') == '') {
+            return [$link];
+        }
+
+        $location = URL::fromString($href)->withBase($baseUrl);
 
         if (!$this->findInWhitelist($location)) {
             return [$link];

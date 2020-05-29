@@ -566,6 +566,13 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertRegExp('/^[a-z0-9]+$/i', (string) $this->getCacheMarker());
     }
 
+    public function testIgnoreEmptyHref() {
+        $this->files['/'] = 'hey';
+        $html = '<html><head><link rel=stylesheet href=/></head><body></body></html>';
+        $this->applyFilter($html);
+        $this->assertEquals(1, $this->dom->getElementsByTagName('link')->length);
+    }
+
     private function getCacheMarker() {
         return json_decode(
             $this->dom->getElementsByTagName('style')->item(0)->getAttribute('data-phast-params')

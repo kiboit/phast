@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+* Ignore `link` elements with empty `href`, or one that consists only of
+  slashes.
+
+
 ## 1.49 - 2020-05-27
 
 * Send uncompressed responses to Cloudflare.  Cloudflare will handle
