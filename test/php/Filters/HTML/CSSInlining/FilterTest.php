@@ -573,6 +573,16 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals(1, $this->dom->getElementsByTagName('link')->length);
     }
 
+    public function testRemoveStyleClosingTag() {
+        $this->files['/external.css'] = 'body{content:"</style>";}';
+        $html = '<html><head><link rel=stylesheet href=/external.css></head><body></body></html>';
+        $this->applyFilter($html);
+        $this->assertEquals(
+            'body{content:"</ style>";}',
+            $this->dom->getElementsByTagName('style')->item(0)->textContent
+        );
+    }
+
     private function getCacheMarker() {
         return json_decode(
             $this->dom->getElementsByTagName('style')->item(0)->getAttribute('data-phast-params')

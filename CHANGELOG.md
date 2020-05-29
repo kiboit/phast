@@ -4,6 +4,8 @@
 
 * Ignore `link` elements with empty `href`, or one that consists only of
   slashes.
+* Replace `</style` inside inlined stylesheets with `</ style` to prevent
+  stylesheet content ending up inside the DOM.
 
 
 ## 1.49 - 2020-05-27

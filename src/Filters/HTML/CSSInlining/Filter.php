@@ -356,6 +356,7 @@ class Filter extends BaseHTMLStreamFilter {
             $style->setAttribute('data-phast-original-src', $url->toString());
             $style->setAttribute('data-phast-params', $this->makeServiceParams($url, $stripImports));
         }
+        $content = preg_replace('~(</)(style)~i', '$1 $2', $content);
         $style->setTextContent($content);
         return $style;
     }
