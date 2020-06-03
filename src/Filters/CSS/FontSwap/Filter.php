@@ -13,6 +13,7 @@ class Filter implements ServiceFilter {
         'Font Awesome',
         'GeneratePress',
         'Dashicons',
+        'Ionicons',
     ];
 
     private $fontDisplayBlockPattern;
