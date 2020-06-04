@@ -72,6 +72,17 @@ class TagTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('CamelCase', $tag->getAttribute('class'));
     }
 
+    public function testGetAttributes() {
+        $tag = new Tag('test', ['a' => '1', 'b' => '2']);
+        $this->assertEquals(['a', 'b'], array_keys($tag->getAttributes()));
+        $tag->setAttribute('c', '3');
+        $this->assertEquals(['c', 'a', 'b'], array_keys($tag->getAttributes()));
+        $tag->removeAttribute('a');
+        $this->assertEquals(['c', 'b'], array_keys($tag->getAttributes()));
+        $tag->removeAttribute('c');
+        $this->assertEquals(['b'], array_keys($tag->getAttributes()));
+    }
+
     private function makeTheTag() {
         $tag = new Tag('span', ['class' => 'SoMe\"Class\"']);
         $tag->setOriginalString($this->opening);

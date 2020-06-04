@@ -1,13 +1,11 @@
 <?php
-
-
 namespace Kibo\Phast\ValueObjects;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Retrievers\Retriever;
 
 class Resource {
-    private $ext2mime = [
+    const EXTENSION_TO_MIME_TYPE = [
         'gif' => 'image/gif',
         'png' => 'image/png',
         'jpg' => 'image/jpeg',
@@ -91,8 +89,9 @@ class Resource {
     public function getMimeType() {
         if (!isset($this->mimeType)) {
             $ext = strtolower($this->url->getExtension());
-            if (isset($this->ext2mime[$ext])) {
-                $this->mimeType = $this->ext2mime[$ext];
+            $ext2mime = self::EXTENSION_TO_MIME_TYPE;
+            if (isset($ext2mime[$ext])) {
+                $this->mimeType = self::EXTENSION_TO_MIME_TYPE[$ext];
             }
         }
         return $this->mimeType;

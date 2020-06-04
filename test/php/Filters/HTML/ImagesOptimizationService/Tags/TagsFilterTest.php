@@ -14,6 +14,8 @@ use Kibo\Phast\ValueObjects\URL;
 class TagsFilterTest extends HTMLFilterTestCase {
     const SERVICE_URL = 'http://the-service.org/service.php';
 
+    private $files;
+
     public function setUp() {
         parent::setUp();
 
@@ -22,11 +24,22 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $signature = $this->createMock(ServiceSignature::class);
         $signature->method('sign')
             ->willReturn('the-token');
+
+        $this->files = null;
         $retriever = $this->createMock(LocalRetriever::class);
-        $retriever->method('getCacheSalt')
-            ->willReturn(12345678);
-        $retriever->method('getSize')
-            ->willReturn(100000);
+        $retriever->method('getCacheSalt')->will($this->returnCallback(function ($file) {
+            if ($this->files === null || in_array($file, $this->files)) {
+                return 12345678;
+            }
+            return false;
+        }));
+        $retriever->method('getSize')->will($this->returnCallback(function ($file) {
+            if ($this->files === null || in_array($file, $this->files)) {
+                return 100000;
+            }
+            return false;
+        }));
+
         $this->filter = new Filter(new ImageURLRewriter(
             $signature,
             $retriever,
@@ -165,6 +178,20 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
         $img = $this->getMatchingElement($img);
         $this->checkSrc($img->getAttribute('srcset'), ['src' => self::BASE_URL . '/new-root/the-image.jpg']);
+    }
+
+    public function testDataAttributesRewriting() {
+        $this->files = [self::BASE_URL . '/image.jpg'];
+
+        $html =
+            '<html><body><div data-a="/image.jpg" data-b="/404.jpg" data-c="/text.txt"></div></body></html>';
+
+        $this->applyFilter($html);
+
+        $div = $this->dom->getElementsByTagName('div')->item(0);
+        $this->checkSrc($div->getAttribute('data-a'), ['src' => self::BASE_URL . '/image.jpg']);
+        $this->assertEquals('/404.jpg', $div->getAttribute('data-b'));
+        $this->assertEquals('/text.txt', $div->getAttribute('data-c'));
     }
 
     private function makeImage($src, $width = null, $height = null) {

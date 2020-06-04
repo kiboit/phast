@@ -1,5 +1,4 @@
 <?php
-
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
@@ -7,8 +6,13 @@ use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
+use Kibo\Phast\ValueObjects\Resource;
 
 class Filter implements HTMLStreamFilter {
+    const IMG_SRC_ATTR_PATTERN = '~^(|data-(|lazy-|wood-))src$~i';
+
+    const IMG_SRCSET_ATTR_PATTERN = '~^(|data-(|lazy-|wood-))srcset$~i';
+
     /**
      * @var ImageURLRewriter
      */
@@ -16,12 +20,15 @@ class Filter implements HTMLStreamFilter {
 
     private $inPictureTag = false;
 
+    private $imagePathPattern;
+
     /**
      * Filter constructor.
      * @param ImageURLRewriter $rewriter
      */
     public function __construct(ImageURLRewriter $rewriter) {
         $this->rewriter = $rewriter;
+        $this->imagePathPattern = $this->makeImagePathPattern();
     }
 
     public function transformElements(\Traversable $elements, HTMLPageContext $context) {
@@ -36,16 +43,37 @@ class Filter implements HTMLStreamFilter {
     }
 
     private function handleTag(Tag $tag, HTMLPageContext $context) {
+        $isImage = false;
         if ($tag->getTagName() == 'img' || ($this->inPictureTag && $tag->getTagName() == 'source')) {
-            foreach (['', 'data-', 'data-lazy-', 'data-wood-'] as $prefix) {
-                $this->rewriteSrc($tag, $context, $prefix . 'src');
-                $this->rewriteSrcset($tag, $context, $prefix . 'srcset');
-            }
+            $isImage = true;
         } elseif ($tag->getTagName() == 'picture') {
             $this->inPictureTag = true;
         } elseif ($tag->getTagName() == 'video' || $tag->getTagName() == 'audio') {
             $this->inPictureTag = false;
         }
+
+        foreach ($tag->getAttributes() as $k => $v) {
+            if (!$v) {
+                continue;
+            }
+            if ($isImage && preg_match(self::IMG_SRC_ATTR_PATTERN, $k)) {
+                $this->rewriteSrc($tag, $context, $k);
+            } elseif ($isImage && preg_match(self::IMG_SRCSET_ATTR_PATTERN, $k)) {
+                $this->rewriteSrcset($tag, $context, $k);
+            } elseif (preg_match($this->imagePathPattern, parse_url($v, PHP_URL_PATH))) {
+                $this->rewriteArbitraryAttribute($tag, $context, $k);
+            }
+        }
+    }
+
+    private function makeImagePathPattern() {
+        $pieces = [];
+        foreach (Resource::EXTENSION_TO_MIME_TYPE as $ext => $mime) {
+            if (strpos($mime, 'image/') === 0) {
+                $pieces[] = preg_quote($ext, '~');
+            }
+        }
+        return '~\.(?:' . implode('|', $pieces) . ')$~';
     }
 
     private function handleClosingTag(ClosingTag $closingTag) {
@@ -56,9 +84,6 @@ class Filter implements HTMLStreamFilter {
 
     private function rewriteSrc(Tag $img, HTMLPageContext $context, $attribute) {
         $url = $img->getAttribute($attribute);
-        if (!$url) {
-            return;
-        }
         $params = [];
         foreach (['width', 'height'] as $attr) {
             $value = $img->getAttribute($attr);
@@ -72,9 +97,6 @@ class Filter implements HTMLStreamFilter {
 
     private function rewriteSrcset(Tag $img, HTMLPageContext $context, $attribute) {
         $srcset = $img->getAttribute($attribute);
-        if (!$srcset) {
-            return;
-        }
         $rewritten = preg_replace_callback('/([^,\s]+)(\s+(?:[^,]+))?/', function ($match) use ($context) {
             $url = $this->rewriter->rewriteUrl($match[1], $context->getBaseUrl());
             if (isset($match[2])) {
@@ -83,5 +105,11 @@ class Filter implements HTMLStreamFilter {
             return $url;
         }, $srcset);
         $img->setAttribute($attribute, $rewritten);
+    }
+
+    private function rewriteArbitraryAttribute(Tag $element, HTMLPageContext $context, $attribute) {
+        $url = $element->getAttribute($attribute);
+        $newUrl = $this->rewriter->rewriteUrl($url, $context->getBaseUrl(), [], true);
+        $element->setAttribute($attribute, $newUrl);
     }
 }

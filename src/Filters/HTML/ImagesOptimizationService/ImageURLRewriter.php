@@ -1,6 +1,4 @@
 <?php
-
-
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
 use Kibo\Phast\Logging\LoggingTrait;
@@ -78,9 +76,10 @@ class ImageURLRewriter {
      * @param string $url
      * @param URL|null $baseUrl
      * @param array $params
+     * @param bool $mustExist
      * @return string
      */
-    public function rewriteUrl($url, URL $baseUrl = null, array $params = []) {
+    public function rewriteUrl($url, URL $baseUrl = null, array $params = [], $mustExist = false) {
         if (strpos($url, '#') === 0) {
             return $url;
         }
@@ -91,13 +90,20 @@ class ImageURLRewriter {
             return $url;
         }
 
-        $inlinedResource = Resource::makeWithRetriever($absolute, $this->retriever);
-        $dataUrl = $this->inliningManager->getUrlForInlining($inlinedResource);
+        $resource = Resource::makeWithRetriever($absolute, $this->retriever);
+
+        if ($mustExist && $resource->getSize() === false) {
+            return $url;
+        }
+
+        $dataUrl = $this->inliningManager->getUrlForInlining($resource);
         if ($dataUrl) {
-            $this->inlinedResources = [$inlinedResource];
+            $this->inlinedResources = [$resource];
             return $dataUrl;
         }
+
         $params['src'] = $absolute->toString();
+
         return $this->makeSignedUrl($params);
     }
 

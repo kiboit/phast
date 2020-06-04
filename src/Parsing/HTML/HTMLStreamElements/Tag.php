@@ -85,6 +85,14 @@ class Tag extends Element {
         }
     }
 
+    /** @return string[] */
+    public function getAttributes() {
+        $this->readUntilAttribute(null);
+        return array_filter($this->newAttributes + $this->attributes, function ($value) {
+            return $value !== null;
+        });
+    }
+
     private function readUntilAttribute($attrName) {
         if (!$this->attributeReader) {
             return;
@@ -177,12 +185,8 @@ class Tag extends Element {
 
     private function generateOpeningTag() {
         $parts = ['<' . $this->tagName];
-        $this->readUntilAttribute(null);
-        $attributes = $this->newAttributes + $this->attributes;
-        foreach ($attributes as $name => $value) {
-            if ($value !== null) {
-                $parts[] = $this->generateAttribute($name, $value);
-            }
+        foreach ($this->getAttributes() as $name => $value) {
+            $parts[] = $this->generateAttribute($name, $value);
         }
         return join(' ', $parts) . '>';
     }
@@ -202,10 +206,10 @@ class Tag extends Element {
             return '"' . htmlspecialchars($value) . '"';
         }
         return "'" . str_replace(
-                ['&',     "'"],
-                ['&amp;', '&#039;'],
-                $value
-            ) . "'";
+            ['&',     "'"],
+            ['&amp;', '&#039;'],
+            $value
+        ) . "'";
     }
 
     private function mustHaveClosing() {
