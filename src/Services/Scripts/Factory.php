@@ -4,6 +4,7 @@ namespace Kibo\Phast\Services\Scripts;
 
 use Kibo\Phast\Filters\JavaScript\Minification\JSMinifierFilter;
 use Kibo\Phast\Filters\Service\CompositeFilter;
+use Kibo\Phast\Filters\Text\Decode\Filter as DecodeFilter;
 use Kibo\Phast\Security\ServiceSignatureFactory;
 use Kibo\Phast\Services\ServiceFactoryTrait;
 
@@ -28,6 +29,7 @@ class Factory {
 
     public function makeFilter(array $config) {
         $filter = new CompositeFilter();
+        $filter->addFilter(new DecodeFilter());
         $filter->addFilter(new JSMinifierFilter(@$config['scripts']['removeLicenseHeaders']));
         return $filter;
     }

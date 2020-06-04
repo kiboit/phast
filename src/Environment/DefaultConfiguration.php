@@ -123,8 +123,8 @@ class DefaultConfiguration {
             ],
 
             'styles' => [
-
                 'filters' => [
+                    \Kibo\Phast\Filters\Text\Decode\Filter::class => [],
                     \Kibo\Phast\Filters\CSS\ImportsStripper\Filter::class => [],
                     \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
                     \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => [],
