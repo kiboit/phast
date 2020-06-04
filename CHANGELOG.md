@@ -1,11 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.50 - 2020-06-04
 
 * Ignore `link` elements with empty `href`, or one that consists only of
   slashes.
 * Replace `</style` inside inlined stylesheets with `</ style` to prevent
   stylesheet content ending up inside the DOM.
+* Add `font-swap: block` for Ionicons.
+* Remove UTF-8 byte order mark from inlined stylesheets.
 
 
 ## 1.49 - 2020-05-27
