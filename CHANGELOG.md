@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.51 - 2020-06-04
+
+* Rewrite image URLs in any attribute, as long as the URL points to a local file
+  and ends with an image extension.
+
+
 ## 1.50 - 2020-06-04
 
 * Ignore `link` elements with empty `href`, or one that consists only of
