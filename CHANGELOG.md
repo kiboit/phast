@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.52 - 2020-06-09
+
+* Fix caching on Windows by not setting read-only permissions on cache files.
+* Add a checksum to cache files to prevent accidental modifications causing
+  trouble.
+
+
 ## 1.51 - 2020-06-04
 
 * Rewrite image URLs in any attribute, as long as the URL points to a local file

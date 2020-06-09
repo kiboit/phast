@@ -125,22 +125,22 @@ class CacheTest extends CacheTestCase {
             return 1000;
         };
         $this->functions->file_get_contents = function () {
-            return 'contents';
+            return implode(' ', [2000, '2', serialize(1337)]);
         };
 
 
         $this->functions->filectime = function () {
-            return $this->functions->time() - round($this->config['cacheMaxAge'] / 20);
+            return $this->functions->time() - round($this->config['garbageCollection']['maxAge'] / 20);
         };
-        $this->cache->get('asd', function () {
-        });
+        $this->assertEquals(1337, $this->cache->get('asd', function () {
+        }));
         $this->assertFalse($touched);
 
         $this->functions->filectime = function () {
-            return $this->functions->time() - round($this->config['cacheMaxAge'] / 10);
+            return $this->functions->time() - round($this->config['garbageCollection']['maxAge'] / 10);
         };
-        $this->cache->get('asd', function () {
-        });
+        $this->assertEquals(1337, $this->cache->get('asd', function () {
+        }));
         $this->assertTrue($touched);
     }
 
@@ -156,6 +156,47 @@ class CacheTest extends CacheTestCase {
         $dc2 = $this->cache->getDiskCleanup();
         $this->assertNotNull($dc1);
         $this->assertSame($dc1, $dc2);
+    }
+
+    /** @dataProvider samplesData */
+    public function testSamples($expected, array $parts) {
+        $this->functions->file_get_contents = function () use ($parts) {
+            return implode(' ', $parts);
+        };
+
+        $result = $this->cache->get('test', function () {
+        });
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function samplesData() {
+        yield [
+            'Hello, World!',
+            [
+                time() + 10,
+                '2',
+                serialize('Hello, World!'),
+            ],
+        ];
+        yield [
+            null,
+            [
+                time() + 10,
+                '3',
+                md5(''),
+                serialize('Hello, World!'),
+            ],
+        ];
+        yield [
+            'Hello, World!',
+            [
+                time() + 10,
+                '3',
+                md5(serialize('Hello, World!')),
+                serialize('Hello, World!'),
+            ],
+        ];
     }
 
     private function rebuildCache() {

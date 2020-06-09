@@ -10,7 +10,7 @@ use Kibo\Phast\Logging\LoggingTrait;
 class Cache implements CacheInterface {
     use LoggingTrait;
 
-    const VERSION = '2';
+    const VERSION = '3';
 
     /**
      * @var GarbageCollector
@@ -139,46 +139,52 @@ class Cache implements CacheInterface {
             return;
         }
         $file = $this->getCacheFilename($key);
-        $tmpFile = $file . '.' . uniqid('', true);
         $expirationTime = $expiresIn > 0 ? $this->functions->time() + $expiresIn : 0;
-        $serialized = $expirationTime . ' ' . self::VERSION . ' ' . serialize($contents);
-        $result = @$this->functions->file_put_contents($tmpFile, $serialized);
+        $serialized = serialize($contents);
+        $serialized = implode(' ', [
+            $expirationTime,
+            self::VERSION,
+            md5($serialized),
+            $serialized,
+        ]);
+        $result = @$this->functions->file_put_contents($file, $serialized);
         if ($result !== strlen($serialized)) {
             $this->logger()->critical(
                 'Phast: FileCache: Error writing to file {filename}. {written} of {total} bytes written!',
                 [
-                    'filename' => $tmpFile,
+                    'filename' => $file,
                     'written' => json_encode($result),
                     'total' => strlen($serialized),
                 ]
             );
-            @unlink($tmpFile);
-            return;
         }
-        @chmod($tmpFile, 0400);
-        @rename($tmpFile, $file);
     }
 
     private function getFromCache($key) {
         $file = $this->getCacheFilename($key);
-        if (!@$this->functions->file_exists($file)) {
-            return null;
-        }
-        $contents = @file_get_contents($file);
+        $contents = @$this->functions->file_get_contents($file);
         if ($contents === false) {
-            $this->logger()->critical('Phast: FileCache: Could not read file {file}', ['file' => $file]);
             return null;
         }
-        list($expirationTime, $version, $data) = explode(' ', $contents, 3);
-        if ($version !== self::VERSION) {
+        @list($expirationTime, $version, $data) = explode(' ', $contents, 3);
+        if ($version === '2') {
+            $data = unserialize($data);
+        } elseif ($version === self::VERSION) {
+            @list($hash, $data) = explode(' ', $data, 2);
+            if (md5($data) != $hash) {
+                $this->logger()->error('Phast: FileCache: Cache file was corrupted: {file}', ['file' => $file]);
+                return null;
+            }
+            $data = unserialize($data);
+        } else {
             $this->logger()->debug('Phast: FileCache: Refusing to read old cache file {file}', ['file' => $file]);
             return null;
         }
         if ($expirationTime > $this->functions->time() || $expirationTime == 0) {
-            if (time() - @$this->functions->filectime($file) >= round($this->gcMaxAge / 10)) {
-                $this->functions->touch($file);
+            if ($this->functions->time() - @$this->functions->filectime($file) >= round($this->gcMaxAge / 10)) {
+                @$this->functions->touch($file);
             }
-            return unserialize($data);
+            return $data;
         }
         return null;
     }
