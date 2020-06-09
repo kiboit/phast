@@ -149,6 +149,7 @@ class Cache implements CacheInterface {
         ]);
         $result = @$this->functions->file_put_contents($file, $serialized);
         if ($result === false) {
+            @chmod($file, 0600);
             @unlink($file);
             $result = @$this->functions->file_put_contents($file, $serialized);
         }
