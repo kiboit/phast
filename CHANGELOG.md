@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.53 - 2020-06-10
+
+* Fix writing existing read-only cache files.
+
+
 ## 1.52 - 2020-06-09
 
 * Fix caching on Windows by not setting read-only permissions on cache files.
