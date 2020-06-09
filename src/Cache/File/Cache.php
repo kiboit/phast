@@ -148,6 +148,10 @@ class Cache implements CacheInterface {
             $serialized,
         ]);
         $result = @$this->functions->file_put_contents($file, $serialized);
+        if ($result === false) {
+            @unlink($file);
+            $result = @$this->functions->file_put_contents($file, $serialized);
+        }
         if ($result !== strlen($serialized)) {
             $this->logger()->critical(
                 'Phast: FileCache: Error writing to file {filename}. {written} of {total} bytes written!',
