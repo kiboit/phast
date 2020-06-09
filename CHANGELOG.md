@@ -1,6 +1,11 @@
 # Changelog
 
-## 1.53 - 2020-06-10
+## 1.54 - 2020-06-09
+
+* Fix writing existing read-only cache files (on Windows).
+
+
+## 1.53 - 2020-06-09
 
 * Fix writing existing read-only cache files.
 
