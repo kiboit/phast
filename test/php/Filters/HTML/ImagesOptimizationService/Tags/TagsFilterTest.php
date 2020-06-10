@@ -194,6 +194,15 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->assertEquals('/text.txt', $div->getAttribute('data-c'));
     }
 
+    public function testNoRewritingInHead() {
+        $html = '<html><head><meta href="/image.jpg"></head></html>';
+
+        $this->applyFilter($html);
+
+        $meta = $this->dom->getElementsByTagName('meta')->item(0);
+        $this->assertEquals('/image.jpg', $meta->getAttribute('href'));
+    }
+
     private function makeImage($src, $width = null, $height = null) {
         $img = $this->makeMarkedElement('img');
         $img->setAttribute('src', $src);

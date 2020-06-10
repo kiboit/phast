@@ -20,6 +20,8 @@ class Filter implements HTMLStreamFilter {
 
     private $inPictureTag = false;
 
+    private $inBody = false;
+
     private $imagePathPattern;
 
     /**
@@ -50,6 +52,8 @@ class Filter implements HTMLStreamFilter {
             $this->inPictureTag = true;
         } elseif ($tag->getTagName() == 'video' || $tag->getTagName() == 'audio') {
             $this->inPictureTag = false;
+        } elseif ($tag->getTagName() == 'body') {
+            $this->inBody = true;
         }
 
         foreach ($tag->getAttributes() as $k => $v) {
@@ -60,7 +64,7 @@ class Filter implements HTMLStreamFilter {
                 $this->rewriteSrc($tag, $context, $k);
             } elseif ($isImage && preg_match(self::IMG_SRCSET_ATTR_PATTERN, $k)) {
                 $this->rewriteSrcset($tag, $context, $k);
-            } elseif (preg_match($this->imagePathPattern, parse_url($v, PHP_URL_PATH))) {
+            } elseif ($this->inBody && preg_match($this->imagePathPattern, parse_url($v, PHP_URL_PATH))) {
                 $this->rewriteArbitraryAttribute($tag, $context, $k);
             }
         }
