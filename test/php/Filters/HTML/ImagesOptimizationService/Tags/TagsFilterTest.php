@@ -195,7 +195,16 @@ class TagsFilterTest extends HTMLFilterTestCase {
     }
 
     public function testNoRewritingInHead() {
-        $html = '<html><head><meta href="/image.jpg"></head></html>';
+        $html = '<html><head><link href="/image.jpg"></head></html>';
+
+        $this->applyFilter($html);
+
+        $meta = $this->dom->getElementsByTagName('link')->item(0);
+        $this->assertEquals('/image.jpg', $meta->getAttribute('href'));
+    }
+
+    public function testNoRewritingMeta() {
+        $html = '<html><body><meta href="/image.jpg"></body></html>';
 
         $this->applyFilter($html);
 

@@ -54,6 +54,8 @@ class Filter implements HTMLStreamFilter {
             $this->inPictureTag = false;
         } elseif ($tag->getTagName() == 'body') {
             $this->inBody = true;
+        } elseif ($tag->getTagName() == 'meta') {
+            return;
         }
 
         foreach ($tag->getAttributes() as $k => $v) {
