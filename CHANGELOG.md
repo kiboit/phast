@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.55 - 2020-06-10
+
+* Only rewrite image URLs in arbitrary attributes inside the `<body>` tag.
+* Don't optimize image URLs in attributes of `<meta>` tags.
+* When optimizing images, send the local PHP version to the API, to investigate
+  whether PHP 5.6 support can be phased out.
+
+
 ## 1.54 - 2020-06-09
 
 * Fix writing existing read-only cache files (on Windows).
