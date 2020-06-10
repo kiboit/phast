@@ -106,6 +106,7 @@ class Filter implements ImageFilter {
         foreach (['host-name', 'request-uri', 'plugin-version'] as $key) {
             $token_parts[$key] = $this->config[$key];
         }
+        $token_parts['php'] = PHP_VERSION;
         return json_encode($token_parts);
     }
 }
