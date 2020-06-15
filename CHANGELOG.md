@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.57 - 2020-06-15
+
+* Revert: Add mktdplp102cdn.azureedge.net (Dynamics 365 SDK) to scripts whitelist.
+
+
 ## 1.56 - 2020-06-15
 
 * Add mktdplp102cdn.azureedge.net (Dynamics 365 SDK) to scripts whitelist.
