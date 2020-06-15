@@ -1,14 +1,13 @@
-FROM alpine:3.8
+FROM alpine:3.10
 
 RUN apk update && \
     apk add \
         shadow \
         sudo \
-        php5 \
-        php5-dom \
-        php5-json
-
-RUN ln -s /usr/bin/php5 /usr/bin/php
+        php7 \
+        php7-dom \
+        php7-json \
+        php7-mbstring
 
 RUN useradd -m docker
 
