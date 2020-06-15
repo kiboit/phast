@@ -172,6 +172,7 @@ class DefaultConfiguration {
                     '~^https?://v2\.zopim\.com/~',
                     '~^https?://stats\.g\.doubleclick\.net/dc\.js$~',
                     '~^https?://s\.pinimg\.com/~',
+                    '~^https?://mktdplp102cdn\.azureedge\.net/~',
                 ],
             ],
         ];
