@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.56 - 2020-06-15
+
+* Add mktdplp102cdn.azureedge.net (Dynamics 365 SDK) to scripts whitelist.
+
+
 ## 1.55 - 2020-06-10
 
 * Only rewrite image URLs in arbitrary attributes inside the `<body>` tag.
