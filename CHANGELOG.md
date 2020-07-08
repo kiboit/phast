@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.58 - 2020-07-08
+
+* Rewrite each URL in a CSS rule, not just the first one.
+
+
 ## 1.57 - 2020-06-15
 
 * Revert: Add mktdplp102cdn.azureedge.net (Dynamics 365 SDK) to scripts whitelist.
