@@ -16,18 +16,16 @@ class CSSURLRewriterTest extends TestCase {
      */
     public function testRewriteRelativeURLs($input, $output) {
         $inputs = [
-            ['css' => "url($input)", 'path' => '/css/test.css'],
-            ['css' => "url('$input')", 'path' => '/css/test2.css'],
-            ['css' => "url(\"$input\")", 'path' => '/css/test3.css'],
+            "url($input)",
+            "url('$input')",
+            "url(\"$input\")",
+            "src:url($input);src:url($input);",
         ];
 
         $base = URL::fromString(self::BASE_URL);
         $outputs = array_map(function ($input) use ($base) {
             return (new Filter())->apply(
-                Resource::makeWithContent(
-                    URL::fromString($input['path'])->withBase($base),
-                    $input['css']
-                ),
+                Resource::makeWithContent(URL::fromString('/css/test.css')->withBase($base), $input),
                 []
             )->getContent();
         }, $inputs);
@@ -36,6 +34,7 @@ class CSSURLRewriterTest extends TestCase {
         $this->assertEquals("url($output)", $outputs[0]);
         $this->assertEquals("url('$output')", $outputs[1]);
         $this->assertEquals("url(\"$output\")", $outputs[2]);
+        $this->assertEquals("src:url($output);src:url($output);", $outputs[3]);
     }
 
     public function urlProvider() {
