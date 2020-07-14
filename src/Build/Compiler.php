@@ -80,8 +80,16 @@ class Compiler {
     }
 
     public function writeFile(string $filename, string $contents): void {
-        if (file_put_contents($filename, $contents) !== strlen($contents)) {
-            throw new \RuntimeException("Could not write output file: $filename");
+        $temp = $filename . '~' . getmypid();
+        try {
+            if (file_put_contents($temp, $contents) !== strlen($contents)) {
+                throw new \RuntimeException("Could not write output file: $temp");
+            }
+            if (!rename($temp, $filename)) {
+                throw new \RuntimeException("Could not rename output file: $temp");
+            }
+        } finally {
+            @unlink($temp);
         }
     }
 
