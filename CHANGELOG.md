@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.59 - 2020-07-21
+
+* Don't rewrite anchor URLs (like `#whatever`) in CSS.
+
+
 ## 1.58 - 2020-07-08
 
 * Rewrite each URL in a CSS rule, not just the first one.
