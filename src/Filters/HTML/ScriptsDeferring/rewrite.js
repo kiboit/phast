@@ -37,7 +37,7 @@ function loadScripts() {
             }
         });
     } catch (e) {
-        window.console && console.error("Phast: Unable to override document.readyState on this browser: ", e);
+        console.error("[Phast] Unable to override document.readyState on this browser: ", e);
     }
 
     phast
@@ -47,16 +47,19 @@ function loadScripts() {
 }
 
 function restoreReadyState() {
-    delete document['readyState'];
+    window.requestAnimationFrame(function () {
+        delete document['readyState'];
+        triggerEvent(document, 'readystatechange');
+        triggerEvent(document, 'DOMContentLoaded');
 
-    triggerEvent(document, 'readystatechange');
-    triggerEvent(document, 'DOMContentLoaded');
-
-    if (loadFiltered) {
-        triggerEvent(window, 'load');
-    } else {
-        loadFiltered = true;
-    }
+        window.requestAnimationFrame(function () {
+            if (loadFiltered) {
+                triggerEvent(window, 'load');
+            } else {
+                loadFiltered = true;
+            }
+        });
+    });
 }
 
 function triggerEvent(on, name) {
