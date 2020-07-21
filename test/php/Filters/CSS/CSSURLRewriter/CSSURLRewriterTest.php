@@ -59,6 +59,10 @@ class CSSURLRewriterTest extends TestCase {
                 'data:abcd',
                 'data:abcd',
             ],
+            [
+                '#test',
+                '#test',
+            ],
         ];
     }
 }

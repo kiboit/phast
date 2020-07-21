@@ -16,7 +16,7 @@ class Filter implements ServiceFilter {
     public function apply(Resource $resource, array $request) {
         $baseUrl = $resource->getUrl();
         $callback = function ($match) use ($baseUrl) {
-            if (preg_match('~^[a-z]+:~i', $match[3])) {
+            if (preg_match('~^[a-z]+:|^#~i', $match[3])) {
                 return $match[0];
             }
             return $match[1] . URL::fromString($match[3])->withBase($baseUrl) . $match[4];
