@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.60 - 2020-07-21
+
+* Ensure that requestAnimationFrame callbacks run before onload event.
+
+
 ## 1.59 - 2020-07-21
 
 * Don't rewrite anchor URLs (like `#whatever`) in CSS.
