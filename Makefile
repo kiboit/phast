@@ -29,6 +29,7 @@ build/phast.php : vendor/autoload.php $(shell git ls-files src)
 
 vendor/autoload.php : composer.json composer.lock
 	composer install
+	touch vendor/autoload.php
 
 docker/%.image : docker/% docker/entrypoint
 	docker build -q -f $< docker > $@~
