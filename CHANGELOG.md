@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.61 - 2020-07-27
+
+* Add `compressServiceResponse` configuration option to allow disabling gzip
+  compression of service response.
+
+
 ## 1.60 - 2020-07-21
 
 * Ensure that requestAnimationFrame callbacks run before onload event.
