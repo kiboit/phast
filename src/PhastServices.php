@@ -81,10 +81,15 @@ class PhastServices {
 
         header_remove('Location');
         header_remove('Cache-Control');
-        self::output($httpRequest, $response);
+        self::output($httpRequest, $response, $runtimeConfig);
     }
 
-    public static function output(Request $request, Response $response, ObjectifiedFunctions $funcs = null) {
+    public static function output(
+        Request $request,
+        Response $response,
+        array $config,
+        ObjectifiedFunctions $funcs = null
+    ) {
         if (is_null($funcs)) {
             $funcs = new ObjectifiedFunctions();
         }
@@ -98,7 +103,10 @@ class PhastServices {
 
         $fp = fopen('php://output', 'wb');
         $zipping = false;
-        if ($response->isCompressible() && self::shouldZip($request)) {
+        if ($response->isCompressible()
+            && self::shouldZip($request)
+            && !empty($config['compressServiceResponse'])
+        ) {
             $zipping = @$funcs->stream_filter_append(
                 $fp,
                 'zlib.deflate',

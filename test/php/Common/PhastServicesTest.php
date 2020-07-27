@@ -3,6 +3,7 @@
 namespace Kibo\Phast;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Environment\DefaultConfiguration;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\HTTP\Response;
 
@@ -52,6 +53,7 @@ class PhastServicesTest extends PhastTestCase {
         $this->functions->header = function ($header) {
             $this->responseHeaders[] = $header;
         };
+        $this->config = DefaultConfiguration::get();
     }
 
     public function testOutputString() {
@@ -137,6 +139,12 @@ class PhastServicesTest extends PhastTestCase {
         $this->assertNotZipped();
     }
 
+    public function testNotZippingWhenDisabled() {
+        $this->config['compressServiceResponse'] = false;
+        $this->executeTest();
+        $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
+    }
+
     private function assertNotZipped() {
         $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
         $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
@@ -147,7 +155,7 @@ class PhastServicesTest extends PhastTestCase {
         $this->responseHeaders = [];
         $this->responseContent = null;
         ob_start();
-        PhastServices::output($this->request, $this->response, $this->functions);
+        PhastServices::output($this->request, $this->response, $this->config, $this->functions);
         if (in_array('Content-Encoding: gzip', $this->responseHeaders)) {
             $this->responseContent = gzdecode(ob_get_contents());
         } else {

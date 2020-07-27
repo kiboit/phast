@@ -38,6 +38,8 @@ class DefaultConfiguration {
 
             'serviceRequestFormat' => \Kibo\Phast\Services\ServiceRequest::FORMAT_PATH,
 
+            'compressServiceResponse' => true,
+
             'optimizeHTMLDocumentsOnly' => true,
 
             'outputServerSideStats' => true,
