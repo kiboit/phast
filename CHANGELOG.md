@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.62 - 2020-08-11
+
+* Add LazyImageLoading filter that adds `loading=lazy` attribute to images.
+
+
 ## 1.61 - 2020-07-27
 
 * Add `compressServiceResponse` configuration option to allow disabling gzip
