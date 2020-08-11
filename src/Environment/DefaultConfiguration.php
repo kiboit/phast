@@ -2,7 +2,7 @@
 namespace Kibo\Phast\Environment;
 
 use Kibo\Phast\Common\System;
-use Kibo\Phast\Filters\Image\ImageFactory;
+use Kibo\Phast\Filters;
 use Kibo\Phast\HTTP\CURLClient;
 use Kibo\Phast\HTTP\Request;
 
@@ -51,17 +51,19 @@ class DefaultConfiguration {
 
                 'filters' => [
 
-                    \Kibo\Phast\Filters\HTML\CommentsRemoval\Filter::class => [],
+                    Filters\HTML\CommentsRemoval\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\Minify\Filter::class => [],
+                    Filters\HTML\Minify\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\MinifyScripts\Filter::class => [],
+                    Filters\HTML\MinifyScripts\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\BaseURLSetter\Filter::class => [],
+                    Filters\HTML\BaseURLSetter\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [],
+                    Filters\HTML\ImagesOptimizationService\Tags\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\CSSInlining\Filter::class => [
+                    Filters\HTML\LazyImageLoading\Filter::class => [],
+
+                    Filters\HTML\CSSInlining\Filter::class => [
                         'optimizerSizeDiffThreshold' => 1024,
                         'whitelist' => [
                             '~^https?://' . preg_quote($request->getHost(), '~') . '/~',
@@ -80,21 +82,21 @@ class DefaultConfiguration {
                         ],
                     ],
 
-                    \Kibo\Phast\Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
+                    Filters\HTML\ImagesOptimizationService\CSS\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\DelayedIFrameLoading\Filter::class => [],
+                    Filters\HTML\DelayedIFrameLoading\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\ScriptsProxyService\Filter::class => [
+                    Filters\HTML\ScriptsProxyService\Filter::class => [
                         'urlRefreshTime' => 7200,
                     ],
 
-                    \Kibo\Phast\Filters\HTML\Diagnostics\Filter::class => [
+                    Filters\HTML\Diagnostics\Filter::class => [
                         'enabled' => 'diagnostics',
                     ],
 
-                    \Kibo\Phast\Filters\HTML\ScriptsDeferring\Filter::class => [],
+                    Filters\HTML\ScriptsDeferring\Filter::class => [],
 
-                    \Kibo\Phast\Filters\HTML\PhastScriptsCompiler\Filter::class => [],
+                    Filters\HTML\PhastScriptsCompiler\Filter::class => [],
 
                 ],
             ],
@@ -104,7 +106,7 @@ class DefaultConfiguration {
 
                 'api-mode' => false,
 
-                'factory' => ImageFactory::class,
+                'factory' => Filters\Image\ImageFactory::class,
 
                 'maxImageInliningSize' => 512,
 
@@ -115,7 +117,7 @@ class DefaultConfiguration {
                 ],
 
                 'filters' => [
-                    \Kibo\Phast\Filters\Image\ImageAPIClient\Filter::class => [
+                    Filters\Image\ImageAPIClient\Filter::class => [
                         'api-url' => 'https://optimize.phast.io/?service=images',
                         'host-name' => $request->getHost(),
                         'request-uri' => $request->getURI(),
@@ -126,14 +128,14 @@ class DefaultConfiguration {
 
             'styles' => [
                 'filters' => [
-                    \Kibo\Phast\Filters\Text\Decode\Filter::class => [],
-                    \Kibo\Phast\Filters\CSS\ImportsStripper\Filter::class => [],
-                    \Kibo\Phast\Filters\CSS\CSSMinifier\Filter::class => [],
-                    \Kibo\Phast\Filters\CSS\CSSURLRewriter\Filter::class => [],
-                    \Kibo\Phast\Filters\CSS\ImageURLRewriter\Filter::class => [
+                    Filters\Text\Decode\Filter::class => [],
+                    Filters\CSS\ImportsStripper\Filter::class => [],
+                    Filters\CSS\CSSMinifier\Filter::class => [],
+                    Filters\CSS\CSSURLRewriter\Filter::class => [],
+                    Filters\CSS\ImageURLRewriter\Filter::class => [
                         'maxImageInliningSize' => 512,
                     ],
-                    \Kibo\Phast\Filters\CSS\FontSwap\Filter::class => [],
+                    Filters\CSS\FontSwap\Filter::class => [],
                 ],
             ],
 
