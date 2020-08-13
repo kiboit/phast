@@ -212,6 +212,15 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->assertEquals('/image.jpg', $meta->getAttribute('href'));
     }
 
+    public function testRewriteAMPImage() {
+        $html = '<html><body><amp-img src="/image"></body></html>';
+
+        $this->applyFilter($html);
+
+        $img = $this->dom->getElementsByTagName('amp-img')->item(0);
+        $this->assertContains('service.php', $img->getAttribute('src'));
+    }
+
     private function makeImage($src, $width = null, $height = null) {
         $img = $this->makeMarkedElement('img');
         $img->setAttribute('src', $src);

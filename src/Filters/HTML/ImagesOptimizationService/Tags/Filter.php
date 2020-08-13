@@ -47,7 +47,10 @@ class Filter implements HTMLStreamFilter, AMPCompatibleFilter {
 
     private function handleTag(Tag $tag, HTMLPageContext $context) {
         $isImage = false;
-        if ($tag->getTagName() == 'img' || ($this->inPictureTag && $tag->getTagName() == 'source')) {
+        if ($tag->getTagName() == 'img'
+            || ($this->inPictureTag && $tag->getTagName() == 'source')
+            || $tag->getTagName() == 'amp-img'
+        ) {
             $isImage = true;
         } elseif ($tag->getTagName() == 'picture') {
             $this->inPictureTag = true;

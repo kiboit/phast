@@ -82,7 +82,7 @@ class HTMLFilterTestCase extends PhastTestCase {
 
         if (!$skipResultParsing) {
             $this->dom = new \DOMDocument();
-            $this->dom->loadHTML($filtered);
+            @$this->dom->loadHTML($filtered);
             $this->head = $this->dom->getElementsByTagName('head')->item(0);
             $this->body = $this->dom->getElementsByTagName('body')->item(0);
         }
