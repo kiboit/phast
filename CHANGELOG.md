@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.63 - 2020-08-13
+
+* Optimize images in AMP documents.
+
+
 ## 1.62 - 2020-08-11
 
 * Add LazyImageLoading filter that adds `loading=lazy` attribute to images.
