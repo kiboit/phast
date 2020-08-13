@@ -1,6 +1,7 @@
 <?php
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService\Tags;
 
+use Kibo\Phast\Filters\HTML\AMPCompatibleFilter;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;
 use Kibo\Phast\Filters\HTML\HTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageURLRewriter;
@@ -8,7 +9,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\ValueObjects\Resource;
 
-class Filter implements HTMLStreamFilter {
+class Filter implements HTMLStreamFilter, AMPCompatibleFilter {
     const IMG_SRC_ATTR_PATTERN = '~^(|data-(|lazy-|wood-))src$~i';
 
     const IMG_SRCSET_ATTR_PATTERN = '~^(|data-(|lazy-|wood-))srcset$~i';

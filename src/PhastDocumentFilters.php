@@ -4,6 +4,7 @@ namespace Kibo\Phast;
 
 use Kibo\Phast\Common\OutputBufferHandler;
 use Kibo\Phast\Environment\Configuration;
+use Kibo\Phast\Filters\HTML\AMPCompatibleFilter;
 use Kibo\Phast\Filters\HTML\Composite\Factory;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Logging\Log;
@@ -15,7 +16,7 @@ class PhastDocumentFilters {
         (\s* <!--(.*?)-->)*
         \s* (<!doctype\s+html[^>]*>)?
         (\s* <!--(.*?)-->)*
-        \s* <html (?! [^>]* \s ( amp | ⚡ ) [\s=>] )
+        \s* <html (?<amp> [^>]* \s ( amp | ⚡ ) [\s=>] )?
         .*
         ( </body> | </html> )
     ~xsiA";
@@ -81,9 +82,13 @@ class PhastDocumentFilters {
             Log::info("Buffer ({bufferSize} bytes) doesn't look like html! Not applying filters", ['bufferSize' => strlen($applyCheckBuffer)]);
             return $buffer;
         }
-        return (new Factory())
-            ->make($runtimeConfig)
-            ->apply($buffer);
+        $compositeFilter = (new Factory())->make($runtimeConfig);
+        if (self::isAMP($applyCheckBuffer)) {
+            $compositeFilter->selectFilters(function ($filter) {
+                return $filter instanceof AMPCompatibleFilter;
+            });
+        }
+        return $compositeFilter->apply($buffer);
     }
 
     private static function shouldApply($buffer, $runtimeConfig) {
@@ -91,5 +96,9 @@ class PhastDocumentFilters {
             return preg_match(self::DOCUMENT_PATTERN, $buffer);
         }
         return strpos($buffer, '<') !== false;
+    }
+
+    private static function isAMP($buffer) {
+        return preg_match(self::DOCUMENT_PATTERN, $buffer, $match) && !empty($match['amp']);
     }
 }

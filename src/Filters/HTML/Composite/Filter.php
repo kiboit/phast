@@ -86,4 +86,8 @@ class Filter {
 
         return $output;
     }
+
+    public function selectFilters($callback) {
+        $this->filters = array_filter($this->filters, $callback);
+    }
 }

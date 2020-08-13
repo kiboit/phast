@@ -55,9 +55,31 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
         yield ["<html>\n<body>"];
         yield ['<?xml version="1.0"?\><tag>asd</tag>'];
         yield ["\0<html><body></body></html>"];
+        yield ['Not html', false];
+    }
+
+    /**
+     * @dataProvider shouldNotInjectScriptsData
+     */
+    public function testShouldNotInjectScripts($buffer) {
+        $out = PhastDocumentFilters::apply($buffer, []);
+        $this->assertFiltersApplied($out);
+        $this->assertNotContains('<script', $out);
+    }
+
+    public function shouldNotInjectScriptsData() {
         yield ['<!doctype html><html amp><body></body></html>'];
         yield ['<!doctype html><html ⚡><body></body></html>'];
-        yield ['Not html', false];
+    }
+
+    public function testOptimizeImagesInAmpDocument() {
+        $out = PhastDocumentFilters::apply(
+            '<!doctype html><html amp><body><img src=test.jpg></body></html>',
+            []
+        );
+        $this->assertFiltersApplied($out);
+        $this->assertNotContains('<script', $out);
+        $this->assertContains('phast.php', $out);
     }
 
     private function assertFiltersApplied($out) {
