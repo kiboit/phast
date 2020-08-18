@@ -8,6 +8,8 @@ use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
 class JSMinifierFilter implements CachedResultServiceFilter {
+    const VERSION = 2;
+
     private $removeLicenseHeaders = true;
 
     /**
@@ -19,7 +21,10 @@ class JSMinifierFilter implements CachedResultServiceFilter {
     }
 
     public function getCacheSalt(Resource $resource, array $request) {
-        return $this->removeLicenseHeaders ? 'license-headers-off' : 'license-headers-on';
+        return http_build_query([
+            'v' => self::VERSION,
+            'removeLicenseHeaders' => $this->removeLicenseHeaders,
+        ]);
     }
 
     public function apply(Resource $resource, array $request) {
