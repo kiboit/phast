@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.64 - 2020-08-18
 
 * Preserve control characters in strings in minified JavaScript.
 * Use JSON_INVALID_UTF8_IGNORE on PHP 7.2+ instead of regexp-based invalid UTF-8
