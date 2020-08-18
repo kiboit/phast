@@ -14,6 +14,8 @@ use Kibo\Phast\ValueObjects\URL;
 class FilterTest extends HTMLFilterTestCase {
     const MODIFICATION_TIME = 1337;
 
+    const EXPECTED_CACHE_MARKER = '1337-2';
+
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
@@ -75,14 +77,14 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertEquals(preg_replace('/\?.*/', '', $attributes['src']), $params->src);
             $this->assertEquals('the-token', $params->token);
             $this->assertEquals('1', $params->isScript);
-            $this->assertEquals(self::MODIFICATION_TIME, $params->cacheMarker);
+            $this->assertEquals(self::EXPECTED_CACHE_MARKER, $params->cacheMarker);
 
             list($query, $url) = $this->parseSrc($newElement);
             $this->assertEquals('script-proxy.php', $url['path']);
             $this->assertArrayHasKey('src', $query);
             $this->assertArrayHasKey('cacheMarker', $query);
             $this->assertEquals(preg_replace('/\?.*/', '', $attributes['src']), $query['src']);
-            $this->assertEquals(self::MODIFICATION_TIME, $query['cacheMarker']);
+            $this->assertEquals(self::EXPECTED_CACHE_MARKER, $query['cacheMarker']);
         } else {
             $this->assertEquals($attributes['src'], $newElement->getAttribute('src'));
         }
@@ -147,7 +149,7 @@ class FilterTest extends HTMLFilterTestCase {
         $url = parse_url($script->getAttribute('src'));
         $query = [];
         parse_str($url['query'], $query);
-        $this->assertEquals(self::MODIFICATION_TIME, $query['cacheMarker']);
+        $this->assertEquals(self::EXPECTED_CACHE_MARKER, $query['cacheMarker']);
     }
 
     public function testRewriteSrcWithSpaces() {
@@ -180,7 +182,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertArrayHasKey('src', $query);
         $this->assertArrayHasKey('cacheMarker', $query);
         $this->assertEquals(self::BASE_URL . '/new-root/the-script.js', $query['src']);
-        $this->assertEquals(self::MODIFICATION_TIME, $query['cacheMarker']);
+        $this->assertEquals(self::EXPECTED_CACHE_MARKER, $query['cacheMarker']);
     }
 
     public function testInjectScript() {

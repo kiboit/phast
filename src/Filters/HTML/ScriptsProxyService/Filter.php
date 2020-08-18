@@ -5,6 +5,7 @@ namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\BaseHTMLStreamFilter;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
+use Kibo\Phast\Filters\JavaScript\Minification\JSMinifierFilter;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 use Kibo\Phast\Retrievers\LocalRetriever;
@@ -82,6 +83,7 @@ class Filter extends BaseHTMLStreamFilter {
         if (!$cacheMarker) {
             return;
         }
+        $cacheMarker .= '-' . JSMinifierFilter::VERSION;
         $element->setAttribute('src', $this->makeProxiedURL($url, $cacheMarker));
         $element->setAttribute('data-phast-original-src', (string) $url);
         $element->setAttribute('data-phast-params', $this->makeServiceParams($url, $cacheMarker));
