@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+* Preserve control characters in strings in minified JavaScript.
+* Use JSON_INVALID_UTF8_IGNORE on PHP 7.2+ instead of regexp-based invalid UTF-8
+  character removal.
+
+
 ## 1.63 - 2020-08-13
 
 * Optimize images in AMP documents.
