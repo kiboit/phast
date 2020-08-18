@@ -13,7 +13,7 @@ watch :
 	git ls-files src | entr $(MAKE) test73
 
 .PHONY : test
-test : test56 test73
+test : test73 test56
 
 .PHONY : test56
 test56 : all docker/php56.image
