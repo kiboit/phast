@@ -13,4 +13,11 @@ class JSMinifierFilterTest extends PhastTestCase {
         $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), 'the-content');
         $this->assertNotEquals($filter1->getCacheSalt($resource, []), $filter2->getCacheSalt($resource, []));
     }
+
+    public function testControlCharacters() {
+        $filter = new JSMinifierFilter(true);
+        $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), " alert( '\x13' ); ");
+        $result = $filter->apply($resource, []);
+        $this->assertEquals("alert('\x13');", $result->getContent());
+    }
 }
