@@ -3,9 +3,15 @@
     "description": "A toolbox for optimizing web page performance",
     "type": "library",
     "license": "AGPL-3.0-or-later",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/kiboit/jsmin-php"
+        }
+    ],
     "require": {
         "php": ">=5.6",
-        "mrclay/jsmin-php": "^2.3.2",
+        "kiboit/jsmin-php": "dev-master",
         "ext-json": "*",
         "nikic/php-parser": "^3.1"
     },
