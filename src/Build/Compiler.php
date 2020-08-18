@@ -24,8 +24,13 @@ class Compiler {
         return (new self())
             ->include($root . '/src')
             ->exclude($root . '/src/Build')
-            ->include($root . '/vendor/mrclay/jsmin-php/src')
+            ->include(self::getDirectoryByClass(\JSMin\JSMin::class))
             ->addResource('cacert.pem', __DIR__ . '/../HTTP/cacert.pem');
+    }
+
+    public static function getDirectoryByClass($class): string {
+        $reflect = new \ReflectionClass($class);
+        return dirname($reflect->getFilename());
     }
 
     public function include(string $dir): self {
