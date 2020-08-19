@@ -1,10 +1,11 @@
 <?php
-
 namespace Kibo\Phast\HTTP;
+
+use Kibo\Phast\ValueObjects\Query;
 
 class Request {
     /**
-     * @var array
+     * @var array|null
      */
     private $get;
 
@@ -27,15 +28,10 @@ class Request {
     }
 
     public static function fromGlobals() {
-        $get = [];
-        $parsed = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
-        if (isset($parsed['query'])) {
-            parse_str($parsed['query'], $get);
-        }
-        return self::fromArray($get, $_SERVER, $_COOKIE);
+        return self::fromArray(null, $_SERVER, $_COOKIE);
     }
 
-    public static function fromArray(array $get = [], array $env = [], array $cookie = []) {
+    public static function fromArray(array $get = null, array $env = [], array $cookie = []) {
         $instance = new self();
         $instance->get = $get;
         $instance->env = $env;
@@ -47,7 +43,17 @@ class Request {
      * @return array
      */
     public function getGet() {
-        return $this->get;
+        return $this->getQuery()->toAssoc();
+    }
+
+    /**
+     * @return Query
+     */
+    public function getQuery() {
+        if ($this->get) {
+            return Query::fromAssoc($this->get);
+        }
+        return Query::fromString($this->getQueryString());
     }
 
     /**

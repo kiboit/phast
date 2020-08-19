@@ -1,9 +1,8 @@
 <?php
-
-
 namespace Kibo\Phast\Services\Bundler;
 
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\Query;
 
 class ShortBundlerParamsParser {
     public static function getParamsMappings() {
@@ -18,12 +17,13 @@ class ShortBundlerParamsParser {
     }
 
     public function parse(ServiceRequest $request) {
-        $query = $request->getHTTPRequest()->getQueryString();
-        if (preg_match('/(^|&)f=/', $query)) {
-            $query = $this->unobfuscateQuery($query);
+        $query_string = $request->getHTTPRequest()->getQueryString();
+        if (preg_match('/(^|&)f=/', $query_string)) {
+            $query = Query::fromString($this->unobfuscateQuery($query_string));
+        } else {
+            $query = $request->getQuery();
         }
-        $query = $this->parseQuery($query);
-        $query = $this->unshortenParams($query);
+        $query = $this->unshortenParams($query->getIterator());
         $query = $this->uncompressSrcs($query);
         $result = [];
         $current = null;
@@ -52,16 +52,6 @@ class ShortBundlerParamsParser {
             }, $query);
         }
         return $query;
-    }
-
-    private function parseQuery($string) {
-        $pieces = explode('&', $string);
-        foreach ($pieces as $piece) {
-            $element = explode('=', $piece, 2);
-            $key = urldecode($element[0]);
-            $value = isset($element[1]) ? urldecode($element[1]) : '';
-            yield $key => $value;
-        }
     }
 
     private function unshortenParams(\Generator $query) {

@@ -1,10 +1,11 @@
 <?php
-
 namespace Kibo\Phast\Services;
 
+use Kibo\Phast\Common\Base64url;
 use Kibo\Phast\Environment\Switches;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Security\ServiceSignature;
+use Kibo\Phast\ValueObjects\Query;
 use Kibo\Phast\ValueObjects\URL;
 
 class ServiceRequest {
@@ -40,9 +41,9 @@ class ServiceRequest {
     private $url;
 
     /**
-     * @var array
+     * @var Query
      */
-    private $params = [];
+    private $query;
 
     /**
      * @var string
@@ -53,6 +54,7 @@ class ServiceRequest {
         if (!isset(self::$switches)) {
             self::$switches = new Switches();
         }
+        $this->query = new Query();
     }
 
     public static function resetRequestState() {
@@ -67,13 +69,15 @@ class ServiceRequest {
     }
 
     public static function fromHTTPRequest(Request $request) {
-        $params = $request->getGet();
-        if (isset($params['src'])) {
-            $params['src'] = preg_replace('~^hxxp(?=s?://)~', 'http', $params['src']);
+        $query = $request->getQuery();
+        if ($query->get('src')) {
+            $query->set('src', preg_replace('~^hxxp(?=s?://)~', 'http', $query->get('src')));
         }
         $pathInfo = $request->getPathInfo();
-        if ($pathInfo) {
-            $params = array_merge($params, self::parsePathInfo($pathInfo));
+        if ($pathParams = self::parseBase64PathInfo($pathInfo)) {
+            $query->update($pathParams);
+        } elseif ($pathInfo) {
+            $query->update(self::parsePathInfo($pathInfo));
         }
         $instance = new self();
         self::$switches = new Switches();
@@ -81,18 +85,17 @@ class ServiceRequest {
         if ($request->getCookie('phast')) {
             self::$switches = Switches::fromString($request->getCookie('phast'));
         }
-        if (isset($params['token'])) {
-            $instance->token = $params['token'];
-            unset($params['token']);
+        if ($token = $query->pop('token')) {
+            $instance->token = $token;
         }
-        $instance->params = $params;
-        if (isset($params['phast'])) {
-            self::$propagatedSwitches = $params['phast'];
-            $paramsSwitches = Switches::fromString($params['phast']);
+        $instance->query = $query;
+        if ($query->get('phast')) {
+            self::$propagatedSwitches = $query->get('phast');
+            $paramsSwitches = Switches::fromString($query->get('phast'));
             self::$switches = self::$switches->merge($paramsSwitches);
         }
-        if (isset($params['documentRequestId'])) {
-            self::$documentRequestId = $params['documentRequestId'];
+        if ($query->get('documentRequestId')) {
+            self::$documentRequestId = $query->get('documentRequestId');
         } else {
             self::$documentRequestId = (string) mt_rand(0, 999999999);
         }
@@ -114,7 +117,14 @@ class ServiceRequest {
      * @return array
      */
     public function getParams() {
-        return $this->params;
+        return $this->query->toAssoc();
+    }
+
+    /**
+     * @return Query
+     */
+    public function getQuery() {
+        return $this->query;
     }
 
     /**
@@ -136,7 +146,9 @@ class ServiceRequest {
      * @return ServiceRequest
      */
     public function withParams(array $params) {
-        return $this->cloneWithProperty('params', $params);
+        $result = clone $this;
+        $result->query = Query::fromAssoc($params);
+        return $result;
     }
 
     /**
@@ -144,7 +156,9 @@ class ServiceRequest {
      * @return ServiceRequest
      */
     public function withUrl(URL $url) {
-        return $this->cloneWithProperty('url', $url);
+        $result = clone $this;
+        $result->url = $url;
+        return $result;
     }
 
     /**
@@ -153,7 +167,9 @@ class ServiceRequest {
      */
     public function sign(ServiceSignature $signature) {
         $token = $signature->sign($this->getVerificationString());
-        return $this->cloneWithProperty('token', $token);
+        $result = clone $this;
+        $result->token = $token;
+        return $result;
     }
 
     /**
@@ -165,14 +181,17 @@ class ServiceRequest {
     }
 
     private static function parsePathInfo($string) {
-        $values = [];
-        $parts = explode('/', preg_replace('~^/~', '', $string));
+        $values = new Query();
+        $parts = explode('/', $string);
         foreach ($parts as $part) {
+            if ($part === '') {
+                continue;
+            }
             $pair = explode('=', $part);
             if (isset($pair[1])) {
-                $values[$pair[0]] = self::decodeSingleValue($pair[1]);
+                $values->set($pair[0], self::decodeSingleValue($pair[1]));
             } elseif (!preg_match('/^__p__\./', $pair[0])) {
-                $values['src'] = self::decodeSingleValue($pair[0]);
+                $values->set('src', self::decodeSingleValue($pair[0]));
             }
         }
         return $values;
@@ -182,16 +201,21 @@ class ServiceRequest {
         return urldecode(str_replace('-', '%', $value));
     }
 
+    private static function parseBase64PathInfo($string) {
+        if (!preg_match('~/([a-z0-9_-]+)\.b\.js~i', $string, $match)) {
+            return null;
+        }
+        $query_string = Base64url::decode($match[1]);
+        $result = new Query();
+        $result->add('service', 'bundler');
+        $result->update(Query::fromString($query_string));
+        return $result;
+    }
+
     private function getVerificationString() {
         $params = $this->getAllParams();
         ksort($params);
         return http_build_query($params);
-    }
-
-    private function cloneWithProperty($property, $value) {
-        $clone = clone $this;
-        $clone->$property = $value;
-        return $clone;
     }
 
     public function serialize($format = null) {
@@ -213,7 +237,7 @@ class ServiceRequest {
         if ($this->url) {
             parse_str($this->url->getQuery(), $urlParams);
         }
-        $params = array_merge($urlParams, $this->params);
+        $params = array_merge($urlParams, $this->query->toAssoc());
         if (!empty(self::$propagatedSwitches)) {
             $params['phast'] = self::$propagatedSwitches;
         }

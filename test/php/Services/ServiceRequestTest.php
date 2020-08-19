@@ -1,8 +1,8 @@
 <?php
-
 namespace Kibo\Phast\Services;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Common\Base64url;
 use Kibo\Phast\HTTP\Request;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\ValueObjects\URL;
@@ -294,5 +294,22 @@ class ServiceRequestTest extends TestCase {
         $request = Request::fromArray(['src' => 'hxxps://yolo']);
         $serviceRequest = ServiceRequest::fromHTTPRequest($request);
         $this->assertEquals('https://yolo', $serviceRequest->getParams()['src']);
+    }
+
+    public function testBase64PathInfo() {
+        $queryString = 'a=1&a=2&b=3';
+        $pathInfo = sprintf('/%s.b.js', Base64url::encode($queryString));
+        $httpRequest = Request::fromArray(['get' => 'yes'], ['PATH_INFO' => $pathInfo]);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $this->assertSame(
+            [
+                'get' => 'yes',
+                'service' => 'bundler',
+                'a' => '1',
+                'b' => '3',
+            ],
+            $serviceRequest->getParams()
+        );
+        $this->assertSame(['1', '2'], $serviceRequest->getQuery()->getAll('a'));
     }
 }
