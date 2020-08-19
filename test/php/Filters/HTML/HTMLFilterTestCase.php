@@ -1,5 +1,4 @@
 <?php
-
 namespace Kibo\Phast\Filters\HTML;
 
 use Kibo\Phast\Cache\Cache;
@@ -56,7 +55,11 @@ class HTMLFilterTestCase extends PhastTestCase {
         $this->html->appendChild($this->body);
 
         $this->compilerCache = $this->createMock(Cache::class);
-        $this->jsCompiler = new PhastJavaScriptCompiler($this->compilerCache, '');
+        $this->jsCompiler = new PhastJavaScriptCompiler(
+            $this->compilerCache,
+            '',
+            ServiceRequest::FORMAT_PATH
+        );
     }
 
     public function tearDown() {

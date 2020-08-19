@@ -1,6 +1,4 @@
 <?php
-
-
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 use Kibo\Phast\Cache\Cache;
@@ -19,7 +17,9 @@ class PhastJavaScriptCompiler {
     /**
      * @var string
      */
-    private $bundlerUrl;
+    private $serviceUrl;
+
+    private $serviceRequestFormat;
 
     /**
      * @var \stdClass
@@ -29,14 +29,14 @@ class PhastJavaScriptCompiler {
     /**
      * PhastJavaScriptCompiler constructor.
      * @param Cache $cache
-     * @param string $bundlerUrl
+     * @param string $serviceUrl
      */
-    public function __construct(Cache $cache, $bundlerUrl) {
+    public function __construct(Cache $cache, $serviceUrl, $serviceRequestFormat) {
         $this->cache = $cache;
-        $this->bundlerUrl = (new ServiceRequest())->withUrl(
-            URL::fromString((string) $bundlerUrl)
-        )->serialize(ServiceRequest::FORMAT_QUERY);
-        ;
+        $this->serviceUrl = (new ServiceRequest())
+            ->withUrl(URL::fromString((string) $serviceUrl))
+            ->serialize(ServiceRequest::FORMAT_QUERY);
+        $this->serviceRequestFormat = $serviceRequestFormat;
     }
 
     /**
@@ -65,8 +65,9 @@ class PhastJavaScriptCompiler {
         $jsMappings = array_combine(array_values($bundlerMappings), array_keys($bundlerMappings));
         $resourcesLoader = PhastJavaScript::fromFile(__DIR__ . '/resources-loader.js');
         $resourcesLoader->setConfig('resourcesLoader', [
-            'serviceUrl' => (string) $this->bundlerUrl,
+            'serviceUrl' => (string) $this->serviceUrl,
             'shortParamsMappings' => $jsMappings,
+            'pathInfo' => $this->serviceRequestFormat === ServiceRequest::FORMAT_PATH,
         ]);
         $scripts = array_merge([
             PhastJavaScript::fromFile(__DIR__ . '/runner.js'),

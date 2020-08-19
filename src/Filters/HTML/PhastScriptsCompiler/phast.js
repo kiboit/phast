@@ -2,7 +2,8 @@ var Promise = phast.ES6Promise;
 
 phast.ResourceLoader.instance = phast.ResourceLoader.make(
     phast.config.resourcesLoader.serviceUrl,
-    phast.config.resourcesLoader.shortParamsMappings
+    phast.config.resourcesLoader.shortParamsMappings,
+    phast.config.resourcesLoader.pathInfo
 );
 
 phast.forEachSelectedElement = function (selector, callback) {

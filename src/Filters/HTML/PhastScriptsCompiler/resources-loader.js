@@ -33,7 +33,7 @@ phast.ResourceLoader.RequestParams.fromString = function(string) {
     }
 };
 
-phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMappings) {
+phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMappings, pathInfo) {
 
     var RequestsPack = phast.ResourceLoader.BundlerServiceClient.RequestsPack;
     var PackItem = RequestsPack.PackItem;
@@ -67,11 +67,15 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
     }
 
     function makeRequest(pack) {
-        var glue = serviceUrl.indexOf('?') > -1 ? '&' : '?';
-        var query = serviceUrl + glue + pack.toQuery();
+        var url;
+        if (pathInfo) {
+            url = appendPathInfo(serviceUrl, pack.toQuery());
+        } else {
+            url = appendQueryString(serviceUrl, 'service=bundler&' + pack.toQuery());
+        }
         var errorHandler = function () {
             console.error("[Phast] Request to bundler failed with status", xhr.status);
-            console.log("URL:", query);
+            console.log("URL:", url);
             pack.handleError();
         };
         var successHandler = function () {
@@ -82,11 +86,25 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
             }
         };
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', query);
+        xhr.open('GET', url);
         xhr.addEventListener('error', errorHandler);
         xhr.addEventListener('abort', errorHandler);
         xhr.addEventListener('load', successHandler);
         xhr.send();
+    }
+
+    function appendQueryString(url, queryString) {
+        var glue = url.indexOf('?') > -1 ? '&' : '?';
+        return url + glue + queryString;
+    }
+
+    function appendPathInfo(url, query) {
+        var path = btoa(query)
+            .replace(/=/g, '')
+            .replace(/\//g, '_')
+            .replace(/\+/g, '-');
+
+        return url.replace(/\?.*$/, '').replace(/\/__p__\.js$/, '') + '/' + path + '.b.js';
     }
 };
 
@@ -510,9 +528,9 @@ phast.ResourceLoader.BlackholeCache = function () {
 
 };
 
-phast.ResourceLoader.make = function (serviceUrl, shortParamsMappings) {
+phast.ResourceLoader.make = function (serviceUrl, shortParamsMappings, pathInfo) {
     var cache = makeCache();
-    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl, shortParamsMappings);
+    var client = new phast.ResourceLoader.BundlerServiceClient(serviceUrl, shortParamsMappings, pathInfo);
     return new phast.ResourceLoader(client, cache);
 
     function makeCache() {
@@ -528,7 +546,3 @@ phast.ResourceLoader.make = function (serviceUrl, shortParamsMappings) {
         }
     }
 };
-
-
-
-

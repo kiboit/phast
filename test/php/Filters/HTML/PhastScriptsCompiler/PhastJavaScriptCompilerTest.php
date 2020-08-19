@@ -1,9 +1,9 @@
 <?php
-
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Services\ServiceRequest;
 use Kibo\Phast\ValueObjects\PhastJavaScript;
 use PHPUnit\Framework\TestCase;
 
@@ -23,7 +23,7 @@ class PhastJavaScriptCompilerTest extends TestCase {
                 return $cb();
             });
 
-        $this->compiler = new PhastJavaScriptCompiler($this->cache, '');
+        $this->compiler = new PhastJavaScriptCompiler($this->cache, '', ServiceRequest::FORMAT_PATH);
     }
 
     public function testCompileScripts() {
@@ -85,7 +85,7 @@ class PhastJavaScriptCompilerTest extends TestCase {
         $s2 = PhastJavaScript::fromFile('f2', $funcs1);
         $s3 = PhastJavaScript::fromFile('f2', $funcs2);
 
-        $compiler = new PhastJavaScriptCompiler($this->cache, '');
+        $compiler = new PhastJavaScriptCompiler($this->cache, '', ServiceRequest::FORMAT_PATH);
         $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
         $this->assertEquals('cached', $compiler->compileScripts([$s1, $s2]));
         $this->assertEquals('cached', $compiler->compileScripts([$s2]));
