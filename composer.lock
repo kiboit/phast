@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d3ef79e8dc727822fce2a69fc2874294",
+    "content-hash": "29f6f0905e52af26b7a6bafe38611c97",
     "packages": [
         {
             "name": "kiboit/jsmin-php",
-            "version": "dev-master",
+            "version": "dev-control-chars",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kiboit/jsmin-php.git",
-                "reference": "34f012dd3805cd8aa49e73912a46ffd80af54201"
+                "reference": "48cc684a845566900aa7fd87402158d44e229a67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kiboit/jsmin-php/zipball/34f012dd3805cd8aa49e73912a46ffd80af54201",
-                "reference": "34f012dd3805cd8aa49e73912a46ffd80af54201",
+                "url": "https://api.github.com/repos/kiboit/jsmin-php/zipball/48cc684a845566900aa7fd87402158d44e229a67",
+                "reference": "48cc684a845566900aa7fd87402158d44e229a67",
                 "shasum": ""
             },
             "require": {
@@ -58,9 +58,9 @@
             "support": {
                 "email": "minify@googlegroups.com",
                 "issues": "https://github.com/mrclay/jsmin-php/issues",
-                "source": "https://github.com/kiboit/jsmin-php/tree/master"
+                "source": "https://github.com/kiboit/jsmin-php/tree/control-chars"
             },
-            "time": "2020-08-18T12:49:48+00:00"
+            "time": "2020-08-19T05:20:07+00:00"
         },
         {
             "name": "nikic/php-parser",

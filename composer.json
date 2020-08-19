@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=5.6",
-        "kiboit/jsmin-php": "dev-master",
+        "kiboit/jsmin-php": "dev-control-chars",
         "ext-json": "*",
         "nikic/php-parser": "^3.1"
     },
