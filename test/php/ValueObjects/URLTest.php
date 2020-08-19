@@ -133,4 +133,24 @@ class URLTest extends PhastTestCase {
     public function testWithoutQuery() {
         $this->assertEquals('http://x/', URL::fromString('http://x/')->withoutQuery());
     }
+
+    public function testRewrite() {
+        $this->assertEquals(
+            'http://google.com',
+            URL::fromString('http://yahoo.com')
+            ->rewrite(URL::fromString('http://yahoo.com/'), URL::fromString('http://google.com'))
+        );
+
+        $this->assertEquals(
+            'http://google.com/test/abc',
+            URL::fromString('http://yahoo.com/test/abc')
+            ->rewrite(URL::fromString('http://yahoo.com/'), URL::fromString('http://google.com'))
+        );
+
+        $this->assertEquals(
+            'http://google.com/new/abc',
+            URL::fromString('http://yahoo.com/old/abc')
+            ->rewrite(URL::fromString('http://yahoo.com/old'), URL::fromString('http://google.com/new'))
+        );
+    }
 }

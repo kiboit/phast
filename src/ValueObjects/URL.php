@@ -253,4 +253,14 @@ class URL {
     public function __toString() {
         return $this->toString();
     }
+
+    public function rewrite(URL $from, URL $to) {
+        $str_from = rtrim($from->toString(), '/');
+        $str_to = rtrim($to->toString(), '/');
+        return URL::fromString(preg_replace(
+            '~^' . preg_quote($str_from, '~') . '(?=$|/)~',
+            $str_to,
+            $this->toString()
+        ));
+    }
 }
