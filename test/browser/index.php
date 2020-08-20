@@ -56,7 +56,7 @@ foreach ([1, 2, 3] as $i) {
         scripts: []
     };
 </script>
-<?php foreach (['es6-promise', 'hash', 'resources-loader', 'scripts-loader'] as $script): ?>
+<?php foreach (['es6-promise', 'hash', 'service-url', 'resources-loader', 'scripts-loader'] as $script): ?>
 <script>(function () {<?= file_get_contents('public/' . $script . '.js'); ?>})();</script>
 <?php endforeach; ?>
 <script src="qunit.js"></script>

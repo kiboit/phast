@@ -10,8 +10,7 @@ use Kibo\Phast\Services\Bundler\TokenRefMakerFactory;
 class Factory implements HTMLFilterFactory {
     public function make(array $config) {
         if (!isset($config['documents']['filters'][Filter::class]['serviceUrl'])) {
-            $config['documents']['filters'][Filter::class]['serviceUrl']
-            = $config['servicesUrl'] . '?service=scripts';
+            $config['documents']['filters'][Filter::class]['serviceUrl'] = $config['servicesUrl'];
         }
         $filterConfig = $config['documents']['filters'][Filter::class];
         $filterConfig['match'] = $config['scripts']['whitelist'];

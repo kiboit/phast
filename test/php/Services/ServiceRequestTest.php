@@ -298,13 +298,12 @@ class ServiceRequestTest extends TestCase {
 
     public function testBase64PathInfo() {
         $queryString = 'a=1&a=2&b=3';
-        $pathInfo = sprintf('/%s.b.js', Base64url::encode($queryString));
+        $pathInfo = sprintf('/%s.q.js', Base64url::encode($queryString));
         $httpRequest = Request::fromArray(['get' => 'yes'], ['PATH_INFO' => $pathInfo]);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $this->assertSame(
             [
                 'get' => 'yes',
-                'service' => 'bundler',
                 'a' => '1',
                 'b' => '3',
             ],

@@ -73,6 +73,7 @@ class PhastJavaScriptCompiler {
             PhastJavaScript::fromFile(__DIR__ . '/runner.js'),
             PhastJavaScript::fromFile(__DIR__ . '/es6-promise.js'),
             PhastJavaScript::fromFile(__DIR__ . '/hash.js'),
+            PhastJavaScript::fromFile(__DIR__ . '/service-url.js'),
             $resourcesLoader,
             PhastJavaScript::fromFile(__DIR__ . '/phast.js'),
         ], $scripts);

@@ -91,6 +91,7 @@ class Filter extends BaseHTMLStreamFilter {
 
     private function makeProxiedURL(URL $url, $cacheMarker) {
         $params = [
+            'service' => 'scripts',
             'src' => (string) $url->withoutQuery(),
             'cacheMarker' => $cacheMarker,
         ];
@@ -116,6 +117,7 @@ class Filter extends BaseHTMLStreamFilter {
     private function addScript() {
         $config = [
             'serviceUrl' => $this->config['serviceUrl'],
+            'pathInfo' => ServiceRequest::getDefaultSerializationMode() === ServiceRequest::FORMAT_PATH,
             'urlRefreshTime' => $this->config['urlRefreshTime'],
             'whitelist' => $this->config['match'],
         ];

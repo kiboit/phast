@@ -70,9 +70,14 @@ function processNode(el) {
 
     var originalSrc = el.src;
 
-    el.src = config.serviceUrl +
-        '&src=' + encodeURIComponent(originalSrc.replace(/^http/, 'hxxp')) +
-        '&cacheMarker=' + encodeURIComponent(cacheMarker);
+    el.src = phast.buildServiceUrl(
+        config,
+        {
+            service: 'scripts',
+            src: originalSrc,
+            cacheMarker: cacheMarker,
+        }
+    );
 
     return function () {
         el.src = originalSrc;

@@ -68,6 +68,10 @@ class ServiceRequest {
         self::$defaultSerializationMode = $mode;
     }
 
+    public static function getDefaultSerializationMode() {
+        return self::$defaultSerializationMode;
+    }
+
     public static function fromHTTPRequest(Request $request) {
         $query = $request->getQuery();
         if ($query->get('src')) {
@@ -202,14 +206,10 @@ class ServiceRequest {
     }
 
     private static function parseBase64PathInfo($string) {
-        if (!preg_match('~/([a-z0-9_-]+)\.b\.js~i', $string, $match)) {
+        if (!preg_match('~^/([a-z0-9_-]+)\.q\.js$~i', $string, $match)) {
             return null;
         }
-        $query_string = Base64url::decode($match[1]);
-        $result = new Query();
-        $result->add('service', 'bundler');
-        $result->update(Query::fromString($query_string));
-        return $result;
+        return Query::fromString(Base64url::decode($match[1]));
     }
 
     private function getVerificationString() {

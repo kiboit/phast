@@ -67,12 +67,10 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
     }
 
     function makeRequest(pack) {
-        var url;
-        if (pathInfo) {
-            url = appendPathInfo(serviceUrl, pack.toQuery());
-        } else {
-            url = appendQueryString(serviceUrl, 'service=bundler&' + pack.toQuery());
-        }
+        var url = phast.buildServiceUrl(
+            {serviceUrl: serviceUrl, pathInfo: pathInfo},
+            'service=bundler&' + pack.toQuery()
+        );
         var errorHandler = function () {
             console.error("[Phast] Request to bundler failed with status", xhr.status);
             console.log("URL:", url);
@@ -91,20 +89,6 @@ phast.ResourceLoader.BundlerServiceClient = function (serviceUrl, shortParamsMap
         xhr.addEventListener('abort', errorHandler);
         xhr.addEventListener('load', successHandler);
         xhr.send();
-    }
-
-    function appendQueryString(url, queryString) {
-        var glue = url.indexOf('?') > -1 ? '&' : '?';
-        return url + glue + queryString;
-    }
-
-    function appendPathInfo(url, query) {
-        var path = btoa(query)
-            .replace(/=/g, '')
-            .replace(/\//g, '_')
-            .replace(/\+/g, '-');
-
-        return url.replace(/\?.*$/, '').replace(/\/__p__\.js$/, '') + '/' + path + '.b.js';
     }
 };
 

@@ -186,6 +186,8 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testInjectScript() {
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_PATH);
+
         $script = $this->makeMarkedElement('script');
         $this->head->appendChild($script);
 
@@ -197,6 +199,7 @@ class FilterTest extends HTMLFilterTestCase {
         $expectedConfig = $this->config;
         $expectedConfig['whitelist'] = $expectedConfig['match'];
         unset($expectedConfig['match']);
+        $expectedConfig['pathInfo'] = true;
         $this->assertCompiledConfigEquals($expectedConfig, 'script-proxy-service');
     }
 
