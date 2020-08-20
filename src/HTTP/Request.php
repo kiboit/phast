@@ -2,13 +2,9 @@
 namespace Kibo\Phast\HTTP;
 
 use Kibo\Phast\ValueObjects\Query;
+use Kibo\Phast\ValueObjects\URL;
 
 class Request {
-    /**
-     * @var array|null
-     */
-    private $get;
-
     /**
      * @var array
      */
@@ -28,12 +24,18 @@ class Request {
     }
 
     public static function fromGlobals() {
-        return self::fromArray(null, $_SERVER, $_COOKIE);
+        $instance = new self();
+        $instance->env = $_SERVER;
+        $instance->cookie = $_COOKIE;
+        return $instance;
     }
 
-    public static function fromArray(array $get = null, array $env = [], array $cookie = []) {
+    public static function fromArray(array $get = [], array $env = [], array $cookie = []) {
+        if ($get) {
+            $url = isset($env['REQUEST_URI']) ? $env['REQUEST_URI'] : '';
+            $env['REQUEST_URI'] = URL::fromString($url)->withQuery(http_build_query($get))->toString();
+        }
         $instance = new self();
-        $instance->get = $get;
         $instance->env = $env;
         $instance->cookie = $cookie;
         return $instance;
@@ -50,9 +52,6 @@ class Request {
      * @return Query
      */
     public function getQuery() {
-        if ($this->get) {
-            return Query::fromAssoc($this->get);
-        }
         return Query::fromString($this->getQueryString());
     }
 
