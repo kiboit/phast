@@ -66,7 +66,6 @@ class DefaultConfiguration {
                     Filters\HTML\CSSInlining\Filter::class => [
                         'optimizerSizeDiffThreshold' => 1024,
                         'whitelist' => [
-                            '~^https?://' . preg_quote($request->getHost(), '~') . '/~',
                             '~^https?://fonts\.googleapis\.com/~' => [
                                 'ieCompatible' => false,
                             ],
@@ -111,8 +110,6 @@ class DefaultConfiguration {
                 'maxImageInliningSize' => 512,
 
                 'whitelist' => [
-                    '~^https?://' . preg_quote($request->getHost(), '~')
-                        . '/[^#?]*\.(jpe?g|gif|png)~i',
                     '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
                 ],
 

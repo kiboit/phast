@@ -33,7 +33,12 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->securityToken = $this->createMock(ServiceSignature::class);
         $this->securityToken->method('sign')->willReturn('the-token');
         $this->retriever = $this->createMock(LocalRetriever::class);
-        $this->retriever->method('getCacheSalt')->willReturn(123);
+        $this->retriever->method('getCacheSalt')->willReturnCallback(function ($url) {
+            if ($url->getHost() === URL::fromString(self::BASE_URL)->getHost()) {
+                return 123;
+            }
+            return false;
+        });
         $this->retriever->method('getSize')->willReturn(1024);
         $this->inliningManager = $this->createMock(ImageInliningManager::class);
     }

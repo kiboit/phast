@@ -172,7 +172,9 @@ class Filter extends BaseHTMLStreamFilter {
 
         $location = URL::fromString($href)->withBase($baseUrl);
 
-        if (!$this->findInWhitelist($location)) {
+        if (!$this->findInWhitelist($location)
+            && !$this->localRetriever->getCacheSalt($location)
+        ) {
             return [$link];
         }
 
@@ -225,11 +227,15 @@ class Filter extends BaseHTMLStreamFilter {
         $whitelistEntry = $this->findInWhitelist($url);
 
         if (!$whitelistEntry) {
+            $whitelistEntry = !!$this->localRetriever->getCacheSalt($url);
+        }
+
+        if (!$whitelistEntry) {
             $this->logger()->info('Not inlining {url}. Not in whitelist', ['url' => ($url)]);
             return [$this->makeLink($url, $media)];
         }
 
-        if (!$whitelistEntry['ieCompatible']) {
+        if (empty($whitelistEntry['ieCompatible'])) {
             $ieFallbackUrl = $ieCompatible ? $url : null;
             $ieCompatible = false;
         } else {

@@ -194,6 +194,9 @@ class ImageURLRewriter {
                 return true;
             }
         }
+        if ($this->retriever->getCacheSalt(URL::fromString($url))) {
+            return true;
+        }
         return false;
     }
 

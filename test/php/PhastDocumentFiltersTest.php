@@ -74,8 +74,12 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
 
     public function testOptimizeImagesInAmpDocument() {
         $out = PhastDocumentFilters::apply(
-            '<!doctype html><html amp><body><img src=test.jpg></body></html>',
-            []
+            '<!doctype html><html amp><body><img src=batman.jpg></body></html>',
+            [
+                'retrieverMap' => [
+                    'example.com' => __DIR__ . '/../test-app/images',
+                ],
+            ]
         );
         $this->assertFiltersApplied($out);
         $this->assertNotContains('<script', $out);
