@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.65 - 2020-08-20
+
+* Use path info URLs for bundler and dynamically inserted scripts.
+* Don't whitelist local URLs but check that the referenced files exist.
+
+
 ## 1.64 - 2020-08-18
 
 * Preserve control characters in strings in minified JavaScript.
