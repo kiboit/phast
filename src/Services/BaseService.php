@@ -1,5 +1,4 @@
 <?php
-
 namespace Kibo\Phast\Services;
 
 use Kibo\Phast\Exceptions\ItemNotFoundException;
@@ -97,8 +96,11 @@ abstract class BaseService {
 
     protected function validateRequest(ServiceRequest $request) {
         $this->validateIntegrity($request);
-        $this->validateToken($request);
-        $this->validateWhitelisted($request);
+        try {
+            $this->validateToken($request);
+        } catch (UnauthorizedException $e) {
+            $this->validateWhitelisted($request);
+        }
     }
 
     protected function validateIntegrity(ServiceRequest $request) {
