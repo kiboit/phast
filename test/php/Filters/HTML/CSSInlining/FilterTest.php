@@ -583,6 +583,15 @@ class FilterTest extends HTMLFilterTestCase {
         );
     }
 
+    public function testLinkOnload() {
+        $this->files['/external.css'] = 'body{background:red;}';
+        $html = '<html><head><link rel=stylesheet href=/external.css media=print onload="media=\'all\'"></head><body></body></html>';
+        $this->applyFilter($html);
+        $this->assertFalse(
+            $this->dom->getElementsByTagName('style')->item(0)->hasAttribute('media')
+        );
+    }
+
     private function getCacheMarker() {
         return json_decode(
             $this->dom->getElementsByTagName('style')->item(0)->getAttribute('data-phast-params')

@@ -178,7 +178,17 @@ class Filter extends BaseHTMLStreamFilter {
             return [$link];
         }
 
-        $elements = $this->inlineURL($location, $link->getAttribute('media'));
+        $media = $link->getAttribute('media');
+
+        if (preg_match(
+            '~^\s*(this\.)?media\s*=\s*(?<q>[\'"])(?<m>((?!\k<q>).)+?)\k<q>\s*(;|$)~',
+            $link->getAttribute('onload'),
+            $match
+        )) {
+            $media = $match['m'];
+        }
+
+        $elements = $this->inlineURL($location, $media);
         return is_null($elements) ? [$link] : $elements;
     }
 
