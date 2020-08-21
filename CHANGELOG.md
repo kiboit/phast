@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.66 - 2020-08-21
+
+* Convert `<link onload="media='all'">` to `<link media="all">` before inlining.
+* Elide `media` attribute on generated `style` tags if it is `all`.
+
+
 ## 1.65 - 2020-08-20
 
 * Use path info URLs for bundler and dynamically inserted scripts.
