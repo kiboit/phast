@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.67 - 2020-08-21
+
+* Fix IE 11 stylesheet fallbacks.
+
+
 ## 1.66 - 2020-08-21
 
 * Convert `<link onload="media='all'">` to `<link media="all">` before inlining.
