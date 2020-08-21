@@ -355,7 +355,7 @@ class Filter extends BaseHTMLStreamFilter {
 
     private function makeStyle(URL $url, $content, $media, $optimized, $stripImports = true) {
         $style = new Tag('style');
-        if ($media !== '') {
+        if ($media !== '' && $media !== 'all') {
             $style->setAttribute('media', $media);
         }
         if ($optimized) {
