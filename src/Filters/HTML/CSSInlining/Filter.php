@@ -131,9 +131,6 @@ class Filter extends BaseHTMLStreamFilter {
             } else {
                 $this->whitelist[$key] = $value;
             }
-            if (!isset($this->whitelist[$key]['ieCompatible'])) {
-                $this->whitelist[$key] = true;
-            }
         }
     }
 
@@ -245,7 +242,7 @@ class Filter extends BaseHTMLStreamFilter {
             return [$this->makeLink($url, $media)];
         }
 
-        if (!empty($whitelistEntry['ieCompatible'])) {
+        if (isset($whitelistEntry['ieCompatible']) && !$whitelistEntry['ieCompatible']) {
             $ieFallbackUrl = $ieCompatible ? $url : null;
             $ieCompatible = false;
         } else {
