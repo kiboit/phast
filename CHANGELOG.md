@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+* Support URLs generated via Retina.js (when path info is enabled).
+
+
 ## 1.67 - 2020-08-21
 
 * Fix IE 11 stylesheet fallbacks.
