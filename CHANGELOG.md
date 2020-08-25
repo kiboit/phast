@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.68 - 2020-08-25
 
 * Support URLs generated via Retina.js (when path info is enabled).
+* Implement rotating text file logger for use in PhastPress.
 
 
 ## 1.67 - 2020-08-21
