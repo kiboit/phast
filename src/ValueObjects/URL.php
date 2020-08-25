@@ -228,6 +228,16 @@ class URL {
     }
 
     /**
+     * @param string $path
+     * @return self
+     */
+    public function withPath($path) {
+        $url = clone $this;
+        $url->path = (string) $path;
+        return $url;
+    }
+
+    /**
      * @param string|null $query
      * @return self
      */

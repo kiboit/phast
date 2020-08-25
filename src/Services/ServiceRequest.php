@@ -181,7 +181,9 @@ class ServiceRequest {
      * @return bool
      */
     public function verify(ServiceSignature $signature) {
-        return $signature->verify($this->token, $this->getVerificationString());
+        return
+            $signature->verify($this->token, $this->getVerificationString())
+            || $signature->verify($this->token, $this->getVerificationStringWithoutStemSuffix());
     }
 
     private static function parsePathInfo($string) {
@@ -194,7 +196,12 @@ class ServiceRequest {
             $pair = explode('=', $part);
             if (isset($pair[1])) {
                 $values->set($pair[0], self::decodeSingleValue($pair[1]));
-            } elseif (!preg_match('/^__p__\./', $pair[0])) {
+            } elseif (preg_match('/^__p__(@[1-9][0-9]*x)?\./', $pair[0], $match)) {
+                if (!empty($match[1]) && $values->has('src')) {
+                    $values->set('src', self::appendStemSuffix($values->get('src'), $match[1]));
+                }
+                break;
+            } else {
                 $values->set('src', self::decodeSingleValue($pair[0]));
             }
         }
@@ -205,6 +212,18 @@ class ServiceRequest {
         return urldecode(str_replace('-', '%', $value));
     }
 
+    private static function appendStemSuffix($src, $suffix) {
+        $url = URL::fromString($src);
+        $path = preg_replace_callback(
+            '/\.\w+$/',
+            function ($match) use ($suffix) {
+                return $suffix . $match[0];
+            },
+            $url->getPath()
+        );
+        return $url->withPath($path)->toString();
+    }
+
     private static function parseBase64PathInfo($string) {
         if (!preg_match('~^/([a-z0-9_-]+)\.q\.js$~i', $string, $match)) {
             return null;
@@ -212,10 +231,32 @@ class ServiceRequest {
         return Query::fromString(Base64url::decode($match[1]));
     }
 
-    private function getVerificationString() {
+    /**
+     * @param callable $paramsFilter
+     * @return string
+     */
+    private function getVerificationString($paramsFilter = null) {
         $params = $this->getAllParams();
+        if ($paramsFilter) {
+            $params = $paramsFilter($params);
+        }
         ksort($params);
         return http_build_query($params);
+    }
+
+    private function getVerificationStringWithoutStemSuffix() {
+        return $this->getVerificationString(function ($params) {
+            if (isset($params['src'])) {
+                $params['src'] = $this->stripStemSuffix($params['src']);
+            }
+            return $params;
+        });
+    }
+
+    private function stripStemSuffix($src) {
+        $url = URL::fromString($src);
+        $path = preg_replace('/@[1-9][0-9]*x(?=\.\w+$)/', '', $url->getPath());
+        return $url->withPath($path)->toString();
     }
 
     public function serialize($format = null) {

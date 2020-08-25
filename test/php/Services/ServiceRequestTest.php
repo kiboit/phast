@@ -311,4 +311,32 @@ class ServiceRequestTest extends TestCase {
         );
         $this->assertSame(['1', '2'], $serviceRequest->getQuery()->getAll('a'));
     }
+
+    public function testRetinaSrc() {
+        $httpRequest = Request::fromArray([], ['PATH_INFO' => '/-2Fimages-2Ffile.jpg/__p__@2x.jpg']);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $this->assertSame(
+            ['src' => '/images/file@2x.jpg'],
+            $serviceRequest->getParams()
+        );
+    }
+
+    public function testRetinaSrcSigning() {
+        $signature = new ServiceSignature($this->createMock(Cache::class));
+        $signature->setIdentities('some-token');
+
+        $request = (new ServiceRequest())->withParams(['src' => 'url.jpg'])->sign($signature);
+
+        $pathInfo = $request->serialize(ServiceRequest::FORMAT_PATH);
+        $this->assertStringStartsWith('/url.jpg/token=', $pathInfo);
+
+        $pathRequest = ServiceRequest::fromHTTPRequest(Request::fromArray([], ['PATH_INFO' => $pathInfo]));
+        $this->assertTrue($pathRequest->verify($signature));
+        $this->assertEquals(['src' => 'url.jpg'], $pathRequest->getParams());
+
+        $pathInfo = preg_replace('~/__p__.jpg$~', '/__p__@2x.jpg', $pathInfo);
+        $pathRequest = ServiceRequest::fromHTTPRequest(Request::fromArray([], ['PATH_INFO' => $pathInfo]));
+        $this->assertTrue($pathRequest->verify($signature));
+        $this->assertEquals(['src' => 'url@2x.jpg'], $pathRequest->getParams());
+    }
 }

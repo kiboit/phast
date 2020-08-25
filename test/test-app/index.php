@@ -5,6 +5,7 @@ require __DIR__ . '/../../build/phast.php';
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="css/stylesheet_large.css">
         <link rel="stylesheet" href="css/styles.css">
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
@@ -19,6 +20,7 @@ require __DIR__ . '/../../build/phast.php';
                 background-position: top right;
             }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/retinajs@2.1.3/dist/retina.min.js"></script>
     </head>
     <body>
         <script>
@@ -40,9 +42,9 @@ require __DIR__ . '/../../build/phast.php';
         <div style="width: 200px; height: 200px; background: url(images/python.png)"></div>
 
         <img src="wow.jpg" width="100" height="100">
-        <img src="images/../images/basset.png">
+        <img src="images/../images/basset.png" data-rjs=2>
         <img src="images/basset.png" width="130" height="155">
-        <img src="images/batman.jpg">
+        <img src="images/batman.jpg" data-rjs=2>
         <img src="images/batman.jpg" width="84" height="50">
         <img src="https://www.commitstrip.com/wp-content/uploads/2017/09/Strip-Lenfance-du-codeur-Le-piratage-650-finalenglish.jpg">
         <script>
