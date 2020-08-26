@@ -52,11 +52,6 @@ class Filter extends BaseHTMLStreamFilter {
     /**
      * @var string
      */
-    private $bundlerUrl;
-
-    /**
-     * @var string
-     */
     private $serviceUrl;
 
     /**
@@ -111,12 +106,7 @@ class Filter extends BaseHTMLStreamFilter {
     ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
-        $this->serviceUrl = (new ServiceRequest())->withUrl(
-            URL::fromString((string) $config['serviceUrl'])
-        )->serialize(ServiceRequest::FORMAT_QUERY);
-        $this->bundlerUrl = (new ServiceRequest())->withUrl(
-            URL::fromString((string) $config['bundlerUrl'])
-        )->serialize(ServiceRequest::FORMAT_QUERY);
+        $this->serviceUrl = URL::fromString((string) $config['serviceUrl']);
         $this->optimizerSizeDiffThreshold = (int) $config['optimizerSizeDiffThreshold'];
         $this->localRetriever = $localRetriever;
         $this->retriever = $retriever;
@@ -412,12 +402,14 @@ class Filter extends BaseHTMLStreamFilter {
 
     protected function makeServiceURL(URL $originalLocation) {
         $params = [
+            'service' => 'css',
             'src' => (string) $originalLocation,
             'cacheMarker' => $this->retriever->getCacheSalt($originalLocation),
         ];
 
-        return (new ServiceRequest())->withParams($params)
-            ->withUrl(URL::fromString($this->serviceUrl))
+        return (new ServiceRequest())
+            ->withUrl($this->serviceUrl)
+            ->withParams($params)
             ->sign($this->signature)
             ->serialize();
     }

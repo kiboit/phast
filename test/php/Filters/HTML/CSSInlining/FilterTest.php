@@ -171,6 +171,33 @@ class FilterTest extends HTMLFilterTestCase {
     }
 
     public function testRedirectingToProxyServiceOnReadError() {
+        $expectedParams = [
+            'service' => 'css',
+            'src' => self::BASE_URL . '/the-css.css',
+            'cacheMarker' => 123,
+            'token' => 'the-token',
+        ];
+
+        $parsedHref = $this->getGeneratedProxyURL();
+        $this->assertEquals(basename(self::SERVICE_URL), basename($parsedHref->getPath()));
+
+        $actualParams = null;
+        parse_str($parsedHref->getQuery(), $actualParams);
+        $this->assertEquals($expectedParams, $actualParams);
+    }
+
+    public function testRedirectingToProxyServiceOnReadErrorPathInfo() {
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_PATH);
+
+        $parsedHref = $this->getGeneratedProxyURL();
+
+        $this->assertEquals(
+            '/service.php/http-3A-2F-2Fphast.test-2Fthe-2Dcss.css/service=css/cacheMarker=123/token=the-2Dtoken/__p__.css',
+            $parsedHref->getPath()
+        );
+    }
+
+    private function getGeneratedProxyURL() {
         $this->retrieverLastModificationTime = 123;
         $this->makeLink($this->head, 'css', self::BASE_URL . '/the-css.css');
         unset($this->files[self::BASE_URL . '/the-css.css']);
@@ -183,18 +210,7 @@ class FilterTest extends HTMLFilterTestCase {
         $newLink = $headElements->item(0);
         $this->assertEquals('link', $newLink->tagName);
 
-        $expectedParams = [
-            'src' => self::BASE_URL . '/the-css.css',
-            'cacheMarker' => 123,
-            'token' => 'the-token',
-        ];
-
-        $parsedHref = parse_url($newLink->getAttribute('href'));
-        $this->assertEquals(basename(self::SERVICE_URL), basename($parsedHref['path']));
-
-        $actualParams = null;
-        parse_str($parsedHref['query'], $actualParams);
-        $this->assertEquals($expectedParams, $actualParams);
+        return URL::fromString($newLink->getAttribute('href'));
     }
 
     public function testMinifyingBeforeOptimizing() {
