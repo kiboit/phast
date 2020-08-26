@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.69 - 2020-08-26
+
+* Fix CSS proxy URL generation not to include `__p__` filename twice.
+
+
 ## 1.68 - 2020-08-25
 
 * Support URLs generated via Retina.js (when path info is enabled).
