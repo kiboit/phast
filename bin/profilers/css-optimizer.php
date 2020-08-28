@@ -15,4 +15,3 @@ return call_user_func(function () {
         $this->parseCSS($css);
     }, $optimizer, $optimizer);
 });
-

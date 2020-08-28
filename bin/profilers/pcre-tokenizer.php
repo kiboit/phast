@@ -10,4 +10,3 @@ return call_user_func(function () {
         $tokens = iterator_to_array($tok->tokenize($data));
     };
 });
-
