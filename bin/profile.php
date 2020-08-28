@@ -15,7 +15,7 @@ if (sizeof($argv) != 3) {
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $file = $argv[1];
-$iterations = (int)$argv[2];
+$iterations = (int) $argv[2];
 
 $callback = require_once $file;
 if (!is_callable($callback)) {
