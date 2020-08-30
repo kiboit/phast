@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.70 - 2020-08-30
+
+* Add Last-Modified header to service response.
+
+
 ## 1.69 - 2020-08-26
 
 * Fix CSS proxy URL generation not to include `__p__` filename twice.
