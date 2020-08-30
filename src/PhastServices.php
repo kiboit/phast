@@ -123,10 +123,11 @@ class PhastServices {
         $headers += [
             'Vary' => 'Accept-Encoding',
             'Cache-Control' => 'max-age=' . $maxAge,
-            'Expires' => gmdate('D, d M Y H:i:s', time() + $maxAge) . ' GMT',
+            'Expires' => self::formatHeaderDate(time() + $maxAge),
             'X-Accel-Expires' => $maxAge,
             'Access-Control-Allow-Origin' => '*',
             'ETag' => self::generateETag($headers, $content),
+            'Last-Modified' => self::formatHeaderDate(time()),
             'X-Content-Type-Options' => 'nosniff',
             'Content-Security-Policy' => "default-src 'none'",
         ];
@@ -143,6 +144,10 @@ class PhastServices {
             fwrite($fp, $part);
         }
         fclose($fp);
+    }
+
+    private static function formatHeaderDate($time) {
+        return gmdate('D, d M Y H:i:s', $time) . ' GMT';
     }
 
     private static function shouldZip(Request $request) {

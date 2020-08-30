@@ -72,6 +72,7 @@ class PhastServicesTest extends PhastTestCase {
         } else {
             $this->assertNotContains('Content-Encoding: gzip', $this->responseHeaders);
         }
+        $this->assertNotEmpty(preg_grep('/^Last-Modified: /', $this->responseHeaders));
 
         $this->assertEquals(self::EXAMPLE_CONTENT, $this->responseContent);
     }
