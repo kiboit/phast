@@ -1,5 +1,5 @@
-PHP56 = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php56.image)
-PHP73 = docker run -it -v $(shell pwd):/data -w /data $(shell cat docker/php73.image)
+PHP56 = docker run -v $(shell pwd):/data -w /data $(shell cat docker/php56.image)
+PHP73 = docker run -v $(shell pwd):/data -w /data $(shell cat docker/php73.image)
 
 ifdef FILTER
 PHPUNIT_ARGS := --filter="$(FILTER)"
@@ -10,7 +10,7 @@ all : build/phast.php
 
 .PHONY : watch
 watch :
-	git ls-files src test | entr $(MAKE) test73
+	git ls-files src test | entr -c -r $(MAKE) -s test73
 
 .PHONY : test
 test : test73 test56
