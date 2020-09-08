@@ -194,7 +194,10 @@ class ImageURLRewriter {
                 return true;
             }
         }
-        if ($this->retriever->getCacheSalt(URL::fromString($url))) {
+        $urlObject = URL::fromString($url);
+        if (preg_match('~\.(jpe?g|gif|png)$~i', $urlObject->getPath())
+            && $this->retriever->getCacheSalt($urlObject)
+        ) {
             return true;
         }
         return false;

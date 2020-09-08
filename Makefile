@@ -10,7 +10,7 @@ all : build/phast.php
 
 .PHONY : watch
 watch :
-	git ls-files src | entr $(MAKE) test73
+	git ls-files src test | entr $(MAKE) test73
 
 .PHONY : test
 test : test73 test56

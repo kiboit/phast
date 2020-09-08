@@ -100,6 +100,7 @@ class ImageURLRewriterTest extends PhastTestCase {
     public function dontRewriteData() {
         yield ['background: url("http://somewhere.else/img.png")'];
         yield ['background: url(#yolo)'];
+        yield ['background: url(/test.svg)'];
     }
 
     public function testNoRewriteForImagesWithInlineSource() {
@@ -205,7 +206,7 @@ class ImageURLRewriterTest extends PhastTestCase {
             $this->inliningManager,
             URL::fromString(self::BASE_URL . '/css/'),
             URL::fromString(self::BASE_URL . '/images.php'),
-            ['~' . preg_quote(self::BASE_URL . '') . '~']
+            []
         );
     }
 }
