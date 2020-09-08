@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.71 - 2020-09-08
 
 * Only process JPEG, GIF and PNG images. (Fix regression in 1.65.)
 
