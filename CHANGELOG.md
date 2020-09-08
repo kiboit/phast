@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+* Only process JPEG, GIF and PNG images. (Fix regression in 1.65.)
+
+
 ## 1.70 - 2020-08-30
 
 * Add Last-Modified header to service response.
