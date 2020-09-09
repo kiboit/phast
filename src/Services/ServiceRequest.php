@@ -50,6 +50,11 @@ class ServiceRequest {
      */
     private $token;
 
+    /**
+     * @var bool
+     */
+    private $trusted = false;
+
     public function __construct() {
         if (!isset(self::$switches)) {
             self::$switches = new Switches();
@@ -73,35 +78,43 @@ class ServiceRequest {
     }
 
     public static function fromHTTPRequest(Request $request) {
-        $query = $request->getQuery();
-        if ($query->get('src')) {
-            $query->set('src', preg_replace('~^hxxp(?=s?://)~', 'http', $query->get('src')));
-        }
-        $pathInfo = $request->getPathInfo();
-        if ($pathParams = self::parseBase64PathInfo($pathInfo)) {
-            $query->update($pathParams);
-        } elseif ($pathInfo) {
-            $query->update(self::parsePathInfo($pathInfo));
-        }
         $instance = new self();
         self::$switches = new Switches();
         $instance->httpRequest = $request;
         if ($request->getCookie('phast')) {
             self::$switches = Switches::fromString($request->getCookie('phast'));
         }
-        if ($token = $query->pop('token')) {
-            $instance->token = $token;
-        }
-        $instance->query = $query;
-        if ($query->get('phast')) {
-            self::$propagatedSwitches = $query->get('phast');
-            $paramsSwitches = Switches::fromString($query->get('phast'));
-            self::$switches = self::$switches->merge($paramsSwitches);
-        }
-        if ($query->get('documentRequestId')) {
-            self::$documentRequestId = $query->get('documentRequestId');
+        if ($request->getEnvValue('REDIRECT_PHAST_SERVICE')) {
+            $instance->query = Query::fromAssoc([
+                'service' => $request->getEnvValue('REDIRECT_PHAST_SERVICE'),
+                'src' => $request->getAbsoluteURI(),
+            ]);
+            $instance->trusted = true;
         } else {
-            self::$documentRequestId = (string) mt_rand(0, 999999999);
+            $query = $request->getQuery();
+            if ($query->get('src')) {
+                $query->set('src', preg_replace('~^hxxp(?=s?://)~', 'http', $query->get('src')));
+            }
+            $pathInfo = $request->getPathInfo();
+            if ($pathParams = self::parseBase64PathInfo($pathInfo)) {
+                $query->update($pathParams);
+            } elseif ($pathInfo) {
+                $query->update(self::parsePathInfo($pathInfo));
+            }
+            if ($token = $query->pop('token')) {
+                $instance->token = $token;
+            }
+            $instance->query = $query;
+            if ($query->get('phast')) {
+                self::$propagatedSwitches = $query->get('phast');
+                $paramsSwitches = Switches::fromString($query->get('phast'));
+                self::$switches = self::$switches->merge($paramsSwitches);
+            }
+            if ($query->get('documentRequestId')) {
+                self::$documentRequestId = $query->get('documentRequestId');
+            } else {
+                self::$documentRequestId = (string) mt_rand(0, 999999999);
+            }
         }
         return $instance;
     }
@@ -182,7 +195,8 @@ class ServiceRequest {
      */
     public function verify(ServiceSignature $signature) {
         return
-            $signature->verify($this->token, $this->getVerificationString())
+            $this->trusted
+            || $signature->verify($this->token, $this->getVerificationString())
             || $signature->verify($this->token, $this->getVerificationStringWithoutStemSuffix());
     }
 

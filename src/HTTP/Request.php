@@ -107,7 +107,7 @@ class Request {
         return $this->getEnvValue('REQUEST_URI');
     }
 
-    private function getEnvValue($key) {
+    public function getEnvValue($key) {
         if (isset($this->env[$key])) {
             return $this->env[$key];
         }
