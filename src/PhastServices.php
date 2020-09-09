@@ -69,12 +69,15 @@ class PhastServices {
                 ->serve($serviceRequest);
             Log::info('Service completed');
         } catch (UnauthorizedException $e) {
+            echo "Unauthorized\n";
             Log::error('Unauthorized exception: {message}', ['message' => $e->getMessage()]);
             exit();
         } catch (ItemNotFoundException $e) {
+            echo "Item not found\n";
             Log::error('Item not found: {message}', ['message' => $e->getMessage()]);
             exit();
         } catch (\Exception $e) {
+            echo "Internal error, see logs\n";
             Log::critical(
                 'Unhandled exception: {type} Message: {message} File: {file} Line: {line}',
                 [
