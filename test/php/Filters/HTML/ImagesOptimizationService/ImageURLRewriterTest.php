@@ -56,35 +56,35 @@ class ImageURLRewriterTest extends PhastTestCase {
     public function caseProvider() {
         return [
             [
-                'background: url("images/image1")',
+                'background: url("images/image1.jpg")',
                 'background: url("'
                 . self::BASE_URL . '/images.php?src='
-                . urlencode(self::BASE_URL . '/css/images/image1')
+                . urlencode(self::BASE_URL . '/css/images/image1.jpg')
                 . '&cacheMarker=123&token=the-token'
                 . '")',
             ],
             [
-                'background: url(" images/image1 ")',
+                'background: url(" images/image1.jpg ")',
                 'background: url("'
                 . self::BASE_URL . '/images.php?src='
-                . urlencode(self::BASE_URL . '/css/images/image1')
+                . urlencode(self::BASE_URL . '/css/images/image1.jpg')
                 . '&cacheMarker=123&token=the-token'
                 . '")',
             ],
             [
-                "border-image: url('/images/image2')",
+                "border-image: url('/images/image2.jpg')",
                 'border-image: url(\''
                 . self::BASE_URL . '/images.php?src='
-                . urlencode(self::BASE_URL . '/images/image2')
+                . urlencode(self::BASE_URL . '/images/image2.jpg')
                 . '&cacheMarker=123&token=the-token'
                 . '\')',
             ],
             [
-                'border-image: url(/images/image2), url(/images/image2)',
+                'border-image: url(/images/image2.jpg), url(/images/image2.jpg)',
                 sprintf(
                     'border-image: url(%1$s), url(%1$s)',
                     self::BASE_URL . '/images.php?src='
-                    . urlencode(self::BASE_URL . '/images/image2')
+                    . urlencode(self::BASE_URL . '/images/image2.jpg')
                     . '&cacheMarker=123&token=the-token'
                 ),
             ],
