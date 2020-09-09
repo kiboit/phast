@@ -195,6 +195,11 @@ class URL {
         return $this->pass;
     }
 
+    /** @return string */
+    public function getDecodedPath() {
+        return urldecode($this->path);
+    }
+
     /**
      * @return string
      */

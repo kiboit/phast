@@ -70,11 +70,11 @@ class LocalRetriever implements Retriever {
     }
 
     private function getExtensionForURL(URL $url) {
-        $dotPosition = strrpos($url->getPath(), '.');
+        $dotPosition = strrpos($url->getDecodedPath(), '.');
         if ($dotPosition === false) {
             return '';
         }
-        return strtolower(substr($url->getPath(), $dotPosition + 1));
+        return strtolower(substr($url->getDecodedPath(), $dotPosition + 1));
     }
 
     private function getFileForURL(URL $url) {
@@ -83,7 +83,7 @@ class LocalRetriever implements Retriever {
         }
         $submap = $this->map[$url->getHost()];
         if (!is_array($submap)) {
-            return $this->appendNormalized($submap, $url->getPath());
+            return $this->appendNormalized($submap, $url->getDecodedPath());
         }
 
         $selectedPath = null;
@@ -91,7 +91,7 @@ class LocalRetriever implements Retriever {
 
         foreach ($submap as $prefix => $root) {
             $pattern = '~^(?=/)/*?(?:' . str_replace('~', '\\~', $prefix) . ')(?<path>/*(?<=/).*)~';
-            if (preg_match($pattern, $url->getPath(), $match)
+            if (preg_match($pattern, $url->getDecodedPath(), $match)
                 && ($selectedPath === null || strlen($match['path']) < strlen($selectedPath))
             ) {
                 $selectedRoot = $root;
