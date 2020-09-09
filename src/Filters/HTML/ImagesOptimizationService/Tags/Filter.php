@@ -94,14 +94,7 @@ class Filter implements HTMLStreamFilter, AMPCompatibleFilter {
 
     private function rewriteSrc(Tag $img, HTMLPageContext $context, $attribute) {
         $url = $img->getAttribute($attribute);
-        $params = [];
-        foreach (['width', 'height'] as $attr) {
-            $value = $img->getAttribute($attr);
-            if (preg_match('/^[1-9][0-9]*$/', $value)) {
-                $params[$attr] = $value;
-            }
-        }
-        $newURL = $this->rewriter->rewriteUrl($url, $context->getBaseUrl(), $params);
+        $newURL = $this->rewriter->rewriteUrl($url, $context->getBaseUrl());
         $img->setAttribute($attribute, $newURL);
     }
 

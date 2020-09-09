@@ -62,11 +62,11 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $images = iterator_to_array($this->dom->getElementsByTagName('img'));
 
         $this->checkSrc($images[0]->getAttribute('src'), ['src' => self::BASE_URL . '/img?1']);
-        $this->checkSrc($images[1]->getAttribute('src'), ['src' => self::BASE_URL . '/img?2', 'width' => 20]);
-        $this->checkSrc($images[2]->getAttribute('src'), ['src' => self::BASE_URL . '/img?3', 'height' => 30]);
+        $this->checkSrc($images[1]->getAttribute('src'), ['src' => self::BASE_URL . '/img?2']);
+        $this->checkSrc($images[2]->getAttribute('src'), ['src' => self::BASE_URL . '/img?3']);
         $this->checkSrc(
             $images[3]->getAttribute('src'),
-            ['src' => self::BASE_URL . '/img?4', 'width' => 40, 'height' => 50]
+            ['src' => self::BASE_URL . '/img?4']
         );
     }
 
