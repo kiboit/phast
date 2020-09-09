@@ -17,9 +17,14 @@ class RemoteRetriever implements Retriever {
     }
 
     public function retrieve(URL $url) {
+        $cdnLoop = ['Phast'];
+        if (!empty($_SERVER['HTTP_CDN_LOOP'])) {
+            $cdnLoop[] = $_SERVER['HTTP_CDN_LOOP'];
+        }
         try {
             $response = $this->client->get($url, [
                 'User-Agent' => 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:56.0) Gecko/20100101 Firefox/56.0',
+                'CDN-Loop' => implode(', ', $cdnLoop),
             ]);
         } catch (\Exception $e) {
             $this->logger()->warning('Caught {cls} while fetching {url}: ({code}) {message}', [

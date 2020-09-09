@@ -18,6 +18,14 @@ class PhastServices {
      */
     public static function serve(callable $getConfig = null) {
         $httpRequest = Request::fromGlobals();
+
+        if ($httpRequest->getHeader('CDN-Loop')
+            && preg_match('~(^|,)\s*Phast\b~', $httpRequest->getHeader('CDN-Loop'))
+        ) {
+            http_response_code(508);
+            die('Loop detected');
+        }
+
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $serviceParams = $serviceRequest->getParams();
 
