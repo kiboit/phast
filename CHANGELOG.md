@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.72 - 2020-09-09
+
+* Don't resize images based on `width`/`height` attributes on `img` tags.
+
+
 ## 1.71 - 2020-09-08
 
 * Only process JPEG, GIF and PNG images. (Fix regression in 1.65.)
