@@ -43,7 +43,7 @@ clean :
 build/phast.php : vendor/autoload.php $(JSMIN_TARGETS) $(shell git ls-files src)
 	bin/compile $(dir $@)
 
-src/JSMin/% : vendor/kiboit/jsmin-php/src/JSMin/% vendor/autoload.php
+src/JSMin/% : vendor/kiboit/jsmin-php/src/JSMin/% | vendor/autoload.php
 	@mkdir -p $(dir $@)
 	cat $< | perl -p -e 's~(\bnamespace\s+)(?=JSMin\b)~$$1Kibo\\Phast\\~g' > $@
 

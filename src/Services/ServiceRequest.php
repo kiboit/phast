@@ -84,7 +84,7 @@ class ServiceRequest {
         if ($request->getCookie('phast')) {
             self::$switches = Switches::fromString($request->getCookie('phast'));
         }
-        if ($request->getEnvValue('REDIRECT_PHAST_SERVICE')) {
+        if ($service = self::getRewrittenService($request)) {
             $instance->query = Query::fromAssoc([
                 'service' => $request->getEnvValue('REDIRECT_PHAST_SERVICE'),
                 'src' => $request->getAbsoluteURI(),
@@ -117,6 +117,16 @@ class ServiceRequest {
             }
         }
         return $instance;
+    }
+
+    public static function getRewrittenService(Request $request) {
+        if ($service = $request->getEnvValue('REDIRECT_PHAST_SERVICE')) {
+            return $service;
+        }
+        if ($service = $request->getEnvValue('PHAST_SERVICE')) {
+            return $service;
+        }
+        return null;
     }
 
     public function hasRequestSwitchesSet() {

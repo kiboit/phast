@@ -95,6 +95,10 @@ class PhastServices {
         self::output($httpRequest, $response, $runtimeConfig);
     }
 
+    public static function isRewrittenRequest() {
+        return !!ServiceRequest::getRewrittenService(Request::fromGlobals());
+    }
+
     public static function output(
         Request $request,
         Response $response,
