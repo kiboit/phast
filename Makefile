@@ -1,5 +1,9 @@
+.DELETE_ON_ERROR :
+
 PHP56 = docker run -v $(shell pwd):/data -w /data $(shell cat docker/php56.image)
 PHP73 = docker run -v $(shell pwd):/data -w /data $(shell cat docker/php73.image)
+JSMIN_SOURCES := $(wildcard vendor/kiboit/jsmin-php/src/JSMin/*.php)
+JSMIN_TARGETS := $(patsubst vendor/kiboit/jsmin-php/src/%,src/%,$(JSMIN_SOURCES))
 
 ifdef FILTER
 PHPUNIT_ARGS := --filter="$(FILTER)"
@@ -36,8 +40,12 @@ clean :
 	rm -rf build
 
 
-build/phast.php : vendor/autoload.php $(shell git ls-files src)
+build/phast.php : vendor/autoload.php $(JSMIN_TARGETS) $(shell git ls-files src)
 	bin/compile $(dir $@)
+
+src/JSMin/% : vendor/kiboit/jsmin-php/src/JSMin/% vendor/autoload.php
+	@mkdir -p $(dir $@)
+	cat $< | perl -p -e 's~(\bnamespace\s+)(?=JSMin\b)~$$1Kibo\\Phast\\~g' > $@
 
 vendor/autoload.php : composer.json composer.lock
 	composer install

@@ -1,8 +1,7 @@
 <?php
-
 namespace Kibo\Phast\Common;
 
-use JSMin\JSMin;
+use Kibo\Phast\JSMin\JSMin;
 
 class JSMinifier extends JSMin {
     protected $removeLicenseHeaders;

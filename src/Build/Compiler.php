@@ -24,7 +24,6 @@ class Compiler {
         return (new self())
             ->include($root . '/src')
             ->exclude($root . '/src/Build')
-            ->include(self::getDirectoryByClass(\JSMin\JSMin::class))
             ->addResource('cacert.pem', __DIR__ . '/../HTTP/cacert.pem');
     }
 
