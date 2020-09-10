@@ -86,7 +86,7 @@ class ServiceRequest {
         }
         if ($service = self::getRewrittenService($request)) {
             $instance->query = Query::fromAssoc([
-                'service' => $request->getEnvValue('REDIRECT_PHAST_SERVICE'),
+                'service' => $service,
                 'src' => $request->getAbsoluteURI(),
             ]);
             $instance->trusted = true;
