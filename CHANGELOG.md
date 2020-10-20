@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.73 - 2020-10-20
+
+* Support `PHAST_SERVICE` environment variable for transparent optimization via
+  `.htaccess`.
+* Don't defer inling scripts that start with `'phast-no-defer'`.
+
+
 ## 1.72 - 2020-09-09
 
 * Don't resize images based on `width`/`height` attributes on `img` tags.
