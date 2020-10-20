@@ -41,6 +41,7 @@ class Filter extends BaseHTMLStreamFilter {
     private function isDeferralDisabled(Tag $script) {
         return $script->hasAttribute('data-phast-no-defer')
                || $script->hasAttribute('data-pagespeed-no-defer')
-               || $script->getAttribute('data-cfasync') === 'false';
+               || $script->getAttribute('data-cfasync') === 'false'
+               || preg_match('~^\s*(?<q>[\'"])phast-no-defer\k<q>~', $script->textContent);
     }
 }

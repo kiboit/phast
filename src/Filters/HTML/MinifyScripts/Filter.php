@@ -18,10 +18,6 @@ class Filter implements HTMLStreamFilter {
     }
 
     public function transformElements(\Traversable $elements, HTMLPageContext $context) {
-        $inTags = [
-            'pre' => 0,
-            'textarea' => 0,
-        ];
         foreach ($elements as $element) {
             if ($element instanceof Tag
                 && $element->getTagName() === 'script'

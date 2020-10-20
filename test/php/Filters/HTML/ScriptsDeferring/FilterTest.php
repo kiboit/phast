@@ -53,14 +53,20 @@ class FilterTest extends HTMLFilterTestCase {
         yield ['data-pagespeed-no-defer', ''];
         yield ['data-cfasync', 'false'];
         yield ['data-cfasync', 'yolo', true];
+        yield [null, null, false, "'phast-no-defer'"];
     }
 
     /** @dataProvider disableRewritingData */
-    public function testDisableRewriting($attrName, $attrValue, $shouldDefer = false) {
+    public function testDisableRewriting($attrName, $attrValue, $shouldDefer = false, $body = '') {
         $script = $this->makeMarkedElement('script');
         $script->setAttribute('type', 'text/javascript');
         $script->setAttribute('src', 'the-src');
-        $script->setAttribute($attrName, $attrValue);
+
+        if ($attrName !== null) {
+            $script->setAttribute($attrName, $attrValue);
+        }
+
+        $script->textContent = $body;
 
         $this->head->appendChild($script);
 
@@ -74,7 +80,9 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertEquals('text/javascript', $script->getAttribute('type'));
         }
 
-        $this->assertTrue($script->hasAttribute($attrName));
-        $this->assertEquals($attrValue, $script->getAttribute($attrName));
+        if ($attrName !== null) {
+            $this->assertTrue($script->hasAttribute($attrName));
+            $this->assertEquals($attrValue, $script->getAttribute($attrName));
+        }
     }
 }
