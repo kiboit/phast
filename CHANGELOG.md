@@ -2,6 +2,9 @@
 
 ## 1.73 - 2020-10-20
 
+* Prevent service loops by adding `CDN-Loop` header.
+* URL-decode paths to local files to handle filenames with spaces or special
+  characters correctly.
 * Support `PHAST_SERVICE` environment variable for transparent optimization via
   `.htaccess`.
 * Don't defer inling scripts that start with `'phast-no-defer'`.
