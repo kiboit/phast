@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.74 - 2020-10-20
+
+* Ignore calls to `document.write` from `async` or `defer` scripts, in line with
+  normal browser behaviour.
+
+
 ## 1.73 - 2020-10-20
 
 * Prevent service loops by adding `CDN-Loop` header.
