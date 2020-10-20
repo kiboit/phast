@@ -162,7 +162,7 @@ QUnit.module('ScriptsLoader', function () {
                     });
                 window.setTimeout(function () {
                     assertRestoredOriginals(assert, 1, element);
-                    assertStringExecution(assert, 2, 'contents-for-proxied-url');
+                    assertWriteProtectedStringExecution(assert, 2, element, 'contents-for-proxied-url');
                     assertInitResolved(assert, true, whenInitialized);
                     done();
                 }, 20);
@@ -243,12 +243,6 @@ QUnit.module('ScriptsLoader', function () {
 
         function assertNumberOfCalls(assert, expectedCallsCount) {
             assert.equal(utils._getCalls().length, expectedCallsCount, expectedCallsCount + ' calls have been made');
-        }
-
-        function assertStringExecution(assert, idx, executeString) {
-            var calls = utils._getCalls();
-            assert.equal(calls[idx].name, 'executeString', 'String has been executed');
-            assert.equal(calls[idx].params, executeString, 'Executed source was correct');
         }
 
         function assertRestoredOriginals(assert, idx, element) {

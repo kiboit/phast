@@ -155,11 +155,26 @@ phast.ScriptsLoader.Utilities = function (document) {
         var insertBefore = sourceElement.nextElementSibling;
         var lastScript = Promise.resolve();
 
+        var ignoreType;
+        if (isAsync(sourceElement)) {
+            ignoreType = 'async';
+        } else if (isDefer(sourceElement)) {
+            ignoreType = 'defer';
+        }
+
         document.write = function (string) {
+            if (ignoreType) {
+                console.warn("document.write call from " + ignoreType + " script ignored");
+                return;
+            }
             insert(string);
         };
 
         document.writeln = function (string) {
+            if (ignoreType) {
+                console.warn("document.writeln call from " + ignoreType + " script ignored");
+                return;
+            }
             insert(string + "\n");
         };
 
@@ -309,7 +324,7 @@ phast.ScriptsLoader.Scripts.AsyncAJAXScript = function (utils, element, fetch, f
         load
             .then(function (execString) {
                 utils.restoreOriginals(element);
-                return utils.executeString(execString).then(resolver);
+                return utils.writeProtectAndExecuteString(element, execString).then(resolver);
             })
             .catch(function () {
                 fallback.init();
@@ -390,10 +405,6 @@ phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
         return !element.hasAttribute('src');
     }
 
-    function isAsync(element) {
-        return element.hasAttribute('async');
-    }
-
 };
 
 function getSrc(element) {
@@ -402,4 +413,12 @@ function getSrc(element) {
     } else if (element.hasAttribute('src')) {
         return element.getAttribute('src');
     }
+}
+
+function isAsync(element) {
+    return element.hasAttribute('async');
+}
+
+function isDefer(element) {
+    return element.hasAttribute('defer');
 }
