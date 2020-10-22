@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.75 - 2020-10-22
+
+* Insert path separators (`/`) into bundler URLs in order to avoid Apache's 255
+  character filename limit.
+
+
 ## 1.74 - 2020-10-20
 
 * Ignore calls to `document.write` from `async` or `defer` scripts, in line with
