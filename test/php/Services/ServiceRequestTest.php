@@ -298,7 +298,7 @@ class ServiceRequestTest extends TestCase {
 
     public function testBase64PathInfo() {
         $queryString = 'a=1&a=2&b=3';
-        $pathInfo = sprintf('/%s.q.js', Base64url::encode($queryString));
+        $pathInfo = '/' . $this->insertPathSeparators(Base64url::encode($queryString) . '.q.js');
         $httpRequest = Request::fromArray(['get' => 'yes'], ['PATH_INFO' => $pathInfo]);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
         $this->assertSame(
@@ -310,6 +310,10 @@ class ServiceRequestTest extends TestCase {
             $serviceRequest->getParams()
         );
         $this->assertSame(['1', '2'], $serviceRequest->getQuery()->getAll('a'));
+    }
+
+    private function insertPathSeparators($path) {
+        return strrev(implode('/', str_split(strrev($path), 6)));
     }
 
     public function testRetinaSrc() {

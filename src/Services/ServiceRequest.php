@@ -249,10 +249,11 @@ class ServiceRequest {
     }
 
     private static function parseBase64PathInfo($string) {
-        if (!preg_match('~^/([a-z0-9_-]+)\.q\.js$~i', $string, $match)) {
+        if (!preg_match('~^((/[a-z0-9_-]+)+)\.q\.js$~i', $string, $match)) {
             return null;
         }
-        return Query::fromString(Base64url::decode($match[1]));
+        $data = str_replace('/', '', $match[1]);
+        return Query::fromString(Base64url::decode($data));
     }
 
     /**

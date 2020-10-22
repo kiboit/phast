@@ -25,17 +25,27 @@ function buildQuery(params) {
 }
 
 function appendPathInfo(url, query) {
-    var path = btoa(query)
+    var data = btoa(query)
         .replace(/=/g, '')
         .replace(/\//g, '_')
         .replace(/\+/g, '-');
+
+    var path = insertPathSeparators(data + '.q.js');
 
     return (
         url
             .replace(/\?.*$/, '')
             .replace(/\/__p__\.js$/, '')
-        + '/' + path + '.q.js'
+        + '/' + path
     );
+
+    function insertPathSeparators(path) {
+        return strrev(strrev(path).match(/[\s\S]{1,255}/g).join('/'));
+    }
+
+    function strrev(s) {
+        return s.split('').reverse().join('');
+    }
 }
 
 function appendQueryString(url, queryString) {
