@@ -53,6 +53,8 @@ class DefaultConfiguration {
 
                     Filters\HTML\CommentsRemoval\Filter::class => [],
 
+                    Filters\HTML\MetaCharset\Filter::class => [],
+
                     Filters\HTML\Minify\Filter::class => [],
 
                     Filters\HTML\MinifyScripts\Filter::class => [],
