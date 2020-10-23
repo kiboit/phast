@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.77 - 2020-10-23
+
+* Insert `<meta charset=utf-8>` tag right after `<head>` and remove existing
+  `<meta charset>` tags.  This fixes an issue where the `<meta charset>` tag
+  appears more than 512 bytes into the document, causing encoding issues.
+
+
 ## 1.76 - 2020-10-23
 
 * Stop proxying external scripts.
