@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.76 - 2020-10-23
+
+* Stop proxying external scripts.
+
+
 ## 1.75 - 2020-10-22
 
 * Insert path separators (`/`) into bundler URLs in order to avoid Apache's 255
