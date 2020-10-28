@@ -15,7 +15,7 @@ class Filter implements HTMLStreamFilter {
                 ) {
                     continue;
                 }
-                if (!$didYield && !in_array($element->tagName, ['html', 'head'])) {
+                if (!$didYield && !in_array($element->tagName, ['html', 'head', '!doctype'])) {
                     yield new Tag('meta', ['charset' => 'utf-8']);
                     $didYield = true;
                 }
