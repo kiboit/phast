@@ -9,8 +9,8 @@ class OutputBufferHandler {
 
     const START_PATTERN = '~
         (
-            \s*+ <!doctype\s++html> |
-            \s*+ <html> |
+            \s*+ <!doctype\s++html\b[^<>]*> |
+            \s*+ <html\b[^<>]*> |
             \s*+ <head> |
             \s*+ <!--.*?-->
         )++

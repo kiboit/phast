@@ -24,10 +24,17 @@ class OutputBufferHandlerTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame('', $this->handler->handleChunk('Hello!', 0));
     }
 
-    public function testImmediateOutput() {
-        $this->assertSame('<html>', $this->handler->handleChunk('<html>', 0));
+    /** @dataProvider immediateOutputData */
+    public function testImmediateOutput($chunk) {
+        $this->assertSame($chunk, $this->handler->handleChunk($chunk, 0));
         $this->assertSame('', $this->handler->handleChunk('</html>', 0));
         $this->assertSame('</HTML>', $this->handler->handleChunk('', PHP_OUTPUT_HANDLER_FINAL));
+    }
+
+    public function immediateOutputData() {
+        yield ['<html>'];
+        yield ['<!doctype html>'];
+        yield ['<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">'];
     }
 
     public function testDataInFinalChunk() {
