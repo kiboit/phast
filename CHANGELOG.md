@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.78 - 2020-10-28
+
+* Handle `<!doctype html ...>` declarations correctly, and don't insert `<meta
+  charset>` before them. (This broke pages using old XHTML doctypes.)
+
+
 ## 1.77 - 2020-10-23
 
 * Insert `<meta charset=utf-8>` tag right after `<head>` and remove existing
