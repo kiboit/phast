@@ -2,6 +2,8 @@
 
 var Promise = phast.ES6Promise;
 
+var hasCurrentScript = !!document.currentScript;
+
 phast.ScriptsLoader = {};
 
 phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
@@ -178,6 +180,19 @@ phast.ScriptsLoader.Utilities = function (document) {
             insert(string + "\n");
         };
 
+        if (hasCurrentScript) {
+            try {
+                Object.defineProperty(document, 'currentScript', {
+                    configurable: true,
+                    get: function() {
+                        return sourceElement;
+                    }
+                });
+            } catch (e) {
+                console.error("[Phast] Unable to override document.currentScript on this browser: ", e);
+            }
+        }
+
         function insert(string) {
             var container = document.createElement('div');
             container.innerHTML = string;
@@ -212,6 +227,9 @@ phast.ScriptsLoader.Utilities = function (document) {
             .finally(function () {
                 delete document.write;
                 delete document.writeln;
+                if (hasCurrentScript) {
+                    delete document.currentScript;
+                }
             });
     }
 
