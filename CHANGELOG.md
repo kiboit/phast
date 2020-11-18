@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.79 - 2020-11-18
+
+* Support `document.currentScript` in optimized scripts.
+* Prevent (suppressed) notice from `ob_end_clean`.
+
+
 ## 1.78 - 2020-10-28
 
 * Handle `<!doctype html ...>` declarations correctly, and don't insert `<meta
