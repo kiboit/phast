@@ -3,6 +3,7 @@
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Common\Base64url;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\LocalRetriever;
 use Kibo\Phast\Retrievers\Retriever;
@@ -192,7 +193,9 @@ class FilterTest extends HTMLFilterTestCase {
         $parsedHref = $this->getGeneratedProxyURL();
 
         $this->assertEquals(
-            '/service.php/http-3A-2F-2Fphast.test-2Fthe-2Dcss.css/service=css/cacheMarker=123/token=the-2Dtoken/__p__.css',
+            sprintf('/service.php/%s.q.css', Base64url::encode(
+                'service=css&src=http%3A%2F%2Fphast.test%2Fthe-css.css&cacheMarker=123&token=the-token'
+            )),
             $parsedHref->getPath()
         );
     }

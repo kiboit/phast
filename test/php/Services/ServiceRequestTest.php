@@ -17,49 +17,25 @@ class ServiceRequestTest extends TestCase {
     /**
      * @dataProvider getSerializeParamsTestData
      */
-    public function testSerializeParams(array $params, $expectedQuery, $expectedPath) {
+    public function testSerializeParams(array $params) {
         $request = (new ServiceRequest())->withParams($params);
+        $expectedQuery = http_build_query($params);
+        $ext = preg_replace('/^.*\./', '', $params['src']);
+        if ($ext == 'php') {
+            $ext = 'js';
+        }
+        $expectedPath = '/' . Base64url::encode($expectedQuery) . '.q.' . $ext;
         $this->checkRequest($request, $expectedQuery, $expectedPath);
     }
 
     public function getSerializeParamsTestData() {
-        return [
-            [
-                ['src' => '/images/file.png'],
-                'src=%2Fimages%2Ffile.png',
-                '/-2Fimages-2Ffile.png/__p__.png',
-            ],
-            [
-                ['src' => '/images/file.php'],
-                'src=%2Fimages%2Ffile.php',
-                '/-2Fimages-2Ffile.php/__p__.js',
-            ],
-            [
-                ['src' => 'http://example.com/path/file.jpeg'],
-                'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile.jpeg',
-                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile.jpeg/__p__.jpeg',
-            ],
-            [
-                ['src' => 'http://example.com///path////file.png'],
-                'src=http%3A%2F%2Fexample.com%2F%2F%2Fpath%2F%2F%2F%2Ffile.png',
-                '/http-3A-2F-2Fexample.com-2F-2F-2Fpath-2F-2F-2F-2Ffile.png/__p__.png',
-            ],
-            [
-                ['src' => 'http://example.com/path/file-file.png'],
-                'src=http%3A%2F%2Fexample.com%2Fpath%2Ffile-file.png',
-                '/http-3A-2F-2Fexample.com-2Fpath-2Ffile-2Dfile.png/__p__.png',
-            ],
-            [
-                ['src' => 'the-file.png', 'width' => 20],
-                'src=the-file.png&width=20',
-                '/the-2Dfile.png/width=20/__p__.png',
-            ],
-            [
-                ['src' => 'the-file.png', 'width' => 20, 'height' => 30],
-                'src=the-file.png&width=20&height=30',
-                '/the-2Dfile.png/width=20/height=30/__p__.png',
-            ],
-        ];
+        yield [['src' => '/images/file.png']];
+        yield [['src' => '/images/file.php']];
+        yield [['src' => 'http://example.com/path/file.jpeg']];
+        yield [['src' => 'http://example.com///path////file.png']];
+        yield [['src' => 'http://example.com/path/file-file.png']];
+        yield [['src' => 'the-file.png', 'width' => 20]];
+        yield [['src' => 'the-file.png', 'width' => 20, 'height' => 30]];
     }
 
     /**
@@ -76,31 +52,31 @@ class ServiceRequestTest extends TestCase {
                 'images.php',
                 ['src' => 'http://example.com/the-image.png'],
                 'images.php/__p__.png?src=http%3A%2F%2Fexample.com%2Fthe-image.png',
-                'images.php/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png/__p__.png',
+                'images.php/c3JjPWh0dHAlM0ElMkYlMkZleGFtcGxlLmNvbSUyRnRoZS1pbWFnZS5wbmc.q.png',
             ],
             [
                 'images.php?param=some-value',
                 ['src' => 'the-image.jpeg'],
                 'images.php/__p__.jpeg?param=some-value&src=the-image.jpeg',
-                'images.php/the-2Dimage.jpeg/param=some-2Dvalue/__p__.jpeg',
+                'images.php/cGFyYW09c29tZS12YWx1ZSZzcmM9dGhlLWltYWdlLmpwZWc.q.jpeg',
             ],
             [
                 'images-service/',
                 ['src' => 'the-image.png'],
                 'images-service/?src=the-image.png',
-                'images-service/the-2Dimage.png/__p__.png',
+                'images-service/c3JjPXRoZS1pbWFnZS5wbmc.q.png',
             ],
             [
                 'images.php?param=value&src=overridden',
                 ['src' => 'image.png'],
                 'images.php/__p__.png?param=value&src=image.png',
-                'images.php/image.png/param=value/__p__.png',
+                'images.php/cGFyYW09dmFsdWUmc3JjPWltYWdlLnBuZw.q.png',
             ],
             [
                 'images.php',
                 ['src' => 'http://example.com/the-image.png?ver=1'],
                 'images.php/__p__.png?src=http%3A%2F%2Fexample.com%2Fthe-image.png%3Fver%3D1',
-                'images.php/http-3A-2F-2Fexample.com-2Fthe-2Dimage.png-3Fver-3D1/__p__.png',
+                'images.php/c3JjPWh0dHAlM0ElMkYlMkZleGFtcGxlLmNvbSUyRnRoZS1pbWFnZS5wbmclM0Z2ZXIlM0Qx.q.png',
             ],
         ];
     }
@@ -137,7 +113,7 @@ class ServiceRequestTest extends TestCase {
         $pathRequest = ServiceRequest::fromHTTPRequest(Request::fromArray([], ['PATH_INFO' => $pathFormat]));
 
         $this->assertStringStartsWith('width=10&src=url&token=', $request->serialize(ServiceRequest::FORMAT_QUERY));
-        $this->assertStringStartsWith('/url/width=10/token=', $request->serialize(ServiceRequest::FORMAT_PATH));
+        $this->assertStringStartsWith('/' . Base64url::encode('width=10&src=url&token='), $request->serialize(ServiceRequest::FORMAT_PATH));
 
         $this->assertTrue($queryRequest->verify($signature));
         $this->assertTrue($pathRequest->verify($signature));
@@ -245,16 +221,16 @@ class ServiceRequestTest extends TestCase {
     }
 
     public function testPropagatingRequestId() {
+        ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
+
         $url = URL::fromString('phast.php?service=diagnostics');
         $url1 = (new ServiceRequest())->withUrl($url)->serialize();
-
-        $this->assertNotContains('requestId=', $url1);
+        $this->assertNotContains('documentRequestId=', $url1);
 
         $httpRequest = Request::fromArray(['phast' => 'diagnostics'], []);
         $url2 = ServiceRequest::fromHTTPRequest($httpRequest)
                 ->withUrl($url)
                 ->serialize();
-
         $this->assertContains('documentRequestId=', $url2);
 
         $url3 = (new ServiceRequest())->withUrl($url)->serialize();
@@ -274,7 +250,7 @@ class ServiceRequestTest extends TestCase {
         ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
         $querySerialization = (new ServiceRequest())->withUrl($url)->serialize();
 
-        $this->assertEquals('phast.php/p=v/__p__.js', $pathSerialization);
+        $this->assertEquals('phast.php/cD12.q.js', $pathSerialization);
         $this->assertEquals((string) $url, $querySerialization);
     }
 
@@ -307,6 +283,21 @@ class ServiceRequestTest extends TestCase {
         $this->assertEquals('https://yolo', $serviceRequest->getParams()['src']);
     }
 
+    public function testLegacyPathInfo() {
+        $pathInfo = '/the-2Dfile.png/width=20/height=30/__p__.png';
+        $httpRequest = Request::fromArray(['get' => 'yes'], ['PATH_INFO' => $pathInfo]);
+        $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
+        $this->assertSame(
+            [
+                'get' => 'yes',
+                'src' => 'the-file.png',
+                'width' => '20',
+                'height' => '30',
+            ],
+            $serviceRequest->getParams()
+        );
+    }
+
     public function testBase64PathInfo() {
         $queryString = 'a=1&a=2&b=3';
         $pathInfo = '/' . $this->insertPathSeparators(Base64url::encode($queryString) . '.q.js');
@@ -327,6 +318,13 @@ class ServiceRequestTest extends TestCase {
         return strrev(implode('/', str_split(strrev($path), 6)));
     }
 
+    public function testSplittingLongFilenames() {
+        $request = (new ServiceRequest())->withParams(['src' => str_repeat('x', 1000)]);
+        $pathInfo = $request->serialize(ServiceRequest::FORMAT_PATH);
+        $this->assertRegExp('~[a-z0-9_-]{255}~i', $pathInfo);
+        $this->assertNotRegExp('~[a-z0-9_-]{256}~i', $pathInfo);
+    }
+
     public function testRetinaSrc() {
         $httpRequest = Request::fromArray([], ['PATH_INFO' => '/-2Fimages-2Ffile.jpg/__p__@2x.jpg']);
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
@@ -343,13 +341,14 @@ class ServiceRequestTest extends TestCase {
         $request = (new ServiceRequest())->withParams(['src' => 'url.jpg'])->sign($signature);
 
         $pathInfo = $request->serialize(ServiceRequest::FORMAT_PATH);
-        $this->assertStringStartsWith('/url.jpg/token=', $pathInfo);
+        $this->assertEquals('/c3JjPXVybC5qcGcmdG9rZW49ZGZhMWRjOTU2NjQwOTllZQ.q.jpg', $pathInfo);
 
         $pathRequest = ServiceRequest::fromHTTPRequest(Request::fromArray([], ['PATH_INFO' => $pathInfo]));
         $this->assertTrue($pathRequest->verify($signature));
         $this->assertEquals(['src' => 'url.jpg'], $pathRequest->getParams());
 
-        $pathInfo = preg_replace('~/__p__.jpg$~', '/__p__@2x.jpg', $pathInfo);
+        $pathInfo = preg_replace('~\.jpg$~', '@2x.jpg', $pathInfo, -1, $count);
+        $this->assertEquals(1, $count);
         $pathRequest = ServiceRequest::fromHTTPRequest(Request::fromArray([], ['PATH_INFO' => $pathInfo]));
         $this->assertTrue($pathRequest->verify($signature));
         $this->assertEquals(['src' => 'url@2x.jpg'], $pathRequest->getParams());

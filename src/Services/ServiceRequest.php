@@ -249,11 +249,20 @@ class ServiceRequest {
     }
 
     private static function parseBase64PathInfo($string) {
-        if (!preg_match('~^((/[a-z0-9_-]+)+)\.q\.js$~i', $string, $match)) {
+        if (!preg_match('~
+            (?<query> (?:/[a-z0-9_-]+)+ )
+            \.q
+            (?<retina> @[1-9][0-9]*x )?
+            \.[a-z]{2,4} $
+        ~ix', $string, $match)) {
             return null;
         }
-        $data = str_replace('/', '', $match[1]);
-        return Query::fromString(Base64url::decode($data));
+        $data = str_replace('/', '', $match['query']);
+        $values = Query::fromString(Base64url::decode($data));
+        if (!empty($match['retina'])) {
+            $values->set('src', self::appendStemSuffix($values->get('src'), $match['retina']));
+        }
+        return $values;
     }
 
     /**
@@ -329,25 +338,16 @@ class ServiceRequest {
 
     /** @return string */
     private function serializeToPathFormat(array $params) {
-        $encodedSrc = null;
-        $values = [];
-        foreach (explode('&', http_build_query($params)) as $element) {
-            list($key, $value) = explode('=', $element, 2);
-            $encodedValue = str_replace(['-', '%'], ['%2D', '-'], $value);
-            if ($key == 'src') {
-                $encodedSrc = $encodedValue;
-            } else {
-                $values[] = $key . '=' . $encodedValue;
-            }
-        }
-        if ($encodedSrc) {
-            array_unshift($values, $encodedSrc);
-        }
-        $params = '/' . join('/', $values) . '/' . $this->getDummyFilename($params);
+        $query = Base64url::encode(http_build_query($params));
+        $path = '/' . $this->insertPathSeparators($query . '.q.' . $this->getDummyExtension($params));
         if (isset($this->url)) {
-            return preg_replace(['~\?.*~', '~/$~'], '', $this->url) . $params;
+            return preg_replace(['~\?.*~', '~/$~'], '', $this->url) . $path;
         }
-        return $params;
+        return $path;
+    }
+
+    private function insertPathSeparators($path) {
+        return strrev(implode('/', str_split(strrev($path), 255)));
     }
 
     private function getDummyFilename(array $params) {
