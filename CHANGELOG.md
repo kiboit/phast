@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.81 - 2020-12-16
+
+* Use Base64-based path info for server-generated URLs.
+
+
 ## 1.80 - 2020-12-16
 
 * Encode characters that cannot occur in URLs. This fixes canonical URLs for
