@@ -298,7 +298,7 @@ class ServiceRequest {
         return $this->serializeToQueryFormat($params);
     }
 
-    private function getAllParams() {
+    public function getAllParams() {
         $urlParams = [];
         if ($this->url) {
             parse_str($this->url->getQuery(), $urlParams);

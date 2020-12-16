@@ -284,6 +284,17 @@ class ServiceRequestTest extends TestCase {
 
         $this->assertEquals($expectedQuery, $actualQuery);
         $this->assertEquals($expectedPath, $actualPath);
+
+        $pathRequest = ServiceRequest::fromHTTPRequest(
+            Request::fromArray([], ['PATH_INFO' => $actualPath])
+        );
+        $this->assertEquals($request->getAllParams(), $pathRequest->getParams());
+
+        $queryUrl = strpos($actualQuery, '?') === false ? '?' . $actualQuery : $actualQuery;
+        $queryRequest = ServiceRequest::fromHTTPRequest(
+            Request::fromArray([], ['REQUEST_URI' => $queryUrl])
+        );
+        $this->assertEquals($request->getAllParams(), $queryRequest->getParams());
     }
 
     public function testHxxp() {

@@ -169,7 +169,7 @@ class ImageURLRewriter {
     /**
      * @param string $url
      * @param URL|null $baseUrl
-     * @return URL
+     * @return URL|null
      */
     private function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
         $url = trim($url);
