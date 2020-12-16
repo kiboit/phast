@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.80 - 2020-12-16
+
+* Encode characters that cannot occur in URLs. This fixes canonical URLs for
+  optimized images if those URLs contained special characters.
+
+
 ## 1.79 - 2020-11-18
 
 * Support `document.currentScript` in optimized scripts.
