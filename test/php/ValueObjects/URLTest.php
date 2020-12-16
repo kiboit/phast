@@ -160,4 +160,15 @@ class URLTest extends PhastTestCase {
             (string) URL::fromString('http://google.com/Много Добре!.html')
         );
     }
+
+    public function testUserPass() {
+        $this->assertEquals(
+            'http://:0@x.com/',
+            (string) URL::fromString('http://:0@x.com/')
+        );
+        $this->assertEquals(
+            'http://0@x.com/',
+            (string) URL::fromString('http://0@x.com/')
+        );
+    }
 }

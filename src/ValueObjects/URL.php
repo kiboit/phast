@@ -111,7 +111,7 @@ class URL {
      */
     public function toString() {
         $pass = isset($this->pass) ? ':' . $this->pass  : '';
-        $pass = ($this->user || $this->pass) ? "$pass@" : '';
+        $pass = isset($this->user) || isset($this->pass) ? "$pass@" : '';
         return $this->encodeSpecialCharacters(implode('', [
             isset($this->scheme) ? $this->scheme . '://' : '',
             $this->user,
