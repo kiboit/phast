@@ -110,16 +110,32 @@ class URL {
      * @return string
      */
     public function toString() {
-        $scheme   = isset($this->scheme) ? $this->scheme . '://' : '';
-        $host     = isset($this->host) ? $this->host : '';
-        $port     = isset($this->port) ? ':' . $this->port : '';
-        $user     = isset($this->user) ? $this->user : '';
-        $pass     = isset($this->pass) ? ':' . $this->pass  : '';
-        $pass     = ($user || $pass) ? "$pass@" : '';
-        $path     = isset($this->path) ? $this->getPath() : '';
-        $query    = isset($this->query) ? '?' . $this->query : '';
-        $fragment = isset($this->fragment) ? '#' . $this->fragment : '';
-        return "$scheme$user$pass$host$port$path$query$fragment";
+        $pass = isset($this->pass) ? ':' . $this->pass  : '';
+        $pass = ($this->user || $this->pass) ? "$pass@" : '';
+        return $this->encodeSpecialCharacters(implode('', [
+            isset($this->scheme) ? $this->scheme . '://' : '',
+            $this->user,
+            $pass,
+            $this->host,
+            isset($this->port) ? ':' . $this->port : '',
+            $this->path,
+            isset($this->query) ? '?' . $this->query : '',
+            isset($this->fragment) ? '#' . $this->fragment : '',
+        ]));
+    }
+
+    private function encodeSpecialCharacters($string) {
+        return preg_replace_callback(
+            '~[^' .
+            preg_quote('!#$&\'()*+,/:;=?@[]', '~') .
+            preg_quote('-_.~', '~') .
+            'A-Za-z0-9%' .
+            ']~',
+            function ($match) {
+                return rawurlencode($match[0]);
+            },
+            $string
+        );
     }
 
     private function normalizePath($path) {

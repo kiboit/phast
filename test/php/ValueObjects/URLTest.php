@@ -153,4 +153,11 @@ class URLTest extends PhastTestCase {
             ->rewrite(URL::fromString('http://yahoo.com/old'), URL::fromString('http://google.com/new'))
         );
     }
+
+    public function testEncoding() {
+        $this->assertEquals(
+            'http://google.com/%D0%9C%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%94%D0%BE%D0%B1%D1%80%D0%B5!.html',
+            (string) URL::fromString('http://google.com/Много Добре!.html')
+        );
+    }
 }
