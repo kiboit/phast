@@ -84,7 +84,7 @@ Phast is tested to work on all browser versions equal or higher than the followi
 * Firefox 56
 * Chrome 62
 * Edge (any version)
-* Safari 5.1
+* Safari 6.2
 * IE 11
 
 

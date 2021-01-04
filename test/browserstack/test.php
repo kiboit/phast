@@ -9,7 +9,52 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 
-$tests = require_once __DIR__ . '/tests_list.php';
+$tests = [
+    [
+        'os' => 'Windows',
+        'os_version' => '10',
+        'browser' => 'chrome',
+    ],
+    [
+        'os' => 'OS X',
+        'os_version' => 'Big Sur',
+        'browser' => 'safari',
+    ],
+    [
+        'os' => 'Windows',
+        'os_version' => '10',
+        'browser' => 'firefox',
+    ],
+
+    [
+        'os' => 'OS X',
+        'os_version' => 'Mountain Lion',
+        'browser' => 'safari',
+        'browser_version' => '6.2',
+    ],
+    [
+        'os' => 'Windows',
+        'os_version' => '10',
+        'browser' => 'firefox',
+        'browser_version' => '56',
+    ],
+    [
+        'os' => 'Windows',
+        'os_version' => '10',
+        'browser' => 'chrome',
+        'browser_version' => '62',
+    ],
+    [
+        'os' => 'Windows',
+        'browser' => 'edge',
+        'browser_version' => '17',
+    ],
+    [
+        'os' => 'windows',
+        'browser' => 'ie',
+        'browser_version' => '11',
+    ],
+];
 
 $caps = parse_options(array_slice($argv, 1));
 

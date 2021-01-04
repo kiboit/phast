@@ -36,14 +36,6 @@ for env in "${need_env[@]}"; do
 done
 
 
-# Download browser list
-if [[ ! -f $browsers_json ]]; then
-    curl -fSs -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
-        https://api.browserstack.com/automate/browsers.json > $browsers_json~
-    mv $browsers_json{~,}
-fi
-
-
 # Run tests
 mkdir -p output
 ./test.php | parallel -j9 --bar --joblog output/joblog --resume-failed | tee output/test.out
