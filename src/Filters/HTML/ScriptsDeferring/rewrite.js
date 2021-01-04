@@ -28,6 +28,16 @@ document.addEventListener('readystatechange', function (e) {
     }
 });
 
+var didSetTimeout = false;
+var originalSetTimeout = window.setTimeout;
+
+window.setTimeout = function (fn, delay) {
+    if (!delay || delay < 0) {
+        didSetTimeout = true;
+    }
+    return originalSetTimeout.call(window, fn, delay);
+};
+
 function loadScripts() {
     var scriptsFactory = new phast.ScriptsLoader.Scripts.Factory(document, fetchScript);
     var scripts = phast.ScriptsLoader.getScriptsInExecutionOrder(document, scriptsFactory);
@@ -78,17 +88,16 @@ function restoreReadyState() {
 
     function waitForTimeouts() {
         return new Promise(function (resolve) {
-            (function retry(tries) {
-                var id = setTimeout(function () {
-                    var nextId = setTimeout(function () {
-                        retry(tries - 1);
+            (function retry (depth) {
+                if (didSetTimeout && depth < 10) {
+                    didSetTimeout = false;
+                    originalSetTimeout.call(window, function () {
+                        retry(depth + 1);
                     });
-                    if (nextId - id <= 1 || tries <= 1) {
-                        requestAnimationFrame(resolve);
-                        clearTimeout(nextId);
-                    }
-                });
-            })(100);
+                } else {
+                    requestAnimationFrame(resolve);
+                }
+            })(0);
         });
     }
 }
