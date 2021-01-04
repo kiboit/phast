@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.83 - 2021-01-04
+
+* Handle setTimeout chains without relying on setTimeout IDs always being offset
+  by one, and without using setTimeout when it isn't needed.
+
+
 ## 1.82 - 2021-01-04
 
 * Make sure setTimeout chains in DOMContentLoaded are completely executed before
