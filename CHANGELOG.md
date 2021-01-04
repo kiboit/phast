@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.82 - 2021-01-04
+
+* Make sure setTimeout chains in DOMContentLoaded are completely executed before
+  the load event is triggered. This fixes some uses of jQuery's ready event.
+
+
 ## 1.81 - 2020-12-16
 
 * Use Base64-based path info for server-generated URLs.
