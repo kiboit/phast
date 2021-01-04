@@ -22,6 +22,12 @@ window.addEventListener('load', function (e) {
     loadFiltered = true;
 });
 
+document.addEventListener('readystatechange', function (e) {
+    if (document.readyState === 'loading') {
+        e.stopImmediatePropagation();
+    }
+});
+
 function loadScripts() {
     var scriptsFactory = new phast.ScriptsLoader.Scripts.Factory(document, fetchScript);
     var scripts = phast.ScriptsLoader.getScriptsInExecutionOrder(document, scriptsFactory);
@@ -29,16 +35,7 @@ function loadScripts() {
         return;
     }
 
-    try {
-        Object.defineProperty(document, 'readyState', {
-            configurable: true,
-            get: function() {
-                return 'loading';
-            }
-        });
-    } catch (e) {
-        console.error("[Phast] Unable to override document.readyState on this browser: ", e);
-    }
+    setReadyState('loading');
 
     phast
         .ScriptsLoader
@@ -46,20 +43,54 @@ function loadScripts() {
         .then(restoreReadyState);
 }
 
-function restoreReadyState() {
-    window.requestAnimationFrame(function () {
-        delete document['readyState'];
-        triggerEvent(document, 'readystatechange');
-        triggerEvent(document, 'DOMContentLoaded');
-
-        window.requestAnimationFrame(function () {
-            if (loadFiltered) {
-                triggerEvent(window, 'load');
-            } else {
-                loadFiltered = true;
+function setReadyState(state) {
+    try {
+        Object.defineProperty(document, 'readyState', {
+            configurable: true,
+            get: function() {
+                return state;
             }
         });
-    });
+    } catch (e) {
+        console.error("[Phast] Unable to override document.readyState on this browser: ", e);
+    }
+}
+
+function restoreReadyState() {
+    waitForTimeouts()
+        .then(function () {
+            setReadyState('interactive');
+            triggerEvent(document, 'readystatechange');
+            return waitForTimeouts();
+        })
+        .then(function () {
+            triggerEvent(document, 'DOMContentLoaded');
+            return waitForTimeouts();
+        })
+        .then(function () {
+            delete document['readyState'];
+            triggerEvent(document, 'readystatechange');
+            if (loadFiltered) {
+                triggerEvent(window, 'load');
+            }
+            loadFiltered = true;
+        });
+
+    function waitForTimeouts() {
+        return new Promise(function (resolve) {
+            (function retry(tries) {
+                var id = setTimeout(function () {
+                    var nextId = setTimeout(function () {
+                        retry(tries - 1);
+                    });
+                    if (nextId - id <= 1 || tries <= 1) {
+                        requestAnimationFrame(resolve);
+                        clearTimeout(nextId);
+                    }
+                });
+            })(100);
+        });
+    }
 }
 
 function triggerEvent(on, name) {

@@ -3,13 +3,7 @@
 <html>
 <body>
 <script>
-    var events = {
-        DOMContentLoaded: 0,
-        readyStateComplete: 0,
-        readyStateCompleteFn: 0,
-        load: 0,
-        loadFn: 0
-    };
+    var events = [];
 
     function say(message) {
         var p = document.createElement('p');
@@ -17,34 +11,25 @@
         document.body.appendChild(p);
     }
 
+    function trackEvent(name) {
+        say("event=" + name + " readyState=" + document.readyState);
+        events.push({
+            event: name,
+            readyState: document.readyState
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-        say('DOMContentLoaded');
-        events.DOMContentLoaded++;
+        trackEvent('DOMContentLoaded');
     });
 
     document.addEventListener('readystatechange', function () {
-        if (document.readyState === 'complete') {
-            say('readystatechange with readyState complete');
-            events.readyStateComplete++;
-        }
+        trackEvent('readystatechange');
     });
-
-    document.onreadystatechange = function() {
-        if (document.readyState === 'complete') {
-            say('readystatechange with readyState complete (old-school)');
-            events.readyStateCompleteFn++;
-        }
-    };
 
     window.addEventListener('load', function () {
-        say('load');
-        events.load++;
+        trackEvent('load');
     });
-
-    window.onload = function () {
-        say('load (old-school)');
-        events.loadFn++;
-    }
 </script>
 </body>
 </html>
