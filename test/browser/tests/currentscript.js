@@ -1,4 +1,8 @@
 test('currentscript.php', function (assert, document) {
+    if (!document.currentScript) {
+        return;
+    }
+
     assert.equal(
         document.querySelector('#result').innerText, 'QED',
         "The contents of the data-value attribute on the script should be retrieved"
