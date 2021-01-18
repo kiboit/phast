@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.84 - 2021-01-18
+
+* Detect WOFF2 support using a feature test, instead of relying on the user
+  agent. This fixes Google Fonts on iOS 9 and earlier.
+
+
 ## 1.83 - 2021-01-04
 
 * Handle setTimeout chains without relying on setTimeout IDs always being offset
