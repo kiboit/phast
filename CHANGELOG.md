@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.85 - 2021-01-29
+
+* Raise maximum page size to 2 MiB.
+
+
 ## 1.84 - 2021-01-18
 
 * Detect WOFF2 support using a feature test, instead of relying on the user
