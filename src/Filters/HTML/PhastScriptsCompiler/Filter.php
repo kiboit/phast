@@ -25,20 +25,20 @@ class Filter implements HTMLStreamFilter {
     }
 
     public function transformElements(\Traversable $elements, HTMLPageContext $context) {
-        $buffered = [];
+        $buffer = [];
         $buffering = false;
         foreach ($elements as $element) {
             if ($this->isClosingBodyTag($element)) {
                 if ($buffering) {
-                    foreach ($buffered as $bufElement) {
+                    foreach ($buffer as $bufElement) {
                         yield $bufElement;
                     }
-                    $buffered =  [];
+                    $buffer = [];
                 }
                 $buffering = true;
             }
             if ($buffering) {
-                $buffered[] = $element;
+                $buffer[] = $element;
             } else {
                 yield $element;
             }
@@ -49,7 +49,7 @@ class Filter implements HTMLStreamFilter {
             yield $this->compileScript($scripts);
         }
 
-        foreach ($buffered as $element) {
+        foreach ($buffer as $element) {
             yield $element;
         }
     }
