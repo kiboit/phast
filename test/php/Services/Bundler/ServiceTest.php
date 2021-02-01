@@ -202,7 +202,7 @@ class ServiceTest extends PhastTestCase {
         $headers = $response->getHeaders();
         $this->assertArrayHasKey('Content-Type', $headers);
 
-        $this->assertEquals('application/json', $headers['Content-Type']);
+        $this->assertEquals('text/plain', $headers['Content-Type']);
         $parts = iterator_to_array($response->getContent());
         $content = json_decode(join('', $parts));
         $this->assertTrue(is_array($content));
