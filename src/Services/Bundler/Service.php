@@ -65,7 +65,7 @@ class Service {
      */
     public function serve(ServiceRequest $request) {
         $response = new Response();
-        $response->setHeader('Content-Type', 'application/json');
+        $response->setHeader('Content-Type', 'text/plain');
         $response->setContent($this->streamResponse($request));
         return $response;
     }
