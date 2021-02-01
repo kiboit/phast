@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.86 - 2021-02-01
+
+* Use `text/plain` MIME type for the bundled CSS and JS responses. This helps
+  apply automatic response compression in some server configurations
+  (specifically o2switch).
+
 ## 1.85 - 2021-01-29
 
 * Raise maximum page size to 2 MiB.
