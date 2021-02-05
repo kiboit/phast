@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ed531c42e630fd0a82e1a6fdd336f726",
+    "content-hash": "10bfaf4a9a58bd4329dcbd63d53a3d36",
     "packages": [],
     "packages-dev": [
         {
@@ -482,16 +482,16 @@
         },
         {
             "name": "kiboit/jsmin-php",
-            "version": "dev-control-chars",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kiboit/jsmin-php.git",
-                "reference": "48cc684a845566900aa7fd87402158d44e229a67"
+                "reference": "2ccb178bbebce0a764138d28ffe2ef845363d8ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kiboit/jsmin-php/zipball/48cc684a845566900aa7fd87402158d44e229a67",
-                "reference": "48cc684a845566900aa7fd87402158d44e229a67",
+                "url": "https://api.github.com/repos/kiboit/jsmin-php/zipball/2ccb178bbebce0a764138d28ffe2ef845363d8ab",
+                "reference": "2ccb178bbebce0a764138d28ffe2ef845363d8ab",
                 "shasum": ""
             },
             "require": {
@@ -501,6 +501,7 @@
             "require-dev": {
                 "phpunit/phpunit": "4.2"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -532,9 +533,9 @@
             "support": {
                 "email": "minify@googlegroups.com",
                 "issues": "https://github.com/mrclay/jsmin-php/issues",
-                "source": "https://github.com/kiboit/jsmin-php/tree/control-chars"
+                "source": "https://github.com/kiboit/jsmin-php/tree/master"
             },
-            "time": "2020-08-19T05:20:07+00:00"
+            "time": "2021-02-05T12:02:12+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -2890,5 +2891,5 @@
     "platform-overrides": {
         "php": "5.6"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }
