@@ -8,7 +8,7 @@ use Kibo\Phast\Filters\Service\CachedResultServiceFilter;
 use Kibo\Phast\ValueObjects\Resource;
 
 class JSMinifierFilter implements CachedResultServiceFilter {
-    const VERSION = 2;
+    const VERSION = 3;
 
     private $removeLicenseHeaders = true;
 
