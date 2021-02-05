@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.87 - 2021-02-05
+
+* Fix handling of closing parenthesis and string literal separated by newline in
+  JSMin.
+
+
 ## 1.86 - 2021-02-01
 
 * Use `text/plain` MIME type for the bundled CSS and JS responses. This helps
