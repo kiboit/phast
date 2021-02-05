@@ -14,7 +14,7 @@ use Kibo\Phast\ValueObjects\URL;
 class FilterTest extends HTMLFilterTestCase {
     const MODIFICATION_TIME = 1337;
 
-    const EXPECTED_CACHE_MARKER = '1337-2';
+    const EXPECTED_CACHE_MARKER = '1337-3';
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
