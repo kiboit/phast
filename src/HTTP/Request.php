@@ -70,13 +70,9 @@ class Request {
         if ($pathInfo) {
             return $pathInfo;
         }
-        $script = $this->getEnvValue('PHP_SELF');
-        $uri = $this->getEnvValue('DOCUMENT_URI');
-        if ($script !== null
-            && $uri !== null
-            && strpos($uri, $script . '/') === 0
-        ) {
-            return substr($uri, strlen($script));
+        $path = parse_url($this->getEnvValue('REQUEST_URI'), PHP_URL_PATH);
+        if (preg_match('~[^/]\.php(/.*)~', $path, $match)) {
+            return $match[1];
         }
     }
 
