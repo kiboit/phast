@@ -40,9 +40,9 @@ class PhastServices {
                 'Service parameter absent',
                 '<p>Phast was not able to determine the request parameters. This might be because you are accessing the Phast service file directly without parameters, or because your server configuration causes the PATH_INFO environment variable to be missing.</p>' .
                 '<p>This request has PATH_INFO set to: ' .
-                (isset($_SERVER['PATH_INFO']) ? '"<code>' . htmlentities($_SERVER['PATH_INFO']) . '</code>"' : '(none)') . '</p>' .
+                (isset($_SERVER['PATH_INFO']) ? '"<code>' . self::escape($_SERVER['PATH_INFO']) . '</code>"' : '(none)') . '</p>' .
                 '<p>This request has QUERY_STRING set to: ' .
-                (isset($_SERVER['QUERY_STRING']) ? '"<code>' . htmlentities($_SERVER['QUERY_STRING']) . '</code>"' : '(none)') . '</p>' .
+                (isset($_SERVER['QUERY_STRING']) ? '"<code>' . self::escape($_SERVER['QUERY_STRING']) . '</code>"' : '(none)') . '</p>' .
                 '<p>Either PATH_INFO or QUERY_STRING must contain the parameters for PhastPress contained in the URL. If the URL ends with parameters after a <code>/</code> character, those should end up in PATH_INFO. If the URL ends with parameters after a <code>?</code> character, those should end up in QUERY_STRING.</p>' .
                 '<p>If the URL contains parameters, but those are not visible above, your server is misconfigured.</p>'
             );
@@ -201,7 +201,8 @@ class PhastServices {
         <!doctype html>
         <html>
         <head>
-        <title><?= htmlentities($title); ?> &middot; Phast on <?= htmlentities($_SERVER['SERVER_NAME']); ?></title>
+        <meta charset="utf-8">
+        <title><?= self::escape($title); ?> &middot; Phast on <?= self::escape($_SERVER['SERVER_NAME']); ?></title>
         <style>
         html, body { min-height: 100%; }
         body { display: flex; flex-direction: column; align-items: center; }
@@ -210,14 +211,18 @@ class PhastServices {
         </head>
         <body>
         <div class="container">
-        <h1><?= htmlentities($title); ?></h1>
+        <h1><?= self::escape($title); ?></h1>
         <?= $message; ?>
         <hr>
-        Phast on <?= htmlentities($_SERVER['SERVER_NAME']); ?>
+        Phast on <?= self::escape($_SERVER['SERVER_NAME']); ?>
         </div>
         </body>
         </html>
         <?php
         exit;
+    }
+
+    private static function escape($value) {
+        return htmlentities((string) $value, ENT_QUOTES, 'UTF-8');
     }
 }
