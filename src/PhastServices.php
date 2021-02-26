@@ -22,8 +22,11 @@ class PhastServices {
         if ($httpRequest->getHeader('CDN-Loop')
             && preg_match('~(^|,)\s*Phast\b~', $httpRequest->getHeader('CDN-Loop'))
         ) {
-            http_response_code(508);
-            die('Loop detected');
+            self::exitWithError(
+                508,
+                'Loop detected',
+                '<p>Phast detected a request loop via the CDN-Loop header.</p>'
+            );
         }
 
         $serviceRequest = ServiceRequest::fromHTTPRequest($httpRequest);
@@ -182,5 +185,23 @@ class PhastServices {
 
     private static function isIterable($thing) {
         return is_array($thing) || ($thing instanceof \Iterator) || ($thing instanceof \Generator);
+    }
+
+    private static function exitWithError($code, $title, $message) {
+        http_response_code($code); ?>
+        <!doctype html>
+        <html>
+        <head>
+        <title><?= htmlentities($title); ?> &middot; Phast on <?= htmlentities($_SERVER['SERVER_NAME']); ?></title>
+        </head>
+        <body>
+        <h1><?= htmlentities($title); ?></h1>
+        <?= $message; ?>
+        <hr>
+        Phast on <?= htmlentities($_SERVER['SERVER_NAME']); ?>
+        </body>
+        </html>
+        <?php
+        exit;
     }
 }
