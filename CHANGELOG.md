@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.88 - 2021-02-26
+
+* Simplify `PATH_INFO` calculation if the environment variable is missing. This
+  is now determined by splitting the path component of `REQUEST_URI` on `.php/`.
+* Improve error messages, hopefully aiding troubleshooting when `phast.php`
+  isn't doing it's job.
+
+
 ## 1.87 - 2021-02-05
 
 * Fix handling of closing parenthesis and string literal separated by newline in
