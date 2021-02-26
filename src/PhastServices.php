@@ -43,7 +43,7 @@ class PhastServices {
                 (isset($_SERVER['PATH_INFO']) ? '"<code>' . self::escape($_SERVER['PATH_INFO']) . '</code>"' : '(none)') . '</p>' .
                 '<p>This request has QUERY_STRING set to: ' .
                 (isset($_SERVER['QUERY_STRING']) ? '"<code>' . self::escape($_SERVER['QUERY_STRING']) . '</code>"' : '(none)') . '</p>' .
-                '<p>Either PATH_INFO or QUERY_STRING must contain the parameters for PhastPress contained in the URL. If the URL ends with parameters after a <code>/</code> character, those should end up in PATH_INFO. If the URL ends with parameters after a <code>?</code> character, those should end up in QUERY_STRING.</p>' .
+                '<p>Either PATH_INFO or QUERY_STRING must contain the parameters for Phast contained in the URL. If the URL ends with parameters after a <code>/</code> character, those should end up in PATH_INFO. If the URL ends with parameters after a <code>?</code> character, those should end up in QUERY_STRING.</p>' .
                 '<p>If the URL contains parameters, but those are not visible above, your server is misconfigured.</p>'
             );
         } else {
