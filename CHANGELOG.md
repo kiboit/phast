@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.91 - 2021-03-04
+
+* Make message about inability to override `document.readyState` a warning
+  rather than an error, to avoid spurious complaints from PageSpeed Insights.
+
 ## 1.90 - 2021-03-04
 
 * Correctly support additional arguments when using setTimeout. This fixes a
