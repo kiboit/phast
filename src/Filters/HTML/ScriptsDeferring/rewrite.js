@@ -65,7 +65,7 @@ function setReadyState(state) {
       },
     });
   } catch (e) {
-    console.error(
+    console.warn(
       "[Phast] Unable to override document.readyState on this browser: ",
       e
     );
