@@ -1,1 +1,1 @@
-console.log('Deferred loaded');
+console.log("Deferred loaded");
