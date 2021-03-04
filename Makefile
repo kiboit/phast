@@ -39,6 +39,10 @@ dist : all
 clean :
 	rm -rf build
 
+.PHONY : format
+format :
+	git ls-files '*.js'
+
 
 build/phast.php : vendor/autoload.php $(JSMIN_TARGETS) $(shell git ls-files src)
 	bin/compile $(dir $@)
