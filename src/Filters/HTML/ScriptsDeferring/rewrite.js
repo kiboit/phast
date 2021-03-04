@@ -35,7 +35,7 @@ window.setTimeout = function (fn, delay) {
   if (!delay || delay < 0) {
     didSetTimeout = true;
   }
-  return originalSetTimeout.call(window, fn, delay);
+  return originalSetTimeout.apply(window, arguments);
 };
 
 function loadScripts() {
