@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.90 - 2021-03-04
+
+* Correctly support additional arguments when using setTimeout. This fixes a
+  regression in version 1.83.
+
 ## 1.89 - 2021-03-04
 
 * Ensure error pages are always interpreted as UTF-8.
