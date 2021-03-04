@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.89 - 2021-03-04
+
+* Ensure error pages are always interpreted as UTF-8.
+
 ## 1.88 - 2021-02-26
 
 * Simplify `PATH_INFO` calculation if the environment variable is missing. This
