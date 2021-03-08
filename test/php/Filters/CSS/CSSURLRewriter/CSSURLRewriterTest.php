@@ -20,6 +20,7 @@ class CSSURLRewriterTest extends TestCase {
             "url('$input')",
             "url(\"$input\")",
             "src:url($input);src:url($input);",
+            "url( '$input' )",
         ];
 
         $base = URL::fromString(self::BASE_URL);
@@ -35,6 +36,7 @@ class CSSURLRewriterTest extends TestCase {
         $this->assertEquals("url('$output')", $outputs[1]);
         $this->assertEquals("url(\"$output\")", $outputs[2]);
         $this->assertEquals("src:url($output);src:url($output);", $outputs[3]);
+        $this->assertEquals("url( '$output' )", $outputs[4]);
     }
 
     public function urlProvider() {

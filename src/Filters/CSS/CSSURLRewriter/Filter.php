@@ -25,9 +25,9 @@ class Filter implements ServiceFilter {
         $cssContent = preg_replace_callback(
             '~
                 \b
-                ( url\( ([\'"]?) )
+                ( url\( \s*+ ([\'"]?) )
                 ([A-Za-z0-9_/.:?&=+%,#@-]+)
-                ( \2 \) )
+                ( \2 \s*+ \) )
             ~x',
             $callback,
             $resource->getContent()
