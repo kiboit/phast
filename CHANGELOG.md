@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.93 - 2021-03-08
+
+* Don't optimize snippets if they look like JSON objects, ie, start with `{"`.
+
 ## 1.92 - 2021-03-08
 
 * Support whitespace in `url()` in CSS.  Eg, `url( 'file.jpg' )` is not
