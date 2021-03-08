@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.92 - 2021-03-08
+
+* Support whitespace in `url()` in CSS.  Eg, `url( 'file.jpg' )` is not
+  processed correctly.
+
 ## 1.91 - 2021-03-04
 
 * Make message about inability to override `document.readyState` a warning
