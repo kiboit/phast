@@ -56,6 +56,7 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
         yield ['<?xml version="1.0"?\><tag>asd</tag>'];
         yield ["\0<html><body></body></html>"];
         yield ['Not html', false];
+        yield ['{"looks-like":"<json/>"}', false];
     }
 
     /**

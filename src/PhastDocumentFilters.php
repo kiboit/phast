@@ -95,7 +95,8 @@ class PhastDocumentFilters {
         if ($runtimeConfig['optimizeHTMLDocumentsOnly']) {
             return preg_match(self::DOCUMENT_PATTERN, $buffer);
         }
-        return strpos($buffer, '<') !== false;
+        return strpos($buffer, '<') !== false
+               && !preg_match('~^\s*+{\s*+"~', $buffer);
     }
 
     private static function isAMP($buffer) {
