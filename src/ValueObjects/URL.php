@@ -43,6 +43,9 @@ class URL {
      */
     private $fragment;
 
+    private function __construct() {
+    }
+
     /**
      * @param $string
      * @return URL
