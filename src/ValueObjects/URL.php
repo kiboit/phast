@@ -279,9 +279,7 @@ class URL {
      * @return self
      */
     public function withoutQuery() {
-        $url = clone $this;
-        $url->query = null;
-        return $url;
+        return $this->withQuery(null);
     }
 
     public function __toString() {
