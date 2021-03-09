@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.95 - 2021-03-09
+
+* Do not rewrite `<img>` element `src` when it has a `rev-slidebg` class and
+  points to `transparent.png`. This is because [Revolution
+  Slider](https://www.sliderrevolution.com/)'s JavaScript depends on the image
+  filename for its logic.
+
 ## 1.94 - 2021-03-09
 
 * Add option `optimizeJSONResponses` to optimize JSON objects with a `html` key,
