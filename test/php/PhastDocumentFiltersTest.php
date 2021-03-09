@@ -56,7 +56,28 @@ class PhastDocumentFiltersTest extends \PHPUnit_Framework_TestCase {
         yield ['<?xml version="1.0"?\><tag>asd</tag>'];
         yield ["\0<html><body></body></html>"];
         yield ['Not html', false];
-        yield ['{"looks-like":"<json/>"}', false];
+        yield ['{"html":"<json/>"}', false];
+    }
+
+    /**
+     * @dataProvider jsonData
+     */
+    public function testJson($shouldApply, $buffer, $documentsOnly) {
+        $config = [
+            'optimizeHTMLDocumentsOnly' => $documentsOnly,
+            'optimizeJSONResponses' => true,
+        ];
+        $out = PhastDocumentFilters::apply($buffer, $config);
+        if ($shouldApply) {
+            $this->assertFiltersApplied($out);
+        } else {
+            $this->assertFiltersNotApplied($out);
+        }
+    }
+
+    public function jsonData() {
+        yield [true, '{"html":"<json/>"}', false];
+        yield [false, '{"something":"<json/>"}', false];
     }
 
     /**

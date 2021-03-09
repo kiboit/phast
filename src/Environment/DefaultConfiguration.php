@@ -42,6 +42,8 @@ class DefaultConfiguration {
 
             'optimizeHTMLDocumentsOnly' => true,
 
+            'optimizeJSONResponses' => false,
+
             'outputServerSideStats' => true,
 
             'documents' => [

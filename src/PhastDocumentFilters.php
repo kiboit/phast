@@ -75,6 +75,9 @@ class PhastDocumentFilters {
     }
 
     private static function applyWithRuntimeConfig($buffer, $runtimeConfig, $applyCheckBuffer = null) {
+        if (preg_match('~^\s*{~', $buffer) && is_object($jsonData = json_decode($buffer))) {
+            return self::applyToJson($jsonData, $buffer, $runtimeConfig);
+        }
         if (is_null($applyCheckBuffer)) {
             $applyCheckBuffer = $buffer;
         }
@@ -89,6 +92,25 @@ class PhastDocumentFilters {
             });
         }
         return $compositeFilter->apply($buffer);
+    }
+
+    private static function applyToJson($jsonData, $buffer, $runtimeConfig) {
+        if (!$runtimeConfig['optimizeJSONResponses']) {
+            return $buffer;
+        }
+        if (empty($jsonData->html) || !is_string($jsonData->html)) {
+            return $buffer;
+        }
+        $newHtml = self::applyWithRuntimeConfig($jsonData->html, $runtimeConfig);
+        if ($newHtml == $jsonData->html) {
+            return $buffer;
+        }
+        $jsonData->html = $newHtml;
+        $json = json_encode($jsonData);
+        if (!$json) {
+            return $buffer;
+        }
+        return $json;
     }
 
     private static function shouldApply($buffer, $runtimeConfig) {
