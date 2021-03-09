@@ -94,6 +94,9 @@ class Filter implements HTMLStreamFilter, AMPCompatibleFilter {
 
     private function rewriteSrc(Tag $img, HTMLPageContext $context, $attribute) {
         $url = $img->getAttribute($attribute);
+        if (preg_match('~(images|assets)/transparent\.png~', $url) && $img->hasClass('rev-slidebg')) {
+            return $url;
+        }
         $newURL = $this->rewriter->rewriteUrl($url, $context->getBaseUrl());
         $img->setAttribute($attribute, $newURL);
     }

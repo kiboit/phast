@@ -221,6 +221,21 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->assertContains('service.php', $img->getAttribute('src'));
     }
 
+    public function testRevolutionSliderFix() {
+        $html = '<html><body>' .
+            '<img src="/images/transparent.png" class="rev-slidebg">' .
+            '<img src="/images/transparent.png">' .
+            '</body></html>';
+
+        $this->applyFilter($html);
+
+        $img = $this->dom->getElementsByTagName('img')->item(0);
+        $this->assertNotContains('service.php', $img->getAttribute('src'));
+
+        $img = $this->dom->getElementsByTagName('img')->item(1);
+        $this->assertContains('service.php', $img->getAttribute('src'));
+    }
+
     private function makeImage($src, $width = null, $height = null) {
         $img = $this->makeMarkedElement('img');
         $img->setAttribute('src', $src);
