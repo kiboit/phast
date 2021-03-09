@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.94 - 2021-03-09
+
+* Add option `optimizeJSONResponses` to optimize JSON objects with a `html` key,
+  for Ajax handlers.
+
 ## 1.93 - 2021-03-08
 
 * Don't optimize snippets if they look like JSON objects, ie, start with `{"`.
