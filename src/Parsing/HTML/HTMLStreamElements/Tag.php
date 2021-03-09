@@ -62,6 +62,26 @@ class Tag extends Element {
     }
 
     /**
+     * @param string $class
+     * @return bool
+     */
+    public function hasClass($class) {
+        foreach ($this->getClasses() as $c) {
+            if (!strcasecmp($class, $c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getClasses() {
+        return array_values(array_filter(preg_split('~\s+~', $this->getAttribute('class')), 'strlen'));
+    }
+
+    /**
      * @param string $attrName
      * @return bool
      */
