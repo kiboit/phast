@@ -1,5 +1,5 @@
 test("currentscript.php", function (assert, document) {
-  if (!document.currentScript) {
+  if (!("currentScript" in document)) {
     return;
   }
 
