@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.96 - 2021-03-11
+
+* Don't emulate `document.currentScript` for scripts that are executed
+  normally. This prevents some scripts from seeing the wrong `currentScript`
+  accidentally.
+
 ## 1.95 - 2021-03-09
 
 * Do not rewrite `<img>` element `src` when it has a `rev-slidebg` class and
