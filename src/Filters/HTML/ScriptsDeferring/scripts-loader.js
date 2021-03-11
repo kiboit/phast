@@ -148,7 +148,9 @@ phast.ScriptsLoader.Utilities = function (document) {
 
   function writeProtectAndExecuteString(sourceElement, scriptString) {
     return writeProtectAndCallback(sourceElement, function () {
-      return executeString(scriptString);
+      return emulateCurrentScript(sourceElement, function () {
+        return executeString(scriptString);
+      });
     });
   }
 
@@ -188,22 +190,6 @@ phast.ScriptsLoader.Utilities = function (document) {
       }
       insert(string + "\n");
     };
-
-    if (hasCurrentScript) {
-      try {
-        Object.defineProperty(document, "currentScript", {
-          configurable: true,
-          get: function () {
-            return sourceElement;
-          },
-        });
-      } catch (e) {
-        console.error(
-          "[Phast] Unable to override document.currentScript on this browser: ",
-          e
-        );
-      }
-    }
 
     function insert(string) {
       var container = document.createElement("div");
@@ -246,10 +232,31 @@ phast.ScriptsLoader.Utilities = function (document) {
       .finally(function () {
         delete document.write;
         delete document.writeln;
-        if (hasCurrentScript) {
-          delete document.currentScript;
-        }
       });
+  }
+
+  function emulateCurrentScript(sourceElement, fn) {
+    if (hasCurrentScript) {
+      try {
+        Object.defineProperty(document, "currentScript", {
+          configurable: true,
+          get: function () {
+            return sourceElement;
+          },
+        });
+      } catch (e) {
+        console.error(
+          "[Phast] Unable to override document.currentScript on this browser: ",
+          e
+        );
+      }
+    }
+
+    return fn().finally(function () {
+      if (hasCurrentScript) {
+        delete document.currentScript;
+      }
+    });
   }
 
   function addPreload(url) {
@@ -422,6 +429,16 @@ phast.ScriptsLoader.Scripts.Factory = function (document, fetch) {
 
   this.makeScriptFromElement = function (element) {
     var fallback;
+
+    if (
+      element.getAttribute("data-phast-debug-force-method") &&
+      window.location.host.match(/\.test$/)
+    ) {
+      return new Scripts[element.getAttribute("data-phast-debug-force-method")](
+        utils,
+        element
+      );
+    }
 
     if (isProxied(element)) {
       if (isAsync(element)) {
