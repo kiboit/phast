@@ -1,7 +1,4 @@
 if (document.currentScript) {
-  document.querySelector("#result").innerText =
-    document.currentScript.dataset.value;
-  document.querySelector(
-    "#src"
-  ).innerText = document.currentScript.getAttribute("src");
+  window.SYNC_VALUE = document.currentScript.dataset.value;
+  window.SYNC_SRC = document.currentScript.getAttribute("src");
 }

@@ -2,8 +2,7 @@
 <!doctype html>
 <html>
 <body>
-<div id="result"></div>
-<div id="src"></div>
-<script src="currentscript.script.js" data-value="QED"></script>
+<script src="currentscript.script.js" data-value="sync"></script>
+<script data-value="inline">window.INLINE_VALUE = document.currentScript.dataset.value</script>
 </body>
 </html>
