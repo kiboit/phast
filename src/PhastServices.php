@@ -53,7 +53,7 @@ class PhastServices {
 
         if (isset($serviceParams['src']) && !headers_sent()) {
             if (!self::isRewrittenRequest($httpRequest)
-                && self::isSafeRedirectUri($serviceParams['src'], $httpRequest)
+                && self::isSafeRedirectDestination($serviceParams['src'], $httpRequest)
             ) {
                 http_response_code(301);
                 header('Location: ' . $serviceParams['src']);
