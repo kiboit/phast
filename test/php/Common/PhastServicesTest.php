@@ -176,4 +176,33 @@ class PhastServicesTest extends PhastTestCase {
         }
         return $etag;
     }
+
+    /** @dataProvider isSafeRedirectDestinationData */
+    public function testIsSafeRedirectDestination($isSafe, $url) {
+        $request = Request::fromArray([], ['HTTP_HOST' => 'mysite.com']);
+        $this->assertSame($isSafe, PhastServices::isSafeRedirectDestination($url, $request));
+    }
+
+    public function isSafeRedirectDestinationData() {
+        yield [
+            false,
+            'http://wpscan.com/',
+            Request::fromArray(),
+        ];
+        yield [
+            true,
+            'http://mysite.com/something',
+            Request::fromArray(),
+        ];
+        yield [
+            true,
+            'https://subby.mysite.com/something',
+            Request::fromArray(),
+        ];
+        yield [
+            false,
+            'yolo://subby.mysite.com/something',
+            Request::fromArray(),
+        ];
+    }
 }

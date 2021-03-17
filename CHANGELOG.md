@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.97 - 2021-03-17
+
+* Fix [open redirect](https://cwe.mitre.org/data/definitions/601.html) on
+  `phast.php`. This would allow a malicious person to redirect someone to a
+  third-party site via `phast.php` by sending them a link. This can enable
+  phishing attacks if the user is mislead by the hostname of the initial URL. It
+  does not compromise the security of your site itself.
+
 ## 1.96 - 2021-03-11
 
 * Don't emulate `document.currentScript` for scripts that are executed

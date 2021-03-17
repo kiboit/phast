@@ -11,6 +11,7 @@ use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Logging\Log;
 use Kibo\Phast\Services\Factory;
 use Kibo\Phast\Services\ServiceRequest;
+use Kibo\Phast\ValueObjects\URL;
 
 class PhastServices {
     /**
@@ -51,12 +52,14 @@ class PhastServices {
         }
 
         if (isset($serviceParams['src']) && !headers_sent()) {
-            if (self::isRewrittenRequest($httpRequest)) {
-                http_response_code(500);
-            } else {
+            if (!self::isRewrittenRequest($httpRequest)
+                && self::isSafeRedirectUri($serviceParams['src'], $httpRequest)
+            ) {
                 http_response_code(301);
                 header('Location: ' . $serviceParams['src']);
                 header('Cache-Control: max-age=86400');
+            } else {
+                http_response_code(500);
             }
         }
 
@@ -224,5 +227,25 @@ class PhastServices {
 
     private static function escape($value) {
         return htmlentities((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public static function isSafeRedirectDestination($url, Request $request) {
+        $url = URL::fromString($url);
+        if (!in_array($url->getScheme(), ['http', 'https'])) {
+            return false;
+        }
+        $host = $url->getHost();
+        if (!$host) {
+            return false;
+        }
+        if ($host === $request->getHeader('Host')) {
+            return true;
+        }
+        if (substr($host, -strlen($request->getHeader('Host')) - 1)
+            === '.' . $request->getHeader('Host')
+        ) {
+            return true;
+        }
+        return false;
     }
 }
