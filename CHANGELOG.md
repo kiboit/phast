@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.98 - 2021-04-21
+
+* Use [native IFrame lazy loading](https://web.dev/iframe-lazy-loading/).
+
 ## 1.97 - 2021-03-17
 
 * Fix [open redirect](https://cwe.mitre.org/data/definitions/601.html) on
