@@ -29,12 +29,20 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function rewrite(Tag $script) {
+        if (!$script->hasAttribute('src')) {
+            $script->removeAttribute('async');
+            $script->removeAttribute('defer');
+        }
         if ($script->hasAttribute('type')) {
             $script->setAttribute('data-phast-original-type', $script->getAttribute('type'));
         }
         $script->setAttribute('type', 'text/phast');
         if ($script->hasAttribute('data-phast-params')) {
             $script->removeAttribute('src');
+        }
+        if (!$script->hasAttribute('src')) {
+            $this->convertBooleanAttribute($script, 'async');
+            $this->convertBooleanAttribute($script, 'defer');
         }
     }
 
@@ -43,5 +51,12 @@ class Filter extends BaseHTMLStreamFilter {
                || $script->hasAttribute('data-pagespeed-no-defer')
                || $script->getAttribute('data-cfasync') === 'false'
                || preg_match('~^\s*(?<q>[\'"])phast-no-defer\k<q>~', $script->textContent);
+    }
+
+    private function convertBooleanAttribute(Tag $script, $attr) {
+        if ($script->hasAttribute($attr)) {
+            $script->removeAttribute($attr);
+            $script->setAttribute('data-phast-' . $attr, '');
+        }
     }
 }

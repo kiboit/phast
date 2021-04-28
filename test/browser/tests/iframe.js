@@ -11,8 +11,8 @@ test("iframe.php", function (assert, document) {
         "The IFrame should have been loaded once"
       );
       assert.ok(
-        document.defaultView.srcWasChanged,
-        "Initially, the IFrame src should have had an src of about:blank"
+        document.defaultView.loadingAttrSet,
+        "The IFrame should have loading=lazy set"
       );
     }
   );

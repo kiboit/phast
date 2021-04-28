@@ -11,10 +11,7 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
   var nonDeferred = [],
     deferred = [];
   for (var i = 0; i < elements.length; i++) {
-    if (
-      getSrc(elements[i]) !== undefined &&
-      elements[i].hasAttribute("defer")
-    ) {
+    if (getSrc(elements[i]) !== undefined && isDefer(elements[i])) {
       deferred.push(elements[i]);
     } else {
       nonDeferred.push(elements[i]);
@@ -482,9 +479,13 @@ function getSrc(element) {
 }
 
 function isAsync(element) {
-  return element.hasAttribute("async");
+  return (
+    element.hasAttribute("async") || element.hasAttribute("data-phast-async")
+  );
 }
 
 function isDefer(element) {
-  return element.hasAttribute("defer");
+  return (
+    element.hasAttribute("defer") || element.hasAttribute("data-phast-defer")
+  );
 }

@@ -6,7 +6,7 @@
 <script>
     (function () {
         var iframe = document.getElementsByTagName('iframe').item(0);
-        srcWasChanged = iframe.src === 'about:blank';
+        loadingAttrSet = iframe.getAttribute('loading') === 'lazy';
     })();
 </script>
 </body>

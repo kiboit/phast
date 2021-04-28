@@ -4,6 +4,7 @@ test("script_order.php", function (assert, document) {
     "deferred inline",
     "synchronous external",
     "second inline",
+    "proxied defer",
     "deferred external",
   ];
   assert.ok(document.defaultView.order, "window.order is defined");
@@ -11,7 +12,7 @@ test("script_order.php", function (assert, document) {
   wait(
     assert,
     function () {
-      return order.length === expected.length + 1;
+      return order.length >= expected.length + 1;
     },
     function () {
       assert.ok(

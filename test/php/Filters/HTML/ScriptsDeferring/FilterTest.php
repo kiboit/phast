@@ -42,10 +42,60 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals('application/javascript', $inline->getAttribute('data-phast-original-type'));
         $this->assertFalse($inline->hasAttribute('async'));
         $this->assertEquals('the-inline-content', $inline->textContent);
+        $this->assertFalse($inline->hasAttribute('data-phast-defer'));
+        $this->assertFalse($inline->hasAttribute('data-phast-async'));
 
         $this->assertEquals('non-js', $nonJS->getAttribute('type'));
 
         $this->assertHasCompiled('ScriptsDeferring/rewrite.js');
+    }
+
+    public function testRewritingProxiedScript() {
+        $script = $this->makeMarkedElement('script');
+        $script->setAttribute('data-phast-params', 'abcd');
+        $script->setAttribute('defer', 'defer');
+        $script->setAttribute('async', 'async');
+        $script->setAttribute('src', 'abcd');
+
+        $this->body->appendChild($script);
+
+        $this->applyFilter();
+
+        $script = $this->getMatchingElement($script);
+        $this->assertFalse($script->hasAttribute('async'));
+        $this->assertFalse($script->hasAttribute('defer'));
+        $this->assertFalse($script->hasAttribute('src'));
+        $this->assertTrue($script->hasAttribute('data-phast-async'));
+        $this->assertTrue($script->hasAttribute('data-phast-defer'));
+    }
+
+    public function testRewritingNonAsyncScript() {
+        $script = $this->makeMarkedElement('script');
+
+        $this->body->appendChild($script);
+
+        $this->applyFilter();
+
+        $script = $this->getMatchingElement($script);
+        $this->assertFalse($script->hasAttribute('async'));
+        $this->assertFalse($script->hasAttribute('defer'));
+        $this->assertFalse($script->hasAttribute('data-phast-async'));
+        $this->assertFalse($script->hasAttribute('data-phast-defer'));
+    }
+
+    public function testNoAsyncInlineScript() {
+        $script = $this->makeMarkedElement('script');
+        $script->setAttribute('async', '');
+
+        $this->body->appendChild($script);
+
+        $this->applyFilter();
+
+        $script = $this->getMatchingElement($script);
+        $this->assertFalse($script->hasAttribute('async'));
+        $this->assertFalse($script->hasAttribute('defer'));
+        $this->assertFalse($script->hasAttribute('data-phast-async'));
+        $this->assertFalse($script->hasAttribute('data-phast-defer'));
     }
 
     public function disableRewritingData() {
