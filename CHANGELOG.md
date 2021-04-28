@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.99 - 2021-04-28
+
+* Prefix `async`, `defer` attributes with `data-phast-` to please W3C validator.
+
 ## 1.98 - 2021-04-21
 
 * Use [native IFrame lazy loading](https://web.dev/iframe-lazy-loading/).
