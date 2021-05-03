@@ -36,7 +36,8 @@ class Factory implements HTMLFilterFactory {
             $retriever,
             new OptimizerFactory($config),
             (new CSSCompositeFactory())->make($config),
-            (new TokenRefMakerFactory())->make($config)
+            (new TokenRefMakerFactory())->make($config),
+            $config['cspNonce']
         );
     }
 }

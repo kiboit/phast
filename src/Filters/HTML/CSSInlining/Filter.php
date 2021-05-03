@@ -94,6 +94,11 @@ class Filter extends BaseHTMLStreamFilter {
      */
     private $cacheMarkers = [];
 
+    /**
+     * @var string
+     */
+    private $cspNonce;
+
     public function __construct(
         ServiceSignature $signature,
         URL $baseURL,
@@ -102,7 +107,8 @@ class Filter extends BaseHTMLStreamFilter {
         Retriever $retriever,
         OptimizerFactory $optimizerFactory,
         ServiceFilter $cssFilter,
-        TokenRefMaker $tokenRefMaker
+        TokenRefMaker $tokenRefMaker,
+        $cspNonce
     ) {
         $this->signature = $signature;
         $this->baseURL = $baseURL;
@@ -113,6 +119,7 @@ class Filter extends BaseHTMLStreamFilter {
         $this->optimizerFactory = $optimizerFactory;
         $this->cssFilter = $cssFilter;
         $this->tokenRefMaker = $tokenRefMaker;
+        $this->cspNonce = $cspNonce;
 
         foreach ($config['whitelist'] as $key => $value) {
             if (!is_array($value)) {
@@ -358,6 +365,9 @@ class Filter extends BaseHTMLStreamFilter {
         if ($optimized) {
             $style->setAttribute('data-phast-original-src', $url->toString());
             $style->setAttribute('data-phast-params', $this->makeServiceParams($url, $stripImports));
+        }
+        if ($this->cspNonce) {
+            $style->setAttribute('nonce', $this->cspNonce);
         }
         $content = preg_replace('~(</)(style)~i', '$1 $2', $content);
         $style->setTextContent($content);

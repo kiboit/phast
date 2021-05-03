@@ -85,6 +85,9 @@ class FilterTest extends HTMLFilterTestCase {
         $this->assertEquals('the-file-contents', $styles[0]->textContent);
         $this->assertEquals('the-file-2-contents', $styles[1]->textContent);
 
+        $this->assertEquals('abcd', $styles[0]->getAttribute('nonce'));
+        $this->assertEquals('abcd', $styles[1]->getAttribute('nonce'));
+
         $this->assertSame($this->head, $styles[0]->parentNode);
         $this->assertSame($this->body->firstChild, $styles[1]);
 
@@ -680,7 +683,8 @@ class FilterTest extends HTMLFilterTestCase {
             $retriever,
             $optimizerFactory,
             $cssFilter,
-            $tokenRefMaker
+            $tokenRefMaker,
+            'abcd'
         );
         $this->filter = $filter;
         return parent::applyFilter($htmlInput, $skipResultParsing);
