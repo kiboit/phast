@@ -43,6 +43,11 @@ class HTMLFilterTestCase extends PhastTestCase {
      */
     protected $filter;
 
+    /**
+     * @var string
+     */
+    protected $cspNonce;
+
     public function setUp() {
         parent::setUp();
 
@@ -53,6 +58,7 @@ class HTMLFilterTestCase extends PhastTestCase {
         $this->dom->appendChild($this->html);
         $this->html->appendChild($this->head);
         $this->html->appendChild($this->body);
+        $this->cspNonce = null;
 
         $this->compilerCache = $this->createMock(Cache::class);
         $this->jsCompiler = new PhastJavaScriptCompiler(
@@ -78,7 +84,9 @@ class HTMLFilterTestCase extends PhastTestCase {
         $composite = new Composite\Filter(URL::fromString(self::BASE_URL), true);
         $composite->addHTMLFilter(new BaseURLSetter\Filter());
         $composite->addHTMLFilter($this->filter);
-        $composite->addHTMLFilter(new PhastScriptsCompiler\Filter($this->jsCompiler));
+        $composite->addHTMLFilter(
+            new PhastScriptsCompiler\Filter($this->jsCompiler, $this->cspNonce)
+        );
 
         $html = is_null($inputHtml) ? $this->dom->saveHTML() : $inputHtml;
         $filtered = $composite->apply($html);

@@ -17,11 +17,18 @@ class Filter implements HTMLStreamFilter {
     private $compiler;
 
     /**
+     * @var ?string
+     */
+    private $cspNonce;
+
+    /**
      * Filter constructor.
      * @param PhastJavaScriptCompiler $compiler
+     * @param ?string $cspNonce
      */
-    public function __construct(PhastJavaScriptCompiler $compiler) {
+    public function __construct(PhastJavaScriptCompiler $compiler, $cspNonce) {
         $this->compiler = $compiler;
+        $this->cspNonce = $cspNonce;
     }
 
     public function transformElements(\Traversable $elements, HTMLPageContext $context) {
@@ -66,6 +73,9 @@ class Filter implements HTMLStreamFilter {
         }, $scripts);
         $script = new Tag('script');
         $script->setAttribute('data-phast-compiled-js-names', join(',', $names));
+        if ($this->cspNonce !== null) {
+            $script->setAttribute('nonce', $this->cspNonce);
+        }
         $compiled = $this->compiler->compileScriptsWithConfig($scripts);
         $script->setTextContent($compiled);
         return $script;

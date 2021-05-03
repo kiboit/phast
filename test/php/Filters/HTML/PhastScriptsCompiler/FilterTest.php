@@ -58,4 +58,11 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
         $this->assertHasNotCompiledScripts();
     }
+
+    public function testAddNonceAttr() {
+        $this->cspNonce = 'abcd';
+        $this->applyFilter();
+        $script = $this->body->getElementsByTagName('script')->item('0');
+        $this->assertEquals('abcd', $script->getAttribute('nonce'));
+    }
 }
