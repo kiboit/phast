@@ -4,5 +4,4 @@ set -euo pipefail
 
 git describe --tags --exact-match HEAD
 
-git push origin master --tags
-git push github master --tags
+git push git@github.com:kiboit/phast master --tags
