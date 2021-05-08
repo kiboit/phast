@@ -97,7 +97,15 @@ class Compiler {
         }
     }
 
-    private function getSourceFiles() {
+    private function getSourceFiles(): array {
+        $files = iterator_to_array($this->getUnsortedSourceFiles(), false);
+        usort($files, function (\SplFileInfo $a, \SplFileInfo $b): int {
+            return $a->getPathname() <=> $b->getPathname();
+        });
+        return $files;
+    }
+
+    private function getUnsortedSourceFiles() {
         foreach ($this->include as $dir) {
             /** @var SplFileInfo $fileinfo */
             foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir))
