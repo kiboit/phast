@@ -44,7 +44,7 @@ format :
 	git ls-files '*.js'
 
 
-build/phast.php : vendor/autoload.php $(JSMIN_TARGETS) $(shell git ls-files src)
+build/phast.php : vendor/autoload.php node_modules $(JSMIN_TARGETS) $(shell git ls-files src)
 	bin/compile $(dir $@)
 
 src/JSMin/% : vendor/kiboit/jsmin-php/src/JSMin/% | vendor/autoload.php
@@ -58,3 +58,7 @@ vendor/autoload.php : composer.json composer.lock
 docker/%.image : docker/% docker/entrypoint
 	docker build -q -f $< docker > $@~
 	mv $@~ $@
+
+node_modules : yarn.lock
+	yarn
+	touch $@
