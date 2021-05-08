@@ -170,6 +170,8 @@ class DefaultConfiguration {
                     '~^https?://' . preg_quote($request->getHost(), '~') . '/~',
                 ],
             ],
+
+            'cspNonce' => null,
         ];
     }
 }
