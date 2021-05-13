@@ -51,13 +51,16 @@ class PhastServices {
             $service = $serviceParams['service'];
         }
 
-        if (isset($serviceParams['src']) && !headers_sent()) {
-            if (!self::isRewrittenRequest($httpRequest)
+        $redirecting = false;
+        if (!headers_sent()) {
+            if (isset($serviceParams['src'])
+                && !self::isRewrittenRequest($httpRequest)
                 && self::isSafeRedirectDestination($serviceParams['src'], $httpRequest)
             ) {
                 http_response_code(301);
                 header('Location: ' . $serviceParams['src']);
                 header('Cache-Control: max-age=86400');
+                $redirecting = true;
             } else {
                 http_response_code(500);
             }
@@ -88,10 +91,16 @@ class PhastServices {
                 ->serve($serviceRequest);
             Log::info('Service completed');
         } catch (UnauthorizedException $e) {
+            if (!$redirecting) {
+                http_response_code(403);
+            }
             echo "Unauthorized\n";
             Log::error('Unauthorized exception: {message}', ['message' => $e->getMessage()]);
             exit();
         } catch (ItemNotFoundException $e) {
+            if (!$redirecting) {
+                http_response_code(404);
+            }
             echo "Item not found\n";
             Log::error('Item not found: {message}', ['message' => $e->getMessage()]);
             exit();
