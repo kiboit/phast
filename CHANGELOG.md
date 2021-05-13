@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.100 - 2021-05-13
+
+* Send 403 and 404 status codes for unauthorized and not found resource URLs
+  respectively, if they cannot be safely redirected to the original resource.
+
 ## 1.99 - 2021-04-28
 
 * Prefix `async`, `defer` attributes with `data-phast-` to please W3C validator.
