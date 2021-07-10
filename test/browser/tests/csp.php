@@ -1,4 +1,7 @@
-<?php require '_.php'; ?>
+<?php
+define('PHAST_CSP_NONCE', 'secret');
+require '_.php';
+?>
 <!doctype html>
 <html>
 <body>

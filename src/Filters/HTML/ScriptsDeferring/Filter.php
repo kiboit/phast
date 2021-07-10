@@ -10,6 +10,16 @@ use Kibo\Phast\ValueObjects\PhastJavaScript;
 class Filter extends BaseHTMLStreamFilter {
     use JSDetectorTrait;
 
+    /** @var string */
+    private $cspNonce;
+
+    /**
+     * @param ?string $cspNonce
+     */
+    public function __construct($cspNonce) {
+        $this->cspNonce = $cspNonce;
+    }
+
     protected function isTagOfInterest(Tag $tag) {
         return $tag->getTagName() == 'script';
     }
@@ -24,7 +34,11 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     protected function afterLoop() {
-        $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/scripts-loader.js'));
+        $scriptsLoader = PhastJavaScript::fromFile(__DIR__ . '/scripts-loader.js');
+        $scriptsLoader->setConfig('scriptsLoader', [
+            'cspNonce' => $this->cspNonce,
+        ]);
+        $this->context->addPhastJavaScript($scriptsLoader);
         $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/rewrite.js'));
     }
 

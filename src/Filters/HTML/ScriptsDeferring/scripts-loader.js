@@ -7,9 +7,13 @@ var hasCurrentScript = !!document.currentScript;
 phast.ScriptsLoader = {};
 
 phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
-  var elements = document.querySelectorAll('script[type="text/phast"]');
+  var elements = Array.prototype.slice
+    .call(document.querySelectorAll('script[type="text/phast"]'))
+    .filter(allowExecution);
+
   var nonDeferred = [],
     deferred = [];
+
   for (var i = 0; i < elements.length; i++) {
     if (getSrc(elements[i]) !== undefined && isDefer(elements[i])) {
       deferred.push(elements[i]);
@@ -17,9 +21,29 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
       nonDeferred.push(elements[i]);
     }
   }
+
   return nonDeferred.concat(deferred).map(function (element) {
     return factory.makeScriptFromElement(element);
   });
+
+  function allowExecution(script) {
+    var cspNonce = phast.config.scriptsLoader.cspNonce;
+
+    if (cspNonce == null) {
+      return true;
+    }
+
+    if (script.nonce === cspNonce) {
+      return true;
+    }
+
+    console.warn(
+      "Script with missing or invalid nonce will not be executed:",
+      script
+    );
+
+    return false;
+  }
 };
 
 phast.ScriptsLoader.executeScripts = function (scripts) {

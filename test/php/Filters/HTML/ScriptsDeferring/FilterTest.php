@@ -7,7 +7,7 @@ use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 class FilterTest extends HTMLFilterTestCase {
     public function setUp() {
         parent::setUp();
-        $this->filter = new Filter();
+        $this->filter = new Filter(null);
     }
 
     public function testRewriting() {
