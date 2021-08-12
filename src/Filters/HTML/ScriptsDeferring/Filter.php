@@ -10,7 +10,7 @@ use Kibo\Phast\ValueObjects\PhastJavaScript;
 class Filter extends BaseHTMLStreamFilter {
     use JSDetectorTrait;
 
-    /** @var string */
+    /** @var ?string */
     private $cspNonce;
 
     /**
