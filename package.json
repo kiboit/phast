@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "uglify-js": "^3.6.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.3.2"
   }
 }
