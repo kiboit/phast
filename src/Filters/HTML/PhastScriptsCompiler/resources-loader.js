@@ -592,9 +592,11 @@ phast.ResourceLoader.make = function (
       console.log("[Phast] Not using IndexedDB cache on Safari");
       return new phast.ResourceLoader.BlackholeCache();
     } else {
-      var storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
+      var storageParams =
+        new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
       var storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
-      var cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
+      var cacheParams =
+        new phast.ResourceLoader.StorageCache.StorageCacheParams();
       return new phast.ResourceLoader.StorageCache(cacheParams, storage);
     }
   }

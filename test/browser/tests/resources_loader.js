@@ -45,9 +45,8 @@ QUnit.module("ResourcesLoader", function (hooks) {
     });
 
     QUnit.test("Check bad params", function (assert) {
-      var params = phast.ResourceLoader.RequestParams.fromString(
-        "invalid json"
-      );
+      var params =
+        phast.ResourceLoader.RequestParams.fromString("invalid json");
       assert.ok(
         params === phast.ResourceLoader.RequestParams.FaultyParams,
         "FaultyParams is returned"
@@ -77,9 +76,8 @@ QUnit.module("ResourcesLoader", function (hooks) {
 
     QUnit.test("Test error on faulty params", function (assert) {
       var done = assert.async();
-      var params = phast.ResourceLoader.RequestParams.fromString(
-        "invalid json"
-      );
+      var params =
+        phast.ResourceLoader.RequestParams.fromString("invalid json");
       var request = client.get(params);
       request
         .then(function () {
@@ -528,7 +526,8 @@ QUnit.module("ResourcesLoader", function (hooks) {
     var Cache = phast.ResourceLoader.StorageCache;
 
     hooks.beforeEach(function () {
-      storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
+      storageParams =
+        new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
       storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
       storageParams.dbName = "test-" + Date.now();
       cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
@@ -625,7 +624,8 @@ QUnit.module("ResourcesLoader", function (hooks) {
     };
 
     hooks.beforeEach(function () {
-      storageParams = new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
+      storageParams =
+        new phast.ResourceLoader.IndexedDBStorage.ConnectionParams();
       storage = new phast.ResourceLoader.IndexedDBStorage(storageParams);
       storageParams.dbName = "test-" + Date.now();
       cacheParams = new phast.ResourceLoader.StorageCache.StorageCacheParams();
