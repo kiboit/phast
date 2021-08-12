@@ -5,6 +5,15 @@ require '_.php';
 <!doctype html>
 <html>
 <body>
+<script data-phast-no-defer>
+window.REPORTS = 0;
+
+window.fetch = function (resource, init) {
+    if (/phast-report/.test(resource)) {
+        window.REPORTS++;
+    }
+}
+</script>
 <script nonce="secret">
 if (!window.SCRIPTS) window.SCRIPTS = [];
 window.SCRIPTS.push("correct nonce");

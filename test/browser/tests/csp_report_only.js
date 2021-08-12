@@ -4,4 +4,9 @@ test("csp_report_only.php", function (assert, document) {
     ["correct nonce", "incorrect nonce", "no nonce"],
     "All scripts should be executed"
   );
+  assert.equal(
+    document.defaultView.REPORTS,
+    2,
+    "Two reports should have been made"
+  );
 });
