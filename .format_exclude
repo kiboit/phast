@@ -1,0 +1,3 @@
+src/Filters/HTML/PhastScriptsCompiler/es6-promise.js
+src/Filters/HTML/PhastScriptsCompiler/hash.js
+test/browser/qunit.js

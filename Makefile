@@ -40,8 +40,8 @@ clean :
 	rm -rf build
 
 .PHONY : format
-format :
-	git ls-files '*.js'
+format : node_modules
+	fd -g '*.js' -t f --ignore-file .format_exclude -X node_modules/.bin/prettier -w
 
 
 build/phast.php : vendor/autoload.php node_modules $(JSMIN_TARGETS) $(shell git ls-files src)
