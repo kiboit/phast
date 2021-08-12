@@ -27,13 +27,32 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
   });
 
   function allowExecution(script) {
-    var cspNonce = phast.config.scriptsLoader.cspNonce;
-
-    if (cspNonce == null) {
+    try {
+      var csp = phast.config.scriptsLoader.csp;
+    } catch (e) {
       return true;
     }
 
-    if (script.nonce === cspNonce) {
+    if (csp.nonce == null) {
+      return true;
+    }
+
+    if (script.nonce === csp.nonce) {
+      return true;
+    }
+
+    try {
+      reportScript(csp, script);
+    } catch (e) {
+      console.error("Could not send CSP report due to error:", e);
+    }
+
+    if (csp.reportOnly) {
+      console.warn(
+        "Script with missing or invalid nonce would not be executed (but report-only mode is enabled):",
+        script
+      );
+
       return true;
     }
 
@@ -43,6 +62,40 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
     );
 
     return false;
+  }
+
+  function reportScript(csp, script) {
+    if (!csp.reportUri) {
+      return;
+    }
+
+    var report = {
+      "blocked-uri": getSrc(script),
+      disposition: csp.reportOnly ? "report" : "enforce",
+      "document-uri": location.href,
+      referrer: document.referrer,
+      "script-sample": getSample(script),
+      implementation: "phast",
+    };
+
+    var body = { "csp-report": report };
+
+    fetch(csp.reportUri, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/csp-report",
+      },
+      credentials: "same-origin",
+      redirect: "error",
+      keepalive: true,
+      body: JSON.stringify(body),
+    });
+  }
+
+  function getSample(script) {
+    if (!script.hasAttribute("src")) {
+      return script.textContent.substr(0, 40);
+    }
   }
 };
 

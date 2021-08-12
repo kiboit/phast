@@ -10,14 +10,14 @@ use Kibo\Phast\ValueObjects\PhastJavaScript;
 class Filter extends BaseHTMLStreamFilter {
     use JSDetectorTrait;
 
-    /** @var ?string */
-    private $cspNonce;
+    /** @var array */
+    private $csp;
 
     /**
-     * @param ?string $cspNonce
+     * @param array $csp
      */
-    public function __construct($cspNonce) {
-        $this->cspNonce = $cspNonce;
+    public function __construct(array $csp) {
+        $this->csp = $csp;
     }
 
     protected function isTagOfInterest(Tag $tag) {
@@ -36,7 +36,7 @@ class Filter extends BaseHTMLStreamFilter {
     protected function afterLoop() {
         $scriptsLoader = PhastJavaScript::fromFile(__DIR__ . '/scripts-loader.js');
         $scriptsLoader->setConfig('scriptsLoader', [
-            'cspNonce' => $this->cspNonce,
+            'csp' => $this->csp,
         ]);
         $this->context->addPhastJavaScript($scriptsLoader);
         $this->context->addPhastJavaScript(PhastJavaScript::fromFile(__DIR__ . '/rewrite.js'));
