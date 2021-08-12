@@ -172,6 +172,10 @@ class DefaultConfiguration {
             ],
 
             'cspNonce' => null,
+
+            'cspReportOnly' => false,
+
+            'cspReportUri' => null,
         ];
     }
 }
