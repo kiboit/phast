@@ -5,8 +5,6 @@ use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 
 class Factory implements HTMLFilterFactory {
     public function make(array $config) {
-        return new Filter(
-            $config['cspNonce']
-        );
+        return new Filter($config['csp']['nonce']);
     }
 }

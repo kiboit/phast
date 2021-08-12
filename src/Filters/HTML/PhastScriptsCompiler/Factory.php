@@ -12,6 +12,6 @@ class Factory implements HTMLFilterFactory {
             $config['servicesUrl'],
             $config['serviceRequestFormat']
         );
-        return new Filter($compiler, $config['cspNonce']);
+        return new Filter($compiler, $config['csp']['nonce']);
     }
 }

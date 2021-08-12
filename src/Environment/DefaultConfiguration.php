@@ -171,11 +171,11 @@ class DefaultConfiguration {
                 ],
             ],
 
-            'cspNonce' => null,
-
-            'cspReportOnly' => false,
-
-            'cspReportUri' => null,
+            'csp' => [
+                'nonce' => null,
+                'reportOnly' => false,
+                'reportUri' => null,
+            ],
         ];
     }
 }
