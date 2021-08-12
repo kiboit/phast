@@ -155,11 +155,8 @@ phast.ScriptsLoader.Utilities = function (document) {
     return new Promise(function (resolve) {
       var callbackName = "PhastCompleteScript" + ++completionCallbacks;
 
-      var el = document.createElement("script");
-      el.textContent = string;
-
-      var trailer = document.createElement("script");
-      trailer.textContent = callbackName + "()";
+      var el = createScript(string);
+      var trailer = createScript(callbackName + "()");
 
       window[callbackName] = next;
       document.body.appendChild(el);
@@ -172,6 +169,13 @@ phast.ScriptsLoader.Utilities = function (document) {
         delete window[callbackName];
       }
     });
+  }
+
+  function createScript(content) {
+    var el = document.createElement("script");
+    el.textContent = content;
+    el.nonce = phast.config.scriptsLoader.csp.nonce;
+    return el;
   }
 
   function copyElement(source) {

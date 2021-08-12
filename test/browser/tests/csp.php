@@ -1,11 +1,16 @@
 <?php
 define('PHAST_CSP_NONCE', 'secret');
+
+if (!(defined('PHAST_CSP_REPORT_ONLY') && PHAST_CSP_REPORT_ONLY)) {
+    header("Content-Security-Policy: script-src 'nonce-secret'");
+}
+
 require '_.php';
 ?>
 <!doctype html>
 <html>
 <body>
-<script data-phast-no-defer>
+<script data-phast-no-defer nonce="secret">
 window.REPORTS = 0;
 
 window.fetch = function (resource, init) {
