@@ -5,6 +5,7 @@ use Kibo\Phast\Common\System;
 use Kibo\Phast\Filters;
 use Kibo\Phast\HTTP\CURLClient;
 use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\Security\ServiceSignatureFactory;
 
 class DefaultConfiguration {
     public static function get() {
@@ -28,9 +29,10 @@ class DefaultConfiguration {
                     'maxAge' => 86400 * 365,
                 ],
                 'diskCleanup' => [
-                    'maxSize' => 500 * pow(1024, 2),
+                    'maxSize' => 1000 * pow(1024, 2),
                     'probability' => 0.02,
                     'portionToFree' => 0.5,
+                    'keepNamespaces' => [ServiceSignatureFactory::CACHE_NAMESPACE],
                 ],
             ],
 

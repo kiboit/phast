@@ -82,4 +82,8 @@ abstract class ProbabilisticExecutor {
     protected function isCacheEntry(\SplFileInfo $item) {
         return $item->isFile() && preg_match('/^[a-f\d]{32}-/', $item->getFilename());
     }
+
+    public function forceExecution() {
+        $this->execute();
+    }
 }

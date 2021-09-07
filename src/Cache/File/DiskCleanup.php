@@ -16,10 +16,14 @@ class DiskCleanup extends ProbabilisticExecutor {
      */
     private $portionToFree;
 
+    /** @var array */
+    private $keepNamespaces;
+
     public function __construct(array $config, ObjectifiedFunctions $functions = null) {
         $this->maxSize = $config['diskCleanup']['maxSize'];
         $this->probability = $config['diskCleanup']['probability'];
         $this->portionToFree = $config['diskCleanup']['portionToFree'];
+        $this->keepNamespaces = $config['diskCleanup']['keepNamespaces'];
         parent::__construct($config, $functions);
     }
 
@@ -45,5 +49,16 @@ class DiskCleanup extends ProbabilisticExecutor {
             $size += $file->getSize();
         }
         return $size;
+    }
+
+    protected function getCacheFiles($root) {
+        foreach (parent::getCacheFiles($root) as $item) {
+            if (!preg_match('~^[a-f0-9]{32}-(.+)$~', $item->getFilename(), $match)
+                || in_array($match[1], $this->keepNamespaces)
+            ) {
+                continue;
+            }
+            yield $item;
+        }
     }
 }

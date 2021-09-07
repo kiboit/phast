@@ -31,6 +31,7 @@ class ScriptInliner extends NodeVisitorAbstract {
                 'maxSize' => 1e9,
                 'probability' => 0,
                 'portionToFree' => 0,
+                'keepNamespaces' => [],
             ],
         ], 'ScriptInliner');
     }

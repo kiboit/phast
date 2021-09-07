@@ -31,6 +31,7 @@ class CacheTestCase extends PhastTestCase {
                 'maxSize' => 10000,
                 'probability' => 0,
                 'portionToFree' => 0.5,
+                'keepNamespaces' => [],
             ],
         ];
         $this->rmDir($this->config['cacheRoot']);
