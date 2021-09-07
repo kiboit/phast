@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.101 - 2021-09-07
+
+* Ensure the security token never gets reset when the cache grows too large.
+  This prevents resource URLs from changing suddenly.
+
 ## 1.100 - 2021-05-13
 
 * Send 403 and 404 status codes for unauthorized and not found resource URLs
