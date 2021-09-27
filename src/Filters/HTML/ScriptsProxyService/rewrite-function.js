@@ -6,6 +6,7 @@
 
 var config = phast.config["script-proxy-service"];
 var urlPattern = /^(https?:)?\/\//;
+var typePattern = /^\s*(application|text)\/(x-)?(java|ecma|j|live)script/i;
 var cacheMarker = Math.floor(
   new Date().getTime() / 1000 / config.urlRefreshTime
 );
@@ -66,6 +67,7 @@ function processNode(el) {
     el.nodeType !== Node.ELEMENT_NODE ||
     el.tagName !== "SCRIPT" ||
     !urlPattern.test(el.src) ||
+    (el.type && !typePattern.test(el.type)) ||
     el.src.substr(0, config.serviceUrl.length) === config.serviceUrl ||
     !checkWhitelist(el.src)
   ) {
@@ -79,6 +81,8 @@ function processNode(el) {
     src: originalSrc,
     cacheMarker: cacheMarker,
   });
+
+  el.setAttribute("data-phast-rewritten", "");
 
   return function () {
     el.src = originalSrc;

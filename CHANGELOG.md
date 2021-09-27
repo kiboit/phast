@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.102 - 2021-09-27
+
+* Don't rewrite dynamically inserted `module` scripts.
+
 ## 1.101 - 2021-09-07
 
 * Ensure the security token never gets reset when the cache grows too large.
