@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.103 - 2021-10-07
+
+* Update CA bundle.
+
 ## 1.102 - 2021-09-27
 
 * Don't rewrite dynamically inserted `module` scripts.
