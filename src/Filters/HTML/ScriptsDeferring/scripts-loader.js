@@ -65,10 +65,6 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
   }
 
   function reportScript(csp, script) {
-    if (!csp.reportUri) {
-      return;
-    }
-
     var report = {
       "blocked-uri": getSrc(script),
       disposition: csp.reportOnly ? "report" : "enforce",
@@ -77,6 +73,31 @@ phast.ScriptsLoader.getScriptsInExecutionOrder = function (document, factory) {
       "script-sample": getSample(script),
       implementation: "phast",
     };
+
+    try {
+      script.dispatchEvent(
+        new SecurityPolicyViolationEvent("securitypolicyviolation", {
+          blockedURI: report["blocked-uri"],
+          disposition: report["disposition"],
+          documentURI: report["document-uri"],
+          effectiveDirective: "script-src-elem",
+          originalPolicy: "phast",
+          referrer: report["referrer"],
+          sample: report["script-sample"],
+          statusCode: 200,
+          violatedDirective: "script-src-elem",
+        })
+      );
+    } catch (e) {
+      console.error(
+        "[Phast] Could not dispatch securitypolicyviolation event",
+        e
+      );
+    }
+
+    if (!csp.reportUri) {
+      return;
+    }
 
     var body = { "csp-report": report };
 
