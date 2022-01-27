@@ -53,7 +53,7 @@ class ReaderTest extends TestCase {
         }
     }
 
-    public static function tearDownAfterClass() {
+    public static function tearDownAfterClass(): void {
         $dir = sys_get_temp_dir();
         @unlink("$dir/log-json-l-reader-test.jsonl");
         @unlink("$dir/new.jsonl");
