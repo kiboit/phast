@@ -3,4 +3,5 @@
 /docker/*.image
 /node_modules
 /.php_cs.cache
+/.phpunit.result.cache
 /vendor
