@@ -1,6 +1,5 @@
 .DELETE_ON_ERROR :
 
-PHP56 = docker run -v $(shell pwd):/data -w /data $(shell cat docker/php56.image)
 PHP74 = docker run -v $(shell pwd):/data -w /data $(shell cat docker/php74.image)
 JSMIN_SOURCES := $(wildcard vendor/kiboit/jsmin-php/src/JSMin/*.php)
 JSMIN_TARGETS := $(patsubst vendor/kiboit/jsmin-php/src/%,src/%,$(JSMIN_SOURCES))
@@ -17,11 +16,7 @@ watch :
 	git ls-files src test | entr -c -r $(MAKE) -s test74
 
 .PHONY : test
-test : test74 test56
-
-.PHONY : test56
-test56 : all docker/php56.image
-	$(PHP56) vendor/bin/phpunit $(PHPUNIT_ARGS)
+test : test74
 
 .PHONY : test74
 test74 : all docker/php74.image
