@@ -128,6 +128,13 @@ class PCRETokenizerTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('first', $tag->getAttribute('class'));
     }
 
+    public function testWhitespace() {
+        $html = ' ';
+        $elements = iterator_to_array((new PCRETokenizer())->tokenize($html), false);
+        $this->assertCount(1, $elements);
+        $this->assertSame(' ', $elements[0]->toString());
+    }
+
     /**
      * @param $html
      * @return Tag

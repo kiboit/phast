@@ -111,7 +111,7 @@ class PCRETokenizer {
             $offset = $match[0][1] + strlen($match[0][0]);
         }
 
-        if ($offset < strlen($data) - 1) {
+        if ($offset < strlen($data)) {
             $element = new Junk();
             $element->originalString = substr($data, $offset);
             yield $element;
