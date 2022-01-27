@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.15
 
 RUN apk add --no-cache \
         shadow \
@@ -6,7 +6,10 @@ RUN apk add --no-cache \
         php7 \
         php7-dom \
         php7-json \
-        php7-mbstring
+        php7-mbstring \
+        php7-tokenizer \
+        php7-xml \
+        php7-xmlwriter
 
 RUN useradd -m docker
 
