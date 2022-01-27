@@ -33,7 +33,7 @@ abstract class ProbabilisticExecutorTestCase extends CacheTestCase {
     }
 
     public function testNotExplodingWhenExecutingOnMissingCacheRoot() {
-        $this->makeExecutor();
+        $this->assertInstanceOf(ProbabilisticExecutor::class, $this->makeExecutor());
     }
 
     public function testExecutionOnDestruction() {

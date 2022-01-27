@@ -5,6 +5,7 @@ namespace Kibo\Phast\Services\Scripts;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\HTTP\Response;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Security\ServiceSignature;
 use Kibo\Phast\Services\ServiceFilter;
@@ -88,7 +89,7 @@ class ServiceTest extends TestCase {
     public function testNoExceptionOnNotAllowedURLWithToken() {
         $request = ['src' => 'http://not-allowed.com/the-script', 'cacheMarker' => 123456789, 'token' => 'the-token'];
         $httpRequest = Request::fromArray($request, []);
-        $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest));
+        $this->assertInstanceOf(Response::class, $this->service->serve(ServiceRequest::fromHTTPRequest($httpRequest)));
     }
 
     public function testExceptionOnNoResult() {

@@ -124,13 +124,14 @@ class CachingServiceFilterTest extends TestCase {
         };
 
         $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content', 'the-mime');
-        try {
-            $this->filter->apply($resource, []);
-        } catch (CachedExceptionException $e) {
-        }
-        try {
-            $this->filter->apply($resource, []);
-        } catch (CachedExceptionException $e) {
+
+        for ($i = 0; $i < 2; $i++) {
+            $e = null;
+            try {
+                $this->filter->apply($resource, []);
+            } catch (CachedExceptionException $e) {
+            }
+            $this->assertInstanceOf(CachedExceptionException::class, $e);
         }
     }
 }

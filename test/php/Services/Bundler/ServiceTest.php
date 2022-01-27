@@ -156,7 +156,7 @@ class ServiceTest extends PhastTestCase {
     public function testIgnoreMalformedParams() {
         $params = ['key' => 'val'];
         $request = (new ServiceRequest())->withParams($params);
-        $this->service->serve($request);
+        $this->assertInstanceOf(Response::class, $this->service->serve($request));
     }
 
     public function testBundlingScripts() {
