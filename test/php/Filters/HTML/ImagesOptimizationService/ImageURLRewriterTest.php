@@ -25,7 +25,7 @@ class ImageURLRewriterTest extends PhastTestCase {
      */
     private $inliningManager;
 
-    public function setUp($rewriteFormat = null) {
+    public function setUp(): void {
         parent::setUp();
 
         ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
@@ -195,11 +195,7 @@ class ImageURLRewriterTest extends PhastTestCase {
         }
     }
 
-    /**
-     * @param int|null $rewriteFormat
-     * @return ImageURLRewriter
-     */
-    private function getRewriter($rewriteFormat = null) {
+    private function getRewriter(): ImageURLRewriter {
         return new ImageURLRewriter(
             $this->securityToken,
             $this->retriever,
