@@ -19,7 +19,7 @@
         "ext-dom": "*",
         "friendsofphp/php-cs-fixer": "^2.16",
         "kiboit/jsmin-php": "dev-master",
-        "nikic/php-parser": "^3.1"
+        "nikic/php-parser": "^4.13"
     },
     "suggest": {
         "nikic/php-parser": "Needed for compilation"
