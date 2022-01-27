@@ -40,7 +40,7 @@ class PhastServicesTest extends PhastTestCase {
      */
     private $functions;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->request = Request::fromArray([], ['HTTP_ACCEPT_ENCODING' => 'gzip, deflate']);

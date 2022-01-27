@@ -39,7 +39,7 @@ class FilterTest extends HTMLFilterTestCase {
      */
     private $config;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
 

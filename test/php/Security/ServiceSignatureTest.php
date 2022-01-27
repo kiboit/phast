@@ -18,7 +18,7 @@ class ServiceSignatureTest extends TestCase {
 
     private $generatedToken;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
         $this->cache->method('get')

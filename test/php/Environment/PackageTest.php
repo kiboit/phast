@@ -17,7 +17,7 @@ class PackageTest extends TestCase {
      */
     private $p2;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->assertTrue(class_exists(TestPackage2\Factory::class));
         $this->assertTrue(class_exists(TestPackage1\Diagnostics::class));
         $this->p1 = Package::fromPackageClass(TestPackage1\Filter::class);

@@ -11,7 +11,7 @@ class FilterTest extends HTMLFilterTestCase {
      */
     private $rewriterMock;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->rewriterMock = $this->createMock(ImageURLRewriter::class);
         $this->rewriterMock->method('rewriteStyle')

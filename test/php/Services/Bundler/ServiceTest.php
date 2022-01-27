@@ -35,7 +35,7 @@ class ServiceTest extends PhastTestCase {
      */
     private $service;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->signature = new ServiceSignature($this->createMock(Cache::class));
         $this->signature->setIdentities('some-identity');

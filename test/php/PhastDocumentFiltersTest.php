@@ -6,7 +6,7 @@ namespace Kibo\Phast;
  * @runTestsInSeparateProcesses
  */
 class PhastDocumentFiltersTest extends \PHPUnit\Framework\TestCase {
-    public function setUp() {
+    public function setUp(): void {
         $_SERVER += [
             'HTTP_HOST' => 'example.com',
             'REQUEST_URI' => '/',

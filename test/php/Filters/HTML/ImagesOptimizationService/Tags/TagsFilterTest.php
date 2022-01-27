@@ -16,7 +16,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
 
     private $files;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);

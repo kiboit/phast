@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 class WriterTest extends TestCase {
     private $tempDir;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->tempDir = sys_get_temp_dir() . '/phast-rotating-text-file-test.' . uniqid();
         mkdir($this->tempDir);
     }

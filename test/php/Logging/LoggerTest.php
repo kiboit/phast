@@ -21,7 +21,7 @@ class LoggerTest extends TestCase {
      */
     private $logger;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->messageWritten = null;
         $this->writer = $this->createMock(LogWriter::class);

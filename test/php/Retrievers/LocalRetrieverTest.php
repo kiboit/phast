@@ -19,7 +19,7 @@ class LocalRetrieverTest extends TestCase {
 
     private $calledForFile;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->calledForFile = null;
         $this->funcs = new ObjectifiedFunctions();

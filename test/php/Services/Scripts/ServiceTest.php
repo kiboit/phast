@@ -36,7 +36,7 @@ class ServiceTest extends TestCase {
 
     private $returnResource;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->calledWithParams = [];

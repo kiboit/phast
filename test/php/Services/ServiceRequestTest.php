@@ -9,7 +9,7 @@ use Kibo\Phast\ValueObjects\URL;
 use PHPUnit\Framework\TestCase;
 
 class ServiceRequestTest extends TestCase {
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         ServiceRequest::resetRequestState();
     }

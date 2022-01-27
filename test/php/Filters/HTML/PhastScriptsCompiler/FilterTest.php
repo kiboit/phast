@@ -17,7 +17,7 @@ class FilterTest extends HTMLFilterTestCase {
 
     private $expectedCompiledScript = '<script data-phast-compiled-js-names="some-file">the-js</script>';
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->jsCompiler = $this->createMock(PhastJavaScriptCompiler::class);

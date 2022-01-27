@@ -22,7 +22,7 @@ class FilterTest extends PhastTestCase {
      */
     private $parsedElements;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->filter = new Filter(URL::fromString(self::BASE_URL), true);
     }

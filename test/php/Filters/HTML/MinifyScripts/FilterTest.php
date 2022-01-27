@@ -5,7 +5,7 @@ use Kibo\Phast\Cache\File\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $cache = $this->createMock(Cache::class);
         $cache->method('get')->will($this->returnCallback(function ($k, $cb) {

@@ -4,7 +4,7 @@ namespace Kibo\Phast\Filters\HTML\Minify;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 
 class FilterTest extends HTMLFilterTestCase {
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->filter = new Filter();
     }

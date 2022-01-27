@@ -10,7 +10,7 @@ class OutputBufferHandlerTest extends \PHPUnit\Framework\TestCase {
     /** @var OutputBufferHandler */
     private $handler;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->handler = new OutputBufferHandler(self::MAX_BUFFER_SIZE_TO_APPLY, function ($buffer) {
             return strtoupper($buffer);
         });

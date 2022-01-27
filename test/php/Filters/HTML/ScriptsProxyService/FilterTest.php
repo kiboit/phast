@@ -30,7 +30,7 @@ class FilterTest extends HTMLFilterTestCase {
         'urlRefreshTime' => 7200,
     ];
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         ServiceRequest::setDefaultSerializationMode(ServiceRequest::FORMAT_QUERY);
 

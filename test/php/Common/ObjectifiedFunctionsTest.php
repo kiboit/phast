@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 class ObjectifiedFunctionsTest extends TestCase {
     private $funcs;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->funcs = new ObjectifiedFunctions();
     }

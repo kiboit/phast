@@ -5,7 +5,7 @@ namespace Kibo\Phast\HTTP;
 use Kibo\Phast\ValueObjects\URL;
 
 class CURLClientTest extends \PHPUnit\Framework\TestCase {
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         if (!function_exists('curl_init')) {
             $this->markTestSkipped('cURL is missing');

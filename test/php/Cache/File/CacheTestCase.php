@@ -16,7 +16,7 @@ class CacheTestCase extends PhastTestCase {
      */
     protected $functions;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $uid = function_exists('posix_geteuid') ? posix_geteuid() : 0;
         $this->config = [

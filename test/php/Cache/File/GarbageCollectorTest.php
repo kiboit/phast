@@ -3,7 +3,7 @@
 namespace Kibo\Phast\Cache\File;
 
 class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->config['garbageCollection']['probability'] = 1;
         $this->config['garbageCollection']['maxAge'] = 60;

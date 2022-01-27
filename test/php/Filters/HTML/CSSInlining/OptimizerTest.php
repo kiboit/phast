@@ -12,7 +12,7 @@ class OptimizerTest extends HTMLFilterTestCase {
      */
     private $cache;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->cache = $this->createMock(Cache::class);
         $this->cache->expects($this->atLeast(1))

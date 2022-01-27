@@ -34,7 +34,7 @@ class FilterTest extends TestCase {
      */
     private $filter;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->image = new DummyImage();
         $this->image->setImageString('The test image');

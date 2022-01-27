@@ -15,7 +15,7 @@ class CompositeFilterTest extends PhastTestCase {
      */
     protected $filter;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->filter = new CompositeFilter();
     }

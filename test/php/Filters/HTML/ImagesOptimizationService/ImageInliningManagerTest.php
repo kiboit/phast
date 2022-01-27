@@ -20,7 +20,7 @@ class ImageInliningManagerTest extends PhastTestCase {
      */
     private $manager;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->cache = $this->createMock(Cache::class);
         $this->manager = new ImageInliningManager($this->cache, self::MAX_INLINING_SIZE);
     }

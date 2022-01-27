@@ -17,7 +17,7 @@ class ResourceTest extends PhastTestCase {
 
     private $mimeType = 'text/css';
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->url = URL::fromString('http://phast.test');
     }

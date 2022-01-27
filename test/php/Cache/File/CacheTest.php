@@ -10,7 +10,7 @@ class CacheTest extends CacheTestCase {
      */
     private $cache;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->rebuildCache();
     }
