@@ -47,7 +47,7 @@ class FilterTest extends TestCase {
         $this->filter = new Filter($factory, $this->createMock(ImageInliningManager::class));
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
         Log::initWithDummy();
     }

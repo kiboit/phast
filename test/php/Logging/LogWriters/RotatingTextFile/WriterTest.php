@@ -15,7 +15,7 @@ class WriterTest extends TestCase {
         mkdir($this->tempDir);
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($this->tempDir, \RecursiveDirectoryIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::CHILD_FIRST

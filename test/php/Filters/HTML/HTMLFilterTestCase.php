@@ -68,7 +68,7 @@ class HTMLFilterTestCase extends PhastTestCase {
         );
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
         ServiceRequest::resetRequestState();
     }

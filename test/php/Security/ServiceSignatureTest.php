@@ -31,7 +31,7 @@ class ServiceSignatureTest extends TestCase {
         $this->signature = new ServiceSignature($this->cache);
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
         $this->generatedToken = null;
     }
