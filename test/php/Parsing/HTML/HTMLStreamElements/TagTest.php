@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Parsing\HTML\HTMLStreamElements;
 
-class TagTest extends \PHPUnit_Framework_TestCase {
+class TagTest extends \PHPUnit\Framework\TestCase {
     private $opening = '<sPaN claSS="SoMe\"Class\"">';
 
     private $text = 'Text';

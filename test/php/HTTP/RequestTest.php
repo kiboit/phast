@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\HTTP;
 
-class RequestTest extends \PHPUnit_Framework_TestCase {
+class RequestTest extends \PHPUnit\Framework\TestCase {
     /** @dataProvider pathInfoData */
     public function testPathInfo($env) {
         $req = Request::fromArray([], $env, []);

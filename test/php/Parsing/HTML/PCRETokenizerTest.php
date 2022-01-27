@@ -6,7 +6,7 @@ use Kibo\Phast\Parsing\HTML\HTMLStreamElements\ClosingTag;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Junk;
 use Kibo\Phast\Parsing\HTML\HTMLStreamElements\Tag;
 
-class PCRETokenizerTest extends \PHPUnit_Framework_TestCase {
+class PCRETokenizerTest extends \PHPUnit\Framework\TestCase {
     public function testSimpleDocument() {
         $html = '
             <!doctype html>

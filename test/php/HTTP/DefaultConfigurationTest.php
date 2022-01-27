@@ -4,7 +4,7 @@ namespace Kibo\Phast\HTTP;
 use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\ValueObjects\URL;
 
-class DefaultConfigurationTest extends \PHPUnit_Framework_TestCase {
+class DefaultConfigurationTest extends \PHPUnit\Framework\TestCase {
     public function testRetrieveURL() {
         $clientFactory = new ClientFactory();
         $config = Configuration::fromDefaults()->toArray();

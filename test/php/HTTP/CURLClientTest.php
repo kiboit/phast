@@ -4,7 +4,7 @@ namespace Kibo\Phast\HTTP;
 
 use Kibo\Phast\ValueObjects\URL;
 
-class CURLClientTest extends \PHPUnit_Framework_TestCase {
+class CURLClientTest extends \PHPUnit\Framework\TestCase {
     public function setUp() {
         parent::setUp();
         if (!function_exists('curl_init')) {
