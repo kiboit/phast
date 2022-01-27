@@ -52,7 +52,7 @@ class GarbageCollectorTest extends ProbabilisticExecutorTestCase {
         mkdir(dirname($filename), 0700, true);
         touch($filename, time() - $this->config['garbageCollection']['maxAge'] - 10);
         $this->makeExecutor();
-        $this->assertFileNotExists($filename);
+        $this->assertFileDoesNotExist($filename);
     }
 
     private function executeCacheTest() {

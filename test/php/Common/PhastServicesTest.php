@@ -83,18 +83,18 @@ class PhastServicesTest extends PhastTestCase {
         $this->executeTest();
 
         $empty = $this->getETagHeaderValue();
-        $this->assertRegExp($pattern, $empty);
+        $this->assertMatchesRegularExpression($pattern, $empty);
 
         $this->response->setHeader('Hello', 'World');
         $this->executeTest();
         $withHeader = $this->getETagHeaderValue();
-        $this->assertRegExp($pattern, $withHeader);
+        $this->assertMatchesRegularExpression($pattern, $withHeader);
         $this->assertNotEquals($empty, $withHeader);
 
         $this->response->setContent('Hey!');
         $this->executeTest();
         $withContent = $this->getETagHeaderValue();
-        $this->assertRegExp($pattern, $withContent);
+        $this->assertMatchesRegularExpression($pattern, $withContent);
         $this->assertNotEquals($withHeader, $withContent);
 
         $streamableContent = [self::EXAMPLE_CONTENT];

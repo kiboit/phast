@@ -321,8 +321,8 @@ class ServiceRequestTest extends TestCase {
     public function testSplittingLongFilenames() {
         $request = (new ServiceRequest())->withParams(['src' => str_repeat('x', 1000)]);
         $pathInfo = $request->serialize(ServiceRequest::FORMAT_PATH);
-        $this->assertRegExp('~[a-z0-9_-]{255}~i', $pathInfo);
-        $this->assertNotRegExp('~[a-z0-9_-]{256}~i', $pathInfo);
+        $this->assertMatchesRegularExpression('~[a-z0-9_-]{255}~i', $pathInfo);
+        $this->assertDoesNotMatchRegularExpression('~[a-z0-9_-]{256}~i', $pathInfo);
     }
 
     public function testRetinaSrc() {

@@ -585,7 +585,7 @@ class FilterTest extends HTMLFilterTestCase {
         $html = '<html><head><link rel=stylesheet href=/external.css?test></head><body></body></html>';
         $this->files['/external.css'] = 'body{background:url(/image.jpg);}';
         $this->applyFilter($html);
-        $this->assertRegExp('/^[a-z0-9]+$/i', (string) $this->getCacheMarker());
+        $this->assertMatchesRegularExpression('/^[a-z0-9]+$/i', (string) $this->getCacheMarker());
     }
 
     public function testIgnoreEmptyHref() {

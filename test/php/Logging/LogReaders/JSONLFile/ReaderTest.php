@@ -33,7 +33,7 @@ class ReaderTest extends TestCase {
             ],
         ];
         $this->assertEquals($expected, $actual);
-        $this->assertFileNotExists("$dir/log-$file.jsonl");
+        $this->assertFileDoesNotExist("$dir/log-$file.jsonl");
     }
 
     public function testCleaningOldLogs() {
@@ -49,7 +49,7 @@ class ReaderTest extends TestCase {
         $this->assertFileExists("$dir/old.xml");
         $this->assertFileExists("$dir/new.jsonl");
         for ($i = 0; $i < 10; $i++) {
-            $this->assertFileNotExists("$dir/$i.jsonl");
+            $this->assertFileDoesNotExist("$dir/$i.jsonl");
         }
     }
 

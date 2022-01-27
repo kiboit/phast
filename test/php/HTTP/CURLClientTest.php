@@ -16,7 +16,7 @@ class CURLClientTest extends \PHPUnit\Framework\TestCase {
         $client = new CURLClient();
         $result = $client->get(URL::fromString('http://whatismyip.akamai.com/'));
         $this->assertEquals(200, $result->getCode());
-        $this->assertRegExp('/^\d+\.\d+\.\d+\.\d+/', $result->getContent());
+        $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+\.\d+/', $result->getContent());
         $this->assertArraySubset(['Content-Type' => 'text/html'], $result->getHeaders());
     }
 
