@@ -117,7 +117,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
     public function testDontRewriteMediaSource($tag) {
         $html = "<picture><$tag><source src=\"/canary\">";
         $filtered = $this->applyFilter($html, true);
-        $this->assertContains('"/canary"', $filtered);
+        $this->assertStringContainsString('"/canary"', $filtered);
     }
 
     public function dontRewriteMediaSourceData() {
@@ -218,7 +218,7 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->applyFilter($html);
 
         $img = $this->dom->getElementsByTagName('amp-img')->item(0);
-        $this->assertContains('service.php', $img->getAttribute('src'));
+        $this->assertStringContainsString('service.php', $img->getAttribute('src'));
     }
 
     public function testRevolutionSliderFix() {
@@ -230,10 +230,10 @@ class TagsFilterTest extends HTMLFilterTestCase {
         $this->applyFilter($html);
 
         $img = $this->dom->getElementsByTagName('img')->item(0);
-        $this->assertNotContains('service.php', $img->getAttribute('src'));
+        $this->assertStringNotContainsString('service.php', $img->getAttribute('src'));
 
         $img = $this->dom->getElementsByTagName('img')->item(1);
-        $this->assertContains('service.php', $img->getAttribute('src'));
+        $this->assertStringContainsString('service.php', $img->getAttribute('src'));
     }
 
     private function makeImage($src, $width = null, $height = null) {

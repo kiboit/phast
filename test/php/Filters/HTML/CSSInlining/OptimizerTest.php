@@ -41,12 +41,12 @@ class OptimizerTest extends HTMLFilterTestCase {
         $firstCSSOptimized = $optimizer->optimizeCSS($firstCSS);
         $secondCSSOptimized = $optimizer->optimizeCSS($secondCSS);
 
-        $this->assertContains('.class1', $firstCSSOptimized);
-        $this->assertContains('red', $firstCSSOptimized);
-        $this->assertNotContains('.class2', $firstCSSOptimized);
-        $this->assertNotContains('green', $firstCSSOptimized);
-        $this->assertNotContains('.class3', $firstCSSOptimized);
-        $this->assertNotContains('blue', $firstCSSOptimized);
+        $this->assertStringContainsString('.class1', $firstCSSOptimized);
+        $this->assertStringContainsString('red', $firstCSSOptimized);
+        $this->assertStringNotContainsString('.class2', $firstCSSOptimized);
+        $this->assertStringNotContainsString('green', $firstCSSOptimized);
+        $this->assertStringNotContainsString('.class3', $firstCSSOptimized);
+        $this->assertStringNotContainsString('blue', $firstCSSOptimized);
 
         $this->assertEquals('', $secondCSSOptimized);
     }
@@ -66,14 +66,14 @@ class OptimizerTest extends HTMLFilterTestCase {
 
         $cssOptimized = $this->optimizeCSS($css);
 
-        $this->assertContains('.class1', $cssOptimized);
-        $this->assertContains('red', $cssOptimized);
+        $this->assertStringContainsString('.class1', $cssOptimized);
+        $this->assertStringContainsString('red', $cssOptimized);
 
         if ($shouldOptimize) {
-            $this->assertNotContains('.class2', $cssOptimized);
-            $this->assertNotContains('blue', $cssOptimized);
+            $this->assertStringNotContainsString('.class2', $cssOptimized);
+            $this->assertStringNotContainsString('blue', $cssOptimized);
         } else {
-            $this->assertContains('blue', $cssOptimized);
+            $this->assertStringContainsString('blue', $cssOptimized);
         }
     }
 
@@ -99,8 +99,8 @@ class OptimizerTest extends HTMLFilterTestCase {
 
         $cssOptimized = $this->optimizeCSS($css);
 
-        $this->assertNotContains('.class1', $cssOptimized);
-        $this->assertContains('span', $cssOptimized);
+        $this->assertStringNotContainsString('.class1', $cssOptimized);
+        $this->assertStringContainsString('span', $cssOptimized);
     }
 
     /**
@@ -130,9 +130,9 @@ class OptimizerTest extends HTMLFilterTestCase {
 
         $cssOptimized = $this->optimizeCSS($css);
 
-        $this->assertNotContains('.no', $cssOptimized);
-        $this->assertContains('.yes', $cssOptimized);
-        $this->assertContains('red', $cssOptimized);
+        $this->assertStringNotContainsString('.no', $cssOptimized);
+        $this->assertStringContainsString('.yes', $cssOptimized);
+        $this->assertStringContainsString('red', $cssOptimized);
     }
 
     /**
@@ -158,7 +158,7 @@ class OptimizerTest extends HTMLFilterTestCase {
 
         $cssOptimized = $this->optimizeCSS($css);
 
-        $this->assertContains('.cls', $cssOptimized);
+        $this->assertStringContainsString('.cls', $cssOptimized);
     }
 
     public function testRemoveEmptyMediaQueries() {

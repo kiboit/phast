@@ -161,9 +161,9 @@ class FilterTest extends HTMLFilterTestCase {
         $this->applyFilter();
         $script = $this->getMatchingElement($script);
 
-        $this->assertContains('%2Fhello%2F', $script->getAttribute('src'));
-        $this->assertNotContains('+', $script->getAttribute('src'));
-        $this->assertNotContains('%20', $script->getAttribute('src'));
+        $this->assertStringContainsString('%2Fhello%2F', $script->getAttribute('src'));
+        $this->assertStringNotContainsString('+', $script->getAttribute('src'));
+        $this->assertStringNotContainsString('%20', $script->getAttribute('src'));
     }
 
     public function testRespectingBaseTag() {

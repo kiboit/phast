@@ -43,8 +43,8 @@ class PhastJavaScriptCompilerTest extends TestCase {
 
         $expectedScript1 = '(function(){var a;})';
         $expectedScript2 = '(function(){var b;})';
-        $this->assertContains($expectedScript1, $compiled);
-        $this->assertContains($expectedScript2, $compiled);
+        $this->assertStringContainsString($expectedScript1, $compiled);
+        $this->assertStringContainsString($expectedScript2, $compiled);
     }
 
     public function testCompilingWithConfig() {

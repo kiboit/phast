@@ -46,21 +46,21 @@ class FilterTest extends PhastTestCase {
         $this->shouldTransform();
         $buffer = '<html><head><meta charset=utf8></head><body>ü</body></html>';
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains('ü', $filtered);
+        $this->assertStringContainsString('ü', $filtered);
     }
 
     public function testShouldOutputUTF8WithoutDeclaration() {
         $this->shouldTransform();
         $buffer = '<html><body>ü</body></html>';
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains('ü', $filtered);
+        $this->assertStringContainsString('ü', $filtered);
     }
 
     public function testHandleMixedUTF8AndWindows1252() {
         $this->shouldTransform();
         $buffer = "<html><body>ü\xfc</body></html>";
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains("ü\xfc", $filtered);
+        $this->assertStringContainsString("ü\xfc", $filtered);
     }
 
     /**
@@ -88,7 +88,7 @@ class FilterTest extends PhastTestCase {
         $div = '<div /><span></span></div>';
         $buffer = "<html><body>$div</body></html>";
         $filtered = $this->filter->apply($buffer);
-        $this->assertContains('<div /><span></span></div>', $filtered);
+        $this->assertStringContainsString('<div /><span></span></div>', $filtered);
     }
 
     public function testShouldHandleExceptions() {
@@ -119,7 +119,7 @@ class FilterTest extends PhastTestCase {
         $buffer = '<html><body></body></html>';
         $this->shouldTransform();
         $actual = $this->filter->apply($buffer);
-        $this->assertContains('<!-- [Phast] Document optimized', $actual);
+        $this->assertStringContainsString('<!-- [Phast] Document optimized', $actual);
     }
 
     public function testShouldNotAddStats() {
@@ -127,7 +127,7 @@ class FilterTest extends PhastTestCase {
         $buffer = '<html><body></body></html>';
         $this->shouldTransform();
         $actual = $this->filter->apply($buffer);
-        $this->assertNotContains('<!-- [Phast] Document optimized', $actual);
+        $this->assertStringNotContainsString('<!-- [Phast] Document optimized', $actual);
     }
 
     private function shouldTransform() {

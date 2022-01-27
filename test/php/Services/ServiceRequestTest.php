@@ -194,7 +194,7 @@ class ServiceRequestTest extends TestCase {
         $url = $serviceRequest->withUrl(URL::fromString('phast.php?service=images'))
                 ->withParams(['k' => 'v'])
                 ->serialize(ServiceRequest::FORMAT_QUERY);
-        $this->assertContains('phast=s1.s2.-s3', $url);
+        $this->assertStringContainsString('phast=s1.s2.-s3', $url);
     }
 
     public function testGeneratingRequestId() {
@@ -225,22 +225,22 @@ class ServiceRequestTest extends TestCase {
 
         $url = URL::fromString('phast.php?service=diagnostics');
         $url1 = (new ServiceRequest())->withUrl($url)->serialize();
-        $this->assertNotContains('documentRequestId=', $url1);
+        $this->assertStringNotContainsString('documentRequestId=', $url1);
 
         $httpRequest = Request::fromArray(['phast' => 'diagnostics'], []);
         $url2 = ServiceRequest::fromHTTPRequest($httpRequest)
                 ->withUrl($url)
                 ->serialize();
-        $this->assertContains('documentRequestId=', $url2);
+        $this->assertStringContainsString('documentRequestId=', $url2);
 
         $url3 = (new ServiceRequest())->withUrl($url)->serialize();
-        $this->assertContains('documentRequestId=', $url3);
+        $this->assertStringContainsString('documentRequestId=', $url3);
 
         $httpRequest = Request::fromArray(['phast' => ''], [], ['phast' => 'diagnostics']);
         $url4 = ServiceRequest::fromHTTPRequest($httpRequest)
             ->withUrl($url)
             ->serialize();
-        $this->assertContains('documentRequestId=', $url4);
+        $this->assertStringContainsString('documentRequestId=', $url4);
     }
 
     public function testSettingDefaultSerializationMode() {

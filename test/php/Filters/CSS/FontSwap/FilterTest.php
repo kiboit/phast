@@ -37,9 +37,9 @@ class FilterTest extends PhastTestCase {
         $resource = Resource::makeWithContent(URL::fromString(self::BASE_URL), $css);
         $actual = $this->filter->apply($resource, [])->getContent();
         if ($shouldSwap) {
-            $this->assertContains('font-display:swap', $actual);
+            $this->assertStringContainsString('font-display:swap', $actual);
         } else {
-            $this->assertContains('font-display:block', $actual);
+            $this->assertStringContainsString('font-display:block', $actual);
         }
     }
 }

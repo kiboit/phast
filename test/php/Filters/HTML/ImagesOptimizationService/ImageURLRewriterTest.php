@@ -123,7 +123,7 @@ class ImageURLRewriterTest extends PhastTestCase {
         $inlined = $rewriter->getInlinedResources();
         $this->assertCount(1, $inlined);
         $this->assertInstanceOf(Resource::class, $inlined[0]);
-        $this->assertContains($inputUrl1, (string) $inlined[0]->getUrl());
+        $this->assertStringContainsString($inputUrl1, (string) $inlined[0]->getUrl());
 
         $inputUrl2 = 'some-url-2.jpg';
         $css = "background: url(\"$inputUrl2\"); background: url(\"$inputUrl1\"); background: url(\"$inputUrl2\");";
@@ -135,8 +135,8 @@ class ImageURLRewriterTest extends PhastTestCase {
         $this->assertCount(2, $inlined);
         $this->assertInstanceOf(Resource::class, $inlined[0]);
         $this->assertInstanceOf(Resource::class, $inlined[1]);
-        $this->assertContains($inputUrl2, (string) $inlined[0]->getUrl());
-        $this->assertContains($inputUrl1, (string) $inlined[1]->getUrl());
+        $this->assertStringContainsString($inputUrl2, (string) $inlined[0]->getUrl());
+        $this->assertStringContainsString($inputUrl1, (string) $inlined[1]->getUrl());
     }
 
     public function testNotInliningWhenManagerReturnsNull() {

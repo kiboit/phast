@@ -24,11 +24,11 @@ selector { rule: value }
             ->apply($this->makeResource(), ['strip-imports' => 1])
             ->getContent();
 
-        $this->assertNotContains('@import \'custom.css\';', $result);
-        $this->assertNotContains('@import url("chrome://communicator/skin/");', $result);
-        $this->assertContains('@import url("bluish.css") projection, tv', $result);
-        $this->assertContains('@import "common.css" screen, projection;', $result);
-        $this->assertContains("@import url('landscape.css') screen and (orientation:landscape)", $result);
+        $this->assertStringNotContainsString('@import \'custom.css\';', $result);
+        $this->assertStringNotContainsString('@import url("chrome://communicator/skin/");', $result);
+        $this->assertStringContainsString('@import url("bluish.css") projection, tv', $result);
+        $this->assertStringContainsString('@import "common.css" screen, projection;', $result);
+        $this->assertStringContainsString("@import url('landscape.css') screen and (orientation:landscape)", $result);
     }
 
     public function testNotStrippingWhenNotRequired() {

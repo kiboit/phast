@@ -65,7 +65,7 @@ class CacheTest extends CacheTestCase {
         $expectedFilename = $this->getCacheFileName($key);
         $this->assertFileExists($expectedFilename);
         $this->assertStringStartsWith('50 ', file_get_contents($expectedFilename));
-        $this->assertContains($value, file_get_contents($expectedFilename));
+        $this->assertStringContainsString($value, file_get_contents($expectedFilename));
     }
 
     public function testShardingDepth() {

@@ -93,6 +93,6 @@ class TagTest extends \PHPUnit\Framework\TestCase {
     public function testDoubleQuoteInAttribute() {
         $tag = new Tag('x');
         $tag->setAttribute('test', '"<>&\'');
-        $this->assertContains('\'"<>&amp;&#039;\'', $tag->toString());
+        $this->assertStringContainsString('\'"<>&amp;&#039;\'', $tag->toString());
     }
 }

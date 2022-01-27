@@ -24,7 +24,7 @@ class CURLClientTest extends \PHPUnit\Framework\TestCase {
         $client = new CURLClient();
         $data = str_repeat('x', 5e6);
         $result = $client->post(URL::fromString('http://optimize.phast.io/?service=images'), $data);
-        $this->assertNotContains('HTTP/', $result->getContent());
+        $this->assertStringNotContainsString('HTTP/', $result->getContent());
         $this->assertNotEmpty($result->getHeaders());
     }
 }

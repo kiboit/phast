@@ -405,8 +405,8 @@ class FilterTest extends HTMLFilterTestCase {
 
         $contentsStyle = array_shift($elements);
         $this->assertEquals('style', $contentsStyle->tagName);
-        $this->assertNotContains($importUrl, $contentsStyle->textContent);
-        $this->assertContains('red', $contentsStyle->textContent);
+        $this->assertStringNotContainsString($importUrl, $contentsStyle->textContent);
+        $this->assertStringContainsString('red', $contentsStyle->textContent);
     }
 
     public function whitelistedImportProvider() {
@@ -478,7 +478,7 @@ class FilterTest extends HTMLFilterTestCase {
         $this->files['/utf-css.css'] = $css;
         $html = '<html><head><link rel="stylesheet" href="/utf-css.css"></head></html>';
         $actual = $this->applyFilter($html, false);
-        $this->assertContains('ü', $actual);
+        $this->assertStringContainsString('ü', $actual);
     }
 
     public function testRespectingBaseTag() {

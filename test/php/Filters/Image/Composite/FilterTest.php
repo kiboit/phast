@@ -91,7 +91,7 @@ class FilterTest extends TestCase {
         $this->assertNotNull($actualContext);
         $expected = ['filter', 'exceptionClass', 'message', 'code', 'file', 'line'];
         foreach ($expected as $element) {
-            $this->assertContains("{$element}", $actualMessage);
+            $this->assertStringContainsString("{$element}", $actualMessage);
             $this->assertArrayHasKey($element, $actualContext);
         }
     }

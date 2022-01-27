@@ -86,7 +86,7 @@ class PhastDocumentFiltersTest extends \PHPUnit\Framework\TestCase {
     public function testShouldNotInjectScripts($buffer) {
         $out = PhastDocumentFilters::apply($buffer, []);
         $this->assertFiltersApplied($out);
-        $this->assertNotContains('<script', $out);
+        $this->assertStringNotContainsString('<script', $out);
     }
 
     public function shouldNotInjectScriptsData() {
@@ -104,15 +104,15 @@ class PhastDocumentFiltersTest extends \PHPUnit\Framework\TestCase {
             ]
         );
         $this->assertFiltersApplied($out);
-        $this->assertNotContains('<script', $out);
-        $this->assertContains('phast.php', $out);
+        $this->assertStringNotContainsString('<script', $out);
+        $this->assertStringContainsString('phast.php', $out);
     }
 
     private function assertFiltersApplied($out) {
-        $this->assertContains('[Phast]', $out);
+        $this->assertStringContainsString('[Phast]', $out);
     }
 
     private function assertFiltersNotApplied($out) {
-        $this->assertNotContains('[Phast]', $out);
+        $this->assertStringNotContainsString('[Phast]', $out);
     }
 }

@@ -14,6 +14,6 @@ class DefaultConfigurationTest extends \PHPUnit\Framework\TestCase {
             $this->expectException(Exceptions\NetworkError::class);
         }
         $response = $client->get($url);
-        $this->assertContains('<html', $response->getContent());
+        $this->assertStringContainsString('<html', $response->getContent());
     }
 }
