@@ -11,9 +11,14 @@ class PhastJavaScript {
     private $filename;
 
     /**
-     * @var string
+     * @var ?string
      */
-    private $contents;
+    private $rawScript;
+
+    /**
+     * @var ?string
+     */
+    private $minifiedScript;
 
     /**
      * @var string
@@ -25,15 +30,13 @@ class PhastJavaScript {
      */
     private $config;
 
-    /**
-     * @var bool
-     */
-    private $minified;
-
-    private function __construct(string $filename, string $contents, bool $minified) {
+    private function __construct(string $filename, string $script, bool $minified) {
         $this->filename = $filename;
-        $this->contents = $contents;
-        $this->minified = $minified;
+        if ($minified) {
+            $this->minifiedScript = $script;
+        } else {
+            $this->rawScript = $script;
+        }
     }
 
     /**
@@ -68,19 +71,18 @@ class PhastJavaScript {
      * @return bool|string
      */
     public function getContents() {
-        if (!$this->minified) {
-            $this->contents = (new JSMinifier($this->contents))->min();
-            $this->minified = true;
+        if ($this->minifiedScript === null) {
+            $this->minifiedScript = (new JSMinifier($this->rawScript))->min();
         }
-        return $this->contents;
+        return $this->minifiedScript;
     }
 
     /**
      * @return string
      */
     public function getCacheSalt() {
-        $hash = md5($this->getContents(), true);
-        return substr(preg_replace('/^[a-z0-9]/i', '', base64_encode($hash)), 0, 16);
+        $hash = md5($this->rawScript ?? $this->minifiedScript, true);
+        return substr(base64_encode($hash), 0, 16);
     }
 
     /**
