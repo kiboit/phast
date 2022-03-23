@@ -26,17 +26,14 @@ class PhastJavaScript {
     private $config;
 
     /**
-     * @var ObjectifiedFunctions
+     * @var bool
      */
-    private $funcs;
+    private $minified;
 
-    /**
-     * @param string $filename
-     * @param string $contents
-     */
-    private function __construct($filename, $contents) {
+    private function __construct(string $filename, string $contents, bool $minified) {
         $this->filename = $filename;
         $this->contents = $contents;
+        $this->minified = $minified;
     }
 
     /**
@@ -47,10 +44,9 @@ class PhastJavaScript {
         $funcs = $funcs ? $funcs : new ObjectifiedFunctions();
         $contents = $funcs->file_get_contents($filename);
         if ($contents === false) {
-            throw new \RuntimeException("Failed to read script: $filename");
+            throw new \RuntimeException("Could not read script: $filename");
         }
-        $contents = (new JSMinifier($contents))->min();
-        return new self($filename, $contents);
+        return new self($filename, $contents, false);
     }
 
     /**
@@ -58,7 +54,7 @@ class PhastJavaScript {
      * @param string $contents
      */
     public static function fromString($filename, $contents) {
-        return new self($filename, $contents);
+        return new self($filename, $contents, true);
     }
 
     /**
@@ -72,6 +68,10 @@ class PhastJavaScript {
      * @return bool|string
      */
     public function getContents() {
+        if (!$this->minified) {
+            $this->contents = (new JSMinifier($this->contents))->min();
+            $this->minified = true;
+        }
         return $this->contents;
     }
 
