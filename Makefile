@@ -32,7 +32,7 @@ dist : all
 
 .PHONY : clean
 clean :
-	rm -rf build
+	rm -rf build docker/php74.image
 
 .PHONY : format
 format : node_modules
