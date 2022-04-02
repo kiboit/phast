@@ -86,6 +86,7 @@ class Manager {
 
     private function getDatabase(): \PDO {
         if (!isset($this->database)) {
+            @mkdir(dirname($this->getDatabasePath()), 0700, true);
             $database = new \PDO('sqlite:' . $this->getDatabasePath());
             $database->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $this->upgradeDatabase($database);
