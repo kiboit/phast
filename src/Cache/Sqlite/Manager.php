@@ -35,7 +35,7 @@ class Manager {
             ]);
             $row = $query->fetch(\PDO::FETCH_ASSOC);
             if ($row) {
-                return unserialize($row['value']);
+                return unserialize($this->inflate($row['value']));
             }
             if ($cb === null) {
                 return null;
@@ -51,10 +51,25 @@ class Manager {
             $this->cleanup();
             $this->getSetQuery()->execute([
                 'key' => $this->hashKey($key),
-                'value' => serialize($value),
+                'value' => $this->deflate(serialize($value)),
                 'expires_at' => $expiresIn > 0 ? $functions->time() + $expiresIn : null,
             ]);
         });
+    }
+
+    private function deflate(string $data): string {
+        if (strlen($data) <= 64 || !preg_match('~^[\x00-\x7f]{16}~', $data)) {
+            return $data;
+        }
+        return gzdeflate($data);
+    }
+
+    private function inflate(string $data): string {
+        $inflated = @gzinflate($data);
+        if ($inflated !== false) {
+            return $inflated;
+        }
+        return $data;
     }
 
     private function hashKey(string $key): string {

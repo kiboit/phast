@@ -129,4 +129,13 @@ class CacheTest extends \PHPUnit\Framework\TestCase {
 
         $this->assertLessThan(1000, $present);
     }
+
+    public function testDeflate(): void {
+        $data = str_repeat('abc', 1000);
+        $this->cache->set('big_data', $data);
+        $this->assertSame($data, $this->cache->get('big_data'));
+
+        $data = file_get_contents($this->cacheRoot . '/cache.sqlite3');
+        $this->assertStringNotContainsString('abcabc', $data);
+    }
 }
