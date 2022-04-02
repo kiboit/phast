@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Security;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 
 class ServiceSignatureFactory {
     const CACHE_NAMESPACE = 'signature';

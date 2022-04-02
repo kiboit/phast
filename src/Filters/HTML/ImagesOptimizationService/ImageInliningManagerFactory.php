@@ -3,7 +3,7 @@
 
 namespace Kibo\Phast\Filters\HTML\ImagesOptimizationService;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 
 class ImageInliningManagerFactory {
     public function make(array $config) {

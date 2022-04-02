@@ -3,7 +3,7 @@
 
 namespace Kibo\Phast\Diagnostics;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\Environment\Exceptions\PackageHasNoDiagnosticsException;
 use Kibo\Phast\Environment\Package;

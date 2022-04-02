@@ -1,7 +1,7 @@
 <?php
 namespace Kibo\Phast\Build;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use PhpParser\Node;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassLike;

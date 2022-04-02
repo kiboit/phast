@@ -1,7 +1,7 @@
 <?php
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 
 class Factory implements HTMLFilterFactory {

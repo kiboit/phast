@@ -1,7 +1,7 @@
 <?php
 namespace Kibo\Phast\Services\Bundler;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 
 class TokenRefMakerFactory {
     public function make(array $config) {

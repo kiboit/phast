@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\Composite;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Exceptions\LogicException;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManagerFactory;

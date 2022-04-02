@@ -3,7 +3,7 @@
 
 namespace Kibo\Phast\Filters\Image\ImageAPIClient;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Filters\Image\ImageFilterFactory;
 use Kibo\Phast\HTTP\ClientFactory;
 use Kibo\Phast\Security\ServiceSignature;

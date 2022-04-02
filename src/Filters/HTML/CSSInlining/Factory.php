@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFactory;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;

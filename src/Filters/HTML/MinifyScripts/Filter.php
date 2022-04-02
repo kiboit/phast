@@ -1,7 +1,7 @@
 <?php
 namespace Kibo\Phast\Filters\HTML\MinifyScripts;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Common\JSMinifier;
 use Kibo\Phast\Filters\HTML\Helpers\JSDetectorTrait;
 use Kibo\Phast\Filters\HTML\HTMLPageContext;

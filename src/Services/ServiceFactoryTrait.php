@@ -3,7 +3,7 @@
 
 namespace Kibo\Phast\Services;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Filters\Service\CompositeFilter;
 use Kibo\Phast\Retrievers\CachingRetriever;
