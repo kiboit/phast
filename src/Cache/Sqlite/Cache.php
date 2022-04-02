@@ -28,14 +28,14 @@ class Cache implements CacheInterface {
     }
 
     private function getKey(string $key): string {
-        return sha1($this->namespace . "\0" . $key);
+        return $this->namespace . "\0" . $key;
     }
 
     public function set($key, $value, $expiresIn = 0): void {
         $this->getManager()->set($this->getKey($key), $value, $expiresIn, $this->functions);
     }
 
-    private function getManager(): Manager {
+    public function getManager(): Manager {
         if (!isset(self::$managers[$this->cacheRoot])) {
             self::$managers[$this->cacheRoot] = new Manager($this->cacheRoot, $this->maxSize);
         }

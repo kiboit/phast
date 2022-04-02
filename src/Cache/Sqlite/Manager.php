@@ -15,16 +15,22 @@ class Manager {
 
     private $setQuery;
 
+    private $autorecover = true;
+
     public function __construct(string $cacheRoot, int $maxSize) {
         $this->cacheRoot = $cacheRoot;
         $this->maxSize = $maxSize;
+    }
+
+    public function setAutorecover(bool $autorecover): void {
+        $this->autorecover = $autorecover;
     }
 
     public function get(string $key, callable $cb = null, int $expiresIn, ObjectifiedFunctions $functions) {
         return $this->autorecover(function () use ($key, $cb, $expiresIn, $functions) {
             $query = $this->getGetQuery();
             $query->execute([
-                'key' => $key,
+                'key' => $this->hashKey($key),
                 'time' => $functions->time(),
             ]);
             $row = $query->fetch(\PDO::FETCH_ASSOC);
@@ -42,12 +48,21 @@ class Manager {
 
     public function set(string $key, $value, int $expiresIn, ObjectifiedFunctions $functions) {
         return $this->autorecover(function () use ($key, $value, $expiresIn, $functions) {
+            $this->cleanup();
             $this->getSetQuery()->execute([
-                'key' => $key,
+                'key' => $this->hashKey($key),
                 'value' => serialize($value),
                 'expires_at' => $expiresIn > 0 ? $functions->time() + $expiresIn : null,
             ]);
         });
+    }
+
+    private function hashKey(string $key): string {
+        return sha1($key, true);
+    }
+
+    private function randomKey(): string {
+        return random_bytes(strlen(sha1('', true)));
     }
 
     private function getGetQuery(): \PDOStatement {
@@ -129,6 +144,9 @@ class Manager {
         try {
             return $fn();
         } catch (\PDOException $e) {
+            if (!$this->autorecover) {
+                throw $e;
+            }
         }
 
         $this->database = null;
@@ -142,5 +160,71 @@ class Manager {
 
     private function purge(): void {
         @unlink($this->getDatabasePath());
+    }
+
+    private function cleanup(): void {
+        if (!$this->needsCleanup(1.25)) {
+            return;
+        }
+
+        $selectQuery = $this->getDatabase()->prepare('
+            SELECT key, LENGTH(key) + LENGTH(value) + LENGTH(expires_at) AS length
+            FROM cache
+            WHERE key >= :key
+            ORDER BY key
+            LIMIT 1
+        ');
+
+        $deleteQuery = $this->getDatabase()->prepare('
+            DELETE FROM cache
+            WHERE key = :key
+        ');
+
+        $bytesFreed = 0;
+
+        $this->getDatabase()->exec('BEGIN IMMEDIATE');
+
+        try {
+            if (!$this->needsCleanup(1.25)) {
+                return;
+            }
+
+            while ($bytesFreed < $this->maxSize * .5) {
+                $selectQuery->execute(['key' => $this->randomKey()]);
+                if (!($row = $selectQuery->fetch(\PDO::FETCH_ASSOC))) {
+                    $selectQuery->execute(['key' => '']);
+                    if (!($row = $selectQuery->fetch(\PDO::FETCH_ASSOC))) {
+                        break;
+                    }
+                }
+                $deleteQuery->execute(['key' => $row['key']]);
+                $bytesFreed += $row['length'];
+            }
+
+            $this->getDatabase()->exec('COMMIT');
+        } catch (\Throwable $e) {
+            $this->getDatabase()->exec('ROLLBACK');
+            throw $e;
+        }
+    }
+
+    private function needsCleanup($tolerance = 1): bool {
+        if ($this->maxSize <= 0) {
+            return false;
+        }
+        $spaceUsed = ($this->getPageCount() - $this->getFreelistCount()) * $this->getPageSize();
+        return $spaceUsed > $this->maxSize * $tolerance;
+    }
+
+    private function getPageCount(): int {
+        return (int) $this->getDatabase()->query('PRAGMA page_count')->fetchColumn();
+    }
+
+    private function getPageSize(): int {
+        return (int) $this->getDatabase()->query('PRAGMA page_size')->fetchColumn();
+    }
+
+    private function getFreelistCount(): int {
+        return (int) $this->getDatabase()->query('PRAGMA freelist_count')->fetchColumn();
     }
 }

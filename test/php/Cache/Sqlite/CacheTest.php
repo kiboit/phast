@@ -20,7 +20,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase {
 
         $config = [
             'cacheRoot' => $this->cacheRoot,
-            'maxSize' => 512 * 1024 * 1024,
+            'maxSize' => 512 * 1024,
         ];
 
         $this->functions = new ObjectifiedFunctions();
@@ -30,6 +30,8 @@ class CacheTest extends \PHPUnit\Framework\TestCase {
             'test',
             $this->functions,
         );
+
+        $this->cache->getManager()->setAutorecover(false);
     }
 
     public function testCallingWithNoDefault() {
@@ -98,6 +100,8 @@ class CacheTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function testCorruptedDatabase(): void {
+        $this->cache->getManager()->setAutorecover(true);
+
         $this->cache->set('testje', 'Hello, World!');
 
         $data = file_get_contents($this->cacheRoot . '/cache.sqlite3');
@@ -109,5 +113,20 @@ class CacheTest extends \PHPUnit\Framework\TestCase {
         file_put_contents($this->cacheRoot . '/cache.sqlite3-wal', 'whoops');
         file_put_contents($this->cacheRoot . '/cache.sqlite3-journal', 'whoops');
         $this->assertNull($this->cache->get('testje'));
+    }
+
+    public function testMaxSize(): void {
+        for ($i = 0; $i < 1000; $i++) {
+            $this->cache->set((string) $i, random_bytes(1024));
+        }
+
+        $present = 0;
+        for ($i = 0; $i < 1000; $i++) {
+            if ($this->cache->get((string) $i) !== null) {
+                $present++;
+            }
+        }
+
+        $this->assertLessThan(1000, $present);
     }
 }
