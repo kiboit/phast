@@ -1,6 +1,6 @@
 <?php
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Filters\HTML\CSSInlining\Optimizer;
 
 return call_user_func(function () {

@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\ScriptsProxyService;
 
-use Kibo\Phast\Cache\File\Cache;
+use Kibo\Phast\Cache\Sqlite\Cache;
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Filters\HTML\HTMLFilterTestCase;
 use Kibo\Phast\Retrievers\LocalRetriever;
