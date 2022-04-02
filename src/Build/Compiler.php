@@ -54,7 +54,7 @@ class Compiler {
     public function getResult(): string {
         $combinedTree = [];
 
-        /** @var SplFileInfo $fileinfo */
+        /** @var \SplFileInfo $fileinfo */
         foreach ($this->getSourceFiles() as $fileinfo) {
             $tree = $this->parseFile($fileinfo);
             $namespace = $this->getSingleNamespace($tree, $fileinfo);
@@ -128,7 +128,7 @@ class Compiler {
         if ($php === false) {
             throw new \RuntimeException(sprintf('%s: Could not read source file', $fileinfo->getPathname()));
         }
-        $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP5);
+        $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
         try {
             $tree = $parser->parse($php);
         } catch (\Exception $e) {
