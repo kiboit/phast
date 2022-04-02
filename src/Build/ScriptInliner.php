@@ -21,18 +21,7 @@ class ScriptInliner extends NodeVisitorAbstract {
     public function __construct() {
         $this->cache = new Cache([
             'cacheRoot' => sys_get_temp_dir() . '/Phast.ScriptInliner.' . posix_geteuid(),
-            'shardingDepth' => 0,
-            'garbageCollection' => [
-                'maxAge' => 86400*365,
-                'maxItems' => 1e6,
-                'probability' => 0,
-            ],
-            'diskCleanup' => [
-                'maxSize' => 1e9,
-                'probability' => 0,
-                'portionToFree' => 0,
-                'keepNamespaces' => [],
-            ],
+            'maxSize' => 512 * 1024 * 1024,
         ], 'ScriptInliner');
     }
 
