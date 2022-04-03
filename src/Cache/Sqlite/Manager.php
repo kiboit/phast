@@ -3,8 +3,11 @@
 namespace Kibo\Phast\Cache\Sqlite;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
+use Kibo\Phast\Logging\LoggingTrait;
 
 class Manager {
+    use LoggingTrait;
+
     private $cacheRoot;
 
     private $name;
@@ -200,8 +203,17 @@ class Manager {
             if (!$this->autorecover) {
                 throw $e;
             }
+            $this->logger()->error('Caught {exceptionClass} during cache operation: {message}; ignoring it', [
+                'exceptionClass' => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
             return null;
         }
+
+        $this->logger()->error('Caught {exceptionClass} during cache operation: {message}; retrying operation', [
+            'exceptionClass' => get_class($e),
+            'message' => $e->getMessage(),
+        ]);
 
         $this->database = null;
         $this->purge();
