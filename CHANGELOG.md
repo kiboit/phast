@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.104 - 2022-04-03
+
+* Improve CSP support.
+* Use SQLite3 database for caching instead of a file tree.
+
 ## 1.103 - 2021-10-07
 
 * Update CA bundle.
