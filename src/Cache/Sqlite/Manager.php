@@ -151,7 +151,7 @@ class Manager {
         // If the cache table is already created, there's nothing to do.
         if ($database->query("
             SELECT 1
-            FROM sqlite_schema
+            FROM sqlite_master
             WHERE
                 type = 'table'
                 AND name = 'cache'
@@ -166,7 +166,7 @@ class Manager {
             // it may have been created after the last check and before the lock.
             if ($database->query("
                 SELECT 1
-                FROM sqlite_schema
+                FROM sqlite_master
                 WHERE
                     type = 'table'
                     AND name = 'cache'
