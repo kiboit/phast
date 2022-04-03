@@ -120,6 +120,7 @@ class Manager {
             $database = new Connection('sqlite:' . $this->getDatabasePath());
             $database->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $database->exec('PRAGMA journal_mode = TRUNCATE');
+            $database->exec('PRAGMA synchronous = OFF');
             if (($maxPageCount = $this->getMaxPageCount($database)) !== null) {
                 $database->exec(sprintf('PRAGMA max_page_count = %d', $maxPageCount));
             }
