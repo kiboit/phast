@@ -8,16 +8,19 @@ use Kibo\Phast\Common\ObjectifiedFunctions;
 class Cache implements CacheInterface {
     private static $managers = [];
 
-    private string $cacheRoot;
+    private $cacheRoot;
 
-    private int $maxSize;
+    private $name;
 
-    private string $namespace;
+    private $maxSize;
+
+    private $namespace;
 
     private $functions;
 
     public function __construct(array $config, string $namespace, ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = (string) $config['cacheRoot'];
+        $this->name = (string) ($config['name'] ?? 'cache');
         $this->maxSize = (int) $config['maxSize'];
         $this->namespace = $namespace;
         $this->functions = $functions ?? new ObjectifiedFunctions();
@@ -36,9 +39,10 @@ class Cache implements CacheInterface {
     }
 
     public function getManager(): Manager {
-        if (!isset(self::$managers[$this->cacheRoot])) {
-            self::$managers[$this->cacheRoot] = new Manager($this->cacheRoot, $this->maxSize);
+        $key = $this->cacheRoot . '/' . $this->name;
+        if (!isset(self::$managers[$key])) {
+            self::$managers[$key] = new Manager($this->cacheRoot, $this->name, $this->maxSize);
         }
-        return self::$managers[$this->cacheRoot];
+        return self::$managers[$key];
     }
 }

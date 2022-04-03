@@ -7,14 +7,17 @@ use Kibo\Phast\Common\ObjectifiedFunctions;
 class Manager {
     private $cacheRoot;
 
+    private $name;
+
     private $maxSize;
 
     private $database;
 
     private $autorecover = true;
 
-    public function __construct(string $cacheRoot, int $maxSize) {
+    public function __construct(string $cacheRoot, string $name, int $maxSize) {
         $this->cacheRoot = $cacheRoot;
+        $this->name = $name;
         $this->maxSize = $maxSize;
     }
 
@@ -126,13 +129,13 @@ class Manager {
     private function checkDirOwner(string $dir): void {
         $owner = fileowner($dir);
         if ($owner === false) {
-            throw new \RuntimeException("Could not get owner of cache dir");
+            throw new \RuntimeException('Could not get owner of cache dir');
         }
         if (!function_exists('posix_geteuid')) {
             return;
         }
         if ($owner !== posix_geteuid()) {
-            throw new \RuntimeException("Cache dir is owner by another user; this is not secure");
+            throw new \RuntimeException('Cache dir is owner by another user; this is not secure');
         }
     }
 
@@ -141,7 +144,7 @@ class Manager {
     }
 
     private function getDatabasePath(): string {
-        return $this->cacheRoot . '/cache.sqlite3';
+        return $this->cacheRoot . '/' . $this->name . '.sqlite3';
     }
 
     private function upgradeDatabase(\PDO $database): void {
