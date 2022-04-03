@@ -102,11 +102,6 @@ class CacheTest extends \PHPUnit\Framework\TestCase {
     public function testCorruptedDatabase(): void {
         $this->cache->getManager()->setAutorecover(true);
 
-        $this->cache->set('testje', 'Hello, World!');
-
-        $data = file_get_contents($this->cacheRoot . '/cache.sqlite3');
-        $this->assertStringContainsString('Hello, World!', $data);
-
         file_put_contents($this->cacheRoot . '/cache.sqlite3', 'whoops');
         $this->assertNull($this->cache->get('testje'));
 

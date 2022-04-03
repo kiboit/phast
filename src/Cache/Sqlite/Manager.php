@@ -36,8 +36,8 @@ class Manager {
                 'time' => $functions->time(),
             ]);
             $row = $query->fetch(\PDO::FETCH_ASSOC);
-            if ($row) {
-                return unserialize($this->inflate($row['value']));
+            if ($row && $this->unserialize($row['value'], $value)) {
+                return $value;
             }
             if ($cb === null) {
                 return null;
@@ -59,7 +59,7 @@ class Manager {
                         VALUES (:key, :value, :expires_at)
                     ')->execute([
                         'key' => $this->hashKey($key),
-                        'value' => $this->deflate(serialize($value)),
+                        'value' => $this->serialize($value),
                         'expires_at' => $expiresIn > 0 ? $functions->time() + $expiresIn : null,
                     ]);
                     return;
@@ -77,19 +77,25 @@ class Manager {
         return preg_match('~13 database or disk is full~', $e->getMessage());
     }
 
-    private function deflate(string $data): string {
-        if (strlen($data) <= 64 || !preg_match('~^[\x00-\x7f]{16}~', $data)) {
-            return $data;
-        }
-        return gzdeflate($data);
+    private function serialize($value): string {
+        return gzcompress(serialize($value));
     }
 
-    private function inflate(string $data): string {
-        $inflated = @gzinflate($data);
-        if ($inflated !== false) {
-            return $inflated;
+    private function unserialize(string $value, &$result): bool {
+        $value = @gzuncompress($value);
+        if ($value === false) {
+            return false;
         }
-        return $data;
+        if ($value === 'b:0;') {
+            $result = false;
+            return true;
+        }
+        $value = @unserialize($value);
+        if ($value === false) {
+            return false;
+        }
+        $result = $value;
+        return true;
     }
 
     private function hashKey(string $key): string {
@@ -97,7 +103,7 @@ class Manager {
     }
 
     private function randomKey(): string {
-        return random_bytes(strlen(sha1('', true)));
+        return random_bytes(strlen($this->hashKey('')));
     }
 
     private function getDatabase(): \PDO {
