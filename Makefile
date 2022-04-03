@@ -51,7 +51,7 @@ vendor/autoload.php : composer.json composer.lock
 	touch vendor/autoload.php
 
 docker/%.image : docker/% docker/entrypoint
-	docker build -q -f $< docker > $@~
+	docker build --pull --iidfile $@~ -f $< docker
 	mv $@~ $@
 
 node_modules : yarn.lock
