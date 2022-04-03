@@ -78,6 +78,7 @@ class Manager {
     }
 
     private function serialize($value): string {
+        // gzcompress is always used since it adds a checksum to the data
         return gzcompress(serialize($value));
     }
 
