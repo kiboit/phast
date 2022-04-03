@@ -11,10 +11,6 @@ class Manager {
 
     private $database;
 
-    private $getQuery;
-
-    private $setQuery;
-
     private $autorecover = true;
 
     public function __construct(string $cacheRoot, int $maxSize) {
@@ -26,9 +22,15 @@ class Manager {
         $this->autorecover = $autorecover;
     }
 
-    public function get(string $key, callable $cb = null, int $expiresIn, ObjectifiedFunctions $functions) {
+    public function get(string $key, ?callable $cb, int $expiresIn, ObjectifiedFunctions $functions) {
         return $this->autorecover(function () use ($key, $cb, $expiresIn, $functions) {
-            $query = $this->getGetQuery();
+            $query = $this->getDatabase()->prepare('
+                SELECT value
+                FROM cache
+                WHERE
+                    key = :key
+                    AND (expires_at IS NULL OR expires_at > :time)
+            ');
             $query->execute([
                 'key' => $this->hashKey($key),
                 'time' => $functions->time(),
@@ -48,13 +50,31 @@ class Manager {
 
     public function set(string $key, $value, int $expiresIn, ObjectifiedFunctions $functions) {
         return $this->autorecover(function () use ($key, $value, $expiresIn, $functions) {
-            $this->cleanup();
-            $this->getSetQuery()->execute([
-                'key' => $this->hashKey($key),
-                'value' => $this->deflate(serialize($value)),
-                'expires_at' => $expiresIn > 0 ? $functions->time() + $expiresIn : null,
-            ]);
+            $db = $this->getDatabase();
+            $tries = 10;
+            while ($tries--) {
+                try {
+                    $db->prepare('
+                        REPLACE INTO cache (key, value, expires_at)
+                        VALUES (:key, :value, :expires_at)
+                    ')->execute([
+                        'key' => $this->hashKey($key),
+                        'value' => $this->deflate(serialize($value)),
+                        'expires_at' => $expiresIn > 0 ? $functions->time() + $expiresIn : null,
+                    ]);
+                    return;
+                } catch (\PDOException $e) {
+                    if (!$this->isFullException($e)) {
+                        throw $e;
+                    }
+                }
+                $this->makeSpace();
+            }
         });
+    }
+
+    private function isFullException(\PDOException $e): bool {
+        return preg_match('~13 database or disk is full~', $e->getMessage());
     }
 
     private function deflate(string $data): string {
@@ -80,34 +100,23 @@ class Manager {
         return random_bytes(strlen(sha1('', true)));
     }
 
-    private function getGetQuery(): \PDOStatement {
-        $this->getQuery ??= $this->getDatabase()->prepare('
-            SELECT value
-            FROM cache
-            WHERE
-                key = :key
-                AND (expires_at IS NULL OR expires_at > :time)
-        ');
-        return $this->getQuery;
-    }
-
-    private function getSetQuery(): \PDOStatement {
-        $this->setQuery ??= $this->getDatabase()->prepare('
-            REPLACE INTO cache (key, value, expires_at)
-            VALUES (:key, :value, :expires_at)
-        ');
-        return $this->setQuery;
-    }
-
     private function getDatabase(): \PDO {
         if (!isset($this->database)) {
             @mkdir(dirname($this->getDatabasePath()), 0700, true);
-            $database = new \PDO('sqlite:' . $this->getDatabasePath());
+            $database = new Connection('sqlite:' . $this->getDatabasePath());
             $database->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $database->exec('PRAGMA journal_mode = TRUNCATE');
+            if (($maxPageCount = $this->getMaxPageCount($database)) !== null) {
+                $database->exec(sprintf('PRAGMA max_page_count = %d', $maxPageCount));
+            }
             $this->upgradeDatabase($database);
             $this->database = $database;
         }
         return $this->database;
+    }
+
+    private function getMaxPageCount(Connection $database): ?int {
+        return $this->maxSize / $database->getPageSize();
     }
 
     private function getDatabasePath(): string {
@@ -166,9 +175,6 @@ class Manager {
         }
 
         $this->database = null;
-        $this->getQuery = null;
-        $this->setQuery = null;
-
         $this->purge();
 
         return $fn();
@@ -178,11 +184,7 @@ class Manager {
         @unlink($this->getDatabasePath());
     }
 
-    private function cleanup(): void {
-        if (!$this->needsCleanup(1.25)) {
-            return;
-        }
-
+    private function makeSpace(): void {
         $selectQuery = $this->getDatabase()->prepare('
             SELECT key, LENGTH(key) + LENGTH(value) + LENGTH(expires_at) AS length
             FROM cache
@@ -196,25 +198,18 @@ class Manager {
             WHERE key = :key
         ');
 
-        $bytesFreed = 0;
-
         $this->getDatabase()->exec('BEGIN IMMEDIATE');
 
         try {
-            if (!$this->needsCleanup(1.25)) {
-                return;
-            }
-
-            while ($bytesFreed < $this->maxSize * .5) {
+            for ($i = 0; $i < 100; $i++) {
                 $selectQuery->execute(['key' => $this->randomKey()]);
                 if (!($row = $selectQuery->fetch(\PDO::FETCH_ASSOC))) {
                     $selectQuery->execute(['key' => '']);
                     if (!($row = $selectQuery->fetch(\PDO::FETCH_ASSOC))) {
-                        break;
+                        return;
                     }
                 }
                 $deleteQuery->execute(['key' => $row['key']]);
-                $bytesFreed += $row['length'];
             }
 
             $this->getDatabase()->exec('COMMIT');
@@ -222,25 +217,5 @@ class Manager {
             $this->getDatabase()->exec('ROLLBACK');
             throw $e;
         }
-    }
-
-    private function needsCleanup($tolerance = 1): bool {
-        if ($this->maxSize <= 0) {
-            return false;
-        }
-        $spaceUsed = ($this->getPageCount() - $this->getFreelistCount()) * $this->getPageSize();
-        return $spaceUsed > $this->maxSize * $tolerance;
-    }
-
-    private function getPageCount(): int {
-        return (int) $this->getDatabase()->query('PRAGMA page_count')->fetchColumn();
-    }
-
-    private function getPageSize(): int {
-        return (int) $this->getDatabase()->query('PRAGMA page_size')->fetchColumn();
-    }
-
-    private function getFreelistCount(): int {
-        return (int) $this->getDatabase()->query('PRAGMA freelist_count')->fetchColumn();
     }
 }

@@ -127,6 +127,8 @@ class CacheTest extends \PHPUnit\Framework\TestCase {
             }
         }
 
+        $this->assertNotNull($this->cache->get('999'));
+
         $this->assertLessThan(1000, $present);
     }
 
