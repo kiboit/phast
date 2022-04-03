@@ -110,6 +110,7 @@ class Manager {
     private function getDatabase(): \PDO {
         if (!isset($this->database)) {
             @mkdir(dirname($this->getDatabasePath()), 0700, true);
+            $this->checkDirOwner(dirname($this->getDatabasePath()));
             $database = new Connection('sqlite:' . $this->getDatabasePath());
             $database->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $database->exec('PRAGMA journal_mode = TRUNCATE');
@@ -120,6 +121,19 @@ class Manager {
             $this->database = $database;
         }
         return $this->database;
+    }
+
+    private function checkDirOwner(string $dir): void {
+        $owner = fileowner($dir);
+        if ($owner === false) {
+            throw new \RuntimeException("Could not get owner of cache dir");
+        }
+        if (!function_exists('posix_geteuid')) {
+            return;
+        }
+        if ($owner !== posix_geteuid()) {
+            throw new \RuntimeException("Cache dir is owner by another user; this is not secure");
+        }
     }
 
     private function getMaxPageCount(Connection $database): ?int {
@@ -179,6 +193,11 @@ class Manager {
             if (!$this->autorecover) {
                 throw $e;
             }
+        } catch (\RuntimeException $e) {
+            if (!$this->autorecover) {
+                throw $e;
+            }
+            return null;
         }
 
         $this->database = null;
