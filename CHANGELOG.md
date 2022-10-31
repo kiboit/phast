@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.105 - 2022-10-31
+
+* Set `X-Robots-Tag: none` header on bundler responses to prevent search engines
+  from indexing them.
+
 ## 1.104 - 2022-04-03
 
 * Improve CSP support.
