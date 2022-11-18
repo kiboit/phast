@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.106 - 2022-11-18
+
+* Set `Content-Type: application/json` header on bundler responses.
+
 ## 1.105 - 2022-10-31
 
 * Set `X-Robots-Tag: none` header on bundler responses to prevent search engines
