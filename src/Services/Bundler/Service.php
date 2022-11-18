@@ -66,7 +66,6 @@ class Service {
     public function serve(ServiceRequest $request) {
         $response = new Response();
         $response->setHeader('Content-Type', 'application/json');
-        $response->setHeader('X-Robots-Tag', 'none');
         $response->setContent($this->streamResponse($request));
         return $response;
     }
