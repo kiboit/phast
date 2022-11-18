@@ -3,6 +3,7 @@
 ## 1.106 - 2022-11-18
 
 * Set `Content-Type: application/json` header on bundler responses.
+* Remove `X-Robots-Tag` header.
 
 ## 1.105 - 2022-10-31
 
