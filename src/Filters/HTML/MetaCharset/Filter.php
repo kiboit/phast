@@ -11,7 +11,7 @@ class Filter implements HTMLStreamFilter {
         foreach ($elements as $element) {
             if ($element instanceof Tag) {
                 if ($element->tagName == 'meta'
-                    && array_keys($element->getAttributes()) == ['charset']
+                    && !array_diff(array_keys($element->getAttributes()), ['charset', '/'])
                 ) {
                     continue;
                 }
