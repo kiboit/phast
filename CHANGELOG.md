@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.107 - 2022-04-18
+
+- Prevent duplication of self-closing `<meta charset>` tags.
+
 ## 1.106 - 2022-11-18
 
 * Set `Content-Type: application/json` header on bundler responses.
