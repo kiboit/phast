@@ -52,7 +52,7 @@ class Request {
      * @return Query
      */
     public function getQuery() {
-        return Query::fromString($this->getQueryString());
+        return Query::fromString((string) $this->getQueryString());
     }
 
     /**

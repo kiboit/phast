@@ -153,7 +153,11 @@ class Optimizer {
             if (!($tag instanceof Tag)) {
                 continue;
             }
-            foreach (preg_split('/\s+/', $tag->getAttribute('class')) as $cls) {
+            $classAttr = $tag->getAttribute('class');
+            if ($classAttr === null) {
+                continue;
+            }
+            foreach (preg_split('/\s+/', $classAttr) as $cls) {
                 if ($cls != ''
                     && !isset($classes[$cls])
                     && preg_match("/^{$this->classNamePattern}$/", $cls)

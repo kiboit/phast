@@ -36,7 +36,7 @@ class ServiceRequest {
     private $httpRequest;
 
     /**
-     * @var URL
+     * @var ?URL
      */
     private $url;
 
@@ -96,9 +96,9 @@ class ServiceRequest {
                 $query->set('src', preg_replace('~^hxxp(?=s?://)~', 'http', $query->get('src')));
             }
             $pathInfo = $request->getPathInfo();
-            if ($pathParams = self::parseBase64PathInfo($pathInfo)) {
+            if ($pathInfo !== null && $pathParams = self::parseBase64PathInfo($pathInfo)) {
                 $query->update($pathParams);
-            } elseif ($pathInfo) {
+            } elseif ($pathInfo !== null) {
                 $query->update(self::parsePathInfo($pathInfo));
             }
             if ($token = $query->pop('token')) {
@@ -310,7 +310,7 @@ class ServiceRequest {
     public function getAllParams() {
         $urlParams = [];
         if ($this->url) {
-            parse_str($this->url->getQuery(), $urlParams);
+            parse_str((string) $this->url->getQuery(), $urlParams);
         }
         $params = array_merge($urlParams, $this->query->toAssoc());
         if (!empty(self::$propagatedSwitches)) {
