@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.108 - 2022-05-13
+
+* Fix deprecation warnings.
+
 ## 1.107 - 2022-04-18
 
 - Prevent duplication of self-closing `<meta charset>` tags.
