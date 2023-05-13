@@ -84,7 +84,7 @@ class Query implements \IteratorAggregate {
         return $assoc;
     }
 
-    public function getIterator() {
+    public function getIterator(): \Generator {
         foreach ($this->tuples as $tuple) {
             yield $tuple[0] => $tuple[1];
         }

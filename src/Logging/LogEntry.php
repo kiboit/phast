@@ -51,7 +51,7 @@ class LogEntry implements \JsonSerializable {
         return $this->context;
     }
 
-    public function toArray() {
+    public function toArray(): array {
         return [
             'level' => $this->level,
             'message' => $this->message,
@@ -59,7 +59,7 @@ class LogEntry implements \JsonSerializable {
         ];
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return $this->toArray();
     }
 }

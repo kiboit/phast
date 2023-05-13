@@ -67,10 +67,7 @@ class Status implements \JsonSerializable {
         return $this->enabled;
     }
 
-    /**
-     * @return array
-     */
-    public function toArray() {
+    public function toArray(): array {
         return [
             'package' => [
                 'type' => $this->package->getType(),
@@ -82,7 +79,7 @@ class Status implements \JsonSerializable {
         ];
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return $this->toArray();
     }
 }

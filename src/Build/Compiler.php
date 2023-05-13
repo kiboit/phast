@@ -58,7 +58,7 @@ class Compiler {
         foreach ($this->getSourceFiles() as $fileinfo) {
             $tree = $this->parseFile($fileinfo);
             $namespace = $this->getSingleNamespace($tree, $fileinfo);
-            $namespace->file = $fileinfo;
+            @$namespace->file = $fileinfo;
             $nameResolver = new NameResolver();
             $nodeTraverser = new NodeTraverser();
             $nodeTraverser->addVisitor($nameResolver);
