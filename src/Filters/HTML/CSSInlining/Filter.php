@@ -176,7 +176,7 @@ class Filter extends BaseHTMLStreamFilter {
 
         if (preg_match(
             '~^\s*(this\.)?media\s*=\s*(?<q>[\'"])(?<m>((?!\k<q>).)+?)\k<q>\s*(;|$)~',
-            $link->getAttribute('onload'),
+            (string) $link->getAttribute('onload'),
             $match
         )) {
             $media = $match['m'];

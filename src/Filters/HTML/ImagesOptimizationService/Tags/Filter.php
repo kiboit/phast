@@ -70,7 +70,7 @@ class Filter implements HTMLStreamFilter, AMPCompatibleFilter {
                 $this->rewriteSrc($tag, $context, $k);
             } elseif ($isImage && preg_match(self::IMG_SRCSET_ATTR_PATTERN, $k)) {
                 $this->rewriteSrcset($tag, $context, $k);
-            } elseif ($this->inBody && preg_match($this->imagePathPattern, parse_url($v, PHP_URL_PATH))) {
+            } elseif ($this->inBody && is_string($path = parse_url($v, PHP_URL_PATH)) && preg_match($this->imagePathPattern, $path)) {
                 $this->rewriteArbitraryAttribute($tag, $context, $k);
             }
         }
