@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.109 - 2022-05-14
+
+* Fix deprecation warnings.
+
 ## 1.108 - 2022-05-13
 
 * Fix deprecation warnings.
