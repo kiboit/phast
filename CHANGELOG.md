@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.110 - 2024-02-23
+
+* Do not require SQLite to support `WITHOUT ROWID`.
+
 ## 1.109 - 2022-05-14
 
 * Fix deprecation warnings.
