@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.111 - 2025-12-11
+
+* Fix CVE-2025-14388 (thanks [Angus
+  G.](https://www.linkedin.com/in/angus-g-53a87a16b/)).
+
 ## 1.110 - 2024-02-23
 
 * Do not require SQLite to support `WITHOUT ROWID`.
