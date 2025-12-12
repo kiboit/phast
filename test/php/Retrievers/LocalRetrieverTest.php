@@ -97,7 +97,8 @@ class LocalRetrieverTest extends TestCase {
         return $this->allMethodsWithData([
             ['http://kibo.test/../forbidden-path'],
             ['http://kibo.test/forbidden-extension.php'],
-            ['http://unmpapped-domain.test/make.css'],
+            ['http://unmapped-domain.test/make.css'],
+            ['http://kibo.test/test.php%00.css'],
         ]);
     }
 
