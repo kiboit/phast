@@ -27,7 +27,7 @@ class CachingRetriever implements Retriever {
      * @param Cache $cache
      * @param int $defaultCacheTime
      */
-    public function __construct(Cache $cache, Retriever $retriever = null, $defaultCacheTime = 0) {
+    public function __construct(Cache $cache, ?Retriever $retriever = null, $defaultCacheTime = 0) {
         $this->cache = $cache;
         $this->retriever = $retriever;
     }

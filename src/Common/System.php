@@ -7,7 +7,7 @@ use Kibo\Phast\Exceptions\UndefinedObjectifiedFunction;
 class System {
     private $functions;
 
-    public function __construct(ObjectifiedFunctions $functions = null) {
+    public function __construct(?ObjectifiedFunctions $functions = null) {
         if ($functions === null) {
             $functions = new ObjectifiedFunctions();
         }

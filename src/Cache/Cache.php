@@ -9,7 +9,7 @@ interface Cache {
      * @param int $expiresIn
      * @return mixed
      */
-    public function get($key, callable $cached = null, $expiresIn = 0);
+    public function get($key, ?callable $cached = null, $expiresIn = 0);
 
     /**
      * @param string $key

@@ -79,7 +79,7 @@ class ImageURLRewriter {
      * @param bool $mustExist
      * @return string
      */
-    public function rewriteUrl($url, URL $baseUrl = null, array $params = [], $mustExist = false) {
+    public function rewriteUrl($url, ?URL $baseUrl = null, array $params = [], $mustExist = false) {
         if (strpos($url, '#') === 0) {
             return $url;
         }
@@ -171,7 +171,7 @@ class ImageURLRewriter {
      * @param URL|null $baseUrl
      * @return URL|null
      */
-    private function makeURLAbsoluteToBase($url, URL $baseUrl = null) {
+    private function makeURLAbsoluteToBase($url, ?URL $baseUrl = null) {
         $url = trim($url);
         if (!$url || substr($url, 0, 5) === 'data:') {
             return null;

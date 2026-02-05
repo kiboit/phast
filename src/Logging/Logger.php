@@ -24,7 +24,7 @@ class Logger {
      * Logger constructor.
      * @param LogWriter $writer
      */
-    public function __construct(LogWriter $writer, ObjectifiedFunctions $functions = null) {
+    public function __construct(LogWriter $writer, ?ObjectifiedFunctions $functions = null) {
         $this->writer = $writer;
         $this->functions = is_null($functions) ? new ObjectifiedFunctions() : $functions;
     }

@@ -22,7 +22,7 @@ class LocalRetriever implements Retriever {
      * @param array $map
      * @param ObjectifiedFunctions|null $functions
      */
-    public function __construct(array $map, ObjectifiedFunctions $functions = null) {
+    public function __construct(array $map, ?ObjectifiedFunctions $functions = null) {
         $this->map = $map;
         if ($functions) {
             $this->funcs = $functions;
