@@ -18,7 +18,7 @@ class Cache implements CacheInterface {
 
     private $functions;
 
-    public function __construct(array $config, string $namespace, ObjectifiedFunctions $functions = null) {
+    public function __construct(array $config, string $namespace, ?ObjectifiedFunctions $functions = null) {
         $this->cacheRoot = (string) $config['cacheRoot'];
         $this->name = (string) ($config['name'] ?? 'cache');
         $this->maxSize = (int) $config['maxSize'];
@@ -26,7 +26,7 @@ class Cache implements CacheInterface {
         $this->functions = $functions ?? new ObjectifiedFunctions();
     }
 
-    public function get($key, callable $fn = null, $expiresIn = 0) {
+    public function get($key, ?callable $fn = null, $expiresIn = 0) {
         return $this->getManager()->get($this->getKey($key), $fn, $expiresIn, $this->functions);
     }
 

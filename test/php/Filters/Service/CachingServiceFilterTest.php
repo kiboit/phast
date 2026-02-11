@@ -35,7 +35,7 @@ class CachingServiceFilterTest extends TestCase {
 
         $cache = $this->createMock(Cache::class);
         $cache->method('get')
-            ->willReturnCallback(function ($key, callable $cb = null, $ttl = 0) {
+            ->willReturnCallback(function ($key, ?callable $cb = null, $ttl = 0) {
                 if (!isset($this->cachedData[$key])) {
                     if ($cb) {
                         $data = $cb();

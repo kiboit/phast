@@ -18,7 +18,7 @@ class PostDataRetriever implements Retriever {
      * PostDataRetriever constructor.
      * @param ObjectifiedFunctions $funcs
      */
-    public function __construct(ObjectifiedFunctions $funcs = null) {
+    public function __construct(?ObjectifiedFunctions $funcs = null) {
         $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;
     }
 

@@ -46,7 +46,7 @@ class ServiceTest extends TestCase {
         $this->retriever = $this->createMock(Retriever::class);
         $this->filter = $this->createMock(ServiceFilter::class);
         $this->filter->method('apply')
-            ->willReturnCallback(function (Resource $resource, array $params = null) {
+            ->willReturnCallback(function (Resource $resource, ?array $params = null) {
                 if (isset($this->returnResource)) {
                     return $this->returnResource;
                 }

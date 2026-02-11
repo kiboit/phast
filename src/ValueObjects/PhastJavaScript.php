@@ -43,7 +43,7 @@ class PhastJavaScript {
      * @param string $filename
      * @param ObjectifiedFunctions|null $funcs
      */
-    public static function fromFile($filename, ObjectifiedFunctions $funcs = null) {
+    public static function fromFile($filename, ?ObjectifiedFunctions $funcs = null) {
         $funcs = $funcs ? $funcs : new ObjectifiedFunctions();
         $contents = $funcs->file_get_contents($filename);
         if ($contents === false) {

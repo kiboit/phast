@@ -11,7 +11,7 @@ class ItemNotFoundException extends \Exception {
      */
     private $url;
 
-    public function __construct($message = '', $code = 0, Throwable $previous = null, URL $failed = null) {
+    public function __construct($message = '', $code = 0, ?Throwable $previous = null, ?URL $failed = null) {
         parent::__construct($message, $code, $previous);
         $this->url = $failed;
     }

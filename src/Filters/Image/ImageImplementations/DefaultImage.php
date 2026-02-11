@@ -36,7 +36,7 @@ class DefaultImage extends BaseImage implements Image {
      */
     private $funcs;
 
-    public function __construct(URL $imageURL, Retriever $retriever, ObjectifiedFunctions $funcs = null) {
+    public function __construct(URL $imageURL, Retriever $retriever, ?ObjectifiedFunctions $funcs = null) {
         $this->imageURL = $imageURL;
         $this->retriever = $retriever;
         $this->funcs = is_null($funcs) ? new ObjectifiedFunctions() : $funcs;

@@ -320,7 +320,7 @@ class Filter extends BaseHTMLStreamFilter {
         return $elements;
     }
 
-    private function addIEFallback(URL $fallbackUrl = null, array $elements = null) {
+    private function addIEFallback(?URL $fallbackUrl = null, ?array $elements = null) {
         if ($fallbackUrl === null || !$elements) {
             return $elements;
         }

@@ -23,7 +23,7 @@ class Writer extends BaseLogWriter {
      * @param array $config
      * @param ObjectifiedFunctions $funcs
      */
-    public function __construct(array $config, ObjectifiedFunctions $funcs = null) {
+    public function __construct(array $config, ?ObjectifiedFunctions $funcs = null) {
         foreach (['messageType', 'destination', 'extraHeaders'] as $field) {
             if (isset($config[$field])) {
                 $this->$field = $config[$field];

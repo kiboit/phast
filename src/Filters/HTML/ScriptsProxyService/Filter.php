@@ -51,7 +51,7 @@ class Filter extends BaseHTMLStreamFilter {
         ServiceSignature $signature,
         LocalRetriever $retriever,
         TokenRefMaker $tokenRefMaker,
-        ObjectifiedFunctions $functions = null
+        ?ObjectifiedFunctions $functions = null
     ) {
         $this->config = $config;
         $this->signature = $signature;

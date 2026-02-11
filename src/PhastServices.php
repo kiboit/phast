@@ -17,7 +17,7 @@ class PhastServices {
     /**
      * @param callable|null $getConfig
      */
-    public static function serve(callable $getConfig = null) {
+    public static function serve(?callable $getConfig = null) {
         $httpRequest = Request::fromGlobals();
 
         if ($httpRequest->getHeader('CDN-Loop')
@@ -131,7 +131,7 @@ class PhastServices {
         Request $request,
         Response $response,
         array $config,
-        ObjectifiedFunctions $funcs = null
+        ?ObjectifiedFunctions $funcs = null
     ) {
         if (is_null($funcs)) {
             $funcs = new ObjectifiedFunctions();

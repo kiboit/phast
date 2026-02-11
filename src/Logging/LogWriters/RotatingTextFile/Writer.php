@@ -23,7 +23,7 @@ class Writer extends BaseLogWriter {
      * @param array $config
      * @param ?ObjectifiedFunctions $funcs
      */
-    public function __construct(array $config, ObjectifiedFunctions $funcs = null) {
+    public function __construct(array $config, ?ObjectifiedFunctions $funcs = null) {
         if (isset($config['path'])) {
             $this->path = (string) $config['path'];
         }
