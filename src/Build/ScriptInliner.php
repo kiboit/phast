@@ -1,7 +1,8 @@
 <?php
 namespace Kibo\Phast\Build;
 
-use Kibo\Phast\Cache\Sqlite\Cache;
+use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Cache\Factory as CacheFactory;
 use PhpParser\Node;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassLike;
@@ -19,10 +20,11 @@ class ScriptInliner extends NodeVisitorAbstract {
     private $cache;
 
     public function __construct() {
-        $this->cache = new Cache([
+        $this->cache = (new CacheFactory([
+            'implementation' => \Kibo\Phast\Cache\Sqlite\Cache::class,
             'cacheRoot' => sys_get_temp_dir() . '/Phast.ScriptInliner.' . posix_geteuid(),
             'maxSize' => 512 * 1024 * 1024,
-        ], 'ScriptInliner');
+        ]))->getCache('ScriptInliner');
     }
 
     public function enterNode(Node $node) {

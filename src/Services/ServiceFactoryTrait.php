@@ -3,7 +3,7 @@
 
 namespace Kibo\Phast\Services;
 
-use Kibo\Phast\Cache\Sqlite\Cache;
+use Kibo\Phast\Cache\Factory as CacheFactory;
 use Kibo\Phast\Filters\Service\CachingServiceFilter;
 use Kibo\Phast\Filters\Service\CompositeFilter;
 use Kibo\Phast\Retrievers\CachingRetriever;
@@ -22,7 +22,7 @@ trait ServiceFactoryTrait {
         $retriever->addRetriever(new LocalRetriever($config['retrieverMap']));
         $retriever->addRetriever(
             new CachingRetriever(
-                new Cache($config['cache'], $cacheNamespace),
+                (new CacheFactory($config['cache']))->getCache($cacheNamespace),
                 (new RemoteRetrieverFactory())->make($config)
             )
         );
@@ -31,7 +31,7 @@ trait ServiceFactoryTrait {
 
     public function makeCachingServiceFilter(array $config, CompositeFilter $compositeFilter, $cacheNamespace) {
         return new CachingServiceFilter(
-            new Cache($config['cache'], $cacheNamespace),
+            (new CacheFactory($config['cache']))->getCache($cacheNamespace),
             $compositeFilter,
             new LocalRetriever($config['retrieverMap'])
         );

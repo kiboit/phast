@@ -20,6 +20,7 @@ class DefaultConfiguration {
             'httpClient' => CURLClient::class,
 
             'cache' => [
+                'implementation' => \Kibo\Phast\Cache\Sqlite\Cache::class,
                 'cacheRoot' => sys_get_temp_dir() . '/phast-cache-' . (new System())->getUserId(),
                 'maxSize' => 1024 * 1024 * 1024,
             ],

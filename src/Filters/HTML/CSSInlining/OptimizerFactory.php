@@ -2,7 +2,8 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-use Kibo\Phast\Cache\Sqlite\Cache;
+use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Cache\Factory as CacheFactory;
 
 class OptimizerFactory {
     /**
@@ -11,7 +12,7 @@ class OptimizerFactory {
     private $cache;
 
     public function __construct(array $config) {
-        $this->cache = new Cache($config['cache'], 'css-optimizitor');
+        $this->cache = (new CacheFactory($config['cache']))->getCache('css-optimizitor');
     }
 
     /**

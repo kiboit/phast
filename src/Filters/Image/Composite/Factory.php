@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\Image\Composite;
 
-use Kibo\Phast\Cache\Sqlite\Cache;
+use Kibo\Phast\Cache\Factory as CacheFactory;
 use Kibo\Phast\Environment\Package;
 use Kibo\Phast\Exceptions\LogicException;
 use Kibo\Phast\Filters\HTML\ImagesOptimizationService\ImageInliningManagerFactory;
@@ -43,7 +43,7 @@ class Factory {
         }
         if ($this->config['images']['enable-cache']) {
             return new CachingServiceFilter(
-                new Cache($this->config['cache'], 'images-1'),
+                (new CacheFactory($this->config['cache']))->getCache('images-1'),
                 $composite,
                 new LocalRetriever($this->config['retrieverMap'])
             );

@@ -2,7 +2,7 @@
 
 namespace Kibo\Phast\Filters\HTML\CSSInlining;
 
-use Kibo\Phast\Cache\Sqlite\Cache;
+use Kibo\Phast\Cache\Factory as CacheFactory;
 use Kibo\Phast\Filters\CSS\Composite\Factory as CSSCompositeFactory;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 use Kibo\Phast\Retrievers\CachingRetriever;
@@ -20,7 +20,7 @@ class Factory implements HTMLFilterFactory {
         $retriever->addRetriever($localRetriever);
         $retriever->addRetriever(
             new CachingRetriever(
-                new Cache($config['cache'], 'css')
+                (new CacheFactory($config['cache']))->getCache('css')
             )
         );
 

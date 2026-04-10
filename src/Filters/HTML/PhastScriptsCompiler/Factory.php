@@ -1,12 +1,12 @@
 <?php
 namespace Kibo\Phast\Filters\HTML\PhastScriptsCompiler;
 
-use Kibo\Phast\Cache\Sqlite\Cache;
+use Kibo\Phast\Cache\Factory as CacheFactory;
 use Kibo\Phast\Filters\HTML\HTMLFilterFactory;
 
 class Factory implements HTMLFilterFactory {
     public function make(array $config) {
-        $cache = new Cache($config['cache'], 'phast-scripts');
+        $cache = (new CacheFactory($config['cache']))->getCache('phast-scripts');
         $compiler = new PhastJavaScriptCompiler(
             $cache,
             $config['servicesUrl'],
