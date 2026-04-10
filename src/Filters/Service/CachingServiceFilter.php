@@ -48,7 +48,7 @@ class CachingServiceFilter implements ServiceFilter {
      */
     public function apply(Resource $resource, array $request) {
         $key = $this->cachedFilter->getCacheSalt($resource, $request);
-        $this->logger()->info('Trying to get {url} from cache', ['url' => (string) $resource->getUrl()]);
+        $this->logger()->info('Trying to get {url} from cache', ['url' => (string) $resource->getUrl() ?: '(no url)']);
         $result = $this->cache->get($key);
         if (isset($result['encoding']) && $result['encoding'] != 'identity') {
             $result = null;
