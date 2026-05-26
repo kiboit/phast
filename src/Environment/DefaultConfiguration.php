@@ -104,6 +104,8 @@ class DefaultConfiguration {
 
                 'maxImageInliningSize' => 512,
 
+                'cloudflare-image-format' => 'off',
+
                 'whitelist' => [
                     '~^https?://ajax\.googleapis\.com/ajax/libs/jqueryui/~',
                 ],
