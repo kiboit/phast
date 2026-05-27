@@ -51,31 +51,11 @@ class Service extends BaseService {
         $response->setHeader('Link', "<$srcUrl>; rel=\"canonical\"");
         $response->setHeader('Content-Type', $resource->getMimeType());
         if ($resource->getMimeType() != Image::TYPE_PNG
-            && $resource->getMimeType() != Image::TYPE_AVIF
             && @$request['varyAccept']
         ) {
             $response->setHeader('Vary', 'Accept');
         }
         return $response;
-    }
-
-    private function serverSupportsAvif(): bool {
-        // wp_image_editor_supports() already validates both WP editor class
-        // AND underlying library (GD/Imagick), so no extra PHP version check needed here
-        if (function_exists('wp_image_editor_supports')
-            && wp_image_editor_supports(['mime_type' => 'image/avif'])
-        ) {
-            return true;
-        }
-        // Non-WordPress context: check the backend directly
-        $usingImagick = class_exists('Imagick')
-        && isset($this->config['images']['processor'])
-        && $this->config['images']['processor'] === 'imagick';
-        if ($usingImagick) {
-            return in_array('AVIF', \Imagick::queryFormats());
-        }
-        // Raw GD check: imageavif() only exists on PHP 8.1+
-        return PHP_VERSION_ID >= 80100 && function_exists('imageavif');
     }
 
     protected function validateIntegrity(ServiceRequest $request) {
