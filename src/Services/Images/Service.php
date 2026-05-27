@@ -11,30 +11,36 @@ use Kibo\Phast\ValueObjects\Resource;
 
 class Service extends BaseService {
     protected function getParams(ServiceRequest $request) {
-        $params = parent::getParams($request);
-        $cfFormat      = $this->config['images']['cloudflare-image-format'] ?? 'off';
-        $behindCf      = $request->getHTTPRequest()->isCloudflare();
-        $http          = $request->getHTTPRequest();
-        $overrideCf    = $cfFormat !== 'off';
+        $params   = parent::getParams($request);
+        $http     = $request->getHTTPRequest();
+        $cfFormat = $this->config['images']['cloudflare-image-format'] ?? 'off';
 
-        if (!$behindCf || $overrideCf) {
+        if ($this->proxySupportsAccept($http)) {
+            // No Cloudflare proxy detected: format negotiated via Accept header as normal.
             $params['varyAccept'] = true;
-
-            $tryAvif = ($cfFormat === 'avif' || !$behindCf)
-            && $this->serverSupportsAvif()
-            && $this->browserSupportsAvif($http);
-
-            $tryWebp = ($cfFormat === 'webp' || $cfFormat === 'avif' || !$behindCf)
-            && $this->browserSupportsWebp($http);
-
-            if ($tryAvif) {
+            if ($this->serverSupportsAvif() && $this->browserSupportsAvif($http)) {
                 $params['preferredType'] = Image::TYPE_AVIF;
                 Log::info('AVIF will be served if possible!');
-            } elseif ($tryWebp) {
+            } elseif ($this->browserSupportsWebp($http)) {
                 $params['preferredType'] = Image::TYPE_WEBP;
                 Log::info('WebP will be served if possible!');
             }
+
+        } elseif ($cfFormat !== 'off') {
+            // Cloudflare does not respect Vary: Accept - the first cached response
+            // is served to all subsequent visitors regardless of their Accept header.
+            // The Accept header is therefore not read, Vary: Accept is not set,
+            // and the configured format is applied unconditionally to all requests.
+            if ($cfFormat === 'avif' && $this->serverSupportsAvif()) {
+                $params['preferredType'] = Image::TYPE_AVIF;
+                Log::info('AVIF will be served unconditionally (Cloudflare mode).');
+            } elseif ($cfFormat === 'webp' || ($cfFormat === 'avif' && !$this->serverSupportsAvif())) {
+                $params['preferredType'] = Image::TYPE_WEBP;
+                Log::info('WebP will be served unconditionally (Cloudflare mode).');
+            }
+            // varyAccept intentionally not set
         }
+        // $cfFormat === 'off' behind Cloudflare: original format preserved, no action taken.
 
         return $params;
     }
@@ -61,16 +67,13 @@ class Service extends BaseService {
         ) {
             return true;
         }
-
         // Non-WordPress context: check the backend directly
         $usingImagick = class_exists('Imagick')
         && isset($this->config['images']['processor'])
         && $this->config['images']['processor'] === 'imagick';
-
         if ($usingImagick) {
             return in_array('AVIF', \Imagick::queryFormats());
         }
-
         // Raw GD check: imageavif() only exists on PHP 8.1+
         return PHP_VERSION_ID >= 80100 && function_exists('imageavif');
     }
