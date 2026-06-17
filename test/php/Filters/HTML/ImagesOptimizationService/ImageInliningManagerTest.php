@@ -57,6 +57,7 @@ class ImageInliningManagerTest extends PhastTestCase {
             ['image/png'],
             ['image/svg+xml'],
             ['image/webp', self::MAX_INLINING_SIZE, false],
+            ['image/avif', self::MAX_INLINING_SIZE, false],
             ['image/jpeg', self::MAX_INLINING_SIZE + 1, false],
         ];
     }
@@ -80,6 +81,7 @@ class ImageInliningManagerTest extends PhastTestCase {
             ['image/jpeg'],
             ['image/gif'],
             ['image/png'],
+            ['image/avif'],
         ];
     }
 

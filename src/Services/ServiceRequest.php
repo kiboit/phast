@@ -361,7 +361,7 @@ class ServiceRequest {
         }
         $url = URL::fromString($params['src']);
         $ext = strtolower($url->getExtension());
-        if (preg_match('/^(jpe?g|gif|png|js|css)$/', $ext)) {
+        if (preg_match('/^(jpe?g|gif|png|webp|avif|js|css)$/', $ext)) {
             return $ext;
         }
         return $default;

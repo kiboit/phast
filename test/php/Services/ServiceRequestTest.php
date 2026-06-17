@@ -36,6 +36,7 @@ class ServiceRequestTest extends TestCase {
         yield [['src' => 'http://example.com/path/file-file.png']];
         yield [['src' => 'the-file.png', 'width' => 20]];
         yield [['src' => 'the-file.png', 'width' => 20, 'height' => 30]];
+        yield [['src' => '/images/file.avif']];
     }
 
     /**
@@ -77,6 +78,12 @@ class ServiceRequestTest extends TestCase {
                 ['src' => 'http://example.com/the-image.png?ver=1'],
                 'images.php/__p__.png?src=http%3A%2F%2Fexample.com%2Fthe-image.png%3Fver%3D1',
                 'images.php/c3JjPWh0dHAlM0ElMkYlMkZleGFtcGxlLmNvbSUyRnRoZS1pbWFnZS5wbmclM0Z2ZXIlM0Qx.q.png',
+            ],
+            [
+                'images.php',
+                ['src' => 'http://example.com/the-image.avif'],
+                'images.php/__p__.avif?src=http%3A%2F%2Fexample.com%2Fthe-image.avif',
+                'images.php/c3JjPWh0dHAlM0ElMkYlMkZleGFtcGxlLmNvbSUyRnRoZS1pbWFnZS5hdmlm.q.avif',
             ],
         ];
     }

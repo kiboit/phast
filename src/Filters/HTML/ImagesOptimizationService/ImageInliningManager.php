@@ -71,7 +71,7 @@ class ImageInliningManager {
     private function shouldStoreForInlining(Resource $resource) {
         return $this->hasSizeForInlining($resource)
             && strpos($resource->getMimeType(), 'image/') === 0
-            && $resource->getMimeType() !== 'image/webp';
+            && !in_array($resource->getMimeType(), ['image/webp', 'image/avif'], true);
     }
 
     private function hasSizeForInlining(Resource $resource) {

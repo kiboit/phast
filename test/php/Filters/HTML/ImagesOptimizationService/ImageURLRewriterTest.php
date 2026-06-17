@@ -101,6 +101,24 @@ class ImageURLRewriterTest extends PhastTestCase {
         yield ['background: url("http://somewhere.else/img.png")'];
         yield ['background: url(#yolo)'];
         yield ['background: url(/test.svg)'];
+        yield ['background: url("images/image1.webp")'];
+        yield ['background: url("images/image1.avif")'];
+    }
+
+    public function testDontRewriteWebpAndAvifWhenWhitelisted() {
+        $rewriter = new ImageURLRewriter(
+            $this->securityToken,
+            $this->retriever,
+            $this->inliningManager,
+            URL::fromString(self::BASE_URL . '/css/'),
+            URL::fromString(self::BASE_URL . '/images.php'),
+            ['~^' . preg_quote(self::BASE_URL, '~') . '~']
+        );
+
+        foreach (['webp', 'avif'] as $extension) {
+            $css = 'background: url("images/image1.' . $extension . '")';
+            $this->assertEquals($css, $rewriter->rewriteStyle($css));
+        }
     }
 
     public function testNoRewriteForImagesWithInlineSource() {

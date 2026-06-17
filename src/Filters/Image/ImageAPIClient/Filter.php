@@ -95,10 +95,30 @@ class Filter implements ImageFilter {
             'X-Phast-Image-API-Client' => $this->getRequestToken(),
             'Content-Type' => 'application/octet-stream',
         ];
-        if (isset($request['preferredType']) && $request['preferredType'] == Image::TYPE_WEBP) {
-            $headers['Accept'] = 'image/webp';
+        if (isset($request['preferredType'])) {
+            $preferredTypes = $this->getPreferredTypes($request['preferredType']);
+            if (!empty($preferredTypes)) {
+                $headers['Accept'] = implode(',', $preferredTypes);
+            }
         }
         return $headers;
+    }
+
+    private function getPreferredTypes($preferredType) {
+        $types = is_array($preferredType)
+            ? $preferredType
+            : preg_split('/\s*,\s*/', (string) $preferredType, -1, PREG_SPLIT_NO_EMPTY);
+
+        $result = [];
+        foreach ($types as $type) {
+            $type = trim($type);
+            if (in_array($type, [Image::TYPE_AVIF, Image::TYPE_WEBP], true)
+                && !in_array($type, $result, true)
+            ) {
+                $result[] = $type;
+            }
+        }
+        return $result;
     }
 
     private function getRequestToken() {

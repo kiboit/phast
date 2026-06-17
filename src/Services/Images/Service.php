@@ -14,9 +14,12 @@ class Service extends BaseService {
         $params = parent::getParams($request);
         if ($this->proxySupportsAccept($request->getHTTPRequest())) {
             $params['varyAccept'] = true;
-            if ($this->browserSupportsWebp($request->getHTTPRequest())) {
-                $params['preferredType'] = Image::TYPE_WEBP;
-                Log::info('WebP will be served if possible!');
+            $preferredTypes = $this->getBrowserSupportedPreferredTypes($request->getHTTPRequest());
+            if (!empty($preferredTypes)) {
+                $params['preferredType'] = implode(',', $preferredTypes);
+                Log::info('Preferred image types will be served if possible: {types}', [
+                    'types' => $params['preferredType'],
+                ]);
             }
         }
         return $params;
@@ -47,8 +50,17 @@ class Service extends BaseService {
         }
     }
 
-    private function browserSupportsWebp(Request $request) {
-        return strpos($request->getHeader('accept'), 'image/webp') !== false;
+    private function getBrowserSupportedPreferredTypes(Request $request) {
+        $accept = (string) $request->getHeader('accept');
+        preg_match_all(
+            '~(?:^|,)\s*(image/(?:avif|webp))\s*(?:;\s*(?!q\s*=\s*0(?:\.0*)?\s*(?=;|,|$))[^;,]*)*\s*(?=,|$)~i',
+            $accept,
+            $matches
+        );
+        $acceptedTypes = array_flip(array_map('strtolower', $matches[1]));
+        return array_values(array_filter([Image::TYPE_AVIF, Image::TYPE_WEBP], function ($type) use ($acceptedTypes) {
+            return isset($acceptedTypes[$type]);
+        }));
     }
 
     private function proxySupportsAccept(Request $request) {

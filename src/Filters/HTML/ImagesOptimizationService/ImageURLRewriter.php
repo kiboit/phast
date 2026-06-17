@@ -161,7 +161,7 @@ class ImageURLRewriter {
             $this->baseUrl->toString(),
             $this->serviceUrl->toString(),
             $this->inliningManager->getMaxImageInliningSize(),
-            '20180413',
+            '20260617',
         ], array_keys($this->whitelist), array_values($this->whitelist));
         return join('-', $parts);
     }
@@ -189,12 +189,15 @@ class ImageURLRewriter {
         if (!$url) {
             return false;
         }
+        $urlObject = URL::fromString($url);
+        if (preg_match('~\.(webp|avif)$~i', $urlObject->getPath())) {
+            return false;
+        }
         foreach ($this->whitelist as $pattern) {
             if (preg_match($pattern, $url)) {
                 return true;
             }
         }
-        $urlObject = URL::fromString($url);
         if (preg_match('~\.(jpe?g|gif|png)$~i', $urlObject->getPath())
             && $this->retriever->getCacheSalt($urlObject)
         ) {

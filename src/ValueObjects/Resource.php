@@ -12,6 +12,7 @@ class Resource {
         'jpeg' => 'image/jpeg',
         'bmp' => 'image/bmp',
         'webp' => 'image/webp',
+        'avif' => 'image/avif',
         'svg' => 'image/svg+xml',
         'css' => 'text/css',
         'js' => 'application/javascript',

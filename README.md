@@ -53,7 +53,7 @@ Test your site!
 * Image optimization: Images are recompressed, optimised (via
   [pngquant](https://pngquant.org/) and
   [jpegtran](https://en.wikipedia.org/wiki/Libjpeg#jpegtran)) and converted to
-  WebP, when supported by the browser.
+  AVIF or WebP, when supported by the browser.
 
 * CSS optimization: We break down included stylesheets and remove all
   class-based selectors that cannot apply to the current document. The optimised

@@ -32,7 +32,7 @@ class LocalRetriever implements Retriever {
     }
 
     public static function getAllowedExtensions() {
-        return ['css', 'js', 'bmp', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'ico', 'svg', 'txt'];
+        return ['css', 'js', 'bmp', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'ico', 'svg', 'txt'];
     }
 
     public function retrieve(URL $url) {
