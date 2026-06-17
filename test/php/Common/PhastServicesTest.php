@@ -40,6 +40,11 @@ class PhastServicesTest extends PhastTestCase {
      */
     private $functions;
 
+    /**
+     * @var array
+     */
+    private $config;
+
     public function setUp(): void {
         parent::setUp();
 

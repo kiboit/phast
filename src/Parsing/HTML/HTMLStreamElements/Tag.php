@@ -78,7 +78,7 @@ class Tag extends Element {
      * @return string[]
      */
     public function getClasses() {
-        return array_values(array_filter(preg_split('~\s+~', $this->getAttribute('class')), 'strlen'));
+        return array_values(array_filter(preg_split('~\s+~', (string) $this->getAttribute('class')), 'strlen'));
     }
 
     /**

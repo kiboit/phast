@@ -79,6 +79,6 @@ class Response {
     }
 
     public function isCompressible() {
-        return strpos($this->getHeader('Content-Type'), 'image/') === false;
+        return strpos((string) $this->getHeader('Content-Type'), 'image/') === false;
     }
 }

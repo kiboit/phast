@@ -171,6 +171,7 @@ class URL {
         if ($requested[0] == '/') {
             return $requested;
         }
+        $base = (string) $base;
         if (substr($base, -1, 1) == '/') {
             $usedBase = $base;
         } else {

@@ -55,6 +55,7 @@ class ServiceSignature {
     }
 
     public function verify($signature, $value) {
+        $signature = (string) $signature;
         $user = substr($signature, 0, -self::SIGNATURE_LENGTH);
         $identities = $this->getIdentities();
         if (!isset($identities[$user])) {

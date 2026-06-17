@@ -195,7 +195,7 @@ class PhastServices {
 
     private static function shouldZip(Request $request) {
         return !$request->isCloudflare()
-               && strpos($request->getHeader('Accept-Encoding'), 'gzip') !== false;
+               && strpos((string) $request->getHeader('Accept-Encoding'), 'gzip') !== false;
     }
 
     private static function generateETag(array $headers, $content) {

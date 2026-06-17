@@ -70,8 +70,8 @@ class Request {
         if ($pathInfo) {
             return $pathInfo;
         }
-        $path = parse_url($this->getEnvValue('REQUEST_URI'), PHP_URL_PATH);
-        if (preg_match('~[^/]\.php(/.*)~', $path, $match)) {
+        $path = parse_url((string) $this->getEnvValue('REQUEST_URI'), PHP_URL_PATH);
+        if (is_string($path) && preg_match('~[^/]\.php(/.*)~', $path, $match)) {
             return $match[1];
         }
     }
@@ -83,8 +83,8 @@ class Request {
     }
 
     public function getQueryString() {
-        $parsed = parse_url($this->getEnvValue('REQUEST_URI'));
-        if (isset($parsed['query'])) {
+        $parsed = parse_url((string) $this->getEnvValue('REQUEST_URI'));
+        if (is_array($parsed) && isset($parsed['query'])) {
             return $parsed['query'];
         }
     }

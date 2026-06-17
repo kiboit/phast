@@ -158,7 +158,7 @@ class DefaultConfiguration {
             'scripts' => [
                 'removeLicenseHeaders' => false,
                 'whitelist' => [
-                    '~^https?://' . preg_quote($request->getHost(), '~') . '/~',
+                    '~^https?://' . preg_quote((string) $request->getHost(), '~') . '/~',
                 ],
             ],
 
