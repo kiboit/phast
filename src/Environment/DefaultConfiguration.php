@@ -100,6 +100,8 @@ class DefaultConfiguration {
 
                 'api-mode' => false,
 
+                'cloudflareSupportsAcceptHeader' => false,
+
                 'factory' => Filters\Image\ImageFactory::class,
 
                 'maxImageInliningSize' => 512,

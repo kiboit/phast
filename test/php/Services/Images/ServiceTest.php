@@ -50,13 +50,45 @@ class ServiceTest extends TestCase {
         $this->assertSame(Image::TYPE_WEBP, $params['preferredType']);
     }
 
-    private function makeService() {
+    public function testCloudflareDoesNotSupportAcceptHeaderByDefault() {
+        $request = ServiceRequest::fromHTTPRequest(Request::fromArray(
+            ['src' => 'image.jpg'],
+            [
+                'REQUEST_URI' => '/phast.php',
+                'HTTP_ACCEPT' => 'image/webp,*/*',
+                'HTTP_CF_RAY' => '1234',
+            ]
+        ));
+
+        $params = $this->makeService()->exposeGetParams($request);
+
+        $this->assertArrayNotHasKey('preferredType', $params);
+        $this->assertArrayNotHasKey('varyAccept', $params);
+    }
+
+    public function testCloudflareSupportsAcceptHeaderOptionAllowsAcceptHeader() {
+        $request = ServiceRequest::fromHTTPRequest(Request::fromArray(
+            ['src' => 'image.jpg'],
+            [
+                'REQUEST_URI' => '/phast.php',
+                'HTTP_ACCEPT' => 'image/webp,*/*',
+                'HTTP_CF_RAY' => '1234',
+            ]
+        ));
+
+        $params = $this->makeService(['cloudflareSupportsAcceptHeader' => true])->exposeGetParams($request);
+
+        $this->assertSame(Image::TYPE_WEBP, $params['preferredType']);
+        $this->assertTrue($params['varyAccept']);
+    }
+
+    private function makeService(array $imageConfig = []) {
         return new TestableImageService(
             $this->createMock(ServiceSignature::class),
             [],
             $this->createMock(Retriever::class),
             $this->createMock(ServiceFilter::class),
-            ['images' => ['api-mode' => false]]
+            ['images' => array_merge(['api-mode' => false], $imageConfig)]
         );
     }
 }

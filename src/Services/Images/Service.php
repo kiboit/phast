@@ -64,6 +64,7 @@ class Service extends BaseService {
     }
 
     private function proxySupportsAccept(Request $request) {
-        return !$request->isCloudflare();
+        return !empty($this->config['images']['cloudflareSupportsAcceptHeader'])
+            || !$request->isCloudflare();
     }
 }
