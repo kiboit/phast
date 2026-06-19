@@ -12,9 +12,18 @@ use Kibo\Phast\ValueObjects\Resource;
 class Service extends BaseService {
     protected function getParams(ServiceRequest $request) {
         $params = parent::getParams($request);
-        if ($this->proxySupportsAccept($request->getHTTPRequest())) {
+        $httpRequest = $request->getHTTPRequest();
+        if ($this->usesCloudflareConfiguredPreferredTypes($httpRequest)) {
+            $preferredTypes = $this->getCloudflarePreferredTypes();
+            if (!empty($preferredTypes)) {
+                $params['preferredType'] = implode(',', $preferredTypes);
+                Log::info('Preferred image types will be served if possible: {types}', [
+                    'types' => $params['preferredType'],
+                ]);
+            }
+        } elseif ($this->proxySupportsAccept($httpRequest)) {
             $params['varyAccept'] = true;
-            $preferredTypes = $this->getBrowserSupportedPreferredTypes($request->getHTTPRequest());
+            $preferredTypes = $this->getBrowserSupportedPreferredTypes($httpRequest);
             if (!empty($preferredTypes)) {
                 $params['preferredType'] = implode(',', $preferredTypes);
                 Log::info('Preferred image types will be served if possible: {types}', [
@@ -63,8 +72,24 @@ class Service extends BaseService {
         }));
     }
 
+    private function getCloudflarePreferredTypes() {
+        $format = strtolower(trim($this->config['images']['cloudflareImageFormat'] ?? 'webp'));
+        if ($format === 'avif') {
+            return [Image::TYPE_AVIF, Image::TYPE_WEBP];
+        }
+        if ($format === '') {
+            return [];
+        }
+        return [Image::TYPE_WEBP];
+    }
+
     private function proxySupportsAccept(Request $request) {
         return !empty($this->config['images']['cloudflareSupportsAcceptHeader'])
             || !$request->isCloudflare();
+    }
+
+    private function usesCloudflareConfiguredPreferredTypes(Request $request) {
+        return $request->isCloudflare()
+            && empty($this->config['images']['cloudflareSupportsAcceptHeader']);
     }
 }

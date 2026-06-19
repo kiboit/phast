@@ -100,7 +100,11 @@ class DefaultConfiguration {
 
                 'api-mode' => false,
 
+                // Cloudflare caches do not reliably vary images by Accept by default,
+                // so use a fixed preferred type unless Accept support is enabled.
                 'cloudflareSupportsAcceptHeader' => false,
+
+                'cloudflareImageFormat' => 'webp',
 
                 'factory' => Filters\Image\ImageFactory::class,
 

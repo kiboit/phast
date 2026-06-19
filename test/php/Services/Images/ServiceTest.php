@@ -50,7 +50,39 @@ class ServiceTest extends TestCase {
         $this->assertSame(Image::TYPE_WEBP, $params['preferredType']);
     }
 
-    public function testCloudflareDoesNotSupportAcceptHeaderByDefault() {
+    public function testCloudflareUsesWebpByDefault() {
+        $request = ServiceRequest::fromHTTPRequest(Request::fromArray(
+            ['src' => 'image.jpg'],
+            [
+                'REQUEST_URI' => '/phast.php',
+                'HTTP_ACCEPT' => 'image/png,*/*',
+                'HTTP_CF_RAY' => '1234',
+            ]
+        ));
+
+        $params = $this->makeService()->exposeGetParams($request);
+
+        $this->assertSame(Image::TYPE_WEBP, $params['preferredType']);
+        $this->assertArrayNotHasKey('varyAccept', $params);
+    }
+
+    public function testCloudflareImageFormatAvifPrefersAvifThenWebp() {
+        $request = ServiceRequest::fromHTTPRequest(Request::fromArray(
+            ['src' => 'image.jpg'],
+            [
+                'REQUEST_URI' => '/phast.php',
+                'HTTP_ACCEPT' => 'image/png,*/*',
+                'HTTP_CF_RAY' => '1234',
+            ]
+        ));
+
+        $params = $this->makeService(['cloudflareImageFormat' => 'avif'])->exposeGetParams($request);
+
+        $this->assertSame(Image::TYPE_AVIF . ',' . Image::TYPE_WEBP, $params['preferredType']);
+        $this->assertArrayNotHasKey('varyAccept', $params);
+    }
+
+    public function testCloudflareImageFormatEmptyDisablesPreferredType() {
         $request = ServiceRequest::fromHTTPRequest(Request::fromArray(
             ['src' => 'image.jpg'],
             [
@@ -60,7 +92,7 @@ class ServiceTest extends TestCase {
             ]
         ));
 
-        $params = $this->makeService()->exposeGetParams($request);
+        $params = $this->makeService(['cloudflareImageFormat' => ''])->exposeGetParams($request);
 
         $this->assertArrayNotHasKey('preferredType', $params);
         $this->assertArrayNotHasKey('varyAccept', $params);
@@ -88,7 +120,7 @@ class ServiceTest extends TestCase {
             [],
             $this->createMock(Retriever::class),
             $this->createMock(ServiceFilter::class),
-            ['images' => array_merge(['api-mode' => false], $imageConfig)]
+            ['images' => array_merge(['api-mode' => false, 'cloudflareImageFormat' => 'webp'], $imageConfig)]
         );
     }
 }
