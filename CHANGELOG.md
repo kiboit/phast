@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.112 - 2026-06-19
+
+* Fix PHP 8.4 deprecation warnings.
+* Make the cache implementation configurable.
+* Add a black hole cache implementation.
+* Add AVIF image negotiation support.
+* Fix PHPUnit compatibility on newer PHP versions.
+* Add Cloudflare image options for Accept header support and fixed preferred
+  image format selection.
+
 ## 1.111 - 2025-12-11
 
 * Fix CVE-2025-14388 (thanks [Angus
