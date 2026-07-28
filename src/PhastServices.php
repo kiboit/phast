@@ -16,8 +16,12 @@ use Kibo\Phast\ValueObjects\URL;
 class PhastServices {
     /**
      * @param callable|null $getConfig
+     * @param bool $provideServiceRequest
      */
-    public static function serve(?callable $getConfig = null) {
+    public static function serve(
+        ?callable $getConfig = null,
+        $provideServiceRequest = false
+    ) {
         $httpRequest = Request::fromGlobals();
 
         if ($httpRequest->getHeader('CDN-Loop')
@@ -68,6 +72,8 @@ class PhastServices {
 
         if ($getConfig === null) {
             $config = [];
+        } elseif ($provideServiceRequest) {
+            $config = $getConfig($serviceRequest);
         } else {
             $config = $getConfig();
         }

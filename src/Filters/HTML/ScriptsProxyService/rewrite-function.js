@@ -76,11 +76,15 @@ function processNode(el) {
 
   var originalSrc = el.src;
 
-  el.src = phast.buildServiceUrl(config, {
+  var params = {
     service: "scripts",
     src: originalSrc,
     cacheMarker: cacheMarker,
-  });
+  };
+  if (config.environment) {
+    params.environment = config.environment;
+  }
+  el.src = phast.buildServiceUrl(config, params);
 
   el.setAttribute("data-phast-rewritten", "");
 

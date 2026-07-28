@@ -14,6 +14,9 @@ class Factory implements HTMLFilterFactory {
         }
         $filterConfig = $config['documents']['filters'][Filter::class];
         $filterConfig['match'] = $config['scripts']['whitelist'];
+        if (!empty($config['scripts']['environment'])) {
+            $filterConfig['environment'] = $config['scripts']['environment'];
+        }
         return new Filter(
             $filterConfig,
             (new ServiceSignatureFactory())->make($config),

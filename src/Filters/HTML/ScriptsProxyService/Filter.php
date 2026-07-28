@@ -95,6 +95,9 @@ class Filter extends BaseHTMLStreamFilter {
             'src' => (string) $url->withoutQuery(),
             'cacheMarker' => $cacheMarker,
         ];
+        if (!empty($this->config['environment'])) {
+            $params['environment'] = $this->config['environment'];
+        }
 
         return (new ServiceRequest())
             ->withUrl(URL::fromString($this->config['serviceUrl']))
@@ -121,6 +124,9 @@ class Filter extends BaseHTMLStreamFilter {
             'urlRefreshTime' => $this->config['urlRefreshTime'],
             'whitelist' => $this->config['match'],
         ];
+        if (!empty($this->config['environment'])) {
+            $config['environment'] = $this->config['environment'];
+        }
         $script = PhastJavaScript::fromFile(__DIR__ . '/rewrite-function.js');
         $script->setConfig('script-proxy-service', $config);
         $this->context->addPhastJavaScript($script);
