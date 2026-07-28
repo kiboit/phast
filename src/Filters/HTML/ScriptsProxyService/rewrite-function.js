@@ -81,7 +81,7 @@ function processNode(el) {
     src: originalSrc,
     cacheMarker: cacheMarker,
   };
-  if (config.environment) {
+  if (typeof config.environment === "string" && config.environment !== "") {
     params.environment = config.environment;
   }
   el.src = phast.buildServiceUrl(config, params);

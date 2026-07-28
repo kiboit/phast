@@ -95,7 +95,10 @@ class Filter extends BaseHTMLStreamFilter {
             'src' => (string) $url->withoutQuery(),
             'cacheMarker' => $cacheMarker,
         ];
-        if (!empty($this->config['environment'])) {
+        if (isset($this->config['environment'])
+            && is_string($this->config['environment'])
+            && $this->config['environment'] !== ''
+        ) {
             $params['environment'] = $this->config['environment'];
         }
 
@@ -124,7 +127,10 @@ class Filter extends BaseHTMLStreamFilter {
             'urlRefreshTime' => $this->config['urlRefreshTime'],
             'whitelist' => $this->config['match'],
         ];
-        if (!empty($this->config['environment'])) {
+        if (isset($this->config['environment'])
+            && is_string($this->config['environment'])
+            && $this->config['environment'] !== ''
+        ) {
             $config['environment'] = $this->config['environment'];
         }
         $script = PhastJavaScript::fromFile(__DIR__ . '/rewrite-function.js');

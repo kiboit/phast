@@ -108,6 +108,29 @@ class PhastDocumentFiltersTest extends \PHPUnit\Framework\TestCase {
         $this->assertStringContainsString('phast.php', $out);
     }
 
+    public function testPropagatesZeroScriptEnvironment() {
+        $out = PhastDocumentFilters::apply(
+            '<!doctype html><html><head><script data-phast-no-defer src="/js/main.js"></script></head><body></body></html>',
+            [
+                'retrieverMap' => [
+                    'example.com' => __DIR__ . '/../test-app',
+                ],
+                'scripts' => [
+                    'environment' => '0',
+                ],
+                'serviceRequestFormat' => Services\ServiceRequest::FORMAT_QUERY,
+            ]
+        );
+
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($out);
+        $script = $dom->getElementsByTagName('script')->item(0);
+        $query = [];
+        parse_str(parse_url($script->getAttribute('src'), PHP_URL_QUERY), $query);
+
+        $this->assertSame('0', $query['environment']);
+    }
+
     private function assertFiltersApplied($out) {
         $this->assertStringContainsString('[Phast]', $out);
     }

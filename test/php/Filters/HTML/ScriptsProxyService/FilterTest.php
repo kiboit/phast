@@ -28,7 +28,7 @@ class FilterTest extends HTMLFilterTestCase {
         ],
         'serviceUrl' => 'script-proxy.php',
         'urlRefreshTime' => 7200,
-        'environment' => 'the-environment',
+        'environment' => '0',
     ];
 
     public function setUp(): void {
@@ -87,7 +87,7 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertArrayHasKey('cacheMarker', $query);
             $this->assertEquals(preg_replace('/\?.*/', '', $attributes['src']), $query['src']);
             $this->assertEquals(self::EXPECTED_CACHE_MARKER, $query['cacheMarker']);
-            $this->assertEquals('the-environment', $query['environment']);
+            $this->assertEquals('0', $query['environment']);
         } else {
             $this->assertEquals($attributes['src'], $newElement->getAttribute('src'));
         }
