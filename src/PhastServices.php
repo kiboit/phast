@@ -15,12 +15,12 @@ use Kibo\Phast\ValueObjects\URL;
 
 class PhastServices {
     /**
-     * @param callable|null $getConfig
-     * @param bool $provideServiceRequest
+     * @param callable|null $getConfig Returns the user configuration
+     * @param bool $provideServiceRequest Pass the parsed request to $getConfig
      */
     public static function serve(
         ?callable $getConfig = null,
-        $provideServiceRequest = false
+        bool $provideServiceRequest = false
     ) {
         $httpRequest = Request::fromGlobals();
 

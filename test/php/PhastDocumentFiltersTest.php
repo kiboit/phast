@@ -2,6 +2,11 @@
 
 namespace Kibo\Phast;
 
+use Kibo\Phast\Environment\Configuration;
+use Kibo\Phast\HTTP\Request;
+use Kibo\Phast\Security\ServiceSignatureFactory;
+use Kibo\Phast\Services\ServiceRequest;
+
 /**
  * @runTestsInSeparateProcesses
  */
@@ -108,18 +113,20 @@ class PhastDocumentFiltersTest extends \PHPUnit\Framework\TestCase {
         $this->assertStringContainsString('phast.php', $out);
     }
 
-    public function testPropagatesZeroScriptEnvironment() {
+    public function testSignsDirectScriptRequestWithZeroEnvironment() {
+        $userConfig = [
+            'retrieverMap' => [
+                'example.com' => __DIR__ . '/../test-app',
+            ],
+            'scripts' => [
+                'environment' => '0',
+            ],
+            'securityToken' => 'test-security-token',
+            'serviceRequestFormat' => ServiceRequest::FORMAT_QUERY,
+        ];
         $out = PhastDocumentFilters::apply(
             '<!doctype html><html><head><script data-phast-no-defer src="/js/main.js"></script></head><body></body></html>',
-            [
-                'retrieverMap' => [
-                    'example.com' => __DIR__ . '/../test-app',
-                ],
-                'scripts' => [
-                    'environment' => '0',
-                ],
-                'serviceRequestFormat' => Services\ServiceRequest::FORMAT_QUERY,
-            ]
+            $userConfig
         );
 
         $dom = new \DOMDocument();
@@ -129,6 +136,20 @@ class PhastDocumentFiltersTest extends \PHPUnit\Framework\TestCase {
         parse_str(parse_url($script->getAttribute('src'), PHP_URL_QUERY), $query);
 
         $this->assertSame('0', $query['environment']);
+        $this->assertArrayHasKey('token', $query);
+
+        $serviceRequest = ServiceRequest::fromHTTPRequest(Request::fromArray($query));
+        $runtimeConfig = Configuration::fromDefaults()
+            ->withUserConfiguration(new Configuration($userConfig))
+            ->getRuntimeConfig()
+            ->toArray();
+        $signature = (new ServiceSignatureFactory())->make($runtimeConfig);
+
+        $this->assertTrue($serviceRequest->verify($signature));
+
+        $query['environment'] = 'another-environment';
+        $tamperedRequest = ServiceRequest::fromHTTPRequest(Request::fromArray($query));
+        $this->assertFalse($tamperedRequest->verify($signature));
     }
 
     private function assertFiltersApplied($out) {

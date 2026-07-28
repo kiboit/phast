@@ -88,6 +88,7 @@ class FilterTest extends HTMLFilterTestCase {
             $this->assertEquals(preg_replace('/\?.*/', '', $attributes['src']), $query['src']);
             $this->assertEquals(self::EXPECTED_CACHE_MARKER, $query['cacheMarker']);
             $this->assertEquals('0', $query['environment']);
+            $this->assertEquals('the-token', $query['token']);
         } else {
             $this->assertEquals($attributes['src'], $newElement->getAttribute('src'));
         }

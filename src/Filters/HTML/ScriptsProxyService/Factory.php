@@ -14,6 +14,7 @@ class Factory implements HTMLFilterFactory {
         }
         $filterConfig = $config['documents']['filters'][Filter::class];
         $filterConfig['match'] = $config['scripts']['whitelist'];
+        unset($filterConfig['environment']);
         if (isset($config['scripts']['environment'])
             && is_string($config['scripts']['environment'])
             && $config['scripts']['environment'] !== ''

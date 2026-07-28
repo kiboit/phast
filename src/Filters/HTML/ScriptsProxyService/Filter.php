@@ -90,21 +90,16 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function makeProxiedURL(URL $url, $cacheMarker) {
-        $params = [
+        $params = $this->withEnvironment([
             'service' => 'scripts',
             'src' => (string) $url->withoutQuery(),
             'cacheMarker' => $cacheMarker,
-        ];
-        if (isset($this->config['environment'])
-            && is_string($this->config['environment'])
-            && $this->config['environment'] !== ''
-        ) {
-            $params['environment'] = $this->config['environment'];
-        }
+        ]);
 
         return (new ServiceRequest())
             ->withUrl(URL::fromString($this->config['serviceUrl']))
             ->withParams($params)
+            ->sign($this->signature)
             ->serialize();
     }
 
@@ -121,21 +116,25 @@ class Filter extends BaseHTMLStreamFilter {
     }
 
     private function addScript() {
-        $config = [
+        $config = $this->withEnvironment([
             'serviceUrl' => $this->config['serviceUrl'],
             'pathInfo' => ServiceRequest::getDefaultSerializationMode() === ServiceRequest::FORMAT_PATH,
             'urlRefreshTime' => $this->config['urlRefreshTime'],
             'whitelist' => $this->config['match'],
-        ];
+        ]);
+        $script = PhastJavaScript::fromFile(__DIR__ . '/rewrite-function.js');
+        $script->setConfig('script-proxy-service', $config);
+        $this->context->addPhastJavaScript($script);
+    }
+
+    private function withEnvironment(array $values) {
         if (isset($this->config['environment'])
             && is_string($this->config['environment'])
             && $this->config['environment'] !== ''
         ) {
-            $config['environment'] = $this->config['environment'];
+            $values['environment'] = $this->config['environment'];
         }
-        $script = PhastJavaScript::fromFile(__DIR__ . '/rewrite-function.js');
-        $script->setConfig('script-proxy-service', $config);
-        $this->context->addPhastJavaScript($script);
+        return $values;
     }
 
     private function getAbsoluteURL($url) {
