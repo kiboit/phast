@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.113 - 2026-07-29
 
 * Local resource hosts are no longer inferred from the HTTP `Host` header.
   Applications must explicitly list trusted host-to-document-root mappings in
