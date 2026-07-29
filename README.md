@@ -28,22 +28,46 @@ Install Phast into your project using Composer:
 composer install kiboit/phast:dev-master
 ~~~
 
-Create `http://your.site/phast.php` to serve optimized versions of resources:
+Create a shared `phast-config.php` configuration file. Map each trusted
+hostname explicitly to its public document root:
 
 ~~~php
 <?php
-require 'vendor/autoload.php';
-\Kibo\Phast\PhastServices::serve();
+return [
+    'retrieverMap' => [
+        'your.site' => __DIR__ . '/public',
+    ],
+];
 ~~~
 
-Load Phast on all of your pages:
+The hostnames in `retrieverMap` are an authorization boundary. Use fixed,
+trusted values and never derive them from the request's `Host` header. Resources
+on hosts that are not mapped explicitly are not treated as local and do not
+receive signed Phast service URLs.
+
+Create `http://your.site/phast.php` to serve optimized versions of resources,
+using the shared configuration:
+
+~~~php
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+\Kibo\Phast\PhastServices::serve(function () {
+    return require __DIR__ . '/../phast-config.php';
+});
+~~~
+
+Load Phast on all of your pages with the same configuration:
 
 ~~~php
 <?php
 // At the top of your index.php
-require 'vendor/autoload.php';
-\Kibo\Phast\PhastDocumentFilters::deploy();
+require __DIR__ . '/../vendor/autoload.php';
+\Kibo\Phast\PhastDocumentFilters::deploy(
+    require __DIR__ . '/../phast-config.php'
+);
 ~~~
+
+Adjust the paths in these examples to match your project layout.
 
 Test your site!
 

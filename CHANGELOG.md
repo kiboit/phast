@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+* Local resource hosts are no longer inferred from the HTTP `Host` header.
+  Applications must explicitly list trusted host-to-document-root mappings in
+  `retrieverMap`. Without a mapping, local resources remain unchanged rather
+  than receiving signed Phast service URLs.
+
 ## 1.112 - 2026-06-19
 
 * Fix PHP 8.4 deprecation warnings.

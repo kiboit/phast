@@ -5,7 +5,7 @@ use Kibo\Phast\Environment\Configuration;
 use Kibo\Phast\ValueObjects\URL;
 
 class DefaultConfigurationTest extends \PHPUnit\Framework\TestCase {
-    public function testScriptWhitelistDoesNotUseRequestHost() {
+    public function testResourceAuthorizationDoesNotUseRequestHost() {
         $originalHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null;
         $_SERVER['HTTP_HOST'] = 'attacker.example';
 
@@ -19,6 +19,7 @@ class DefaultConfigurationTest extends \PHPUnit\Framework\TestCase {
             }
         }
 
+        $this->assertSame([], $config['retrieverMap']);
         $this->assertSame([], $config['scripts']['whitelist']);
     }
 

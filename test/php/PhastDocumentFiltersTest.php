@@ -113,6 +113,45 @@ class PhastDocumentFiltersTest extends \PHPUnit\Framework\TestCase {
         $this->assertStringContainsString('phast.php', $out);
     }
 
+    public function testDoesNotSignDirectScriptRequestWithoutExplicitRetrieverMap() {
+        $out = PhastDocumentFilters::apply(
+            '<!doctype html><html><head><script data-phast-no-defer src="/js/main.js"></script></head><body></body></html>',
+            [
+                'securityToken' => 'test-security-token',
+                'serviceRequestFormat' => ServiceRequest::FORMAT_QUERY,
+            ]
+        );
+
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($out);
+        $script = $dom->getElementsByTagName('script')->item(0);
+
+        $this->assertSame('/js/main.js', $script->getAttribute('src'));
+        $this->assertFalse($script->hasAttribute('data-phast-params'));
+    }
+
+    public function testDoesNotSignDirectScriptRequestForUnconfiguredRequestHost() {
+        $_SERVER['HTTP_HOST'] = 'attacker.example';
+
+        $out = PhastDocumentFilters::apply(
+            '<!doctype html><html><head><script data-phast-no-defer src="/js/main.js"></script></head><body></body></html>',
+            [
+                'retrieverMap' => [
+                    'example.com' => __DIR__ . '/../test-app',
+                ],
+                'securityToken' => 'test-security-token',
+                'serviceRequestFormat' => ServiceRequest::FORMAT_QUERY,
+            ]
+        );
+
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($out);
+        $script = $dom->getElementsByTagName('script')->item(0);
+
+        $this->assertSame('/js/main.js', $script->getAttribute('src'));
+        $this->assertFalse($script->hasAttribute('data-phast-params'));
+    }
+
     public function testSignsDirectScriptRequestWithZeroEnvironment() {
         $userConfig = [
             'retrieverMap' => [

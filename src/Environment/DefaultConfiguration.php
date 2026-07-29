@@ -13,9 +13,7 @@ class DefaultConfiguration {
         return [
             'securityToken' => null,
 
-            'retrieverMap' => [
-                $request->getHost() => $request->getDocumentRoot(),
-            ],
+            'retrieverMap' => [],
 
             'httpClient' => CURLClient::class,
 
