@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+* Add a Redis cache implementation (`Kibo\Phast\Cache\Redis\Cache`, requires
+  the phpredis extension). Configure it with `'cache' => ['implementation' =>
+  \Kibo\Phast\Cache\Redis\Cache::class, 'redis' => ['host' => ..., 'port' =>
+  ...]]`, and give Redis a `maxmemory` limit with an `allkeys-*` eviction
+  policy.
 * Fix the SQLite cache on newer PHP/SQLite versions: once the cache was full,
   retrying a write failed with "bad parameter or other API misuse" and the
   cache file was deleted. Recovery now only deletes a corrupt database, so one
