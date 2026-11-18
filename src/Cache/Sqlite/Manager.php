@@ -42,6 +42,9 @@ class Manager {
                 'time' => $functions->time(),
             ]);
             $row = $query->fetch(\PDO::FETCH_ASSOC);
+            // Reset the cached statement now: left active, it keeps a shared
+            // lock while this process is idle, blocking all other writers.
+            $query->closeCursor();
             if ($row && $this->unserialize($row['value'], $value)) {
                 return $value;
             }
@@ -59,17 +62,22 @@ class Manager {
             $db = $this->getDatabase();
             $tries = 10;
             while ($tries--) {
+                $statement = $db->prepare('
+                    REPLACE INTO cache (key, value, expires_at)
+                    VALUES (:key, :value, :expires_at)
+                ');
                 try {
-                    $db->prepare('
-                        REPLACE INTO cache (key, value, expires_at)
-                        VALUES (:key, :value, :expires_at)
-                    ')->execute([
+                    $statement->execute([
                         'key' => $this->hashKey($key),
                         'value' => $this->serialize($value),
                         'expires_at' => $expiresIn > 0 ? $functions->time() + $expiresIn : null,
                     ]);
                     return;
                 } catch (\PDOException $e) {
+                    // The connection caches prepared statements. Executing
+                    // this one again after a failure returns SQLITE_MISUSE
+                    // unless it is reset first.
+                    $statement->closeCursor();
                     if (!$this->isFullException($e)) {
                         throw $e;
                     }
@@ -220,10 +228,34 @@ class Manager {
             'message' => $e->getMessage(),
         ]);
 
-        $this->database = null;
-        $this->purge();
+        $this->closeDatabase();
+
+        // Only throw the database away if it is unusable. Other workers keep
+        // their own connections to this file; after it is unlinked they fail
+        // with "attempt to write a readonly database" and would then remove
+        // the replacement too, wiping the whole cache over and over.
+        if ($this->isCorruptException($e)) {
+            $this->purge();
+        }
 
         return $fn();
+    }
+
+    private function isCorruptException(\PDOException $e): bool {
+        return preg_match('~\b(11 database disk image is malformed|26 file is not a database)\b~', $e->getMessage()) > 0;
+    }
+
+    private function closeDatabase(): void {
+        if ($this->database) {
+            if ($this->database->inTransaction()) {
+                try {
+                    $this->database->rollBack();
+                } catch (\PDOException $e) {
+                }
+            }
+            $this->database->closeStatements();
+        }
+        $this->database = null;
     }
 
     private function purge(): void {
@@ -252,11 +284,14 @@ class Manager {
                 if (!($row = $selectQuery->fetch(\PDO::FETCH_ASSOC))) {
                     $selectQuery->execute(['key' => '']);
                     if (!($row = $selectQuery->fetch(\PDO::FETCH_ASSOC))) {
-                        return;
+                        // The cache is empty; still commit the deletions.
+                        break;
                     }
                 }
+                $selectQuery->closeCursor();
                 $deleteQuery->execute(['key' => $row['key']]);
             }
+            $selectQuery->closeCursor();
 
             $this->getDatabase()->exec('COMMIT');
         } catch (\Throwable $e) {
