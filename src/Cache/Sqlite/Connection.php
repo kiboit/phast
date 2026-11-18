@@ -15,6 +15,17 @@ class Connection extends \PDO {
         return $this->statements[$query];
     }
 
+    /**
+     * Drop the cached statements. They reference this connection, so without
+     * this the connection (and any lock it holds) outlives the last reference.
+     */
+    public function closeStatements(): void {
+        foreach ($this->statements ?? [] as $statement) {
+            $statement->closeCursor();
+        }
+        $this->statements = [];
+    }
+
     public function getPageSize(): int {
         return (int) $this->query('PRAGMA page_size')->fetchColumn();
     }

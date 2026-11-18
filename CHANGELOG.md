@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+* Fix the SQLite cache on newer PHP/SQLite versions: once the cache was full,
+  retrying a write failed with "bad parameter or other API misuse" and the
+  cache file was deleted. Recovery now only deletes a corrupt database, so one
+  process' error no longer wipes the cache for all others. Cache hits no
+  longer hold a lock while the process is idle.
+
 ## 1.113 - 2026-07-29
 
 * Local resource hosts are no longer inferred from the HTTP `Host` header.
