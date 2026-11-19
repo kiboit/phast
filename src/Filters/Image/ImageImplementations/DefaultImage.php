@@ -6,6 +6,7 @@ use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\LogicException;
 use Kibo\Phast\Filters\Image\Exceptions\ImageProcessingException;
+use Kibo\Phast\Filters\Image\Exceptions\InvalidImageException;
 use Kibo\Phast\Filters\Image\Image;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\URL;
@@ -79,11 +80,11 @@ class DefaultImage extends BaseImage implements Image {
     private function getImageInfo() {
         if (!isset($this->imageInfo)) {
             if ($this->getImageString() === '') {
-                throw new ImageProcessingException('Image is empty');
+                throw new InvalidImageException('Image is empty');
             }
             $imageInfo = @getimagesizefromstring($this->getImageString());
             if ($imageInfo === false) {
-                throw new ImageProcessingException('Could not read GD image info');
+                throw new InvalidImageException('Could not read GD image info');
             }
             $this->imageInfo = $imageInfo;
         }

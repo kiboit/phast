@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Answer invalid input (an empty or undecodable image) with 422 instead of
+  500 when the service is not redirecting to the original resource.
 * Add a Redis cache implementation (`Kibo\Phast\Cache\Redis\Cache`, requires
   the phpredis extension). Configure it with `'cache' => ['implementation' =>
   \Kibo\Phast\Cache\Redis\Cache::class, 'redis' => ['host' => ..., 'port' =>

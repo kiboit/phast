@@ -3,7 +3,9 @@
 namespace Kibo\Phast\Filters\Service;
 
 use Kibo\Phast\Cache\Cache;
+use Kibo\Phast\Exceptions\CachedClientErrorException;
 use Kibo\Phast\Exceptions\CachedExceptionException;
+use Kibo\Phast\Exceptions\ClientErrorException;
 use Kibo\Phast\Logging\LoggingTrait;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\Services\ServiceFilter;
@@ -122,7 +124,11 @@ class CachingServiceFilter implements ServiceFilter {
     }
 
     private function deserializeException(array $data) {
-        return new CachedExceptionException(
+        // Keep client errors recognizable, so a cached one still gets a 4xx.
+        $class = is_a($data['class'], ClientErrorException::class, true)
+            ? CachedClientErrorException::class
+            : CachedExceptionException::class;
+        return new $class(
             sprintf(
                 'Phast: %s: Type: %s, Msg: %s, Code: %s',
                 static::class,

@@ -4,6 +4,7 @@ namespace Kibo\Phast;
 
 use Kibo\Phast\Common\ObjectifiedFunctions;
 use Kibo\Phast\Environment\Configuration;
+use Kibo\Phast\Exceptions\ClientErrorException;
 use Kibo\Phast\Exceptions\ItemNotFoundException;
 use Kibo\Phast\Exceptions\UnauthorizedException;
 use Kibo\Phast\HTTP\Request;
@@ -109,6 +110,13 @@ class PhastServices {
             }
             echo "Item not found\n";
             Log::error('Item not found: {message}', ['message' => $e->getMessage()]);
+            exit();
+        } catch (ClientErrorException $e) {
+            if (!$redirecting) {
+                http_response_code(422);
+            }
+            echo "Invalid input\n";
+            Log::warning('Invalid input: {message}', ['message' => $e->getMessage()]);
             exit();
         } catch (\Exception $e) {
             echo "Internal error, see logs\n";

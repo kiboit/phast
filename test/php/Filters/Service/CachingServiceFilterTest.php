@@ -4,6 +4,8 @@ namespace Kibo\Phast\Filters\Service;
 
 use Kibo\Phast\Cache\Cache;
 use Kibo\Phast\Exceptions\CachedExceptionException;
+use Kibo\Phast\Exceptions\ClientErrorException;
+use Kibo\Phast\Filters\Image\Exceptions\InvalidImageException;
 use Kibo\Phast\Retrievers\Retriever;
 use Kibo\Phast\ValueObjects\Resource;
 use Kibo\Phast\ValueObjects\URL;
@@ -113,8 +115,8 @@ class CachingServiceFilterTest extends TestCase {
     }
 
     public function testCachingExceptions() {
+        $thrown = false;
         $this->filterCallback = function () use (&$thrown) {
-            static $thrown = false;
             if ($thrown) {
                 $this->fail('Thrown exception was not cached!');
             } else {
@@ -132,6 +134,41 @@ class CachingServiceFilterTest extends TestCase {
             } catch (CachedExceptionException $e) {
             }
             $this->assertInstanceOf(CachedExceptionException::class, $e);
+        }
+    }
+
+    public function testCachedClientErrorsStayClientErrors() {
+        $calls = 0;
+        $this->filterCallback = function () use (&$calls) {
+            $calls++;
+            throw new InvalidImageException('Could not read GD image info');
+        };
+
+        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'not-an-image', 'image/png');
+
+        for ($i = 0; $i < 2; $i++) {
+            $e = null;
+            try {
+                $this->filter->apply($resource, []);
+            } catch (CachedExceptionException $e) {
+            }
+            $this->assertInstanceOf(ClientErrorException::class, $e, $i ? 'from cache' : 'first time');
+        }
+        $this->assertSame(1, $calls);
+    }
+
+    public function testOtherCachedExceptionsAreNotClientErrors() {
+        $this->filterCallback = function () {
+            throw new \RuntimeException();
+        };
+
+        $resource = Resource::makeWithContent(URL::fromString('http://phast.test'), 'the-content', 'the-mime');
+
+        try {
+            $this->filter->apply($resource, []);
+            $this->fail('Expected an exception');
+        } catch (CachedExceptionException $e) {
+            $this->assertNotInstanceOf(ClientErrorException::class, $e);
         }
     }
 }
