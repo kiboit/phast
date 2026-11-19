@@ -11,6 +11,8 @@ class ServiceSignatureFactory {
         $cache = (new CacheFactory(array_merge($config['cache'], [
             'name' => self::CACHE_NAMESPACE,
             'maxSize' => 1024 * 1024,
+            // The security token must never expire or be evicted.
+            'persistent' => true,
         ])))->getCache(self::CACHE_NAMESPACE);
         $signature = new ServiceSignature($cache);
         if (isset($config['securityToken'])) {
