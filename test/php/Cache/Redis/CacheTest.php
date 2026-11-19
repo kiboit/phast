@@ -86,6 +86,47 @@ class CacheTest extends TestCase {
         $this->assertLessThanOrEqual(100, $ttls[1]);
     }
 
+    public function testDefaultTtlAppliesOnlyWithoutExplicitExpiry(): void {
+        $config = $this->config;
+        $config['redis']['defaultTtl'] = 1000;
+        $this->cache('test', $config)->set('default', 'value');
+        $this->cache('test', $config)->set('explicit', 'value', 100);
+
+        $this->assertSame([100, 1000], $this->ttlsByMagnitude());
+    }
+
+    public function testPersistentCacheGetsNoDefaultTtl(): void {
+        $config = $this->config;
+        $config['redis']['defaultTtl'] = 1000;
+        $config['persistent'] = true;
+        $this->cache('test', $config)->set('token', 'value');
+
+        $this->assertSame([-1], $this->ttlsByMagnitude());
+    }
+
+    public function testSignatureCacheIsPersistent(): void {
+        $config = \Kibo\Phast\Environment\DefaultConfiguration::get();
+        $config['cache'] = [
+            'implementation' => Cache::class,
+            'redis' => $this->config['redis'] + ['defaultTtl' => 1000],
+        ];
+        $signature = (new \Kibo\Phast\Security\ServiceSignatureFactory())->make($config);
+        $signature->sign('something');
+
+        $this->assertSame([-1], $this->ttlsByMagnitude());
+    }
+
+    /** TTLs of all test keys, rounded to the nearest power of ten. */
+    private function ttlsByMagnitude(): array {
+        $redis = $this->redis();
+        $ttls = array_map(function ($key) use ($redis) {
+            $ttl = $redis->ttl($key);
+            return $ttl <= 0 ? $ttl : (int) (10 ** round(log10($ttl)));
+        }, $redis->keys($this->config['redis']['prefix'] . '*'));
+        sort($ttls);
+        return $ttls;
+    }
+
     public function testCorruptEntryIsAMiss(): void {
         $this->cache()->set('key', 'value');
         $redis = $this->redis();

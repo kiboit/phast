@@ -18,10 +18,17 @@ use Kibo\Phast\Logging\LoggingTrait;
  *         'database' => 0,
  *         'prefix' => 'phast:',
  *         'timeout' => 1.0,                  // connect/read timeout, seconds
+ *         'defaultTtl' => 0,                 // seconds for entries without
+ *                                            // an expiry; 0: none
  *     ],
  *
- * Entries without an expiry are kept until Redis evicts them, so configure
- * Redis with a `maxmemory` limit and an `allkeys-*` eviction policy.
+ * Entries without an expiry are kept until Redis evicts them, or for
+ * `defaultTtl` seconds if set. Caches configured as `persistent` (such as the
+ * service signature token) never get a default TTL. Either configure Redis
+ * with a `maxmemory` limit and an eviction policy (with a `defaultTtl`,
+ * `volatile-lru` never evicts persistent entries), or, with a disk-based
+ * Redis-compatible server without eviction such as Kvrocks, use `defaultTtl`
+ * to bound its size.
  *
  * Redis errors are logged and treated as cache misses: a failing cache makes
  * requests slower, never fail.
@@ -36,6 +43,8 @@ class Cache implements CacheInterface {
 
     private $namespace;
 
+    private $persistent;
+
     private $functions;
 
     public function __construct(array $config, string $namespace, ?ObjectifiedFunctions $functions = null) {
@@ -45,7 +54,9 @@ class Cache implements CacheInterface {
             'database' => 0,
             'prefix' => 'phast:',
             'timeout' => 1.0,
+            'defaultTtl' => 0,
         ];
+        $this->persistent = !empty($config['persistent']);
         $this->namespace = $namespace;
         $this->functions = $functions ?? new ObjectifiedFunctions();
     }
@@ -67,9 +78,13 @@ class Cache implements CacheInterface {
 
     public function set($key, $value, $expiresIn = 0) {
         $data = $this->serialize($value);
-        $this->call(function (\Redis $redis) use ($key, $data, $expiresIn) {
-            if ($expiresIn > 0) {
-                return $redis->set($this->getKey($key), $data, ['ex' => (int) $expiresIn]);
+        $ttl = (int) $expiresIn;
+        if ($ttl <= 0 && !$this->persistent) {
+            $ttl = (int) $this->config['defaultTtl'];
+        }
+        $this->call(function (\Redis $redis) use ($key, $data, $ttl) {
+            if ($ttl > 0) {
+                return $redis->set($this->getKey($key), $data, ['ex' => $ttl]);
             }
             return $redis->set($this->getKey($key), $data);
         });

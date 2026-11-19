@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+* Redis cache: `redis.defaultTtl` sets an expiry for entries stored without
+  one, e.g. to bound a Redis-compatible store without eviction such as
+  Kvrocks. The service signature cache is marked `persistent` and never gets
+  a default TTL.
 * Answer invalid input (an empty or undecodable image) with 422 instead of
   500 when the service is not redirecting to the original resource.
 * Add a Redis cache implementation (`Kibo\Phast\Cache\Redis\Cache`, requires
