@@ -209,8 +209,8 @@ class ServiceRequestTest extends TestCase {
         $id1 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
         $id2 = ServiceRequest::fromHTTPRequest($httpRequest)->getDocumentRequestId();
 
-        $this->assertTrue((bool) preg_match('/^\d{1,9}$/', $id1));
-        $this->assertTrue((bool) preg_match('/^\d{1,9}$/', $id2));
+        $this->assertMatchesRegularExpression('/^[A-Za-z0-9]{22}$/', $id1);
+        $this->assertMatchesRegularExpression('/^[A-Za-z0-9]{22}$/', $id2);
         $this->assertNotEquals($id1, $id2);
     }
 

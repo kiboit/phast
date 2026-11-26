@@ -70,7 +70,7 @@ class ServiceSignature {
     public static function generateToken() {
         $token = '';
         for ($i = 0; $i < self::AUTO_TOKEN_SIZE; $i++) {
-            $token .= chr(mt_rand(33, 126));
+            $token .= chr(random_int(33, 126));
         }
         return $token;
     }

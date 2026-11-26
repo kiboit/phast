@@ -113,10 +113,22 @@ class ServiceRequest {
             if ($query->get('documentRequestId')) {
                 self::$documentRequestId = $query->get('documentRequestId');
             } else {
-                self::$documentRequestId = (string) mt_rand(0, 999999999);
+                self::$documentRequestId = self::generateDocumentRequestId();
             }
         }
         return $instance;
+    }
+
+    /**
+     * @return string 22 random alphanumeric characters (131 bits)
+     */
+    private static function generateDocumentRequestId() {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $id = '';
+        for ($i = 0; $i < 22; $i++) {
+            $id .= $chars[random_int(0, 61)];
+        }
+        return $id;
     }
 
     public static function getRewrittenService(Request $request) {
