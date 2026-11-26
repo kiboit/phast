@@ -15,10 +15,20 @@ class Writer extends BaseLogWriter {
      */
     protected function doWriteEntry(LogEntry $entry) {
         $encoded = @JSON::encode($entry->toArray());
-        if ($encoded) {
-            $this->makeDirIfNotExists();
-            @file_put_contents($this->filename, $encoded . "\n", FILE_APPEND | LOCK_EX);
+        if (!$encoded) {
+            return;
         }
+        $this->makeDirIfNotExists();
+        if (!($fp = $this->openLogFile(true))) {
+            return;
+        }
+        if (@flock($fp, LOCK_EX)) {
+            @fseek($fp, 0, SEEK_END);
+            @fwrite($fp, $encoded . "\n");
+            @fflush($fp);
+            @flock($fp, LOCK_UN);
+        }
+        @fclose($fp);
     }
 
     private function makeDirIfNotExists() {

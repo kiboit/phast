@@ -10,8 +10,10 @@ class Reader implements LogReader {
     use JSONLFileLogTrait;
 
     public function readEntries() {
-        $fp = @fopen($this->filename, 'r');
-        while ($fp && ($row = @fgets($fp))) {
+        if (!($fp = $this->openLogFile(false))) {
+            return;
+        }
+        while ($row = @fgets($fp)) {
             $decoded = @json_decode($row, true);
             if (!$decoded) {
                 continue;

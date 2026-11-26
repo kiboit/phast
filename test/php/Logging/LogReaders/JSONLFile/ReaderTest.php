@@ -36,6 +36,22 @@ class ReaderTest extends TestCase {
         $this->assertFileDoesNotExist("$dir/log-$file.jsonl");
     }
 
+    public function testDoesNotReadThroughSymlink() {
+        $dir = sys_get_temp_dir();
+        $target = "$dir/json-l-reader-target";
+        file_put_contents($target, json_encode(['level' => 1, 'message' => 'secret', 'context' => []]) . "\n");
+        chmod($target, 0600);
+        @unlink("$dir/log-json-l-reader-link.jsonl");
+        symlink($target, "$dir/log-json-l-reader-link.jsonl");
+
+        $reader = new Reader($dir, 'json-l-reader-link');
+        $this->assertSame([], iterator_to_array($reader->readEntries()));
+        $this->assertFileExists($target);
+
+        unlink("$dir/log-json-l-reader-link.jsonl");
+        unlink($target);
+    }
+
     public function testCleaningOldLogs() {
         $dir = sys_get_temp_dir();
         for ($i = 0; $i < 10; $i++) {
