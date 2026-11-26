@@ -1,23 +1,35 @@
 # Changelog
 
-## Unreleased
+## 1.114 - 2026-11-26
 
-* Redis cache: `redis.defaultTtl` sets an expiry for entries stored without
-  one, e.g. to bound a Redis-compatible store without eviction such as
-  Kvrocks. The service signature cache is marked `persistent` and never gets
-  a default TTL.
+* Fix the SQLite cache on newer PHP/SQLite versions (e.g. PHP 8.5 with
+  SQLite 3.53): once the cache was full, every write failed with "bad
+  parameter or other API misuse" and the cache file was deleted, after which
+  other processes deleted its replacement too. Recovery now only deletes a
+  corrupt database. Cache hits no longer hold a lock while the process is
+  idle.
 * Answer invalid input (an empty or undecodable image) with 422 instead of
-  500 when the service is not redirecting to the original resource.
+  500 when the service is not redirecting to the original resource, and log
+  it as a warning instead of a critical error.
 * Add a Redis cache implementation (`Kibo\Phast\Cache\Redis\Cache`, requires
   the phpredis extension). Configure it with `'cache' => ['implementation' =>
   \Kibo\Phast\Cache\Redis\Cache::class, 'redis' => ['host' => ..., 'port' =>
-  ...]]`, and give Redis a `maxmemory` limit with an `allkeys-*` eviction
+  ...]]`. Entries without an expiry are kept until Redis evicts them;
+  `redis.defaultTtl` gives them one, e.g. to bound a Redis-compatible server
+  without eviction such as Kvrocks. The service signature token is stored
+  without expiry and evicting it invalidates all signed service URLs, so set
+  `securityToken`, or use `defaultTtl` with the `volatile-lru` eviction
   policy.
-* Fix the SQLite cache on newer PHP/SQLite versions: once the cache was full,
-  retrying a write failed with "bad parameter or other API misuse" and the
-  cache file was deleted. Recovery now only deletes a corrupt database, so one
-  process' error no longer wipes the cache for all others. Cache hits no
-  longer hold a lock while the process is idle.
+* The diagnostics service now only serves the request logs for the
+  diagnostics overlay, and answers 404 otherwise. It no longer serves system
+  diagnostics over HTTP, which was a fatal error unless `PHAST_CONFIG_FILE`
+  was defined (e.g. in PhastPress).
+* Generate the service signature token and document request IDs with a
+  cryptographically secure random number generator instead of `mt_rand()`.
+* Diagnostics log files are created with mode 0600, and existing log files
+  are only read or appended to if they are regular files owned by the
+  current user, so another user sharing the temp directory can no longer
+  read them or redirect them with a symlink or hard link.
 
 ## 1.113 - 2026-07-29
 
